@@ -83,3 +83,6 @@ rustc-ice-*.txt
 /.claude/settings.local.json
 /.claude/worktrees/
 .screenshots/
+.cora-cli/
+
+.venv

@@ -531,10 +531,32 @@ const parsedContentJson = computed(() => {
   return JSON.stringify(parsedContent.value, null, 2);
 });
 
-// A message body is either the legacy `content` field or, for OTel GenAI
-// semconv v5 messages, the `parts` array — `formatContent` already knows how
-// to render both shapes.
-const messageBody = (msg: any) => formatContent(msg.content ?? msg.parts);
+const messageBody = (msg: any) => {
+  let body = formatContent(msg.content ?? msg.parts);
+  if (!body && typeof msg.reasoning_content === "string") {
+    body = msg.reasoning_content;
+  }
+  if (Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0) {
+    const tcStrings = msg.tool_calls.map((tc: any) => {
+      const name = tc?.function?.name || tc?.name || "tool";
+      let args = tc?.function?.arguments ?? tc?.arguments ?? "";
+      if (typeof args === "object" && args !== null) {
+        try {
+          args = JSON.stringify(args);
+        } catch {
+          args = String(args);
+        }
+      }
+      return `Called ${name}(${args})`;
+    });
+    if (body) {
+      body += "\n\n" + tcStrings.join("\n\n");
+    } else {
+      body = tcStrings.join("\n\n");
+    }
+  }
+  return body;
+};
 
 // Extract messages
 const parsedMessages = computed(() => {

@@ -566,6 +566,30 @@ describe("LLMContentRenderer", () => {
       expect(content).toContain("https://example.com/x.png");
       expect(content).not.toContain('"type"');
     });
+
+    it("renders tool_calls when assistant message has empty content", () => {
+      wrapper = mount(LLMContentRenderer, {
+        props: {
+          content: JSON.stringify([
+            {
+              role: "assistant",
+              content: "",
+              tool_calls: [
+                {
+                  id: "call_1",
+                  type: "function",
+                  function: { name: "read", arguments: '{"path":"main.py"}' },
+                },
+              ],
+            },
+          ]),
+          viewMode: "formatted",
+        },
+      });
+
+      const content = wrapper.vm.parsedMessages[0].content;
+      expect(content).toContain('Called read({"path":"main.py"})');
+    });
   });
 
   describe("Content Truncation", () => {
