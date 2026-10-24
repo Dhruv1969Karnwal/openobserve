@@ -13,11 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { PaidFeaturePolicyChoice } from "@/utils/enterpriseFeatures";
+import type { PaidFeaturePolicy } from "@/utils/enterpriseFeatures";
 
 // Lets a spec exercise both sides of PAID_FEATURE_POLICY without a production seam.
 export interface PaidFeaturePolicyCell {
-  mode: PaidFeaturePolicyChoice;
+  mode: PaidFeaturePolicy;
 }
 
 // State lives on globalThis so a dynamically imported factory and the spec setter share one cell.
@@ -25,7 +25,7 @@ const cell: PaidFeaturePolicyCell = ((
   globalThis as Record<string, unknown>
 ).__paidFeaturePolicyCell ??= { mode: "hide" }) as PaidFeaturePolicyCell;
 
-export const setPaidFeaturePolicy = (next: PaidFeaturePolicyChoice): void => {
+export const setPaidFeaturePolicy = (next: PaidFeaturePolicy): void => {
   cell.mode = next;
 };
 
@@ -34,7 +34,7 @@ export const resetPaidFeaturePolicy = (): void => {
   cell.mode = "hide";
 };
 
-export const paidFeaturePolicy = (): PaidFeaturePolicyChoice => cell.mode;
+export const paidFeaturePolicy = (): PaidFeaturePolicy => cell.mode;
 
 // LIMITATION: the spread keeps the real checkFeatureAccess/useLockedFeatureGate, which read the
 // shipped constant from inside their own module. This flips what CONSUMERS see.
@@ -44,7 +44,7 @@ export const withPaidFeaturePolicy = async (
   const actual = await importOriginal();
   return {
     ...actual,
-    get PAID_FEATURE_POLICY(): PaidFeaturePolicyChoice {
+    get PAID_FEATURE_POLICY(): PaidFeaturePolicy {
       return cell.mode;
     },
     get hidesPaidFeatures(): boolean {
