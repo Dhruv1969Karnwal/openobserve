@@ -50,14 +50,14 @@
   --d-chrome: #0c0d0f; /* title bar + left activity-bar strip             */
   --d-base: #15171a; /* MAIN: content card + table canvas               */
   --d-well: #2b2f34; /* recessed wells, segmented-control track         */
-  --d-panel: #131518; /* folder sidebar, sub rails, cards, dialogs (DM)  */
-  --d-overlay: #1c1f23; /* menus, dropdowns, tooltips, table-header (top tier,
+  --d-panel: #1e2126; /* folder sidebar, sub rails, cards, dialogs (DM)  */
+  --d-overlay: #282c33; /* menus, dropdowns, tooltips, table-header (top tier,
                                 lifts above panel by lightness alone)          */
 
-  /* Borders & dividers — one lightness step above the surface they outline */
-  --d-divider: #212429; /* subtle: row & section separators            */
-  --d-border: #2c3036; /* default: card / input / table / rail edges  */
-  --d-border-strong: #454a50; /* strong: checkbox / radio / file outlines    */
+  /* Borders & dividers: one step above the surface they outline; contrast.spec.ts holds -strong at 3:1. */
+  --d-divider: #333840; /* subtle: row & section separators            */
+  --d-border: #4a505a; /* default: card / input / table / rail edges  */
+  --d-border-strong: #6a717a; /* strong: checkbox / radio / file outlines    */
 
   /* Text — mapped straight to the registered --color-grey-* palette in the
        block below (mirrors light mode, where each tier = a grey step). No
@@ -72,19 +72,19 @@
                              the dashboard-folder hover (theme-tinted, not grey) */
   --d-selected: color-mix(in srgb, var(--color-primary-500) 30%, var(--d-panel));
   /* selected row — teal-tinted (brand signal)       */
-  --d-zebra: #191c20; /* striped-row bg — one step off the base canvas    */
+  --d-zebra: #1a1d21; /* striped-row bg — one step off the base canvas    */
 
-  /* --- Text — grey palette steps, one per tier (light half of the ramp) --- */
+  /* --- Text: label/muted/placeholder use grey-450; grey-500 is 3.79:1 here, under the AA floor. --- */
   --color-text-heading: var(--color-grey-200); /* h1-h6, modal titles — brightest */
   --color-text-soft: var(--color-grey-200); /* feeds --color-select-text (OSelect trigger value) */
   --color-text-body: var(--color-grey-300); /* paragraphs, default body */
   --color-text-secondary: var(--color-grey-400); /* supporting text, descriptions */
-  --color-text-label: var(--color-grey-500); /* form labels, metadata */
-  --color-text-muted: var(--color-grey-500); /* de-emphasized */
+  --color-text-label: var(--color-grey-450); /* form labels, metadata — 5.65:1 on the canvas */
+  --color-text-muted: var(--color-grey-450); /* de-emphasized — AA-legible, unlike grey-500 */
   --color-text-disabled: var(--color-grey-600); /* dimmer than labels so disabled reads disabled */
   --color-text-placeholder: var(
-    --color-grey-500
-  ); /* input placeholders — dim but legible, above disabled */
+    --color-grey-450
+  ); /* input placeholders — dim but legible (grey-500 was 3.79:1, below AA) */
   --color-text-link: var(--color-primary-400); /* clickable links (teal) */
   --color-text-link-hover: var(--color-primary-300); /* link hover state (teal) */
   --color-text-code: var(--color-grey-300); /* inline code, monospace */
@@ -813,23 +813,8 @@
   --color-table-streaming-bar: var(--color-primary-400);
   --color-table-row-expanded-bg: var(--d-overlay);
 
-  /* Chart panel bar (dark) — same trick as the table header: the panel body sits
-     on the content canvas (--d-base), so the bar LIFTS off it rather than going
-     darker. Darker than --d-base (#15171a) would read as a hole, not a header.
-
-     A literal, not an alias: this sits one step above --d-overlay (#1c1f23) and
-     below --d-well (#2b2f34), and both of those carry roles (menus/tooltips,
-     recessed tracks) that this is not. Aliasing either would couple the header
-     to a token that moves for unrelated reasons.
-
-     1.24:1 against the body, deliberately matched to the light side's 1.26:1
-     (grey-200 on white) so the header reads the same weight in both themes —
-     keep the pair in step if either moves.
-
-     Unlike light mode there is no ceiling on the fill here: --d-border is
-     LIGHTER than it, so a darker fill only helps the divider. That is why the
-     border below is unchanged while the light one had to move with the fill. */
-  --color-panel-bar-bg: #262a2f;
+  /* Chart panel bar lifts off --d-base like the light header; a literal, so --d-overlay/--d-well can move freely. */
+  --color-panel-bar-bg: #30353c;
   --color-panel-bar-border: var(--d-border);
 }
 /* Domain data-viz & color tokens (dark) */
