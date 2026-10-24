@@ -199,8 +199,13 @@ export const themeNameSlug = (name: string): string => name.toLowerCase().replac
  * and must never change, but the "O2 " prefix is dropped for display on every
  * theme except the signature theme ("O2 Signature" stays branded).
  */
+// Stored names stay historical so saved preferences keep resolving; only the display name carries the product.
+export const THEME_DISPLAY_NAMES: Record<string, string> = {
+  [DEFAULT_THEME_NAME]: "Retrace Signature",
+};
+
 export const themeDisplayName = (name: string): string =>
-  name === DEFAULT_THEME_NAME ? name : name.replace(/^O2\s+/, "");
+  THEME_DISPLAY_NAMES[name] ?? (name === DEFAULT_THEME_NAME ? name : name.replace(/^O2\s+/, ""));
 
 export type ThemeSource = "preview" | "predefined" | "custom" | "default";
 

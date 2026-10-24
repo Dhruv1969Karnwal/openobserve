@@ -3011,8 +3011,8 @@
     "clickHere": "여기를 클릭하세요",
     "loginWithSso": "SSO로 로그인",
     "loginAsInternalUser": "내부 사용자로 로그인",
-    "openObserveLogoAlt": "OpenObserve 로고",
-    "getStartedBannerMessage": "더 효율적이고 성능이 뛰어난 옵저버빌리티를 위해 지금 OpenObserve를 사용해 보세요.",
+    "openObserveLogoAlt": "Retrace.ai 로고",
+    "getStartedBannerMessage": "더 효율적이고 성능이 뛰어난 옵저버빌리티를 위해 지금 Retrace.ai를 사용해 보세요.",
     "getStartedBannerAlt": "시작하기 배너",
     "getStartedHeading": "시작하기 전에 마지막으로 한 가지만",
     "hearAboutUsLabel": "저희를 어떻게 알게 되셨나요?",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "비밀번호는 필수입니다",
     "mustAcceptTerms": "계속하려면 약관에 동의해야 합니다",
     "getStarted": {
-      "title": "OpenObserve에 오신 것을 환영합니다",
+      "title": "Retrace.ai에 오신 것을 환영합니다",
       "subtitle": "14일 체험판이 시작되었습니다. 두 가지 간단한 질문 후 설정으로 안내해 드리겠습니다.",
       "sourceLabel": "무엇을 먼저 전송하시겠습니까?",
       "optional": "(선택 사항)",
@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "예시"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "OpenObserve",
+    "openObserveLogoAlt": "Retrace.ai",
     "currencySymbol": "$",
     "header": "LLM 모델 가격 책정",
     "matchingPriorityTooltip": "모델 매칭 우선 순위: 조직 > 글로벌 > 내장",

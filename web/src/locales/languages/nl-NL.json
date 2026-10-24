@@ -3011,8 +3011,8 @@
     "clickHere": "klik hier",
     "loginWithSso": "Inloggen met SSO",
     "loginAsInternalUser": "Inloggen als interne gebruiker",
-    "openObserveLogoAlt": "OpenObserve-logo",
-    "getStartedBannerMessage": "Probeer OpenObserve vandaag nog voor efficiëntere en performantere observability.",
+    "openObserveLogoAlt": "Retrace.ai-logo",
+    "getStartedBannerMessage": "Probeer Retrace.ai vandaag nog voor efficiëntere en performantere observability.",
     "getStartedBannerAlt": "Aan de slag-banner",
     "getStartedHeading": "Nog één ding voordat we beginnen",
     "hearAboutUsLabel": "Hoe heb je over ons gehoord?",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "Wachtwoord is verplicht",
     "mustAcceptTerms": "U moet de voorwaarden accepteren om verder te gaan",
     "getStarted": {
-      "title": "Welkom bij OpenObserve",
+      "title": "Welkom bij Retrace.ai",
       "subtitle": "Je proefperiode van 14 dagen is begonnen. Twee korte vragen, daarna brengen we je naar de installatie.",
       "sourceLabel": "Wat wil je eerst verzenden?",
       "optional": "(optioneel)",
@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "Voorbeeld"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "OpenObserve",
+    "openObserveLogoAlt": "Retrace.ai",
     "currencySymbol": "$",
     "header": "Prijzen van het LLM-model",
     "matchingPriorityTooltip": "Prioriteit voor modelaanpassing: uw organisatie > Globaal > Ingebouwd",

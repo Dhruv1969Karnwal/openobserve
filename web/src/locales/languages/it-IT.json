@@ -3011,8 +3011,8 @@
     "clickHere": "clicca qui",
     "loginWithSso": "Accedi con SSO",
     "loginAsInternalUser": "Accedi come utente interno",
-    "openObserveLogoAlt": "Logo OpenObserve",
-    "getStartedBannerMessage": "Prova OpenObserve oggi per un'osservabilità più efficiente e performante.",
+    "openObserveLogoAlt": "Logo Retrace.ai",
+    "getStartedBannerMessage": "Prova Retrace.ai oggi per un'osservabilità più efficiente e performante.",
     "getStartedBannerAlt": "Banner Inizia",
     "getStartedHeading": "Un'ultima cosa prima di iniziare",
     "hearAboutUsLabel": "Come hai saputo di noi?",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "La password è obbligatoria",
     "mustAcceptTerms": "Devi accettare i termini per continuare",
     "getStarted": {
-      "title": "Benvenuto in OpenObserve",
+      "title": "Benvenuto in Retrace.ai",
       "subtitle": "La tua prova di 14 giorni è iniziata. Due rapide domande e poi ti portiamo alla configurazione.",
       "sourceLabel": "Cosa vuoi inviare per primo?",
       "optional": "(facoltativo)",
@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "Esempio"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "OpenObserve",
+    "openObserveLogoAlt": "Retrace.ai",
     "currencySymbol": "$",
     "header": "Prezzi del modello LLM",
     "matchingPriorityTooltip": "Priorità di corrispondenza dei modelli: La tua organizzazione > Globale > Integrata",

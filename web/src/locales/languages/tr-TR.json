@@ -3011,8 +3011,8 @@
     "clickHere": "buraya tıklayın",
     "loginWithSso": "SSO ile giriş yap",
     "loginAsInternalUser": "Dahili kullanıcı olarak giriş yap",
-    "openObserveLogoAlt": "OpenObserve Logosu",
-    "getStartedBannerMessage": "Daha verimli ve performanslı gözlemlenebilirlik için bugün OpenObserve'i deneyin.",
+    "openObserveLogoAlt": "Retrace.ai logosu",
+    "getStartedBannerMessage": "Daha verimli ve performanslı gözlemlenebilirlik için bugün Retrace.ai'i deneyin.",
     "getStartedBannerAlt": "Başlarken Banner",
     "getStartedHeading": "Başlamadan önce son bir şey",
     "hearAboutUsLabel": "Bizi nereden duydunuz?",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "Şifre zorunludur",
     "mustAcceptTerms": "Devam etmek için şartları kabul etmelisiniz",
     "getStarted": {
-      "title": "OpenObserve'ye Hoş Geldiniz",
+      "title": "Retrace.ai'ye Hoş Geldiniz",
       "subtitle": "14 günlük deneme süreniz başladı. İki kısa soru, ardından sizi kuruluma yönlendireceğiz.",
       "sourceLabel": "İlk olarak ne göndermek istiyorsunuz?",
       "optional": "(isteğe bağlı)",
@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "Örnek"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "OpenObserve",
+    "openObserveLogoAlt": "Retrace.ai",
     "currencySymbol": "$",
     "header": "LLM Model Fiyatlandırması",
     "matchingPriorityTooltip": "Model Eşleştirme Önceliği: Kuruluşunuz > Genel > Yerleşik",

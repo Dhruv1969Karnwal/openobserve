@@ -3011,8 +3011,8 @@
     "clickHere": "нажмите здесь",
     "loginWithSso": "Войти через SSO",
     "loginAsInternalUser": "Войти как внутренний пользователь",
-    "openObserveLogoAlt": "Логотип OpenObserve",
-    "getStartedBannerMessage": "Попробуйте OpenObserve сегодня для более эффективной и производительной наблюдаемости.",
+    "openObserveLogoAlt": "Логотип Retrace.ai",
+    "getStartedBannerMessage": "Попробуйте Retrace.ai сегодня для более эффективной и производительной наблюдаемости.",
     "getStartedBannerAlt": "Баннер начала работы",
     "getStartedHeading": "Последнее, что нужно сделать перед началом",
     "hearAboutUsLabel": "Откуда вы о нас узнали?",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "Пароль обязателен",
     "mustAcceptTerms": "Вы должны принять условия для продолжения",
     "getStarted": {
-      "title": "Добро пожаловать в OpenObserve",
+      "title": "Добро пожаловать в Retrace.ai",
       "subtitle": "Ваш 14-дневный пробный период начался. Два коротких вопроса — и мы перейдём к настройке.",
       "sourceLabel": "Что вы хотите отправить первым?",
       "optional": "(необязательно)",
@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "Пример"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "OpenObserve",
+    "openObserveLogoAlt": "Retrace.ai",
     "currencySymbol": "$",
     "header": "Ценообразование моделей LLM",
     "matchingPriorityTooltip": "Приоритет сопоставления моделей: Ваша организация > Глобальный > Встроенный",

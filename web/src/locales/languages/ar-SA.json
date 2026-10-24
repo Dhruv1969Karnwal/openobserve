@@ -3011,8 +3011,8 @@
     "clickHere": "اضغط هنا",
     "loginWithSso": "تسجيل الدخول باستخدام SSO",
     "loginAsInternalUser": "تسجيل الدخول كمستخدم داخلي",
-    "openObserveLogoAlt": "شعار OpenObserve",
-    "getStartedBannerMessage": "جرب OpenObserve اليوم للحصول على ملاحظة أكثر كفاءة وأداء.",
+    "openObserveLogoAlt": "شعار Retrace.ai",
+    "getStartedBannerMessage": "جرب Retrace.ai اليوم للحصول على ملاحظة أكثر كفاءة وأداء.",
     "getStartedBannerAlt": "راية ابدأ",
     "getStartedHeading": "شيء أخير قبل أن نبدأ",
     "hearAboutUsLabel": "كيف سمعت عنا؟",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "كلمة المرور مطلوبة",
     "mustAcceptTerms": "يجب أن تقبل الشروط للاستمرار",
     "getStarted": {
-      "title": "مرحبًا بك في OpenObserve",
+      "title": "مرحبًا بك في Retrace.ai",
       "subtitle": "بدأت فترة التجربة لمدة 14 يومًا. سؤالان سريعان، ثم سنأخذك إلى الإعداد.",
       "sourceLabel": "ما الذي تريد إرساله أولاً؟",
       "optional": "(اختياري)",
@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "مثال"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "OpenObserve",
+    "openObserveLogoAlt": "Retrace.ai",
     "currencySymbol": "$",
     "header": "تسعير نماذج LLM",
     "matchingPriorityTooltip": "أولوية مطابقة النماذج: مؤسستك > > العالمية المدمجة",

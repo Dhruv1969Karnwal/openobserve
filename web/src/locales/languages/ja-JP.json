@@ -3011,8 +3011,8 @@
     "clickHere": "ここをクリック",
     "loginWithSso": "SSOでログイン",
     "loginAsInternalUser": "内部ユーザーとしてログイン",
-    "openObserveLogoAlt": "OpenObserveロゴ",
-    "getStartedBannerMessage": "より効率的で高性能な可観測性を実現するには、今すぐOpenObserveをお試しください。",
+    "openObserveLogoAlt": "Retrace.aiロゴ",
+    "getStartedBannerMessage": "より効率的で高性能な可観測性を実現するには、今すぐRetrace.aiをお試しください。",
     "getStartedBannerAlt": "はじめようバナー",
     "getStartedHeading": "始める前に最後に1つだけ",
     "hearAboutUsLabel": "どのようにして当社を知りましたか？",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "パスワードは必須です",
     "mustAcceptTerms": "続行するには利用規約に同意する必要があります",
     "getStarted": {
-      "title": "OpenObserve へようこそ",
+      "title": "Retrace.ai へようこそ",
       "subtitle": "14日間のトライアルが開始されました。2つだけ簡単な質問にお答えいただくと、セットアップに進みます。",
       "sourceLabel": "最初に送信するのはどれですか？",
       "optional": "（任意）",
@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "例"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "OpenObserve",
+    "openObserveLogoAlt": "Retrace.ai",
     "currencySymbol": "$",
     "header": "LLM モデルの価格設定",
     "matchingPriorityTooltip": "モデルマッチング優先度:組織 > グローバル > 組み込み",

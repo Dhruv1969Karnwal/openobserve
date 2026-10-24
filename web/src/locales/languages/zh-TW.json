@@ -3011,8 +3011,8 @@
     "clickHere": "按一下這裡",
     "loginWithSso": "使用 SSO 登入",
     "loginAsInternalUser": "以內部使用者身分登入",
-    "openObserveLogoAlt": "OpenObserve 標誌",
-    "getStartedBannerMessage": "立即試用 OpenObserve，獲得更有效率且高效能的可觀測性。",
+    "openObserveLogoAlt": "Retrace.ai 標誌",
+    "getStartedBannerMessage": "立即試用 Retrace.ai，獲得更有效率且高效能的可觀測性。",
     "getStartedBannerAlt": "開始使用橫幅",
     "getStartedHeading": "開始前最後一件事",
     "hearAboutUsLabel": "您是怎麼得知我們的？",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "密碼為必填",
     "mustAcceptTerms": "您必須接受條款才能繼續",
     "getStarted": {
-      "title": "歡迎使用 OpenObserve",
+      "title": "歡迎使用 Retrace.ai",
       "subtitle": "您的 14 天試用期已開始。回答兩個簡單問題，我們就會帶您進行設定。",
       "sourceLabel": "您想先傳送什麼？",
       "optional": "（選填）",
@@ -14649,7 +14649,7 @@
     "guideExampleHeader": "範例"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "OpenObserve",
+    "openObserveLogoAlt": "Retrace.ai",
     "currencySymbol": "$",
     "header": "LLM 模型定價",
     "matchingPriorityTooltip": "模型比對優先順序：組織 > 全域 > 內建",

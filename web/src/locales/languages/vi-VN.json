@@ -3011,8 +3011,8 @@
     "clickHere": "bấm vào đây",
     "loginWithSso": "Đăng nhập bằng SSO",
     "loginAsInternalUser": "Đăng nhập với tư cách người dùng nội bộ",
-    "openObserveLogoAlt": "Logo OpenObserve",
-    "getStartedBannerMessage": "Dùng thử OpenObserve ngay hôm nay để có khả năng quan sát hiệu quả và hiệu suất cao hơn.",
+    "openObserveLogoAlt": "Logo Retrace.ai",
+    "getStartedBannerMessage": "Dùng thử Retrace.ai ngay hôm nay để có khả năng quan sát hiệu quả và hiệu suất cao hơn.",
     "getStartedBannerAlt": "Banner Bắt đầu",
     "getStartedHeading": "Một điều cuối cùng trước khi chúng ta bắt đầu",
     "hearAboutUsLabel": "Bạn biết đến chúng tôi qua đâu?",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "Mật khẩu là bắt buộc",
     "mustAcceptTerms": "Bạn phải chấp nhận điều khoản để tiếp tục",
     "getStarted": {
-      "title": "Chào mừng bạn đến với OpenObserve",
+      "title": "Chào mừng bạn đến với Retrace.ai",
       "subtitle": "Bản dùng thử 14 ngày của bạn đã bắt đầu. Hai câu hỏi nhanh, sau đó chúng tôi sẽ đưa bạn đến phần thiết lập.",
       "sourceLabel": "Bạn muốn gửi dữ liệu gì trước?",
       "optional": "(không bắt buộc)",
@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "Ví dụ"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "OpenObserve",
+    "openObserveLogoAlt": "Retrace.ai",
     "currencySymbol": "$",
     "header": "Định giá mô hình LLM",
     "matchingPriorityTooltip": "Ưu tiên khớp mô hình: Tổ chức của bạn > Toàn cầu > Tích hợp sẵn",
