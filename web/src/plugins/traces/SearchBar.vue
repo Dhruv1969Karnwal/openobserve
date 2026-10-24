@@ -362,6 +362,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <ODropdown v-if="store.state.zoConfig.auto_query_enabled" side="bottom" align="end">
                 <template #trigger>
                   <OButton
+                    :aria-label="t('common.moreOptions')"
                     variant="ghost"
                     size="icon-xs"
                     :disabled="isLoading"
@@ -801,7 +802,12 @@ export default defineComponent({
       _sqlOnQueryChange();
       updateAutoComplete(value);
       if (searchObj.meta.sqlMode == true) {
-        searchObj.data.parsedQuery = tracesParser.value?.astify(value);
+        try {
+          searchObj.data.parsedQuery = tracesParser.value?.astify(value);
+        } catch {
+          // Half-typed SQL does not parse; keep the last good parse until it does.
+          return;
+        }
         if (searchObj.data.parsedQuery?.from?.length > 0) {
           if (
             searchObj.data.parsedQuery.from[0].table !==

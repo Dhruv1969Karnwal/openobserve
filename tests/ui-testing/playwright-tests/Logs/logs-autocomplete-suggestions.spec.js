@@ -195,8 +195,8 @@ async function triggerSuggestionsWithRetry(page, pm, expectedValueOrNull, timeou
     const { monacoHelper } = getMonacoHelper(page, pm);
     let lastSuggestions = [];
     await expect.poll(async () => {
-        // Press Escape to close any prior popup, then re-trigger
-        await page.keyboard.press('Escape').catch(() => {});
+        // Escape with no menu open moves focus out of the editor, so only press it to close an open popup.
+        if ((await menuState(page)).visible) await page.keyboard.press('Escape');
         await page.keyboard.press('Control+Space');
         try {
             await monacoHelper.waitForSuggestions(1500);
@@ -1328,7 +1328,7 @@ test.describe("Autocomplete key contract — Enter never inserts from a menu it 
         tag: ['@all', '@autosuggestions', '@logs', '@keycontract']
     }, async ({ page }) => {
         await seedEditor(page, `SELECT *`);
-        await page.keyboard.press('Escape');
+        if ((await menuState(page)).visible) await page.keyboard.press('Escape');
         await page.keyboard.press('Tab');
         expect(await editorText(page)).toMatch(/^SELECT \*[ \t]+$/);
     });
@@ -1616,7 +1616,7 @@ test.describe("Autocomplete key contract — chained menus (Automatic)", () => {
         expect(await editorCaret(page)).toEqual(inQuotes);
         // Monaco picks its undo keys from the user agent, which the Desktop Chrome device sets to Windows.
         const mod = await page.evaluate(() => (/Macintosh/.test(navigator.userAgent) ? 'Meta' : 'Control'));
-        await page.keyboard.press('Escape');
+        if ((await menuState(page)).visible) await page.keyboard.press('Escape');
         await page.keyboard.press(`${mod}+z`);
         await expect.poll(() => editorText(page)).not.toBe(wrapped);
         await page.keyboard.press(`${mod}+Shift+z`);
@@ -2012,11 +2012,19 @@ test.describe("Autocomplete group headers — never a target", () => {
         tag: ['@all', '@autosuggestions', '@logs', '@headers']
     }, async ({ page }) => {
         const menu = await valueMenu(page);
-        const whole = menu.rows[0].replace(/'/g, '');
+        const fields = (await pm.logsPage.getQueryEditorFieldNames()).map((f) => f.toLowerCase());
+        expect(fields.length, 'the query editor should know the stream fields').toBeGreaterThan(0);
+        // Monaco's fuzzy filter needs the typed letters in order, so a value that is no field's subsequence can only match values.
+        const row = menu.rows.filter((r) => /^'/.test(r)).find((r) => {
+            const v = r.replace(/'/g, '').toLowerCase();
+            return !fields.some((f) => { let i = 0; for (const ch of f) if (ch === v[i]) i++; return i === v.length; });
+        });
+        expect(row, `no listed level value is free of a field match; values: ${menu.rows.join(', ')}`).toBeTruthy();
+        const whole = row.replace(/'/g, '');
         await page.keyboard.type(whole);
         const after = await waitForMenu(page, 5000);
-        expect(after.headers, `only values should match "${whole}"; a Fields header means the test data has a field with that prefix`).toEqual(['Values · recent']);
-        expect(after.focused).toBe(menu.rows[0]);
+        expect(after.headers, `only values should match "${whole}"`).toEqual(['Values · recent']);
+        expect(after.focused).toBe(row);
     });
 
     test("a function name after = completes under Functions: CAS then Tab writes CAST(", {
@@ -2127,7 +2135,7 @@ test.describe("Autocomplete group headers — never a target", () => {
         await page.keyboard.press('ArrowDown');
         await page.keyboard.press('Enter');
         await expect.poll(() => editorText(page)).toBe(`${WHERE}level = ${menu.rows[0]}`);
-        await page.keyboard.press('Escape');
+        if ((await menuState(page)).visible) await page.keyboard.press('Escape');
         await page.keyboard.press(`${await undoKey(page)}+z`);
         await expect.poll(() => editorText(page)).toBe(`${WHERE}level = `);
     });

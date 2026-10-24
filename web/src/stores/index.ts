@@ -73,6 +73,7 @@ const organizationObj = {
     cross_links: [],
     usage_stream_enabled: false,
     red_insights_enabled: false,
+    ai_rca_thread_tool_output: false,
   },
   isDataIngested: false,
   regexPatterns: [],
@@ -189,7 +190,9 @@ export default createStore({
       state.selectedOrganization = payload;
     },
     setOrganizations(state, payload) {
-      state.organizations = payload;
+      // Callers read .length unguarded; a failed org fetch must not store undefined.
+      const organizations: any = Array.isArray(payload) ? payload : [];
+      state.organizations = organizations;
     },
     setCurrentUser(state, payload) {
       state.currentuser = payload;

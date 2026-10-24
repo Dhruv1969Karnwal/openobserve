@@ -790,6 +790,22 @@ describe("Index.vue (Main Traces Page)", () => {
       expect(mockSearchObj.data.editorValue).toBe("service_name = 'checkout'");
       expect(mockSearchObj.meta.sqlMode).toBe(false);
     });
+
+    it("clears a stale editor for an empty handoff ?filter= (unfiltered RCA evidence)", async () => {
+      routerCurrentRouteSpy.mockReturnValue(
+        ref({
+          query: { filter: "" },
+          name: "traces",
+          path: "/traces",
+        }) as typeof router.currentRoute,
+      );
+      mockSearchObj.data.editorValue = "service_name = 'stale'";
+
+      wrapper = mountIndex();
+      await flushPromises();
+
+      expect(mockSearchObj.data.editorValue).toBe("");
+    });
   });
 
   describe("Auto Run off (#14760)", () => {
@@ -3940,6 +3956,70 @@ describe("Index.vue (Main Traces Page)", () => {
       await flushPromises();
 
       mockFetchQueryDataWithHttpStream.mockReset();
+    });
+  });
+
+  describe("restoreFilters with unparsable SQL", () => {
+    it("returns without touching filters when the saved filter does not parse", async () => {
+      wrapper = mount(Index, {
+        attachTo: node,
+        global: {
+          plugins: [i18n, router],
+          provide: { store: store },
+          stubs: {
+            "search-bar": true,
+            "index-list": true,
+            "search-result": true,
+            "service-graph": true,
+            "services-catalog": true,
+            SanitizedHtmlRenderer: true,
+          },
+        },
+      });
+      await flushPromises();
+      const parser = createdTracesParsers.at(-1) as { astify: ReturnType<typeof vi.fn> };
+      parser.astify.mockImplementationOnce(() => {
+        throw new Error("Expected end of input");
+      });
+
+      expect(() => wrapper.vm.restoreFilters("service_name = ")).not.toThrow();
+    });
+  });
+
+  describe("traces count failure logging", () => {
+    it("warns with the error instead of logging a bare console error", async () => {
+      wrapper = mount(Index, {
+        attachTo: node,
+        global: {
+          plugins: [i18n, router],
+          provide: { store: store },
+          stubs: {
+            "search-bar": true,
+            "index-list": true,
+            "search-result": true,
+            "service-graph": true,
+            "services-catalog": true,
+            SanitizedHtmlRenderer: true,
+          },
+        },
+      });
+      await flushPromises();
+      mockSearchObj.data.stream.selectedStream = { label: "default", value: "default" };
+      mockSearchObj.data.queryPayload = { query: { start_time: 1, end_time: 2 } };
+      mockFetchQueryDataWithHttpStream.mockClear();
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const err = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      wrapper.vm.fetchTracesCount();
+      const [, handlers] = mockFetchQueryDataWithHttpStream.mock.calls.at(-1) as any[];
+      const failure = { content: { message: "network error" } };
+      handlers.error({}, failure);
+
+      expect(warn).toHaveBeenCalledWith("Failed to fetch traces count", failure);
+      expect(err).not.toHaveBeenCalledWith("Failed to fetch traces count");
+      warn.mockRestore();
+      err.mockRestore();
+      mockSearchObj.data.queryPayload = null;
     });
   });
 });
