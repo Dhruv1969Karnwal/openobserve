@@ -442,18 +442,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         />
         <!-- Correlation Tabs (visible whenever service streams are enabled; locked without an enterprise license) -->
         <OTab
-          v-if="serviceStreamsEnabled"
+          v-if="serviceStreamsEnabled && correlationAccess.visible"
           name="correlated-logs"
           :label="t('correlation.correlatedLogs')"
-          :suffix-icon="!correlationAccess.allowed ? 'lock' : undefined"
           data-test="trace-details-sidebar-tabs-correlated-logs"
           class="font-normal! capitalize"
         />
         <OTab
-          v-if="serviceStreamsEnabled"
+          v-if="serviceStreamsEnabled && correlationAccess.visible"
           name="correlated-metrics"
           :label="t('correlation.correlatedMetrics')"
-          :suffix-icon="!correlationAccess.allowed ? 'lock' : undefined"
           data-test="trace-details-sidebar-tabs-correlated-metrics"
           class="font-normal! capitalize"
         />

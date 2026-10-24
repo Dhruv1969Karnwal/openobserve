@@ -191,10 +191,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </OButton>
 
         <!-- EDITION BADGE / UPGRADE BUTTON -->
-        <!-- Enterprise/Cloud: ghost-muted badge (informational, opens about dialog) -->
-        <!-- Open Source: primary CTA to drive upgrades -->
+        <!-- Hidden while PAID_FEATURE_POLICY is "hide": a single-edition
+             product does not sell an upgrade from its own header. -->
         <OButton
-          :variant="
+          v-if="enterpriseDialogVisible"
+          :variant=""
             config.isEnterprise === 'true' || config.isCloud === 'true'
               ? 'outline-primary'
               : 'primary'
@@ -228,7 +229,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <!-- AI CHAT TOGGLE: Enterprise/Cloud feature to toggle AI chat panel.
            Leads the utility-icon cluster, set off by a separator from the
            org selector so it reads as the primary action in this group.
-           Shown locked (not hidden) in builds that don't unlock it. -->
+           Hidden outright in builds that don't unlock it. -->
           <template v-if="aiButtonVisible">
             <OButton
               variant="ghost"
@@ -246,15 +247,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :src="getBtnLogo"
                 class="h-5 w-5 shrink-0 [transition:transform_0.6s_ease] group-hover:rotate-180 group-hover:brightness-0 group-hover:invert group-hover:[transition:filter_0.3s_ease]"
               />
-              <span
-                v-if="!aiAccess.allowed"
-                aria-hidden="true"
-                class="bg-surface-overlay border-surface-base absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border shadow-sm"
-              >
-                <OIcon name="lock" size="xs" class="text-warning-600 size-2.5!" />
-              </span>
               <OTooltip
-                v-if="aiAccess.allowed"
                 side="bottom"
                 align="center"
                 :content="t('menu.aiAssistant')"
@@ -508,7 +501,7 @@ import LinkedAccountsDialog from "./settings/LinkedAccountsDialog.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
-import { checkFeatureAccess } from "@/utils/enterpriseFeatures";
+import { checkFeatureAccess, hidesPaidFeatures } from "@/utils/enterpriseFeatures";
 import { readSlackOrgConfig } from "@/utils/slackSettings";
 import ODropdown from "@/lib/overlay/Dropdown/ODropdown.vue";
 import ODropdownItem from "@/lib/overlay/Dropdown/ODropdownItem.vue";
@@ -638,6 +631,8 @@ export default defineComponent({
     const { isOpen: showEnterpriseDialog, open: openEnterpriseDialog } =
       useEnterpriseUpgradeDialog();
 
+
+
     const showLanguageSubmenu = ref(false);
     const languageListRef = ref<HTMLElement | null>(null);
     const { lgUp } = useBreakpoint();
@@ -723,18 +718,26 @@ export default defineComponent({
       }),
     );
     const aiButtonVisible = computed(
-      () => !aiAccess.value.allowed || Boolean(props.store.state.zoConfig.ai_enabled),
+      () => aiAccess.value.visible && (!aiAccess.value.allowed || Boolean(props.store.state.zoConfig.ai_enabled)),
     );
 
+    // The header's edition CTA is itself an upsell, so it follows the same
+    // policy as the features it advertises.
+    const enterpriseDialogVisible = computed(() => !hidesPaidFeatures);
+
     // The edition gate and the org's runtime switch both have to pass, as for Settings › Slack.
-    const linkedAccountsVisible = computed(
-      () =>
-        checkFeatureAccess("slack", {
-          isEnterprise: props.config.isEnterprise === "true",
-          isCloud: props.config.isCloud === "true",
-          rbac: props.store.state.zoConfig?.rbac_enabled !== false,
-        }).allowed && readSlackOrgConfig(props.store.state.zoConfig).enabled,
-    );
+    const linkedAccountsVisible = computed(() => {
+      const access = checkFeatureAccess("slack", {
+        isEnterprise: props.config.isEnterprise === "true",
+        isCloud: props.config.isCloud === "true",
+        rbac: props.store.state.zoConfig?.rbac_enabled !== false,
+      });
+      return (
+        access.visible &&
+        access.allowed &&
+        readSlackOrgConfig(props.store.state.zoConfig).enabled
+      );
+    });
     const showLinkedAccounts = ref(false);
 
     // Computed property for enterprise button text based on deployment type

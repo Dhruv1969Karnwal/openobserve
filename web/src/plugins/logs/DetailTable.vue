@@ -1063,7 +1063,7 @@ export default defineComponent({
           dataTest: "log-detail-table-tab",
         },
       ];
-      if (serviceStreamsEnabled.value) {
+      if (serviceStreamsEnabled.value && correlationAccess.value.visible) {
         const locked = !correlationAccess.value.allowed;
         tabs.push(
           {

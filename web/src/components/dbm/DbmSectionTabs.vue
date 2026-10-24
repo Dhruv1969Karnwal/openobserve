@@ -98,6 +98,7 @@ import { computed } from "vue";
 import { useRoute, useRouter, type RouteLocationRaw } from "vue-router";
 
 import config from "@/aws-exports";
+import { hidesPaidFeatures } from "@/utils/enterpriseFeatures";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OTab from "@/lib/navigation/Tabs/OTab.vue";
 import OTabs from "@/lib/navigation/Tabs/OTabs.vue";
@@ -171,6 +172,11 @@ const isEnterprise = computed(() => config.isEnterprise === "true");
 
 /** The three tabs the OSS backend refuses. */
 const ENTERPRISE_ONLY_TABS = ["deadlocks", "blocked", "tableHealth"];
+
+// Under PAID_FEATURE_POLICY = "hide" the gated tabs are dropped from the strip
+// instead of sitting inert on it; the routes bounce a hand-typed URL back anyway.
+const isSectionOffered = (key: string) =>
+  !ENTERPRISE_ONLY_TABS.includes(key) || isEnterprise.value || !hidesPaidFeatures;
 
 /**
  * Route name → tab key. The detail route resolves to the tab it was opened
@@ -311,7 +317,8 @@ const carriedQuery = computed(() => {
   return rest;
 });
 
-const sections = computed<Section[]>(() => [
+const sections = computed<Section[]>(() =>
+  ([
   {
     key: "overview",
     label: t("dbm.page.tabs.overview"),
@@ -390,7 +397,7 @@ const sections = computed<Section[]>(() => [
       : t("dbm.page.tabs.tableHealthLocked"),
     disabled: !isEnterprise.value,
   },
-]);
+  ] as Section[]).filter((s) => isSectionOffered(s.key));
 
 const navigate = (key: string | number) => {
   if (key === activeTab.value) return;
@@ -398,7 +405,7 @@ const navigate = (key: string | number) => {
   if (!section) return;
   // A locked tab must not navigate even if `change` reaches here some other
   // way (keyboard, a future OTabs change) — the route would only bounce back.
-  if (section.disabled) return;
+  if (section.disabled || !isSectionOffered(section.key)) return;
   router.push(section.to).catch(() => {});
 };
 </script>

@@ -818,12 +818,10 @@ export default defineComponent({
       }
     });
 
-    // Shows the entry — locked, if this edition doesn't unlock `featureKey` —
-    // whenever `enabledByRuntimeFlag` is true OR the edition flat-out doesn't
-    // unlock it (so the locked entry stays discoverable rather than only
-    // appearing once an admin has also flipped the runtime flag on). Hides it
-    // only when the edition allows the feature but the runtime flag is off —
-    // that's a deployment choice, not something to upsell.
+    // Shows the entry only when the edition unlocks `featureKey` AND the
+    // admin's runtime flag is on. `access.visible` carries the edition half:
+    // under `PAID_FEATURE_POLICY = "hide"` it is false for an edition that
+    // doesn't unlock the feature, so no locked tile is inserted at all.
     const syncGatedMenuEntry = (
       name: string,
       featureKey: "incidents" | "workflows",
@@ -833,7 +831,7 @@ export default defineComponent({
     ) => {
       const existingIndex = linksList.value.findIndex((link) => link.name === name);
       const access = checkFeatureAccess(featureKey, buildFeatureGateContext(store.state.zoConfig));
-      const shouldShow = enabledByRuntimeFlag || !access.allowed;
+      const shouldShow = access.visible && (enabledByRuntimeFlag || access.allowed);
 
       if (!shouldShow) {
         if (existingIndex !== -1) linksList.value.splice(existingIndex, 1);

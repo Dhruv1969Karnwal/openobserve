@@ -1006,6 +1006,7 @@ import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import analytics from "@/services/product_analytics";
 import config from "@/aws-exports";
+import { hidesPaidFeatures } from "@/utils/enterpriseFeatures";
 import ImportAlert from "@/components/alerts/ImportAlert.vue";
 import { getImageURL, getUUID, verifyOrganizationStatus } from "@/utils/zincutils";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -1312,7 +1313,9 @@ export default defineComponent({
     );
     const anomalyDetectionTabVisible = computed(
       () =>
-        !anomalyDetectionEntitled.value || store.state.zoConfig.anomaly_detection_enabled === true,
+        !hidesPaidFeatures &&
+        (!anomalyDetectionEntitled.value ||
+          store.state.zoConfig.anomaly_detection_enabled === true),
     );
     const isAnomalyDetectionEnabled = computed(
       () =>

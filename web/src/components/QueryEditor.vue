@@ -127,13 +127,6 @@
           :alt="t('search.aiModeIconAlt')"
           class="h-4.5 w-4.5 transition-transform duration-[600ms] ease-[ease] group-hover:rotate-180 group-hover:brightness-0 group-hover:invert"
         />
-        <span
-          v-if="!aiAccess.allowed"
-          aria-hidden="true"
-          class="bg-surface-overlay border-surface-base absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border shadow-sm"
-        >
-          <OIcon name="lock" size="xs" class="text-warning-600 size-2.5!" />
-        </span>
         <OTooltip
           v-if="aiAccess.allowed"
           :content="
@@ -302,7 +295,8 @@ const aiAccess = computed(() =>
   checkFeatureAccess("aiAssistant", buildFeatureGateContext(store.state.zoConfig)),
 );
 const aiFeatureVisible = computed(
-  () => !aiAccess.value.allowed || Boolean(store.state.zoConfig.ai_enabled),
+  () =>
+    aiAccess.value.visible && (!aiAccess.value.allowed || Boolean(store.state.zoConfig.ai_enabled)),
 );
 const aiFeatureEnabled = computed(() => aiFeatureVisible.value && aiAccess.value.allowed);
 

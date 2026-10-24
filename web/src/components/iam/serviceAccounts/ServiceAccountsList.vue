@@ -127,16 +127,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <span
               :data-test="`service-accounts-roles-${row.email}`"
               class="text-text-secondary inline-flex min-w-0 items-center gap-1 truncate text-xs"
-              :class="{ 'cursor-pointer': !rbacAccess.allowed }"
-              :title="rbacAccess.allowed ? serviceAccountRolesText(row.email) : rbacAccess.message"
-              @click="!rbacAccess.allowed && openUpgradeDialog()"
+              :title="serviceAccountRolesText(row.email)"
               >{{ serviceAccountRolesText(row.email) }}
-              <OIcon
-                v-if="!rbacAccess.allowed"
-                name="lock"
-                size="xs"
-                class="text-warning-600 shrink-0"
-              />
             </span>
           </template>
 
@@ -469,10 +461,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <span class="text-text-secondary text-xs">{{ tokenNextStepHint }}</span>
             </div>
 
-            <!-- Always rendered — locked (not hidden) when rbac isn't allowed:
-                 inert links, lock icon instead of the arrow, tooltip explains
-                 why. See rbacAccess / onQuickLinkClick. -->
-            <div class="mt-3 flex flex-wrap items-center justify-center gap-3">
+            <!-- Hidden entirely while RBAC isn't on offer: the targets are
+                 gated routes, so an inert link would be a dead control. -->
+            <div
+              v-if="rbacAccess.visible"
+              class="mt-3 flex flex-wrap items-center justify-center gap-3"
+            >
               <router-link
                 data-test="service-accounts-list-token-add-to-role"
                 :to="roleLinkTarget"
@@ -482,14 +476,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OIcon name="shield" size="sm" class="text-primary shrink-0" />
                 <span class="font-medium">{{ t("serviceAccounts.tokenReveal.addToRole") }}</span>
                 <OIcon
-                  :name="rbacAccess.allowed ? 'arrow-right' : 'lock'"
+                  name="arrow-right"
                   size="sm"
-                  :class="
-                    rbacAccess.allowed
-                      ? 'text-text-secondary group-hover:translate-x-0.5'
-                      : 'text-warning-600'
-                  "
-                  class="shrink-0 transition-transform"
+                  class="text-text-secondary shrink-0 transition-transform group-hover:translate-x-0.5"
                 />
               </router-link>
               <router-link
@@ -501,14 +490,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OIcon name="group" size="sm" class="text-primary shrink-0" />
                 <span class="font-medium">{{ t("serviceAccounts.tokenReveal.addToGroup") }}</span>
                 <OIcon
-                  :name="rbacAccess.allowed ? 'arrow-right' : 'lock'"
+                  name="arrow-right"
                   size="sm"
-                  :class="
-                    rbacAccess.allowed
-                      ? 'text-text-secondary group-hover:translate-x-0.5'
-                      : 'text-warning-600'
-                  "
-                  class="shrink-0 transition-transform"
+                  class="text-text-secondary shrink-0 transition-transform group-hover:translate-x-0.5"
                 />
               </router-link>
             </div>
@@ -717,6 +701,18 @@ export default defineComponent({
       return t("serviceAccounts.tokenReveal.nextStepOss");
     });
 
+    const rolesColumn = computed<OTableColumnDef<any>>(() => ({
+      id: "roles",
+      header: t("serviceAccounts.list.col.roles"),
+      accessorKey: "roles",
+      sortable: false,
+      resizable: true,
+      hideable: true,
+      size: 160,
+      minSize: 120,
+      meta: { align: "left" },
+    }));
+
     // Quick-add links stay visible when locked — clicking opens the upgrade
     // dialog instead of navigating to Roles/Groups.
     const onQuickLinkClick = (e: Event) => {
@@ -834,22 +830,7 @@ export default defineComponent({
         minSize: 160,
         meta: { align: "left", flex: true },
       },
-      // Shown locked (not hidden) in builds/orgs where rbac isn't allowed —
-      // see rbacAccess; the cell itself renders the lock icon + tooltip.
-      {
-        id: "roles",
-        header: t("serviceAccounts.list.col.roles"),
-        accessorKey: "roles",
-        sortable: false,
-        resizable: true,
-        hideable: true,
-        size: 160,
-        minSize: 120,
-        meta: {
-          align: "left",
-          headerTooltip: rbacAccess.value.allowed ? undefined : rbacAccess.value.message,
-        },
-      },
+      rolesColumn.value,
       {
         id: "token",
         header: t("serviceAccounts.list.col.token"),

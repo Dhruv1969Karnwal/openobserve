@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { ref } from "vue";
+import { hidesPaidFeatures } from "@/utils/enterpriseFeatures";
 
 /**
  * Module-scoped singleton (same pattern as ONavGroup's `openGroupKey`): every
@@ -21,6 +22,9 @@ import { ref } from "vue";
  * `<EnterpriseUpgradeDialog>` mounted once (in Header.vue) can be opened from
  * anywhere — a locked nav tile, a locked Settings tab — without each one
  * needing its own dialog instance or a prop/event chain back up to Header.
+ *
+ * `open()` is a no-op while `PAID_FEATURE_POLICY` is `"hide"`: the upsell modal
+ * is not part of a single-edition product. Entry points are hidden upstream.
  */
 const isEnterpriseUpgradeDialogOpen = ref(false);
 
@@ -28,6 +32,7 @@ export function useEnterpriseUpgradeDialog() {
   return {
     isOpen: isEnterpriseUpgradeDialogOpen,
     open: () => {
+      if (hidesPaidFeatures) return;
       isEnterpriseUpgradeDialogOpen.value = true;
     },
     close: () => {

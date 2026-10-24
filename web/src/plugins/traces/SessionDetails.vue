@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </template>
 
       <template #actions>
-        <template v-if="canAnnotateContext">
+        <template v-if="canAnnotateContext && queuesAccess.visible">
           <TraceAnnotateMenu
             v-if="queuesAccess.allowed"
             ref-type="session"
