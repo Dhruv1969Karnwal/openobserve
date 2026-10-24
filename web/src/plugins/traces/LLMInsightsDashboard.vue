@@ -40,10 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       data-test="llm-insights"
       all-agents
       agent-skeleton
-      :show-agent-toggle="genAiAgentMappingAccess.allowed"
-      :agent-toggle-locked-message="
-        !genAiAgentMappingAccess.allowed ? genAiAgentMappingAccess.message : undefined
-      "
+      :show-agent-toggle="genAiAgentMappingAccess.visible && genAiAgentMappingAccess.allowed"
       :show-version="!compareMode"
       :labels="{
         agent: t('traces.lLMInsightsDashboard.agent'),

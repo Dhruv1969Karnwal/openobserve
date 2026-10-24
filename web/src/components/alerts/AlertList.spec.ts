@@ -1361,15 +1361,14 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     expect(tabValues).toContain("anomalyDetection");
   });
 
-  it("should show anomalyDetection tab locked when build_type=opensource even when enterprise flags are set", async () => {
+  it("should omit the anomalyDetection tab when build_type=opensource even when enterprise flags are set", async () => {
     (config as any).isEnterprise = "true";
     (config as any).isCloud = "false";
     (store.state as any).zoConfig.build_type = "opensource";
 
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
   it("should enable anomalyDetection tab when isCloud=true (cloud build)", async () => {
@@ -1383,23 +1382,21 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     expect(tabValues).toContain("anomalyDetection");
   });
 
-  it("should show anomalyDetection tab locked when isEnterprise=false (opensource frontend)", async () => {
+  it("should omit the anomalyDetection tab when isEnterprise=false (opensource frontend)", async () => {
     (config as any).isEnterprise = "false";
     (config as any).isCloud = "false";
     (store.state as any).zoConfig.build_type = "enterprise";
 
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
-  it("should show anomalyDetection tab locked by default (no env vars set)", async () => {
-    // isEnterprise defaults to "false" → feature locked, not hidden
+  it("should omit the anomalyDetection tab by default (no env vars set)", async () => {
+    // isEnterprise defaults to "false" → the tab is absent, not locked.
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
   it("should include anomalyDetection tab in alertTabs when enabled", async () => {
@@ -1409,18 +1406,18 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     (store.state as any).zoConfig.anomaly_detection_enabled = true;
 
     const wrapper: any = await mountAlertList();
-    const tabValues = wrapper.vm.alertTabs.map((t: any) => t.value);
-    expect(tabValues).toContain("anomalyDetection");
+    const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
+    expect(tab).toBeTruthy();
+    expect(tab.locked).toBeFalsy();
   });
 
-  it("should show anomalyDetection tab locked in alertTabs when not entitled", async () => {
+  it("should omit the anomalyDetection tab from alertTabs when not entitled", async () => {
     (config as any).isEnterprise = "false";
     (config as any).isCloud = "false";
 
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
   it("should fall back activeTab to 'all' when anomalyDetection tab requested but feature disabled", async () => {

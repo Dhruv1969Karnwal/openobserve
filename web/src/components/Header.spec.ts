@@ -467,7 +467,7 @@ describe("Header Component", () => {
       aiWrapper.unmount();
     });
 
-    it("should show the AI button locked (not hidden) if not enterprise", async () => {
+    it("should hide the AI button entirely when the edition does not include it", async () => {
       const aiWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -485,10 +485,10 @@ describe("Header Component", () => {
 
       await aiWrapper.vm.$nextTick();
 
-      // Visible and clickable — upsell, not a hidden or disabled feature.
+      // Hidden outright — PAID_FEATURE_POLICY is "hide", so there is no
+      // locked-but-clickable upsell affordance in the header.
       const aiButton = aiWrapper.find('[data-test="menu-link-ai-item"]');
-      expect(aiButton.exists()).toBe(true);
-      expect(aiButton.attributes("disabled")).toBeUndefined();
+      expect(aiButton.exists()).toBe(false);
 
       aiWrapper.unmount();
     });
@@ -1227,11 +1227,11 @@ describe("Header Component", () => {
       // Verify no custom logo images are rendered
       expect(html).not.toContain("data:image; base64,");
 
-      // Verify default OpenObserve logo is rendered instead
+      // Verify the built-in Retrace.ai wordmark is rendered instead
       expect(html).toContain("openobserve-logo");
       const imgs = wrapper.findAll('[data-test="header-openobserve-logo"]');
       expect(imgs.length).toBeGreaterThan(0);
-      expect(imgs[0].attributes("src")).toContain("openobserve");
+      expect(imgs[0].attributes("src")).toContain("retrace_wordmark");
     });
 
     it("should display red warning icon when quota is exactly 95%", () => {

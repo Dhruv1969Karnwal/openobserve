@@ -62,16 +62,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           data-test="tab-overview"
         />
         <OTab
+          v-if="insightsAccess.visible"
           name="frequency"
           :label="t('alerts.insights.tabs.frequency')"
           data-test="tab-frequency"
-          :suffix-icon="!insightsAccess.allowed ? 'lock' : undefined"
         />
         <OTab
+          v-if="insightsAccess.visible"
           name="correlation"
           :label="t('alerts.insights.tabs.correlation')"
           data-test="tab-correlation"
-          :suffix-icon="!insightsAccess.allowed ? 'lock' : undefined"
         />
         <OTab name="quality" :label="t('alerts.insights.tabs.quality')" data-test="tab-quality" />
       </OTabs>

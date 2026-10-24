@@ -1006,6 +1006,7 @@ import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import analytics from "@/services/product_analytics";
 import config from "@/aws-exports";
+import { hidesPaidFeatures } from "@/utils/enterpriseFeatures";
 import ImportAlert from "@/components/alerts/ImportAlert.vue";
 import { getImageURL, getUUID, verifyOrganizationStatus } from "@/utils/zincutils";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -1310,13 +1311,19 @@ export default defineComponent({
     const anomalyDetectionEntitled = computed(
       () => store.state.zoConfig.build_type !== "opensource" && config.isEnterprise === "true",
     );
-    const anomalyDetectionTabVisible = computed(
-      () =>
-        !anomalyDetectionEntitled.value || store.state.zoConfig.anomaly_detection_enabled === true,
-    );
     const isAnomalyDetectionEnabled = computed(
       () =>
         anomalyDetectionEntitled.value && store.state.zoConfig.anomaly_detection_enabled === true,
+    );
+    // Under "hide" the tab is the feature: no entitlement (or the toggle off)
+    // means no tab. Under "lock" an un-entitled build still shows it locked,
+    // while an entitled build with the toggle off still shows nothing.
+    const anomalyDetectionTabVisible = computed(
+      () =>
+        isAnomalyDetectionEnabled.value ||
+        (!hidesPaidFeatures &&
+          (!anomalyDetectionEntitled.value ||
+            store.state.zoConfig.anomaly_detection_enabled === true)),
     );
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 

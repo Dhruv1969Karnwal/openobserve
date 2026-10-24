@@ -49,7 +49,11 @@ import SectionRail from "@/components/common/SectionRail.vue";
 import type { SectionHubGroup, SectionHubItem } from "@/components/common/SectionHub.vue";
 import { navSection } from "./navSection";
 import type { IconName } from "@/lib/core/Icon/OIcon.icons";
-import { buildFeatureGateContext, checkFeatureAccess } from "@/utils/enterpriseFeatures";
+import {
+  buildFeatureGateContext,
+  checkFeatureAccess,
+  type FeatureKey,
+} from "@/utils/enterpriseFeatures";
 import { AI_OBSERVABILITY_SECTIONS } from "@/composables/shared/useAIObservabilityRoutes";
 
 /** The same mark the primary nav uses for this module, so the collapsed rail
@@ -101,23 +105,32 @@ const activeSection = computed<string>(() => navSection(route.name, route.query.
 // composables/shared/useAIObservabilityRoutes.ts), so a nav item's
 // `featureKey`/`routeName` can't drift from what actually gates/names its
 // route. Every section beyond Monitor's LLM Insights + Sessions is
-// enterprise/cloud-only — rather than hiding those items in OSS, they stay
-// visible but locked (lock icon + pitch-card tooltip), matching the
-// Settings/IAM rail pattern.
+// enterprise/cloud-only, and follow PAID_FEATURE_POLICY: hidden when that
+// policy is "hide", locked otherwise.
+const featureAccessFor = (
+  key: string,
+  cache: Map<string, ReturnType<typeof checkFeatureAccess>>,
+) => {
+  let access = cache.get(key);
+  if (!access) {
+    access = checkFeatureAccess(key as FeatureKey, buildFeatureGateContext(store.state.zoConfig));
+    cache.set(key, access);
+  }
+  return access;
+};
+
 const sectionItems = computed<(SectionHubItem & { group: string })[]>(() => {
-  const featureGateCtx = buildFeatureGateContext(store.state.zoConfig);
   // Memoized per featureKey, not per nav item — the four Evaluate entries
   // share one key and would otherwise recompute the same access check 4x.
   const accessByFeatureKey = new Map<string, ReturnType<typeof checkFeatureAccess>>();
-  return AI_OBSERVABILITY_SECTIONS.map((section) => {
+  return AI_OBSERVABILITY_SECTIONS.filter((section) => {
+    if (!section.featureKey) return true;
+    return featureAccessFor(section.featureKey, accessByFeatureKey).visible;
+  }).map((section) => {
     let locked: boolean | undefined;
     let lockedMessage: I18nText | undefined;
     if (section.featureKey) {
-      let access = accessByFeatureKey.get(section.featureKey);
-      if (!access) {
-        access = checkFeatureAccess(section.featureKey, featureGateCtx);
-        accessByFeatureKey.set(section.featureKey, access);
-      }
+      const access = featureAccessFor(section.featureKey, accessByFeatureKey);
       locked = !access.allowed;
       lockedMessage = access.message;
     }

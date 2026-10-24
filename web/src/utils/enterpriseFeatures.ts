@@ -330,6 +330,21 @@ export function isFeatureKey(key: string): key is FeatureKey {
     future lint rule) reads this instead of hand-maintaining its own copy. */
 export const ALL_FEATURE_KEYS: FeatureKey[] = Object.keys(FEATURE_GATES) as FeatureKey[];
 
+/** How the app presents a feature this build does not unlock. */
+export type PaidFeaturePolicy = "hide" | "lock";
+
+/**
+ * Retrace.ai ships one edition, so an entitlement-gated feature is not sold in
+ * the UI: `"hide"` renders nothing at all instead of a locked affordance.
+ * Set to `"lock"` to restore the upstream lock-icon + upsell-dialog treatment;
+ * every surface reads this through {@link checkFeatureAccess}, so nothing else
+ * needs to change.
+ */
+export const PAID_FEATURE_POLICY: PaidFeaturePolicy = "hide";
+
+/** True when unavailable features must be removed from the UI rather than locked. */
+export const hidesPaidFeatures: boolean = PAID_FEATURE_POLICY === "hide";
+
 export interface FeatureAccess {
   allowed: boolean;
   /** False means hide this feature ENTIRELY — not locked, not shown at all. Always true when `allowed` is true. */
@@ -359,26 +374,33 @@ export function checkFeatureAccess(key: FeatureKey, context: FeatureGateContext)
   if (gate.cloudOffers === false && pureCloud) {
     return { allowed: false, visible: false, message: raw(""), ctaRelevant: true };
   }
+  const hidden = hidesPaidFeatures;
   // RBAC alone depends on an admin toggle, not just edition — an edition
   // that already supports it just needs the toggle on, so "upgrade" is a
   // false, confusing CTA here.
   if (key === "rbac" && (context.isEnterprise || context.isCloud) && !context.rbac) {
     return {
       allowed: false,
-      visible: true,
-      message: gt("enterpriseFeature.rbacDisabled"),
+      visible: !hidden,
+      message: hidden ? raw("") : gt("enterpriseFeature.rbacDisabled"),
       ctaRelevant: false,
     };
   }
   const message = gate.pitchKey
     ? gt(gate.pitchKey)
     : gt("enterpriseFeature.locked", { feature: gt(gate.labelKey) });
-  return { allowed: false, visible: true, message, ctaRelevant: true };
+  return {
+    allowed: false,
+    visible: !hidden,
+    message: hidden ? raw("") : message,
+    ctaRelevant: !hidden,
+  };
 }
 
 /**
- * Wraps a route guard so navigation redirects to the shared locked-feature
- * page instead of proceeding, when `key` isn't unlocked. Must be a GUARD, not
+ * Wraps a route guard so navigation cannot reach an entitlement-gated page:
+ * under `PAID_FEATURE_POLICY = "hide"` it bounces to the org home, otherwise to
+ * the shared locked-feature page. Must be a GUARD, not
  * a choice of `component:` — vue-router permanently caches a route's first-
  * resolved lazy component (`extractComponentsGuards`:
  * `record.components[name] = resolvedComponent`), so picking between two
@@ -395,6 +417,10 @@ export function withFeatureGate(
 ) {
   return (to: any, from: any, next: any) => {
     if (!checkFeatureAccess(key, getContext()).allowed) {
+      if (hidesPaidFeatures) {
+        next({ name: "home", query: { org_identifier: to.query?.org_identifier } });
+        return;
+      }
       next({
         name: "enterpriseFeatureLocked",
         query: { feature: key, org_identifier: to.query?.org_identifier, redirect: to.fullPath },

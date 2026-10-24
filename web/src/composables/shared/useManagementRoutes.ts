@@ -1,6 +1,16 @@
 import config from "@/aws-exports";
 import { routeGuard } from "@/utils/zincutils";
-import { withFeatureGate } from "@/utils/enterpriseFeatures";
+import { hidesPaidFeatures, withFeatureGate } from "@/utils/enterpriseFeatures";
+
+// The two upsell surfaces are themselves gated by the product's own policy: a
+// single-edition build has nothing to sell, so a hand-typed URL bounces home.
+const hideUpsellPage = (to: any, from: any, next: any) => {
+  if (hidesPaidFeatures) {
+    next({ name: "home", query: { org_identifier: to.query?.org_identifier } });
+    return;
+  }
+  routeGuard(to, from, next);
+};
 import { oncallRouteGuard } from "./oncallRouteGuard";
 import { slackRouteGuard } from "./slackRouteGuard";
 
@@ -78,9 +88,7 @@ const useManagementRoutes = () => {
     name: "enterpriseFeatureLocked",
     component: () => import("@/components/EnterpriseFeatureLocked.vue"),
     meta: { titleKey: "enterpriseFeature.lockedTitle" },
-    beforeEnter(to: any, from: any, next: any) {
-      routeGuard(to, from, next);
-    },
+    beforeEnter: hideUpsellPage,
   });
 
   // Full-page listing of every enterprise feature (the same offer the header's
@@ -91,9 +99,7 @@ const useManagementRoutes = () => {
     name: "enterpriseFeatures",
     component: () => import("@/views/EnterpriseFeatures.vue"),
     meta: { titleKey: "enterpriseFeature.featuresPageTitle" },
-    beforeEnter(to: any, from: any, next: any) {
-      routeGuard(to, from, next);
-    },
+    beforeEnter: hideUpsellPage,
   });
 
   // Public synthetics locations are the registry the Lambda venue dispatches

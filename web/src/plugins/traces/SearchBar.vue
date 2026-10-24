@@ -57,7 +57,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               data-test="traces-service-graph-toggle"
               value="service-graph"
               size="sm"
-              :icon-right="!serviceGraphAccess.allowed ? 'lock' : undefined"
               :tooltip="
                 serviceGraphAccess.allowed && shouldHideToggleText
                   ? t('traces.serviceGraphTab')

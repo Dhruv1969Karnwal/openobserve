@@ -73,10 +73,10 @@ export const PREDEFINED_THEMES: PredefinedTheme[] = [
     id: 10,
     name: raw("O2 Signature"),
     light: {
-      themeColor: "#6B76E3",
+      themeColor: "#1C1F23",
     },
     dark: {
-      themeColor: "#8B8DF0",
+      themeColor: "#E6E6E6",
     },
   },
   {

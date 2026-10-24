@@ -449,11 +449,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                     })
                                   : t("logStream.addPattern")
                               }}
-                              <OIcon
-                                :name="sdrAccess.allowed ? 'arrow-forward' : 'lock'"
-                                size="xs"
-                                :class="sdrAccess.allowed ? '' : 'text-warning-600'"
-                              />
+                              <OIcon name="arrow-forward" size="xs" />
                             </span>
                           </template>
                         </template>
@@ -1901,19 +1897,20 @@ export default defineComponent({
         size: 220,
         meta: { align: "left" },
       },
-      // SDR column — shown locked (not hidden) in builds that don't unlock
-      // the regex-pattern association feature; see sdrAccess.
-      {
-        id: "patterns",
-        header: raw("SDR"),
-        accessorKey: "patterns",
-        sortable: false,
-        size: COL.template,
-        meta: {
-          align: "left",
-          headerTooltip: sdrAccess.value.allowed ? undefined : sdrAccess.value.message,
-        },
-      },
+      // SDR column — the regex-pattern association feature is entitlement
+      // gated (see sdrAccess), so the column is dropped when it isn't on offer.
+      ...(sdrAccess.value.visible
+        ? [
+            {
+              id: "patterns",
+              header: raw("SDR"),
+              accessorKey: "patterns",
+              sortable: false,
+              size: COL.template,
+              meta: { align: "left" },
+            },
+          ]
+        : []),
     ];
 
     const redBtnColumns: OTableColumnDef<any>[] = [

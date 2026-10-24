@@ -371,7 +371,7 @@ describe("SettingsIndex", () => {
       return groups.flatMap((g: any) => g.items ?? []);
     };
 
-    it("should mark enterprise-only items as locked (not hidden) in a true OSS build", async () => {
+    it("should hide enterprise-only items entirely in a true OSS build", async () => {
       const config = await import("@/aws-exports");
       vi.mocked(config.default).isEnterprise = "false";
       // Not just "not enterprise" — this batch doesn't exist on Cloud at all
@@ -385,15 +385,11 @@ describe("SettingsIndex", () => {
       const pipelineItem = items.find((i: any) => i.dataTest === "pipeline-destinations-tab");
       const regexItem = items.find((i: any) => i.dataTest === "regex-patterns-tab");
 
-      // Present but locked — not hidden — in OSS, so the feature stays discoverable.
-      expect(cipherItem?.visible).not.toBe(false);
-      expect(nodesItem?.visible).not.toBe(false);
-      expect(pipelineItem?.visible).not.toBe(false);
-      expect(regexItem?.visible).not.toBe(false);
-      expect(cipherItem?.locked).toBe(true);
-      expect(nodesItem?.locked).toBe(true);
-      expect(pipelineItem?.locked).toBe(true);
-      expect(regexItem?.locked).toBe(true);
+      // PAID_FEATURE_POLICY is "hide": no locked-but-clickable row is offered.
+      expect(cipherItem?.visible).toBe(false);
+      expect(nodesItem?.visible).toBe(false);
+      expect(pipelineItem?.visible).toBe(false);
+      expect(regexItem?.visible).toBe(false);
     });
 
     // Cloud never offers this batch at all — not even locked — because a

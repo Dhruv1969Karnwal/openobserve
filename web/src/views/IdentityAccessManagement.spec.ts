@@ -241,7 +241,7 @@ describe("IdentityAccessManagement.vue Component", () => {
       w.unmount();
     });
 
-    it("should lock (not hide) groups and roles when rbac_enabled is false", async () => {
+    it("should hide groups and roles when rbac_enabled is false", async () => {
       store.state.zoConfig.rbac_enabled = false;
 
       const w = mount(IdentityAccessManagement, {
@@ -253,16 +253,15 @@ describe("IdentityAccessManagement.vue Component", () => {
       });
       await flushPromises();
 
-      // Present but locked — not hidden — so the feature stays discoverable.
+      // PAID_FEATURE_POLICY is "hide": an unavailable capability is absent,
+      // not a locked row the reader has to click through.
       const items = visibleItems(w.vm.sectionGroups);
-      const groups = items.find((i: any) => i.key === "groups");
-      const roles = items.find((i: any) => i.key === "roles");
-      expect(groups?.locked).toBe(true);
-      expect(roles?.locked).toBe(true);
+      expect(items.some((i: any) => i.key === "groups")).toBe(false);
+      expect(items.some((i: any) => i.key === "roles")).toBe(false);
       w.unmount();
     });
 
-    it("suppresses the upgrade CTA when the edition already supports RBAC but the toggle is off", async () => {
+    it("hides the rows instead of showing a locked one when the edition supports RBAC but the toggle is off", async () => {
       vi.spyOn(config, "isEnterprise", "get").mockReturnValue("true");
       vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
       store.state.zoConfig.rbac_enabled = false;
@@ -276,9 +275,9 @@ describe("IdentityAccessManagement.vue Component", () => {
       });
       await flushPromises();
 
+      // No locked row with a suppressed CTA either — the whole row is gone.
       const items = visibleItems(w.vm.sectionGroups);
-      const groups = items.find((i: any) => i.key === "groups");
-      expect(groups?.lockedShowUpgradeCta).toBe(false);
+      expect(items.some((i: any) => i.key === "groups")).toBe(false);
       w.unmount();
     });
   });
@@ -547,7 +546,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         w.unmount();
       });
 
-      it("should show groups/roles locked, not hidden, in open source (non-enterprise)", async () => {
+      it("should hide groups/roles in open source (non-enterprise)", async () => {
         vi.spyOn(config, "isEnterprise", "get").mockReturnValue("false");
         vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
         store.state.zoConfig.rbac_enabled = true;
@@ -561,13 +560,11 @@ describe("IdentityAccessManagement.vue Component", () => {
         });
         await flushPromises();
 
-        // Present (discoverable) but locked — OSS can't unlock RBAC regardless
-        // of the backend's rbac_enabled flag.
+        // Absent outright — OSS can't unlock RBAC regardless of the
+        // backend's rbac_enabled flag, so there is nothing to offer here.
         const items = visibleItems(w.vm.sectionGroups);
-        const groups = items.find((i: any) => i.key === "groups");
-        const roles = items.find((i: any) => i.key === "roles");
-        expect(groups?.locked).toBe(true);
-        expect(roles?.locked).toBe(true);
+        expect(items.some((i: any) => i.key === "groups")).toBe(false);
+        expect(items.some((i: any) => i.key === "roles")).toBe(false);
         w.unmount();
       });
 

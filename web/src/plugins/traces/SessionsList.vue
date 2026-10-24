@@ -47,10 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       count-data-test="sessions-stream-count"
       all-agents
       show-stream-skeleton
-      :show-agent-toggle="genAiAgentMappingAccess.allowed"
-      :agent-toggle-locked-message="
-        !genAiAgentMappingAccess.allowed ? genAiAgentMappingAccess.message : undefined
-      "
+      :show-agent-toggle="genAiAgentMappingAccess.visible && genAiAgentMappingAccess.allowed"
       :labels="{
         agent: t('traces.sessionsList.agent'),
         stream: t('traces.sessionsList.stream'),

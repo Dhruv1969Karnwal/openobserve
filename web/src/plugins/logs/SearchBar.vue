@@ -128,6 +128,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </OToggleGroupItem>
 
             <OToggleGroupItem
+              v-if="patternsAccess.visible"
               data-test="logs-patterns-toggle"
               value="patterns"
               size="sm"
@@ -141,9 +142,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OIcon name="layers" size="sm" class="shrink-0" />
               </template>
               <span v-if="!toolbarToggleIconOnly">{{ t("search.showPatternsLabel") }}</span>
-              <template v-if="!patternsAccess.allowed" #icon-right>
-                <OIcon name="lock" size="xs" class="text-warning-600 shrink-0" />
-              </template>
             </OToggleGroupItem>
           </OToggleGroup>
           <!-- reset filters button — moves into More menu at very narrow widths -->
@@ -774,24 +772,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
           <ODropdownSeparator />
 
-          <ODropdownGroup :label="t('search.menuGroupSchedule')">
-            <template v-if="!scheduledSearchAccess.allowed" #label-action>
-              <OIcon
-                name="lock"
-                size="xs"
-                class="text-warning-600"
-                data-test="search-scheduler-locked-icon"
-              />
-            </template>
-
+          <ODropdownGroup
+            v-if="scheduledSearchAccess.visible"
+            :label="t('search.menuGroupSchedule')"
+          >
             <ODropdownItem
               data-test="search-scheduler-create-new-btn"
-              :disabled="scheduledSearchAccess.allowed && !!scheduleJobReason"
+              :disabled="!!scheduleJobReason"
               focusable-unavailable
-              :description="
-                scheduledSearchAccess.allowed ? scheduleJobReason || scheduleJobNote : undefined
-              "
-              @select="scheduledSearchAccess.allowed ? createScheduleJob() : openUpgradeDialog()"
+              :description="scheduleJobReason || scheduleJobNote"
+              @select="createScheduleJob()"
             >
               <template #icon-left>
                 <span
@@ -809,12 +799,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </span>
             </ODropdownItem>
 
-            <ODropdownItem
-              data-test="search-scheduler-list-btn"
-              @select="
-                scheduledSearchAccess.allowed ? routeToSearchSchedule() : openUpgradeDialog()
-              "
-            >
+            <ODropdownItem data-test="search-scheduler-list-btn" @select="routeToSearchSchedule()">
               <template #icon-left>
                 <span
                   class="rounded-default bg-section-header-bg text-text-secondary inline-flex h-7 w-7 shrink-0 items-center justify-center"

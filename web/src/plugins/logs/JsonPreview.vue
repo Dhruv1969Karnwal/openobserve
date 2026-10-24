@@ -21,7 +21,7 @@
         }}</OButton
       >
       <OButton
-        v-if="showViewRelatedBtn"
+        v-if="showViewRelatedBtn && correlationAccess.visible"
         size="xs"
         variant="outline"
         class="me-2 mb-1.5"
@@ -29,13 +29,7 @@
         data-test="log-correlation-btn"
       >
         <OIcon name="link" size="xs" class="me-1" />{{ t("search.viewRelated") }}
-        <OIcon
-          v-if="!correlationAccess.allowed"
-          name="lock"
-          size="xs"
-          class="text-warning-600 ms-1"
-        />
-        <OTooltip v-if="correlationAccess.allowed" :content="t('search.viewRelatedTooltip')" />
+        <OTooltip :content="t('search.viewRelatedTooltip')" />
       </OButton>
       <!-- Stream picker and its action read as one control, sized to sit level
            with the toolbar buttons above rather than towering over them. -->
@@ -146,7 +140,7 @@
             </ODropdownItem>
           </template>
           <ODropdownItem
-            v-if="store.state.zoConfig.ai_enabled"
+            v-if="store.state.zoConfig.ai_enabled && aiAssistantAccess.visible"
             data-test="send-to-ai-chat-btn"
             @select.stop="sendToAiChat(JSON.stringify({ [key]: value[key] }))"
           >
@@ -154,11 +148,9 @@
               <img :src="getBtnLogo" width="14" height="14" alt="" />
             </template>
             {{ t("logs.jsonPreview.sendToAiChat") }}
-            <template v-if="!aiAssistantAccess.allowed" #icon-right>
-              <OIcon name="lock" size="xs" class="text-warning-600 shrink-0" />
-            </template>
           </ODropdownItem>
           <ODropdownItem
+            v-if="regexPatternsAccess.visible"
             data-test="redirect-to-regex-pattern-btn"
             @select.stop="createRegexPatternFromLogs(key, value[key])"
           >
@@ -166,9 +158,6 @@
               <img :src="regexIcon" width="14" height="14" alt="" />
             </template>
             {{ t("regex_patterns.create_regex_pattern_field") }}
-            <template v-if="!regexPatternsAccess.allowed" #icon-right>
-              <OIcon name="lock" size="xs" class="text-warning-600 shrink-0" />
-            </template>
           </ODropdownItem>
         </ODropdown>
 
@@ -208,6 +197,7 @@
           {{ t("logs.jsonPreview.copy") }}
         </div>
         <div
+          v-if="regexPatternsAccess.visible"
           class="hover:bg-dropdown-item-hover-bg flex cursor-pointer items-center px-3 py-1.5 [transition:background-color_0.2s]"
           @click="handleCreateRegex"
         >
