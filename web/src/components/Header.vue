@@ -113,11 +113,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               :src="
                 getImageURL(
                   isDark
-                    ? 'images/common/openobserve_latest_dark_2.svg'
-                    : 'images/common/openobserve_latest_light_2.svg',
+                    ? 'images/common/retrace_wordmark_dark.svg'
+                    : 'images/common/retrace_wordmark_light.svg',
                 )
               "
-              :alt="raw('OpenObserve')"
+              :alt="raw('Retrace.ai')"
             />
           </a>
         </div>
@@ -132,11 +132,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :src="
               getImageURL(
                 isDark
-                  ? 'images/common/openobserve_latest_dark_2.svg'
-                  : 'images/common/openobserve_latest_light_2.svg',
+                  ? 'images/common/retrace_wordmark_dark.svg'
+                  : 'images/common/retrace_wordmark_light.svg',
               )
             "
-            :alt="raw('OpenObserve')"
+            :alt="raw('Retrace.ai')"
           />
         </a>
       </div>

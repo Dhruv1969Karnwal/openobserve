@@ -325,19 +325,19 @@ describe("router/index (factory)", () => {
       router = createAppRouter(store);
     });
 
-    it("should set document.title to OpenObserve when route has no meta.titleKey", async () => {
+    it("should set document.title to Retrace.ai when route has no meta.titleKey", async () => {
       // The ingestion fixture route carries no meta at all
       await router.push("/ingestion").catch(() => {});
-      expect(document.title).toBe("OpenObserve");
+      expect(document.title).toBe("Retrace.ai");
     });
 
-    it("should prefix document.title with OpenObserve - and translate meta.titleKey", async () => {
+    it("should prefix document.title with Retrace.ai - and translate meta.titleKey", async () => {
       // Login fixture carries meta.titleKey = "login.login", which resolves to "Login".
       // Asserting the resolved text (not the key) is the point: the guard, not the
       // route table, is what translates — that is what keeps the tab title in the
       // current locale.
       await router.push("/login").catch(() => {});
-      expect(document.title).toBe("OpenObserve - Login");
+      expect(document.title).toBe("Retrace.ai - Login");
     });
   });
 });

@@ -1227,11 +1227,11 @@ describe("Header Component", () => {
       // Verify no custom logo images are rendered
       expect(html).not.toContain("data:image; base64,");
 
-      // Verify default OpenObserve logo is rendered instead
+      // Verify the built-in Retrace.ai wordmark is rendered instead
       expect(html).toContain("openobserve-logo");
       const imgs = wrapper.findAll('[data-test="header-openobserve-logo"]');
       expect(imgs.length).toBeGreaterThan(0);
-      expect(imgs[0].attributes("src")).toContain("openobserve");
+      expect(imgs[0].attributes("src")).toContain("retrace_wordmark");
     });
 
     it("should display red warning icon when quota is exactly 95%", () => {
