@@ -15,6 +15,16 @@
 
 import { flushPromises, mount } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
+
+// The component branches on `PAID_FEATURE_POLICY`; both sides are asserted below.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
+
 import { nextTick, ref, watch } from "vue";
 import { createStore } from "vuex";
 import { createRouter, createWebHistory } from "vue-router";
@@ -560,7 +570,20 @@ describe("ImportFunction", () => {
     // OSS builds cannot run JavaScript, so the option is shown locked (not
     // hidden) but still selectable — picking it opens the upgrade dialog
     // instead of trading this validation error for a server-side one.
-    it("offers a JavaScript option on OSS, locked via isJsAllowed", async () => {
+    it("offers no JavaScript option on OSS under the shipped hide policy", async () => {
+      setPaidFeaturePolicy("hide");
+      (config as any).isEnterprise = "false";
+      const wrapper = mountScreen();
+      await flushPromises();
+
+      // Listing it and refusing the selection only moved the error into a refused dialog.
+      expect(wrapper.vm.transTypeOptions.map((o: any) => o.value)).toEqual(["0"]);
+      expect(wrapper.vm.isJsAllowed).toBe(false);
+      resetPaidFeaturePolicy();
+    });
+
+    it("offers a locked JavaScript option on OSS under the lock policy", async () => {
+      setPaidFeaturePolicy("lock");
       (config as any).isEnterprise = "false";
       const wrapper = mountScreen();
       await flushPromises();
@@ -568,6 +591,7 @@ describe("ImportFunction", () => {
       const options = wrapper.vm.transTypeOptions;
       expect(options.map((o: any) => o.value)).toEqual(["0", "1"]);
       expect(wrapper.vm.isJsAllowed).toBe(false);
+      resetPaidFeaturePolicy();
     });
 
     it("offers an unlocked JavaScript option where the build can run it", async () => {
@@ -580,7 +604,9 @@ describe("ImportFunction", () => {
       expect(wrapper.vm.isJsAllowed).toBe(true);
     });
 
+    // Under "lock", JavaScript is listed and refused on selection, as in the Add form toggle.
     it("picking the locked JavaScript option opens the upgrade dialog instead of selecting it", async () => {
+      setPaidFeaturePolicy("lock");
       (config as any).isEnterprise = "false";
       const wrapper = mountScreen();
       await flushPromises();
@@ -589,6 +615,7 @@ describe("ImportFunction", () => {
       close();
       wrapper.vm.updateTransType("1", 0);
       expect(isOpen.value).toBe(true);
+      resetPaidFeaturePolicy();
     });
 
     it("takes unusable params from the params box", async () => {

@@ -345,6 +345,9 @@ export const PAID_FEATURE_POLICY: PaidFeaturePolicy = "hide";
 /** True when unavailable features must be removed from the UI rather than locked. */
 export const hidesPaidFeatures: boolean = PAID_FEATURE_POLICY === "hide";
 
+// Locally-gated surfaces render lock icons whose dialog the policy refuses; under "hide" they omit.
+export const showsLockedAffordances: boolean = !hidesPaidFeatures;
+
 export interface FeatureAccess {
   allowed: boolean;
   /** False means hide this feature ENTIRELY — not locked, not shown at all. Always true when `allowed` is true. */

@@ -432,32 +432,31 @@ describe("General", () => {
       config.isCloud = originalIsCloud;
     });
 
-    it("should keep the branding section visible but locked on OSS", () => {
+    // Under "hide" branding is absent rather than locked: there is no upsell click to route to.
+    it("should hide the branding section entirely on OSS", () => {
       mockStore.state.zoConfig.meta_org = "test-org";
       config.isEnterprise = "false";
       config.isCloud = "false";
       const wrapper = createWrapper();
 
-      expect(wrapper.find("#enterpriseFeature").exists()).toBe(true);
-      const lockedText = wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]');
-      expect(lockedText.exists()).toBe(true);
-      // Clickable (not disabled) — the wrapping row opens the upgrade dialog
-      // on click instead of the field being an inert disabled control.
-      expect(lockedText.find("input").attributes("disabled")).toBeUndefined();
+      expect(wrapper.find("#enterpriseFeature").exists()).toBe(false);
+      expect(wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]').exists()).toBe(
+        false,
+      );
       expect(
         wrapper.find('[data-test="setting_ent_custom_logo_img_file_upload_locked"]').exists(),
-      ).toBe(true);
+      ).toBe(false);
       expect(
         wrapper.find('[data-test="setting_ent_custom_logo_dark_img_file_upload_locked"]').exists(),
-      ).toBe(true);
-      // The functional controls must not render alongside the locked ones.
+      ).toBe(false);
+      // And of course the functional controls are not offered either.
       expect(wrapper.find('[data-test="settings_ent_logo_custom_text"]').exists()).toBe(false);
       expect(wrapper.find('[data-test="settings_ent_logo_custom_text_edit_btn"]').exists()).toBe(
         false,
       );
     });
 
-    it("opens the upgrade dialog when a locked branding row is clicked", async () => {
+    it("offers no upsell click from an un-entitled Settings › General", async () => {
       mockStore.state.zoConfig.meta_org = "test-org";
       config.isEnterprise = "false";
       config.isCloud = "false";
@@ -465,8 +464,9 @@ describe("General", () => {
 
       const { isOpen, close } = useEnterpriseUpgradeDialog();
       close();
-      await wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]').trigger("click");
-      expect(isOpen.value).toBe(true);
+      const clickable = wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]');
+      expect(clickable.exists()).toBe(false);
+      expect(isOpen.value).toBe(false);
     });
 
     it("should hide the branding section entirely on a pure Cloud build", () => {

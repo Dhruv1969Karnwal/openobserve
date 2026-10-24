@@ -21,6 +21,16 @@
 
 import { mount } from "@vue/test-utils";
 import { describe, it, expect, vi, afterEach } from "vitest";
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
+
+// The component branches on `PAID_FEATURE_POLICY`; both sides are asserted below.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
+
 import i18n from "@/locales";
 import store from "@/test/unit/helpers/store";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
@@ -349,10 +359,20 @@ describe("AlertTargetsSelect", () => {
       expect(wrapper.emitted("create-workflow")).toHaveLength(1);
     });
 
-    // Discoverable instead of absent: the family supports workflow routing
-    // but this edition doesn't unlock it, so the button stays visible and
-    // clickable — clicking opens the upgrade dialog instead of creating one.
+    it("renders no Create Workflow control at all on an un-entitled build under the shipped hide policy", async () => {
+      setPaidFeaturePolicy("hide");
+      const wrapper = createWrapper({
+        workflowsEnabled: false,
+        workflowsLocked: true,
+        workflowsLockMessage: "Upgrade to unlock workflows",
+      });
+      // A locked button here would be dead: openUpgradeDialog() is a no-op while the policy is "hide".
+      expect(wrapper.find('[data-test="create-workflow-btn"]').exists()).toBe(false);
+    });
+
+    // Under "lock" the button stays discoverable and its click opens the upgrade dialog.
     it("shows a clickable, locked Create Workflow button that opens the upgrade dialog", async () => {
+      setPaidFeaturePolicy("lock");
       const wrapper = createWrapper({
         workflowsEnabled: false,
         workflowsLocked: true,
@@ -368,6 +388,8 @@ describe("AlertTargetsSelect", () => {
       expect(isOpen.value).toBe(true);
       expect(wrapper.emitted("create-workflow")).toBeUndefined();
     });
+
+    afterEach(() => resetPaidFeaturePolicy());
   });
 
   // ── Malformed / partially-loaded lists ─────────────────────────────────────

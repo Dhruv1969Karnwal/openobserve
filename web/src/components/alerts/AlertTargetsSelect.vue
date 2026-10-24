@@ -82,10 +82,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     >
       {{ t("workflow.create") }}
     </OButton>
-    <!-- Locked (not hidden): the family supports workflow routing, but this
-         edition doesn't unlock it — kept as the discovery point since the
-         dropdown's own "Workflows" header has no icon/tooltip slot to attach. -->
-    <template v-else-if="workflowsLocked">
+    <!-- Locked only under the "lock" policy: under "hide" its dialog is refused, so the button would be dead. -->
+    <template v-else-if="workflowsLocked && showsLockedAffordances">
       <OButton
         data-test="create-workflow-btn"
         variant="outline"
@@ -107,6 +105,7 @@ import OSelect from "@/lib/forms/Select/OSelect.vue";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 
 const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 

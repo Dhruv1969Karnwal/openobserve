@@ -23,6 +23,15 @@ import { makeAlertSectionRouter } from "@/test/unit/helpers/alertSectionRouter";
 import type { AlertLibraryEntry, AlertLibraryManifest } from "@/types/alertLibrary";
 import config from "@/aws-exports";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
+
+// The gallery branches on the policy and both sides are asserted, so it must be switchable here.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
 
 // See AlertSectionTabs.spec.ts — the app router is neither needed nor cheap.
 const router = makeAlertSectionRouter();
@@ -1130,6 +1139,7 @@ describe("AlertLibrary", () => {
     const original = { isEnterprise: config.isEnterprise, zoConfig: store.state.zoConfig };
     const upgrade = useEnterpriseUpgradeDialog();
 
+    // `"locked"` means *not entitled*; what that renders as is the policy call, set per case below.
     const setAccess = (access: "enabled" | "locked" | "hidden") => {
       (config as { isEnterprise: string }).isEnterprise = access === "locked" ? "false" : "true";
       store.state.zoConfig = {
@@ -1143,6 +1153,8 @@ describe("AlertLibrary", () => {
       wrapper.find(`[data-test="alert-library-card-${ANOMALY}"]`);
 
     beforeEach(() => {
+      // Every case in this block describes the LOCKED treatment; hide has its own cases below.
+      setPaidFeaturePolicy("lock");
       manifestRef.value = withAnomaly;
       upgrade.close();
     });
@@ -1151,6 +1163,17 @@ describe("AlertLibrary", () => {
       (config as { isEnterprise: string }).isEnterprise = original.isEnterprise;
       store.state.zoConfig = original.zoConfig;
       upgrade.close();
+      resetPaidFeaturePolicy();
+    });
+
+    it("omits anomaly alerts, the Enterprise tag and the upgrade click entirely under the shipped hide policy", async () => {
+      setPaidFeaturePolicy("hide");
+      const wrapper = await mountView();
+      expect(card(wrapper).exists()).toBe(false);
+      expect(wrapper.find('[data-test="alert-library-card-enterprise"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test="alert-library-alert-type"]').exists()).toBe(false);
+      expect(upgrade.isOpen.value).toBe(false);
+      expect(wrapper.find('[data-test="alert-library-stat-all"]').text()).toContain("4");
     });
 
     it("lists anomaly alerts beside scheduled ones when enabled", async () => {

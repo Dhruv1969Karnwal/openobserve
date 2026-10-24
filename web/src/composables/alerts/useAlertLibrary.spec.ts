@@ -15,6 +15,16 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
+
+// Both sides of the policy are asserted below, so the shipped constant must be switchable here.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
+
 // The store is the cache — not a module-level variable that happens to be
 // warm. Several tests below deliberately seed the STORE while leaving the
 // module cold (and vice versa) so that an implementation which memoises
@@ -453,6 +463,7 @@ describe("useAnomalyLibraryAccess", () => {
 
   afterEach(() => {
     delete (mockStore.state as { zoConfig?: unknown }).zoConfig;
+    resetPaidFeaturePolicy();
   });
 
   const access = (isEnterprise: string, zoConfig: Record<string, unknown>) => {
@@ -461,13 +472,30 @@ describe("useAnomalyLibraryAccess", () => {
     return useAnomalyLibraryAccess().value;
   };
 
-  it("is locked on a build that is not enterprise", () => {
+  // Which treatment an un-entitled build gets is the policy's call, so both sides are asserted.
+  it("is hidden on a build that is not enterprise, under the shipped hide policy", () => {
+    setPaidFeaturePolicy("hide");
+    expect(access("false", { build_type: "enterprise", anomaly_detection_enabled: true })).toBe(
+      "hidden",
+    );
+  });
+
+  it("is hidden when an enterprise UI talks to an OSS backend, under the shipped hide policy", () => {
+    setPaidFeaturePolicy("hide");
+    expect(access("true", { build_type: "opensource", anomaly_detection_enabled: true })).toBe(
+      "hidden",
+    );
+  });
+
+  it("is locked on a build that is not enterprise, under the lock policy", () => {
+    setPaidFeaturePolicy("lock");
     expect(access("false", { build_type: "enterprise", anomaly_detection_enabled: true })).toBe(
       "locked",
     );
   });
 
-  it("is locked when an enterprise UI talks to an OSS backend", () => {
+  it("is locked when an enterprise UI talks to an OSS backend, under the lock policy", () => {
+    setPaidFeaturePolicy("lock");
     expect(access("true", { build_type: "opensource", anomaly_detection_enabled: true })).toBe(
       "locked",
     );
