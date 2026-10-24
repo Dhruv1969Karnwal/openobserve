@@ -32,9 +32,9 @@
       focusable="false"
       data-test="brand-wordmark-mark"
     >
-      <rect class="brand-plate" x="14" y="72" width="96" height="96" rx="14" />
+      <rect class="brand-plate fill-text-heading" x="14" y="72" width="96" height="96" rx="14" />
       <path
-        class="brand-glyph"
+        class="brand-glyph stroke-surface-base"
         d="M36 120h14l10-26 12 52 10-26h16"
         fill="none"
         stroke-width="10"
@@ -44,10 +44,10 @@
     </svg>
     <span
       :class="[
-        'brand-word font-sans leading-none font-medium tracking-tight whitespace-nowrap',
+        'brand-word text-text-heading font-sans leading-none font-medium tracking-tight whitespace-nowrap',
         size === 'hero' ? 'text-2xl max-md:text-xl' : 'text-lg max-md:text-base',
       ]"
-      >{{ brand }}<span class="brand-suffix">{{ suffix }}</span></span
+      >{{ brand }}<span class="brand-suffix text-text-secondary">{{ suffix }}</span></span
     >
   </span>
 </template>
@@ -70,23 +70,3 @@ withDefaults(
   { size: "header", testId: "brand-wordmark", name: raw("Retrace.ai") },
 );
 </script>
-
-<style scoped>
-/* Token colours only, so one implementation covers both themes: no dark/light asset pair. */
-.brand-mark {
-  fill: var(--color-text-heading);
-}
-
-.brand-glyph {
-  stroke: var(--color-surface-base);
-}
-
-.brand-word {
-  color: var(--color-text-heading);
-}
-
-/* The suffix sits a tier down so the name reads as one unit, and stays above AA on every surface. */
-.brand-suffix {
-  color: var(--color-text-secondary);
-}
-</style>

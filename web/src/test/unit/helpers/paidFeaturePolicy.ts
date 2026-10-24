@@ -21,8 +21,9 @@ export interface PaidFeaturePolicyCell {
 }
 
 // State lives on globalThis so a dynamically imported factory and the spec setter share one cell.
-const cell: PaidFeaturePolicyCell = ((globalThis as Record<string, unknown>)
-  .__paidFeaturePolicyCell ??= { mode: "hide" }) as PaidFeaturePolicyCell;
+const cell: PaidFeaturePolicyCell = ((
+  globalThis as Record<string, unknown>
+).__paidFeaturePolicyCell ??= { mode: "hide" }) as PaidFeaturePolicyCell;
 
 export const setPaidFeaturePolicy = (next: PaidFeaturePolicyChoice): void => {
   cell.mode = next;
