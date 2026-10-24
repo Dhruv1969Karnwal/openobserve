@@ -39,3 +39,6 @@ src/assets/ai-datasource-content/generated/
 # the committed config is exactly `vite.config.ts`, which this cannot match.
 vite.config.*-*.ts
 vite.config.local-*.ts
+
+# scratch config written by `npm run type-check:changes` (deleted on exit)
+tsconfig.changes.tmp.json
