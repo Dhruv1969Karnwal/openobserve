@@ -120,7 +120,6 @@ const featureAccessFor = (
 };
 
 const sectionItems = computed<(SectionHubItem & { group: string })[]>(() => {
-  const featureGateCtx = buildFeatureGateContext(store.state.zoConfig);
   // Memoized per featureKey, not per nav item — the four Evaluate entries
   // share one key and would otherwise recompute the same access check 4x.
   const accessByFeatureKey = new Map<string, ReturnType<typeof checkFeatureAccess>>();

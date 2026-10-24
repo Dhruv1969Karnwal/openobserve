@@ -152,7 +152,6 @@ import { useChatHistory } from "@/composables/useChatHistory";
 import useAiChat from "@/composables/useAiChat";
 import type { ChatMessage } from "@/ts/interfaces/chat";
 import OSpinner from "@/lib/feedback/Spinner/OSpinner.vue";
-import OIcon from "@/lib/core/Icon/OIcon.vue";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
 import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
 

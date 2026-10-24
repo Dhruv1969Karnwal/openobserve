@@ -21,8 +21,11 @@ vi.mock("@/aws-exports", () => ({
 
 import config from "@/aws-exports";
 import {
-  checkFeatureAccess,
+  ALL_FEATURE_KEYS,
+  PAID_FEATURE_POLICY,
   buildFeatureGateContext,
+  checkFeatureAccess,
+  hidesPaidFeatures,
   isFeatureKey,
   withFeatureGate,
 } from "@/utils/enterpriseFeatures";
@@ -49,13 +52,34 @@ describe("enterpriseFeatures", () => {
     });
   });
 
+  describe("PAID_FEATURE_POLICY", () => {
+    it("hides paid features outright, matching the single-edition product", () => {
+      expect(PAID_FEATURE_POLICY).toBe("hide");
+      expect(hidesPaidFeatures).toBe(true);
+    });
+
+    it("never reports an allowed feature as hidden, whatever the edition", () => {
+      config.isEnterprise = "true";
+      const ctx = buildFeatureGateContext({ rbac_enabled: true });
+      for (const key of ALL_FEATURE_KEYS) {
+        const result = checkFeatureAccess(key, ctx);
+        if (result.allowed) expect(result.visible).toBe(true);
+      }
+    });
+
+    it("leaves un-gated feature strings for call sites to keep visible", () => {
+      expect(isFeatureKey("databaseMonitoring")).toBe(false);
+      expect(isFeatureKey("logs")).toBe(false);
+    });
+  });
+
   describe("checkFeatureAccess — isEnterprise-only keys", () => {
-    it("locks an enterprise-only feature in OSS, with a message naming it", () => {
+    it("hides an enterprise-only feature in OSS, with no message to render", () => {
       const ctx = buildFeatureGateContext();
       const result = checkFeatureAccess("cipherKeys", ctx);
       expect(result.allowed).toBe(false);
-      expect(result.message).toMatch(/Cipher Keys/);
-      expect(result.message).toMatch(/Enterprise/);
+      expect(result.visible).toBe(false);
+      expect(result.message).toBe("");
     });
 
     it("unlocks an enterprise-only feature in a self-hosted enterprise build", () => {
@@ -86,11 +110,11 @@ describe("enterpriseFeatures", () => {
       },
     );
 
-    it("stays visible-but-locked on OSS (not hidden) — only pure Cloud hides it", () => {
+    it("hides an entitlement-gated feature on OSS, not merely locks it", () => {
       const result = checkFeatureAccess("cipherKeys", buildFeatureGateContext());
       expect(result.allowed).toBe(false);
-      expect(result.visible).toBe(true);
-      expect(result.message).not.toBe("");
+      expect(result.visible).toBe(false);
+      expect(result.message).toBe("");
     });
 
     it("is visible (not hidden) on an enterprise+cloud hybrid build", () => {
@@ -117,15 +141,15 @@ describe("enterpriseFeatures", () => {
       expect(checkFeatureAccess("workflows", buildFeatureGateContext()).allowed).toBe(true);
     });
 
-    // Cloud DOES offer these (the predicate includes isCloud), so locked
-    // never implies "pure cloud with nothing to offer" here — always
-    // visible, unlike the isEnterprise-only batch above.
+    // Under the hide policy the `cloudOffers` distinction no longer changes
+    // visibility in OSS — nothing gated is rendered at all — but the
+    // predicates still decide `allowed`, which is what guards read.
     it.each(["incidents", "workflows", "oncall", "rbac"] as const)(
-      "stays visible when locked in OSS (%s)",
+      "hides %s when it is not allowed in OSS",
       (key) => {
         const result = checkFeatureAccess(key, buildFeatureGateContext({ rbac_enabled: true }));
         expect(result.allowed).toBe(false);
-        expect(result.visible).toBe(true);
+        expect(result.visible).toBe(false);
       },
     );
   });
@@ -163,10 +187,11 @@ describe("enterpriseFeatures", () => {
       expect(result.ctaRelevant).toBe(false);
     });
 
-    it("keeps the upgrade CTA relevant when OSS is the reason rbac is locked", () => {
+    it("drops the upgrade CTA along with the feature when OSS is the reason rbac is unavailable", () => {
       const result = checkFeatureAccess("rbac", buildFeatureGateContext({ rbac_enabled: true }));
       expect(result.allowed).toBe(false);
-      expect(result.ctaRelevant).toBe(true);
+      expect(result.visible).toBe(false);
+      expect(result.ctaRelevant).toBe(false);
     });
   });
 
@@ -180,7 +205,7 @@ describe("enterpriseFeatures", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("redirects to the locked page, preserving org_identifier and the original path", () => {
+    it("bounces to the org home instead of a locked upsell page", () => {
       const guard = vi.fn();
       const next = vi.fn();
       const to = {
@@ -190,13 +215,17 @@ describe("enterpriseFeatures", () => {
       withFeatureGate("cipherKeys", guard)(to, {}, next);
       expect(guard).not.toHaveBeenCalled();
       expect(next).toHaveBeenCalledWith({
-        name: "enterpriseFeatureLocked",
-        query: {
-          feature: "cipherKeys",
-          org_identifier: "o1",
-          redirect: "/settings/cipher_keys?org_identifier=o1",
-        },
+        name: "home",
+        query: { org_identifier: "o1" },
       });
+    });
+
+    it("never reaches the upsell page while the hide policy is in force", () => {
+      const next = vi.fn();
+      withFeatureGate("cipherKeys", vi.fn())({ query: {}, fullPath: "/x" }, {}, next);
+      const target = next.mock.calls[0][0];
+      expect(target.name).not.toBe("enterpriseFeatureLocked");
+      expect(target.name).not.toBe("enterpriseFeatures");
     });
   });
 

@@ -457,17 +457,21 @@ describe("DbmSectionTabs", () => {
         .filter((tab) => tab.attributes("aria-disabled") === "true")
         .map((tab) => tab.attributes("data-test"));
 
-    it("disables deadlocks, blocked and table health on an OSS build", () => {
+    const offeredKeys = (wrapper: ReturnType<typeof mountAt>) =>
+      tabsOf(wrapper).map((tab) => tab.attributes("data-test"));
+
+    // PAID_FEATURE_POLICY is "hide": the three tabs the OSS backend refuses are
+    // dropped from the strip rather than parked on it as inert furniture.
+    it("omits deadlocks, blocked and table health on an OSS build", () => {
       mockConfig.isEnterprise = "false";
       const wrapper = mountAt("dbmDatabases");
 
-      // All eight still RENDER — disabled, not hidden.
-      expect(tabsOf(wrapper)).toHaveLength(8);
-      expect(disabledKeys(wrapper)).toEqual([
-        "dbm-section-tab-deadlocks",
-        "dbm-section-tab-blocked",
-        "dbm-section-tab-tableHealth",
-      ]);
+      expect(tabsOf(wrapper)).toHaveLength(5);
+      const offered = offeredKeys(wrapper);
+      expect(offered).not.toContain("dbm-section-tab-deadlocks");
+      expect(offered).not.toContain("dbm-section-tab-blocked");
+      expect(offered).not.toContain("dbm-section-tab-tableHealth");
+      expect(disabledKeys(wrapper)).toHaveLength(0);
     });
 
     it("leaves every tab enabled on an enterprise build", () => {
@@ -486,25 +490,24 @@ describe("DbmSectionTabs", () => {
       "treats isEnterprise=%p as OSS — only the literal string true unlocks",
       (value) => {
         mockConfig.isEnterprise = value;
-        expect(disabledKeys(mountAt("dbmDatabases"))).toHaveLength(3);
+        const offered = offeredKeys(mountAt("dbmDatabases"));
+        expect(offered).toHaveLength(5);
+        expect(offered).not.toContain("dbm-section-tab-deadlocks");
       },
     );
 
-    /** A locked tab must say WHY it is locked and what unlocks it. */
-    it("explains the upgrade path on a locked tab", () => {
-      mockConfig.isEnterprise = "false";
-      const hint = mountAt("dbmDatabases")
-        .find("[data-test='dbm-section-tab-deadlocks']")
-        .findComponent({ name: "OTooltip" })
-        .props("content") as string;
-      expect(hint).toContain("Enterprise");
-    });
-
-    /** The lock is the visual cue; without it a disabled tab just reads as broken. */
-    it("marks a locked tab with a lock icon", () => {
+    /** Nothing is parked on the strip with an upsell tooltip behind it. */
+    it("offers no upgrade-path hint on an OSS build", () => {
       mockConfig.isEnterprise = "false";
       const wrapper = mountAt("dbmDatabases");
-      expect(wrapper.find("[data-test='dbm-section-tab-lock-deadlocks']").exists()).toBe(true);
+      expect(wrapper.find("[data-test='dbm-section-tab-deadlocks']").exists()).toBe(false);
+    });
+
+    /** A hidden tab leaves no lock affordance either — there is no dead tab. */
+    it("renders no lock affordance for a gated tab on an OSS build", () => {
+      mockConfig.isEnterprise = "false";
+      const wrapper = mountAt("dbmDatabases");
+      expect(wrapper.find("[data-test='dbm-section-tab-lock-deadlocks']").exists()).toBe(false);
       expect(wrapper.find("[data-test='dbm-section-tab-lock-queries']").exists()).toBe(false);
     });
 

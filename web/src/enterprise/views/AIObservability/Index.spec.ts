@@ -102,30 +102,13 @@ beforeEach(() => {
 });
 
 describe("AIObservabilityShell — OSS builds (isEnterprise and isCloud both false)", () => {
-  it("still shows every group and every item — nothing is hidden", async () => {
+  // PAID_FEATURE_POLICY is "hide": the rail keeps only what OSS really
+  // serves, so a group whose every item is gated disappears with them.
+  it("shows only the OSS-served items, and only the group that still has them", async () => {
     const wrapper = await mountShell();
     const groups = groupsOf(wrapper);
-    expect(groups.map((g) => g.label)).toEqual(ALL_GROUP_LABELS);
-    // Rendered in group order (Monitor, Evaluate, Experiment, Annotate —
-    // see `sectionGroupOrder`), not AI_OBSERVABILITY_SECTIONS's flat order.
-    const keys = itemsOf(wrapper).map((i) => i.key);
-    expect(keys).toEqual([
-      "llmInsights",
-      "sessions",
-      "agentGraph",
-      "agentBehavior",
-      "quality",
-      "jobs",
-      "scorers",
-      "scoreConfigs",
-      "prompts",
-      "playground",
-      "experiments",
-      "remoteTasks",
-      "discovery",
-      "queues",
-      "datasets",
-    ]);
+    expect(groups.map((g) => g.label)).toEqual(["aiObservability.sections.monitor"]);
+    expect(itemsOf(wrapper).map((i) => i.key)).toEqual(["llmInsights", "sessions"]);
   });
 
   it("leaves LLM Insights + Sessions unlocked — OSS serves them for real", async () => {
@@ -137,7 +120,7 @@ describe("AIObservabilityShell — OSS builds (isEnterprise and isCloud both fal
     expect(sessions.locked).toBeFalsy();
   });
 
-  it("locks every other item with a message, instead of hiding it", async () => {
+  it("offers none of the gated items, locked or otherwise", async () => {
     const wrapper = await mountShell();
     const items = itemsOf(wrapper);
     const lockedKeys = [
@@ -156,13 +139,15 @@ describe("AIObservabilityShell — OSS builds (isEnterprise and isCloud both fal
       "scoreConfigs",
     ];
     for (const key of lockedKeys) {
-      const item = items.find((i) => i.key === key)!;
-      expect(item.locked, `${key} should be locked on a true OSS build`).toBe(true);
-      expect(item.lockedMessage, `${key} should carry a lockedMessage`).toBeTruthy();
+      expect(
+        items.some((i) => i.key === key),
+        `${key} must not appear on OSS`,
+      ).toBe(false);
     }
   });
 
   it("points every item at the route name the enterprise rail uses too — same registry, same names", async () => {
+    mockIsEnterprise = "true";
     const wrapper = await mountShell();
     const items = itemsOf(wrapper);
     expect((items.find((i) => i.key === "llmInsights")!.to as any).name).toBe("aiLLMInsights");

@@ -1077,24 +1077,29 @@ describe("ONavGroup", () => {
       return { wrapper: w, router };
     }
 
-    it("renders the locked child as a non-navigating element, not a router-link", async () => {
+    // PAID_FEATURE_POLICY is "hide": a gated child is dropped from the flyout
+    // outright, so there is no locked row to render and no click path to the
+    // real destination (Service Graph) to intercept.
+    it("omits the gated child entirely, locked variant included", async () => {
       const { wrapper: w } = await mountLocked("/traces");
-      const el = w.get('[data-test="nav-group-item-traces-service-graph-locked"]');
-      expect(el.element.tagName).toBe("DIV");
-      expect(el.attributes("href")).toBeUndefined();
+      expect(w.find('[data-test="nav-group-item-traces-service-graph"]').exists()).toBe(false);
+      expect(w.find('[data-test="nav-group-item-traces-service-graph-locked"]').exists()).toBe(
+        false,
+      );
       wrapper = w;
     });
 
-    // Clicking a locked item must never navigate to its real destination
-    // (Service Graph) — it redirects to the Enterprise Features page instead.
-    it("redirects to the Enterprise Features page, not the real destination, when the locked child is clicked", async () => {
+    it("leaves nothing to click, so the gated route is unreachable from the flyout", async () => {
       const { wrapper: w, router } = await mountLocked("/");
       expect(router.currentRoute.value.fullPath).toBe("/");
 
-      await w.get('[data-test="nav-group-item-traces-service-graph-locked"]').trigger("click");
+      expect(w.find('[data-test="nav-group-item-traces-service-graph-locked"]').exists()).toBe(
+        false,
+      );
       await flushPromises();
 
-      expect(router.currentRoute.value.name).toBe("enterpriseFeatures");
+      expect(router.currentRoute.value.name).not.toBe("enterpriseFeatures");
+      expect(router.currentRoute.value.name).not.toBe("serviceGraph");
       wrapper = w;
     });
 

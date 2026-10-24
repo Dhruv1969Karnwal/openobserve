@@ -195,7 +195,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
              product does not sell an upgrade from its own header. -->
         <OButton
           v-if="enterpriseDialogVisible"
-          :variant=""
+          :variant="
             config.isEnterprise === 'true' || config.isCloud === 'true'
               ? 'outline-primary'
               : 'primary'
@@ -631,8 +631,6 @@ export default defineComponent({
     const { isOpen: showEnterpriseDialog, open: openEnterpriseDialog } =
       useEnterpriseUpgradeDialog();
 
-
-
     const showLanguageSubmenu = ref(false);
     const languageListRef = ref<HTMLElement | null>(null);
     const { lgUp } = useBreakpoint();
@@ -718,7 +716,9 @@ export default defineComponent({
       }),
     );
     const aiButtonVisible = computed(
-      () => aiAccess.value.visible && (!aiAccess.value.allowed || Boolean(props.store.state.zoConfig.ai_enabled)),
+      () =>
+        aiAccess.value.visible &&
+        (!aiAccess.value.allowed || Boolean(props.store.state.zoConfig.ai_enabled)),
     );
 
     // The header's edition CTA is itself an upsell, so it follows the same
@@ -733,9 +733,7 @@ export default defineComponent({
         rbac: props.store.state.zoConfig?.rbac_enabled !== false,
       });
       return (
-        access.visible &&
-        access.allowed &&
-        readSlackOrgConfig(props.store.state.zoConfig).enabled
+        access.visible && access.allowed && readSlackOrgConfig(props.store.state.zoConfig).enabled
       );
     });
     const showLinkedAccounts = ref(false);
@@ -853,6 +851,7 @@ export default defineComponent({
       ingestionQuotaPercentage,
       ingestionQuotaColor,
       showEnterpriseDialog,
+      enterpriseDialogVisible,
       showLanguageSubmenu,
       languageListRef,
       onLanguageRowSelect,
