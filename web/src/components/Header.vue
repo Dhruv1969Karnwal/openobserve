@@ -101,42 +101,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           />
         </a>
 
-        <!-- OpenObserve logo (shown alongside custom logo if configured) -->
+        <!-- Product wordmark (shown alongside custom logo if configured) -->
         <div
           v-if="store.state.zoConfig.custom_hide_self_logo == false"
           class="relative inline-flex min-h-10 items-center"
         >
           <a :href="homeUrl" @click.prevent="goToHome" class="inline-flex items-center">
-            <img
-              data-test="header-openobserve-logo"
-              class="openobserve-logo block h-8 max-w-37.5 cursor-pointer transition-opacity duration-200 hover:opacity-80"
-              :src="
-                getImageURL(
-                  isDark
-                    ? 'images/common/retrace_wordmark_dark.svg'
-                    : 'images/common/retrace_wordmark_light.svg',
-                )
-              "
-              :alt="raw('Retrace.ai')"
+            <BrandWordmark
+              test-id="header-retrace-logo"
+              class="openobserve-logo cursor-pointer transition-opacity duration-200 hover:opacity-80"
             />
           </a>
         </div>
       </div>
 
-      <!-- Default OpenObserve logo (when no custom logo) -->
+      <!-- Default product wordmark (when no custom logo) -->
       <div v-else class="relative-position relative inline-flex min-h-10 items-center">
         <a :href="homeUrl" @click.prevent="goToHome" class="inline-flex items-center">
-          <img
-            data-test="header-openobserve-logo"
-            class="openobserve-logo block h-8 max-w-37.5 cursor-pointer transition-opacity duration-200 hover:opacity-80"
-            :src="
-              getImageURL(
-                isDark
-                  ? 'images/common/retrace_wordmark_dark.svg'
-                  : 'images/common/retrace_wordmark_light.svg',
-              )
-            "
-            :alt="raw('Retrace.ai')"
+          <BrandWordmark
+            test-id="header-retrace-logo"
+            class="openobserve-logo cursor-pointer transition-opacity duration-200 hover:opacity-80"
           />
         </a>
       </div>
@@ -498,6 +482,7 @@ import ThemeSwitcher from "./ThemeSwitcher.vue";
 import EnterpriseUpgradeDialog from "./EnterpriseUpgradeDialog.vue";
 import OrganizationSelector from "./OrganizationSelector.vue";
 import LinkedAccountsDialog from "./settings/LinkedAccountsDialog.vue";
+import BrandWordmark from "./BrandWordmark.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
@@ -519,6 +504,7 @@ export default defineComponent({
     EnterpriseUpgradeDialog,
     OrganizationSelector,
     LinkedAccountsDialog,
+    BrandWordmark,
     OButton,
     OIcon,
     OTooltip,
@@ -744,7 +730,7 @@ export default defineComponent({
       const isCloud = props.config.isCloud === "true";
 
       if (isCloud) {
-        return t("about.header_button.cloud_features", { product: raw("OpenObserve") });
+        return t("about.header_button.cloud_features", { product: raw("Retrace.ai") });
       } else if (isEnterprise) {
         return t("about.header_button.enterprise_edition");
       } else {

@@ -198,7 +198,7 @@ describe("Header Component", () => {
   });
 
   describe("Logo Rendering", () => {
-    it("should display OpenObserve logo by default", async () => {
+    it("should display the product wordmark by default", async () => {
       const logoWrapper = createWrapper({
         mountType: "mount",
         stubsOverrides: {},
@@ -206,8 +206,8 @@ describe("Header Component", () => {
 
       await logoWrapper.vm.$nextTick();
 
-      // Verify the OpenObserve logo is rendered
-      const openobserveLogo = logoWrapper.find('[data-test="header-openobserve-logo"]');
+      // Verify the product wordmark is rendered
+      const openobserveLogo = logoWrapper.find('[data-test="header-retrace-logo"]');
       expect(openobserveLogo.exists()).toBe(true);
 
       logoWrapper.unmount();
@@ -248,7 +248,7 @@ describe("Header Component", () => {
       expect(wrapper.emitted("goToHome")).toBeTruthy();
     });
 
-    it("should use dark theme logo when theme is dark", async () => {
+    it("should render the same token-painted wordmark when the theme is dark", async () => {
       const darkWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -261,18 +261,17 @@ describe("Header Component", () => {
 
       await darkWrapper.vm.$nextTick();
 
-      // Verify the logo exists and check that dark theme is applied
-      const openobserveLogo = darkWrapper.find('[data-test="header-openobserve-logo"]');
-      expect(openobserveLogo.exists()).toBe(true);
-
-      // The logo src should contain 'dark' in the path
-      const logoSrc = openobserveLogo.attributes("src");
-      expect(logoSrc).toContain("dark");
+      // Verify the wordmark is present in the dark theme.
+      const wordmark = darkWrapper.find('[data-test="header-retrace-logo"]');
+      expect(wordmark.exists()).toBe(true);
+      // One token-painted lock-up serves both themes, so there is deliberately no per-theme `src`.
+      expect(wordmark.text()).toBe("Retrace.ai");
+      expect(wordmark.attributes("src")).toBeUndefined();
 
       darkWrapper.unmount();
     });
 
-    it("should not display OpenObserve logo when custom_hide_self_logo is true", async () => {
+    it("should not display the product wordmark when custom_hide_self_logo is true", async () => {
       const customWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -291,8 +290,8 @@ describe("Header Component", () => {
 
       await customWrapper.vm.$nextTick();
 
-      // Check that the OpenObserve logo is NOT in the HTML
-      const openobserveLogo = customWrapper.find('[data-test="header-openobserve-logo"]');
+      // Check that the product wordmark is NOT in the HTML
+      const openobserveLogo = customWrapper.find('[data-test="header-retrace-logo"]');
       expect(openobserveLogo.exists()).toBe(false);
 
       // Verify the custom logo text IS displayed
@@ -302,7 +301,7 @@ describe("Header Component", () => {
       customWrapper.unmount();
     });
 
-    it("should display OpenObserve logo when custom_hide_self_logo is false", async () => {
+    it("should display the product wordmark when custom_hide_self_logo is false", async () => {
       const customWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -321,8 +320,8 @@ describe("Header Component", () => {
 
       await customWrapper.vm.$nextTick();
 
-      // Check that the OpenObserve logo IS in the HTML
-      const openobserveLogo = customWrapper.find('[data-test="header-openobserve-logo"]');
+      // Check that the product wordmark IS in the HTML
+      const openobserveLogo = customWrapper.find('[data-test="header-retrace-logo"]');
       expect(openobserveLogo.exists()).toBe(true);
 
       // Verify the custom logo text is also displayed
@@ -1032,7 +1031,7 @@ describe("Header Component", () => {
   });
 
   describe("Theme Management", () => {
-    it("should render with light theme logo", async () => {
+    it("should render the wordmark in the light theme", async () => {
       const lightWrapper = createWrapper({
         mountType: "mount",
         stubsOverrides: {},
@@ -1040,17 +1039,16 @@ describe("Header Component", () => {
 
       await lightWrapper.vm.$nextTick();
 
-      // Verify light theme logo is used
-      const logo = lightWrapper.find('[data-test="header-openobserve-logo"]');
+      // The wordmark is theme-independent: same lock-up, the tokens do the rest.
+      const logo = lightWrapper.find('[data-test="header-retrace-logo"]');
       expect(logo.exists()).toBe(true);
-
-      const logoSrc = logo.attributes("src");
-      expect(logoSrc).toContain("light");
+      expect(logo.text()).toBe("Retrace.ai");
+      expect(logo.find("img").exists()).toBe(false);
 
       lightWrapper.unmount();
     });
 
-    it("should render with dark theme logo", async () => {
+    it("should render the wordmark in the dark theme", async () => {
       const darkWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -1063,12 +1061,11 @@ describe("Header Component", () => {
 
       await darkWrapper.vm.$nextTick();
 
-      // Verify dark theme logo is used
-      const logo = darkWrapper.find('[data-test="header-openobserve-logo"]');
+      // …and the same in dark, without a second asset.
+      const logo = darkWrapper.find('[data-test="header-retrace-logo"]');
       expect(logo.exists()).toBe(true);
-
-      const logoSrc = logo.attributes("src");
-      expect(logoSrc).toContain("dark");
+      expect(logo.text()).toBe("Retrace.ai");
+      expect(logo.find("img").exists()).toBe(false);
 
       darkWrapper.unmount();
     });
@@ -1208,7 +1205,7 @@ describe("Header Component", () => {
       }
     });
 
-    it("should render default OpenObserve logo when both custom logos are null", () => {
+    it("should render the default product wordmark when both custom logos are null", () => {
       const wrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -1227,11 +1224,12 @@ describe("Header Component", () => {
       // Verify no custom logo images are rendered
       expect(html).not.toContain("data:image; base64,");
 
-      // Verify the built-in Retrace.ai wordmark is rendered instead
+      // The brand is text the page draws with its own font, not an <img> (see BrandWordmark.vue).
       expect(html).toContain("openobserve-logo");
-      const imgs = wrapper.findAll('[data-test="header-openobserve-logo"]');
-      expect(imgs.length).toBeGreaterThan(0);
-      expect(imgs[0].attributes("src")).toContain("retrace_wordmark");
+      const mark = wrapper.find('[data-test="header-retrace-logo"]');
+      expect(mark.exists()).toBe(true);
+      expect(mark.text()).toBe("Retrace.ai");
+      expect(mark.find("img").exists()).toBe(false);
     });
 
     it("should display red warning icon when quota is exactly 95%", () => {

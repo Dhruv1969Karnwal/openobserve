@@ -50,41 +50,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             style="max-width: 9.375rem; max-height: 1.9375rem"
           />
         </span>
-        <a
+        <!-- The product's own wordmark, deliberately not a link out of the page. -->
+        <BrandWordmark
           v-if="store.state.zoConfig.custom_hide_self_logo == false"
-          href="https://openobserve.ai/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            class="appLogo h-auto"
-            :style="
-              store.state.zoConfig.custom_logo_text != '' ? 'width: 9.375rem;' : 'width: 15.625rem;'
-            "
-            :src="
-              isDark
-                ? getImageURL('images/common/openobserve_latest_dark_2.svg')
-                : getImageURL('images/common/openobserve_latest_light_2.svg')
-            "
-            :alt="t('login.openObserveLogoAlt')"
-          />
-        </a>
+          size="hero"
+          test-id="login-retrace-logo"
+          :name="t('login.openObserveLogoAlt')"
+        />
       </div>
       <div class="mb-4 flex justify-center" v-else>
-        <a href="https://openobserve.ai/" target="_blank" rel="noopener noreferrer">
-          <img
-            class="appLogo h-auto"
-            :style="
-              store.state.zoConfig.custom_logo_text != '' ? 'width: 9.375rem;' : 'width: 15.625rem;'
-            "
-            :alt="t('login.openObserveLogoAlt')"
-            :src="
-              isDark
-                ? getImageURL('images/common/openobserve_latest_dark_2.svg')
-                : getImageURL('images/common/openobserve_latest_light_2.svg')
-            "
-          />
-        </a>
+        <BrandWordmark
+          size="hero"
+          test-id="login-retrace-logo"
+          :name="t('login.openObserveLogoAlt')"
+        />
       </div>
 
       <div v-if="autoRedirectDexLogin">
@@ -234,6 +213,7 @@ import OButton from "@/lib/core/Button/OButton.vue";
 import OBanner from "@/lib/feedback/Banner/OBanner.vue";
 import OForm from "@/lib/forms/Form/OForm.vue";
 import OFormInput from "@/lib/forms/Input/OFormInput.vue";
+import BrandWordmark from "@/components/BrandWordmark.vue";
 import { openobserveRum } from "@openobserve/browser-rum";
 import { useReo } from "@/services/reodotdev_analytics";
 import { toast } from "@/lib/feedback/Toast/useToast";
@@ -241,7 +221,7 @@ import { makeLoginSchema, loginDefaults, type LoginForm } from "./Login.schema";
 
 export default defineComponent({
   name: "PageLogin",
-  components: { OButton, OBanner, OForm, OFormInput },
+  components: { OButton, OBanner, OForm, OFormInput, BrandWordmark },
 
   setup() {
     const store = useStore();

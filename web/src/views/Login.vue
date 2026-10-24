@@ -28,18 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   </div>
   <div v-if="showInvitations && config.isCloud == 'true'">
     <div class="relative-position flex px-3 pt-2">
-      <a href="https://openobserve.ai/" target="_blank" rel="noopener noreferrer">
-        <img
-          class="h-10 max-h-10 w-auto max-w-50 cursor-pointer"
-          loading="lazy"
-          :alt="t('login.openObserveLogoAlt')"
-          :src="
-            isDark
-              ? getImageURL('images/common/openobserve_latest_dark_2.svg')
-              : getImageURL('images/common/openobserve_latest_light_2.svg')
-          "
-        />
-      </a>
+      <BrandWordmark
+        size="hero"
+        test-id="login-retrace-logo"
+        :name="t('login.openObserveLogoAlt')"
+      />
     </div>
     <InvitationList
       v-if="showInvitations"
@@ -55,6 +48,7 @@ import { queryClient } from "@/composables/query/queryClient";
 import { defineComponent, onBeforeMount, ref } from "vue";
 import { useRouter } from "vue-router";
 import Login from "@/components/login/Login.vue";
+import BrandWordmark from "@/components/BrandWordmark.vue";
 import InvitationList from "@/components/iam/users/InvitationList.vue";
 import OSpinner from "@/lib/feedback/Spinner/OSpinner.vue";
 import config from "@/aws-exports";
@@ -83,6 +77,7 @@ export default defineComponent({
   name: "LoginPage",
   components: {
     Login,
+    BrandWordmark,
     InvitationList,
     OSpinner,
   },

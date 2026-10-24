@@ -21,15 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <!-- ── Hero Banner ─────────────────────────────────────────── -->
         <div class="bg-card-glass-bg rounded-default relative overflow-hidden p-4">
           <div class="relative z-1">
-            <img
-              :alt="t('login.openObserveLogoAlt')"
-              :src="
-                isDark
-                  ? getImageURL('images/common/openobserve_latest_dark_2.svg')
-                  : getImageURL('images/common/openobserve_latest_light_2.svg')
-              "
-              class="block max-w-55"
-              width="220"
+            <BrandWordmark
+              size="hero"
+              test-id="about-retrace-logo"
+              :name="t('login.openObserveLogoAlt')"
             />
             <OText variant="body" class="mt-1 mb-0">
               {{ t("about.logoMsg") }}
@@ -444,7 +439,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
 
         <!-- ── Feature Comparison ──────────────────────────────────── -->
-        <div v-if="config.isCloud === 'false'" class="bg-card-glass-bg rounded-default mb-5 p-4">
+        <!-- Edition comparison is a selling surface, so a single-edition build omits it; "lock" brings it back. -->
+        <div
+          v-if="config.isCloud === 'false' && showsLockedAffordances"
+          class="bg-card-glass-bg rounded-default mb-5 p-4"
+        >
           <FeatureComparisonTable />
         </div>
       </div>
@@ -462,6 +461,8 @@ import { useRouter } from "vue-router";
 import config from "@/aws-exports";
 import licenseServer from "@/services/license_server";
 import FeatureComparisonTable from "@/components/about/FeatureComparisonTable.vue";
+import BrandWordmark from "@/components/BrandWordmark.vue";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OSpinner from "@/lib/feedback/Spinner/OSpinner.vue";
@@ -474,6 +475,7 @@ export default defineComponent({
   name: "PageAbout",
   components: {
     FeatureComparisonTable,
+    BrandWordmark,
     OButton,
     OIcon,
     OSpinner,
@@ -565,6 +567,7 @@ export default defineComponent({
 
     return {
       isDark,
+      showsLockedAffordances,
       t,
       raw,
       store,
