@@ -47,17 +47,17 @@
        base    = editor / main content canvas
        well    = recessed / segmented track
        overlay = menus, dropdowns, tooltips */
-  --d-chrome: #0e0f11; /* title bar + left activity-bar strip             */
-  --d-base: #0d1117; /* MAIN: content card + table canvas               */
-  --d-well: #2d2d2d; /* recessed wells, segmented-control track         */
-  --d-panel: #181818; /* folder sidebar, sub rails, cards, dialogs (DM)  */
-  --d-overlay: #202020; /* menus, dropdowns, tooltips, table-header (top tier,
-                                lifts above panel #181818 via border + shadow)   */
+  --d-chrome: #0c0d0f; /* title bar + left activity-bar strip             */
+  --d-base: #15171a; /* MAIN: content card + table canvas               */
+  --d-well: #2b2f34; /* recessed wells, segmented-control track         */
+  --d-panel: #131518; /* folder sidebar, sub rails, cards, dialogs (DM)  */
+  --d-overlay: #1c1f23; /* menus, dropdowns, tooltips, table-header (top tier,
+                                lifts above panel by lightness alone)          */
 
-  /* Borders & dividers — VS Code widget / panel borders */
-  --d-divider: #3c3c3c; /* subtle: row & section separators            */
-  --d-border: #454545; /* default: card / input / table / rail edges  */
-  --d-border-strong: #6b6b6b; /* strong: checkbox / radio / file outlines    */
+  /* Borders & dividers — one lightness step above the surface they outline */
+  --d-divider: #212429; /* subtle: row & section separators            */
+  --d-border: #2c3036; /* default: card / input / table / rail edges  */
+  --d-border-strong: #454a50; /* strong: checkbox / radio / file outlines    */
 
   /* Text — mapped straight to the registered --color-grey-* palette in the
        block below (mirrors light mode, where each tier = a grey step). No
@@ -72,7 +72,7 @@
                              the dashboard-folder hover (theme-tinted, not grey) */
   --d-selected: color-mix(in srgb, var(--color-primary-500) 30%, var(--d-panel));
   /* selected row — teal-tinted (brand signal)       */
-  --d-zebra: #252526; /* striped-row bg — VS Code list alternating row    */
+  --d-zebra: #191c20; /* striped-row bg — one step off the base canvas    */
 
   /* --- Text — grey palette steps, one per tier (light half of the ramp) --- */
   --color-text-heading: var(--color-grey-200); /* h1-h6, modal titles — brightest */
@@ -113,7 +113,7 @@
   --color-dag-node-event: #ffd54f;
   --color-dag-node-default: #9e9e9e;
   /* Code syntax highlighting — GitHub dark palette */
-  --color-syntax-bg: #0d1117;
+  --color-syntax-bg: #15171a;
   --color-syntax-text: #c9d1d9;
   --color-syntax-keyword: #ff7b72;
   --color-syntax-function: #d2a8ff;
@@ -815,10 +815,10 @@
 
   /* Chart panel bar (dark) — same trick as the table header: the panel body sits
      on the content canvas (--d-base), so the bar LIFTS off it rather than going
-     darker. Darker than #0d1117 would read as a hole, not a header.
+     darker. Darker than --d-base (#15171a) would read as a hole, not a header.
 
-     A literal, not an alias: this sits one step above --d-overlay (#202020) and
-     below --d-well (#2d2d2d), and both of those carry roles (menus/tooltips,
+     A literal, not an alias: this sits one step above --d-overlay (#1c1f23) and
+     below --d-well (#2b2f34), and both of those carry roles (menus/tooltips,
      recessed tracks) that this is not. Aliasing either would couple the header
      to a token that moves for unrelated reasons.
 
@@ -829,7 +829,7 @@
      Unlike light mode there is no ceiling on the fill here: --d-border is
      LIGHTER than it, so a darker fill only helps the divider. That is why the
      border below is unchanged while the light one had to move with the fill. */
-  --color-panel-bar-bg: #252526;
+  --color-panel-bar-bg: #262a2f;
   --color-panel-bar-border: var(--d-border);
 }
 /* Domain data-viz & color tokens (dark) */
