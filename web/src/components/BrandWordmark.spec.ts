@@ -16,6 +16,7 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 
+import { raw } from "@/types/i18n";
 import BrandWordmark from "./BrandWordmark.vue";
 
 // The brand must render as drawn text, so these assert DOM presence rather than an asset fetch.
@@ -28,7 +29,7 @@ describe("BrandWordmark", () => {
   });
 
   it("exposes one accessible name for the whole lock-up", () => {
-    const wrapper = mount(BrandWordmark, { props: { name: "Retrace.ai logo" } });
+    const wrapper = mount(BrandWordmark, { props: { name: raw("Retrace.ai logo") } });
     const root = wrapper.get('[data-test="brand-wordmark"]');
 
     expect(root.attributes("role")).toBe("img");
