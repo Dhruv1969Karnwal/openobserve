@@ -478,7 +478,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OIcon
                   name="arrow-right"
                   size="sm"
-                  class="text-text-secondary shrink-0 transition-transform group-hover:translate-x-0.5"
+                  class="text-text-secondary shrink-0 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none"
                 />
               </router-link>
               <router-link
@@ -492,7 +492,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OIcon
                   name="arrow-right"
                   size="sm"
-                  class="text-text-secondary shrink-0 transition-transform group-hover:translate-x-0.5"
+                  class="text-text-secondary shrink-0 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none"
                 />
               </router-link>
             </div>

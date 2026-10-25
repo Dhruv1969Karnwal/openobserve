@@ -109,7 +109,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <a :href="homeUrl" @click.prevent="goToHome" class="inline-flex items-center">
             <BrandWordmark
               test-id="header-retrace-logo"
-              class="retrace-logo cursor-pointer transition-opacity duration-200 hover:opacity-80"
+              class="retrace-logo cursor-pointer transition-opacity duration-200 hover:opacity-80 motion-reduce:transition-none"
             />
           </a>
         </div>
@@ -120,7 +120,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <a :href="homeUrl" @click.prevent="goToHome" class="inline-flex items-center">
           <BrandWordmark
             test-id="header-retrace-logo"
-            class="retrace-logo cursor-pointer transition-opacity duration-200 hover:opacity-80"
+            class="retrace-logo cursor-pointer transition-opacity duration-200 hover:opacity-80 motion-reduce:transition-none"
           />
         </a>
       </div>
