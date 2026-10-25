@@ -36,7 +36,8 @@ const mockRouter = {
   replace: mockReplace,
   currentRoute: {
     value: {
-      name: "settings",
+      // widened so the `name = undefined` case below stays type-valid
+      name: "settings" as string | undefined,
       path: "/settings",
       query: {},
     },
