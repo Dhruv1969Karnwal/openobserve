@@ -1,11 +1,17 @@
 #!/usr/bin/env node
+// Copyright 2026 OpenObserve Inc.
+//
 // Regenerates `public/favicon.ico` from `public/favicon.svg` so the raster tab icon
-// can never drift from the vector one, and neither can drift from the in-app mark.
-// Supports only the primitives the Retrace lock-up uses (M/H/h/V/v/L/l + rounded rect);
-// anything else fails loudly instead of rendering something wrong.
+// cannot drift from the vector one.
+//
+// GUARANTEES: exactly one <rect> plate and exactly one <path> glyph, drawn with the
+// M/H/h/V/v/L/l commands and 6-digit hex paints the Retrace lock-up uses, from a square
+// viewBox scaled uniformly into each square canvas. Anything outside that subset — a second
+// path, an attribute this reader cannot anchor to, a curve command, a named colour, a
+// non-square viewBox — is an error, never a plausible-looking wrong raster.
 //
 // Run: node scripts/make-favicon.mjs          (from web/)  — writes the .ico
-//      node scripts/make-favicon.mjs --check                 — exit 1 on drift
+//      node scripts/make-favicon.mjs --check                  — exit 1 on drift
 import { deflateSync } from "node:zlib";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -19,16 +25,33 @@ const SUPERSAMPLE = 6;
 
 const svg = readFileSync(SVG_PATH, "utf8");
 
-
 const viewBox = /viewBox="([\d.\s-]+)"/.exec(svg)?.[1].trim().split(/\s+/).map(Number);
-if (!viewBox || viewBox.length !== 4) throw new Error("favicon.svg: unreadable viewBox");
-const [vbX, vbY, vbW] = viewBox;
+if (!viewBox || viewBox.length !== 4 || viewBox.some(Number.isNaN)) {
+  throw new Error("favicon.svg: unreadable viewBox");
+}
+const [vbX, vbY, vbW, vbH] = viewBox;
+if (vbW <= 0 || vbH <= 0) {
+  throw new Error(`favicon.svg: viewBox has no area: ${viewBox.join(" ")}`);
+}
+if (vbW !== vbH) {
+  throw new Error(
+    `favicon.svg: each canvas is square and the scale is uniform, so a ${vbW}x${vbH} viewBox would be distorted — use a square one`,
+  );
+}
 
-const rectTag = /<rect[^>]*>/.exec(svg)?.[0];
-const pathTag = /<path[\s\S]*?>/.exec(svg)?.[0];
-if (!rectTag || !pathTag) throw new Error("favicon.svg: expected one <rect> plate and one <path> glyph");
+const rectTags = svg.match(/<rect[^>]*>/g) ?? [];
+const pathTags = svg.match(/<path[\s\S]*?>/g) ?? [];
+if (rectTags.length !== 1 || pathTags.length !== 1) {
+  throw new Error(
+    `favicon.svg: expected exactly one <rect> plate and one <path> glyph, found ${rectTags.length} rect and ${pathTags.length} path`,
+  );
+}
+const [rectTag] = rectTags;
+const [pathTag] = pathTags;
 
-const attr = (tag, name) => new RegExp(`${name}="([^"]*)"`).exec(tag)?.[1];
+// Anchored at an attribute-name boundary, so `width="` cannot match inside `stroke-width="`
+// and `x="` cannot match inside `rx="`, whatever order the attributes are written in.
+const attr = (tag, name) => new RegExp(`(?<![\\w-])${name}="([^"]*)"`).exec(tag)?.[1];
 const num2 = (tag, name) => Number(attr(tag, name));
 const plate = {
   x: num2(rectTag, "x"),
@@ -40,9 +63,14 @@ const plate = {
   stroke: attr(rectTag, "stroke"),
   strokeWidth: num2(rectTag, "stroke-width"),
 };
-const glyph = { d: attr(pathTag, "d"), stroke: attr(pathTag, "stroke"), strokeWidth: num2(pathTag, "stroke-width") };
+const glyph = {
+  d: attr(pathTag, "d"),
+  stroke: attr(pathTag, "stroke"),
+  strokeWidth: num2(pathTag, "stroke-width"),
+};
 for (const [where, value] of [
   ["plate x/y/width/height/rx", [plate.x, plate.y, plate.w, plate.h, plate.rx]],
+  ["plate stroke-width", plate.strokeWidth],
   ["glyph stroke/width", [glyph.stroke, glyph.strokeWidth]],
 ]) {
   const list = Array.isArray(value) ? value : [value];
@@ -70,7 +98,8 @@ for (const token of commands) {
   const type = token[0];
   // SVG lets a sign or a second decimal point act as the separator: "l10-26 12 52" is four numbers.
   const args = (token.slice(1).match(/-?\d*\.?\d+(?:[eE][-+]?\d+)?/g) ?? []).map(Number);
-  if (args.some((a) => Number.isNaN(a))) throw new Error(`favicon.svg: unreadable path argument in "${token}"`);
+  if (args.some((a) => Number.isNaN(a)))
+    throw new Error(`favicon.svg: unreadable path argument in "${token}"`);
   if (type === "M" || type === "m") {
     if (args.length !== 2) throw new Error(`favicon.svg: M/m takes one pair`);
     cursor = type === "M" ? [args[0], args[1]] : [cursor[0] + args[0], cursor[1] + args[1]];
@@ -88,7 +117,10 @@ for (const token of commands) {
   } else if (type === "L" || type === "l") {
     if (args.length % 2) throw new Error(`favicon.svg: L/l takes pairs`);
     for (let i = 0; i < args.length; i += 2) {
-      cursor = [type === "L" ? args[i] : cursor[0] + args[i], type === "L" ? args[i + 1] : cursor[1] + args[i + 1]];
+      cursor = [
+        type === "L" ? args[i] : cursor[0] + args[i],
+        type === "L" ? args[i + 1] : cursor[1] + args[i + 1],
+      ];
       points.push(cursor);
     }
   } else {
@@ -110,7 +142,12 @@ const insideRoundedRect = (px, py, x0, y0, x1, y1, r) => {
   if (px < x0 || px > x1 || py < y0 || py > y1) return false;
   const straight = (x0 + r <= px && px <= x1 - r) || (y0 + r <= py && py <= y1 - r);
   if (straight) return true;
-  return Math.hypot(px - Math.max(x0 + r, Math.min(px, x1 - r)), py - Math.max(y0 + r, Math.min(py, y1 - r))) <= r;
+  return (
+    Math.hypot(
+      px - Math.max(x0 + r, Math.min(px, x1 - r)),
+      py - Math.max(y0 + r, Math.min(py, y1 - r)),
+    ) <= r
+  );
 };
 
 // An SVG stroke straddles its path, so the painted plate reaches `sw/2` past the rect on
@@ -243,7 +280,9 @@ if (process.argv.includes("--check")) {
     process.exit(1);
   }
   if (current.equals(ico)) {
-    console.log(`make-favicon: ${ICO_PATH} matches favicon.svg (${ico.length} bytes, ${SIZES.join("/")} px)`);
+    console.log(
+      `make-favicon: ${ICO_PATH} matches favicon.svg (${ico.length} bytes, ${SIZES.join("/")} px)`,
+    );
     process.exit(0);
   }
   console.error(
