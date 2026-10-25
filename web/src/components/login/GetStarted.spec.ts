@@ -23,6 +23,10 @@ import GetStarted from "./GetStarted.vue";
 import { makeGetStartedSchema } from "./GetStarted.schema";
 import { FIRST_SOURCE_PREFILL_KEY } from "./firstSourceOptions";
 import { gt } from "@/types/i18n";
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
 
 const submitNewUserInfo = vi.fn();
 vi.mock("@/services/billings", async (importOriginal) => {
@@ -57,6 +61,10 @@ const track = vi.fn();
 vi.mock("@/services/product_analytics", () => ({
   default: { track: (...args: unknown[]) => track(...args) },
 }));
+
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
 
 const ORG = "test-org";
 const EMAIL = "test@example.com";
@@ -150,6 +158,7 @@ describe("GetStarted.vue", () => {
   const pushSpy = () => vi.spyOn(router, "push");
 
   beforeEach(() => {
+    resetPaidFeaturePolicy();
     submitNewUserInfo.mockReset();
     submitNewUserInfo.mockResolvedValue({ status: 200 });
     httpCalls.mockClear();
@@ -187,9 +196,20 @@ describe("GetStarted.vue", () => {
   });
 
   describe("content", () => {
-    it("shows the welcome title and the trial subtitle", async () => {
+    it("shows the welcome title under either paid-feature policy", async () => {
       await mountAt();
       expect(byTest("onboarding-get-started-title").text()).toBe("Welcome to Retrace.ai");
+    });
+
+    it("does not advertise a trial the shipped single-edition build cannot honour", async () => {
+      setPaidFeaturePolicy("hide");
+      await mountAt();
+      expect(byTest("onboarding-get-started-subtitle").exists()).toBe(false);
+    });
+
+    it("keeps the trial subtitle for the upstream locked-affordance treatment", async () => {
+      setPaidFeaturePolicy("lock");
+      await mountAt();
       expect(byTest("onboarding-get-started-subtitle").text()).toContain(
         "Your 14-day trial has started",
       );

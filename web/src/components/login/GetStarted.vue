@@ -29,7 +29,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       >
         {{ t("login.getStarted.title") }}
       </div>
-      <div class="text-text-secondary mt-0.5 text-sm" data-test="onboarding-get-started-subtitle">
+      <!-- The subtitle advertises a trial this single-edition product does not sell. -->
+      <div
+        v-if="showsLockedAffordances"
+        class="text-text-secondary mt-0.5 text-sm"
+        data-test="onboarding-get-started-subtitle"
+      >
         {{ t("login.getStarted.subtitle") }}
       </div>
     </div>
@@ -187,6 +192,7 @@ import analytics from "@/services/product_analytics";
 import { toast } from "@/lib/feedback/Toast/useToast";
 import { useI18nTyped } from "@/types/i18n";
 import { getImageURL } from "@/utils/zincutils";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 import { connectDataPromptSessionKey } from "@/utils/slackCommunityInvite";
 
 interface GetStartedAnswers {
