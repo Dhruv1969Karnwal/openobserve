@@ -28,11 +28,22 @@ import { hidesPaidFeatures } from "@/utils/enterpriseFeatures";
  */
 const isEnterpriseUpgradeDialogOpen = ref(false);
 
+/** A locked affordance survived the hide policy, so its click can only offer nothing. */
+function reportLockedAffordanceUnderHide() {
+  if (!import.meta.env.DEV) return;
+  console.error(
+    '[useEnterpriseUpgradeDialog] a locked control was clicked while PAID_FEATURE_POLICY is "hide", so it did nothing. Render it only when showsLockedAffordances is true, or gate it on FeatureAccess.visible.',
+  );
+}
+
 export function useEnterpriseUpgradeDialog() {
   return {
     isOpen: isEnterpriseUpgradeDialogOpen,
     open: () => {
-      if (hidesPaidFeatures) return;
+      if (hidesPaidFeatures) {
+        reportLockedAffordanceUnderHide();
+        return;
+      }
       isEnterpriseUpgradeDialogOpen.value = true;
     },
     close: () => {
