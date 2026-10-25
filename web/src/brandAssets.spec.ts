@@ -103,6 +103,42 @@ describe("shipped brand assets", () => {
     const inWordmark = /\sd="([^"]+)"/.exec(wordmark)?.[1];
     expect(inSvg).toBeTruthy();
     expect(inSvg).toBe(inWordmark);
+    expect(/viewBox="([^"]+)"/.exec(svg)?.[1]).toBe(/viewBox="([^"]+)"/.exec(wordmark)?.[1]);
+  });
+
+  it("pins the tab icon's plate to the in-app mark's plate and to one fixed polarity", () => {
+    const plate = /<rect[^>]*>/.exec(svg)?.[0] ?? "";
+    const glyph = /<path[\s\S]*?>/.exec(svg)?.[0] ?? "";
+    const markPlate = /<rect[^>]*>/.exec(wordmark)?.[0] ?? "";
+    const markGlyph = /<path[\s\S]*?>/.exec(wordmark)?.[0] ?? "";
+    const num = (tag: string, name: string) =>
+      Number(new RegExp(`(?<![\\w-])${name}="([^"]*)"`).exec(tag)?.[1]);
+
+    // The stroke straddles the rect, so the icon's painted plate reaches `border/2` past it:
+    // its outer edge has to land exactly on the plate the in-app mark draws.
+    const border = num(plate, "stroke-width");
+    expect([
+      num(plate, "x") - border / 2,
+      num(plate, "y") - border / 2,
+      num(plate, "width") + border,
+      num(plate, "height") + border,
+    ]).toEqual([
+      num(markPlate, "x"),
+      num(markPlate, "y"),
+      num(markPlate, "width"),
+      num(markPlate, "height"),
+    ]);
+    // Its corner is one unit tighter than the mark's once the border is accounted for, and that
+    // difference is a decision, not drift.
+    expect(num(plate, "rx") + border / 2).toBe(15);
+
+    // A static icon cannot follow the theme, so this polarity is fixed: light plate, neutral edge,
+    // dark glyph — the dark-theme rendering of the mark's heading-on-surface pair.
+    expect(/fill="([^"]+)"/.exec(plate)?.[1]).toBe("#f5f6f7");
+    expect(/stroke="([^"]+)"/.exec(plate)?.[1]).toBe("#bebebe");
+    expect(/stroke="([^"]+)"/.exec(glyph)?.[1]).toBe("#0c0d0f");
+    expect(markPlate).toContain("fill-text-heading");
+    expect(markGlyph).toContain("stroke-surface-base");
   });
 
   it("paints the favicon with neutrals only — the rebrand removed the accent hues", () => {
