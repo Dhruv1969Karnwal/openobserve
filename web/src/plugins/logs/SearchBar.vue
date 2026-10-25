@@ -781,7 +781,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               :disabled="!!scheduleJobReason"
               focusable-unavailable
               :description="scheduleJobReason || scheduleJobNote"
-              @select="createScheduleJob()"
+              @select="onScheduleMenuSelect"
             >
               <template #icon-left>
                 <span
@@ -2041,13 +2041,12 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18nTyped();
     const store = useStore();
-    // Log-pattern mining ("Patterns" toggle) — shown locked (not hidden) in
-    // builds that don't unlock it, with the shared nav/settings tooltip.
+    // Log-pattern mining ("Patterns" toggle) — the shipped "hide" policy removes it
+    // outright; only a "lock" build shows the locked affordance + upsell dialog.
     const patternsAccess = computed(() =>
       checkFeatureAccess("logPatterns", buildFeatureGateContext(store.state.zoConfig)),
     );
-    // Scheduled Search menu — shown locked (not hidden) in builds that don't
-    // unlock it, same treatment as the Patterns toggle above.
+    // Scheduled Search menu — same policy split as the Patterns toggle above.
     const scheduledSearchAccess = computed(() =>
       checkFeatureAccess("scheduledSearch", buildFeatureGateContext(store.state.zoConfig)),
     );
@@ -2510,12 +2509,14 @@ export default defineComponent({
         label: t("search.drillDown"),
         disabled: searchObj.meta.sqlMode,
       },
-      ...(config.isEnterprise === "true"
+      ...(patternsAccess.value.visible
         ? [
             {
               value: "patterns",
               icon: "layers",
               label: t("search.showPatternsLabel"),
+              // Not disabled: like the toolbar toggle, the click guard in
+              // onLogsVisualizeToggleUpdate routes locked builds to the dialog.
               disabled: false,
             },
           ]
@@ -4725,6 +4726,16 @@ export default defineComponent({
       searchObj.meta.jobRecords = 100;
     };
 
+    // Allowed-first, mirroring the Patterns click guard: the whole group is
+    // v-if-gone under "hide", so the dialog branch only runs in "lock" builds.
+    const onScheduleMenuSelect = () => {
+      if (scheduledSearchAccess.value.allowed) {
+        createScheduleJob();
+        return;
+      }
+      openUpgradeDialog();
+    };
+
     const openGuardSearchJob = (snapshot: any) => {
       guardJobSnapshot.value = snapshot;
       searchSchedulerJob.value = true;
@@ -5065,6 +5076,7 @@ export default defineComponent({
       addJobScheduler,
       routeToSearchSchedule,
       createScheduleJob,
+      onScheduleMenuSelect,
       buildAlertPrefill,
       createAlertSource,
       createAlertDisabledReason,
