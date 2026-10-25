@@ -69,6 +69,34 @@ describe("brand ownership in locale strings", () => {
     it(`${code} credits the built-in model pricing logo to the provider that owns it`, () => {
       expect(locale.modelPricing.openObserveLogoAlt).toBe(UPSTREAM);
     });
+
+    it(`${code} names this product in the bring-your-own-bucket hero`, () => {
+      expect(locale.storage_settings.heroBrand).toContain(PRODUCT);
+      expect(locale.storage_settings.heroBrand).not.toContain(UPSTREAM);
+    });
+
+    it(`${code} names this product in the reasons a password change is forced`, () => {
+      for (const key of ["reasonPolicyTightened", "reasonRotationExpired"]) {
+        expect(locale.passwordReset[key]).toContain(PRODUCT);
+        expect(locale.passwordReset[key]).not.toContain(UPSTREAM);
+      }
+    });
+
+    it(`${code} sends organization-deletion recovery to this product's support`, () => {
+      for (const key of ["deleteOrganizationDescription", "deleteOrganizationRecoverable"]) {
+        expect(locale.settings[key]).toContain(PRODUCT);
+        expect(locale.settings[key]).not.toContain(UPSTREAM);
+      }
+    });
+
+    it(`${code} keeps the org-name slot the delete dialog interpolates into`, () => {
+      expect(locale.settings.deleteOrganizationDescription).toContain("{name}");
+    });
+
+    it(`${code} names this product as the one that reads the user's data`, () => {
+      expect(locale.autoobserve.subtitle).toContain(PRODUCT);
+      expect(locale.autoobserve.subtitle).not.toContain(UPSTREAM);
+    });
   }
 
   it("keeps the two alt keys apart, because the two logos are not the same company's", () => {

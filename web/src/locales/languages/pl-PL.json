@@ -12029,7 +12029,7 @@
     "search": "Szukaj miejsc docelowych"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "BYOB",
     "title": "Przynieś własny bucket",
     "notEnabled": "{product} nie jest włączony dla tej organizacji",
@@ -12672,7 +12672,7 @@
     "dangerZone": "Strefa niebezpieczna",
     "deleteOrganization": "Usuń organizację",
     "deleteOrganizationTitle": "Usuń tę organizację",
-    "deleteOrganizationDescription": "Każdy, w tym Ty, traci dostęp do {name} natychmiast. W oknie odzyskiwania tylko wsparcie OpenObserve może go przywrócić; po tym czasie wszystkie dane zostaną trwale usunięte.",
+    "deleteOrganizationDescription": "Każdy, w tym Ty, traci dostęp do {name} natychmiast. W oknie odzyskiwania tylko wsparcie Retrace.ai może go przywrócić; po tym czasie wszystkie dane zostaną trwale usunięte.",
     "deleteOrganizationScopeLoading": "Sprawdzanie, co zawiera ta organizacja…",
     "deleteOrganizationScope": "pulpity: {dashboards} · strumienie: {streams} · dane: {size}",
     "deleteFactGracePeriod": "Okno odzyskiwania",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "Cały dostęp cofnięty natychmiast",
     "deleteOrganizationConfirm": "Spowoduje to zaplanowanie usunięcia \"{name}\" — oraz wszystkich jego strumieni, pulpitów, alertów, potoków, użytkowników i ustawień.",
     "deleteOrganizationWarning": "Organizacja staje się natychmiast niedostępna i jest ukryta przed wszystkimi, którzy jej używają. Przesyłanie danych jest zablokowane, a zaplanowane alerty, potoki i raporty przestają działać, więc nie są wysyłane żadne powiadomienia, gdy jest zaplanowana do usunięcia.",
-    "deleteOrganizationRecoverable": "W oknie odzyskiwania można ją jeszcze przywrócić, ale nie przez Ciebie — tracisz dostęp do tej organizacji natychmiast po rozpoczęciu usuwania i tylko wsparcie OpenObserve może ją przywrócić. Gdy okno się zamknie, jej dane zostaną trwale usunięte i nie będą mogły zostać odzyskane przez nikogo.",
+    "deleteOrganizationRecoverable": "W oknie odzyskiwania można ją jeszcze przywrócić, ale nie przez Ciebie — tracisz dostęp do tej organizacji natychmiast po rozpoczęciu usuwania i tylko wsparcie Retrace.ai może ją przywrócić. Gdy okno się zamknie, jej dane zostaną trwale usunięte i nie będą mogły zostać odzyskane przez nikogo.",
     "deleteOrganizationTypeToConfirm": "Aby potwierdzić, wpisz {name} poniżej:",
     "deleteOrganizationInitiated": "Organizacja zaplanowana do usunięcia. Jest teraz ukryta; skontaktuj się ze wsparciem, aby ją przywrócić przed zamknięciem okna odzyskiwania.",
     "somethingWentWrong": "Coś poszło nie tak",
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "Zaktualizuj hasło",
     "signedInAs": "Zalogowano jako {email}",
-    "reasonPolicyTightened": "Polityka haseł uległa zmianie. Zaktualizuj hasło, aby dalej korzystać z OpenObserve.",
-    "reasonRotationExpired": "Twoje hasło wygasło. Ustaw nowe, aby dalej korzystać z OpenObserve.",
+    "reasonPolicyTightened": "Polityka haseł uległa zmianie. Zaktualizuj hasło, aby dalej korzystać z Retrace.ai.",
+    "reasonRotationExpired": "Twoje hasło wygasło. Ustaw nowe, aby dalej korzystać z Retrace.ai.",
     "reasonRotationWarning": "Twoje hasło wkrótce wygaśnie. Ustaw nowe teraz, aby uniknąć zablokowania dostępu do pracy.",
     "reused": "To hasło było niedawno używane. Wybierz hasło, którego nie było wśród ostatnio używanych (sprawdzana liczba haseł: {count}).",
     "expiryBanner": "Twoje hasło wygasa za {count} dzień. Zaktualizuj je teraz, aby uniknąć zablokowania dostępu do pracy. | Twoje hasło wygasa za {count} dni. Zaktualizuj je teraz, aby uniknąć zablokowania dostępu do pracy.",
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "Wyślij swoje dane. OpenObserve znajduje problemy i informuje Cię o nich, podając swoją najlepszą interpretację przyczyny. Gdy jest cicho, pokazuje, co sprawdził i czego nie widzi.",
+    "subtitle": "Wyślij swoje dane. Retrace.ai znajduje problemy i informuje Cię o nich, podając swoją najlepszą interpretację przyczyny. Gdy jest cicho, pokazuje, co sprawdził i czego nie widzi.",
     "phase2": "Faza 2",
     "tabs": {
       "issues": "Problemy",

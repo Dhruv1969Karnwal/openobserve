@@ -12024,7 +12024,7 @@
     "search": "搜尋目標"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "儲存設定",
     "title": "儲存設定",
     "notEnabled": "{product} 未在此組織中啟用",
@@ -12667,7 +12667,7 @@
     "dangerZone": "危險區域",
     "deleteOrganization": "刪除組織",
     "deleteOrganizationTitle": "刪除此組織",
-    "deleteOrganizationDescription": "包括您在內的所有人都會立即失去對 {name} 的存取權。在復原視窗期間，只有 OpenObserve 支援才能將其還原；之後，所有資料都會被永久刪除。",
+    "deleteOrganizationDescription": "包括您在內的所有人都會立即失去對 {name} 的存取權。在復原視窗期間，只有 Retrace.ai 支援才能將其還原；之後，所有資料都會被永久刪除。",
     "deleteOrganizationScopeLoading": "正在檢查該組織包含的內容…",
     "deleteOrganizationScope": "{dashboards} 個儀表板 · {streams} 個資料流 · {size} 資料",
     "deleteFactGracePeriod": "復原視窗",
@@ -12681,7 +12681,7 @@
     "deleteFactMembersDetail": "立即撤銷所有存取權限",
     "deleteOrganizationConfirm": "此操作會將「{name}」及其所有資料流、儀表板、警示、管線、使用者和設定排定刪除。",
     "deleteOrganizationWarning": "該組織將立即無法使用，並對所有使用它的人隱藏。資料擷取將被封鎖，排程的警示、管線和報表將停止執行，因此在排定刪除期間不會傳送任何通知。",
-    "deleteOrganizationRecoverable": "在復原視窗期間，它仍然可以恢復，但不是由您恢復 — 一旦刪除開始，您就會立即失去對此組織的存取權，只有 OpenObserve 支援才能將其還原。一旦視窗關閉，其資料將被永久刪除，任何人都無法恢復。",
+    "deleteOrganizationRecoverable": "在復原視窗期間，它仍然可以恢復，但不是由您恢復 — 一旦刪除開始，您就會立即失去對此組織的存取權，只有 Retrace.ai 支援才能將其還原。一旦視窗關閉，其資料將被永久刪除，任何人都無法恢復。",
     "deleteOrganizationTypeToConfirm": "如需確認，請在下方輸入 {name}：",
     "deleteOrganizationInitiated": "組織已排定刪除。它現在已隱藏；請在復原視窗關閉前聯絡支援以將其還原。",
     "somethingWentWrong": "發生錯誤",
@@ -21141,8 +21141,8 @@
   "passwordReset": {
     "title": "更新您的密碼",
     "signedInAs": "已登入為 {email}",
-    "reasonPolicyTightened": "密碼原則已變更。請更新您的密碼以繼續使用 OpenObserve。",
-    "reasonRotationExpired": "您的密碼已過期。請設定新密碼以繼續使用 OpenObserve。",
+    "reasonPolicyTightened": "密碼原則已變更。請更新您的密碼以繼續使用 Retrace.ai。",
+    "reasonRotationExpired": "您的密碼已過期。請設定新密碼以繼續使用 Retrace.ai。",
     "reasonRotationWarning": "您的密碼即將過期。請立即設定新密碼，以免無法繼續您的工作。",
     "reused": "此密碼最近曾使用過。請選擇一個未出現在您最近 {count} 個密碼中的密碼。",
     "expiryBanner": "您的密碼將於 {count} 天後過期。請立即更新，以免無法繼續您的工作。 | 您的密碼將於 {count} 天後過期。請立即更新，以免無法繼續您的工作。",
@@ -24594,7 +24594,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "傳送您的資料。OpenObserve 會找出問題並通知您，同時提供對原因的最佳判讀。當一切平靜時，它會顯示檢查過的項目，以及它看不見的部分。",
+    "subtitle": "傳送您的資料。Retrace.ai 會找出問題並通知您，同時提供對原因的最佳判讀。當一切平靜時，它會顯示檢查過的項目，以及它看不見的部分。",
     "phase2": "階段 2",
     "tabs": {
       "issues": "問題",

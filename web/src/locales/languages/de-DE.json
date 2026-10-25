@@ -12029,7 +12029,7 @@
     "search": "Ziel suchen"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "Org-Speicher",
     "title": "Org-Speicher",
     "notEnabled": "{product} ist für diese Organisation nicht aktiviert",
@@ -12672,7 +12672,7 @@
     "dangerZone": "Gefahrenzone",
     "deleteOrganization": "Organisation löschen",
     "deleteOrganizationTitle": "Diese Organisation löschen",
-    "deleteOrganizationDescription": "Alle, Sie eingeschlossen, verlieren sofort den Zugriff auf {name}. Während des Wiederherstellungszeitraums kann nur der OpenObserve-Support sie wiederherstellen; danach werden alle Daten dauerhaft gelöscht.",
+    "deleteOrganizationDescription": "Alle, Sie eingeschlossen, verlieren sofort den Zugriff auf {name}. Während des Wiederherstellungszeitraums kann nur der Retrace.ai-Support sie wiederherstellen; danach werden alle Daten dauerhaft gelöscht.",
     "deleteOrganizationScopeLoading": "Inhalt dieser Organisation wird geprüft…",
     "deleteOrganizationScope": "{dashboards} Dashboards · {streams} Streams · {size} Daten",
     "deleteFactGracePeriod": "Wiederherstellungszeitraum",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "Alle Zugriffe werden sofort entzogen",
     "deleteOrganizationConfirm": "Dadurch werden \"{name}\" und alle zugehörigen Streams, Dashboards, Alarme, Pipelines, Benutzer und Einstellungen zur Löschung eingeplant.",
     "deleteOrganizationWarning": "Die Organisation ist sofort nicht mehr verfügbar und wird für alle Nutzer ausgeblendet. Die Datenaufnahme wird blockiert und geplante Alarme, Pipelines und Berichte werden angehalten, sodass keine Benachrichtigungen gesendet werden, solange die Löschung eingeplant ist.",
-    "deleteOrganizationRecoverable": "Während des Wiederherstellungszeitraums kann sie noch zurückgebracht werden, aber nicht von Ihnen – Sie verlieren den Zugriff auf diese Organisation, sobald die Löschung beginnt, und nur der OpenObserve-Support kann sie wiederherstellen. Sobald das Zeitfenster schließt, werden ihre Daten dauerhaft gelöscht und können von niemandem wiederhergestellt werden.",
+    "deleteOrganizationRecoverable": "Während des Wiederherstellungszeitraums kann sie noch zurückgebracht werden, aber nicht von Ihnen – Sie verlieren den Zugriff auf diese Organisation, sobald die Löschung beginnt, und nur der Retrace.ai-Support kann sie wiederherstellen. Sobald das Zeitfenster schließt, werden ihre Daten dauerhaft gelöscht und können von niemandem wiederhergestellt werden.",
     "deleteOrganizationTypeToConfirm": "Geben Sie zur Bestätigung {name} unten ein:",
     "deleteOrganizationInitiated": "Organisation zur Löschung vorgemerkt. Sie ist jetzt ausgeblendet; kontaktieren Sie den Support, um sie vor Ablauf des Wiederherstellungszeitraums wiederherzustellen.",
     "somethingWentWrong": "Etwas ist schief gelaufen",
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "Aktualisieren Sie Ihr Passwort",
     "signedInAs": "Angemeldet als {email}",
-    "reasonPolicyTightened": "Die Passwortrichtlinie wurde geändert. Aktualisieren Sie Ihr Passwort, um OpenObserve weiter zu verwenden.",
-    "reasonRotationExpired": "Ihr Passwort ist abgelaufen. Legen Sie ein neues fest, um OpenObserve weiter zu verwenden.",
+    "reasonPolicyTightened": "Die Passwortrichtlinie wurde geändert. Aktualisieren Sie Ihr Passwort, um Retrace.ai weiter zu verwenden.",
+    "reasonRotationExpired": "Ihr Passwort ist abgelaufen. Legen Sie ein neues fest, um Retrace.ai weiter zu verwenden.",
     "reasonRotationWarning": "Ihr Passwort läuft bald ab. Legen Sie jetzt ein neues fest, um nicht von Ihrer Arbeit ausgesperrt zu werden.",
     "reused": "Dieses Passwort wurde kürzlich verwendet. Wählen Sie eines, das Sie nicht unter Ihren letzten {count} Passwörtern verwendet haben.",
     "expiryBanner": "Ihr Passwort läuft in {count} Tag ab. Aktualisieren Sie es jetzt, um nicht von Ihrer Arbeit ausgesperrt zu werden. | Ihr Passwort läuft in {count} Tagen ab. Aktualisieren Sie es jetzt, um nicht von Ihrer Arbeit ausgesperrt zu werden.",
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "Senden Sie Ihre Daten. OpenObserve findet die Probleme und teilt sie Ihnen mit – mit seiner besten Einschätzung der Ursache. Wenn es still ist, zeigt es Ihnen, was es geprüft hat und was es nicht sehen kann.",
+    "subtitle": "Senden Sie Ihre Daten. Retrace.ai findet die Probleme und teilt sie Ihnen mit – mit seiner besten Einschätzung der Ursache. Wenn es still ist, zeigt es Ihnen, was es geprüft hat und was es nicht sehen kann.",
     "phase2": "Phase 2",
     "tabs": {
       "issues": "Probleme",

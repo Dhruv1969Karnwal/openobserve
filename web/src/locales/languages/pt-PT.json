@@ -12029,7 +12029,7 @@
     "search": "Pesquisar destino"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "Armazenamento organizacional",
     "title": "Armazenamento organizacional",
     "notEnabled": "{product} não está ativado para esta organização",
@@ -12672,7 +12672,7 @@
     "dangerZone": "Zona de perigo",
     "deleteOrganization": "Eliminar organização",
     "deleteOrganizationTitle": "Eliminar esta organização",
-    "deleteOrganizationDescription": "Todos, incluindo o utilizador atual, perdem o acesso a {name} imediatamente. Durante a janela de recuperação, apenas o suporte do OpenObserve pode restaurá-la; depois disso, todos os dados são apagados permanentemente.",
+    "deleteOrganizationDescription": "Todos, incluindo o utilizador atual, perdem o acesso a {name} imediatamente. Durante a janela de recuperação, apenas o suporte do Retrace.ai pode restaurá-la; depois disso, todos os dados são apagados permanentemente.",
     "deleteOrganizationScopeLoading": "A verificar o que esta organização contém…",
     "deleteOrganizationScope": "{dashboards} dashboards · {streams} streams · {size} de dados",
     "deleteFactGracePeriod": "Janela de recuperação",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "Todo o acesso é revogado imediatamente",
     "deleteOrganizationConfirm": "Isto agendará a eliminação de \"{name}\" — e de todos os seus streams, dashboards, alertas, pipelines, utilizadores e definições.",
     "deleteOrganizationWarning": "A organização fica indisponível imediatamente e é ocultada de todos os que a utilizam. A ingestão é bloqueada e os alertas, pipelines e relatórios agendados deixam de ser executados, por isso nenhuma notificação é enviada enquanto estiver agendada para eliminação.",
-    "deleteOrganizationRecoverable": "Durante a janela de recuperação, ainda pode ser restaurada, mas não por si — perde o acesso a esta organização assim que a eliminação começa, e apenas o suporte do OpenObserve pode restaurá-la. Quando a janela fechar, os seus dados serão eliminados permanentemente e não poderão ser recuperados por ninguém.",
+    "deleteOrganizationRecoverable": "Durante a janela de recuperação, ainda pode ser restaurada, mas não por si — perde o acesso a esta organização assim que a eliminação começa, e apenas o suporte do Retrace.ai pode restaurá-la. Quando a janela fechar, os seus dados serão eliminados permanentemente e não poderão ser recuperados por ninguém.",
     "deleteOrganizationTypeToConfirm": "Para confirmar, introduza {name} abaixo:",
     "deleteOrganizationInitiated": "Organização agendada para eliminação. Está agora oculta; contacte o suporte para a restaurar antes de a janela de recuperação fechar.",
     "somethingWentWrong": "Algo correu mal",
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "Atualize a sua palavra-passe",
     "signedInAs": "Sessão iniciada como {email}",
-    "reasonPolicyTightened": "A política de palavras-passe mudou. Atualize a sua palavra-passe para continuar a usar o OpenObserve.",
-    "reasonRotationExpired": "A sua palavra-passe expirou. Defina uma nova para continuar a usar o OpenObserve.",
+    "reasonPolicyTightened": "A política de palavras-passe mudou. Atualize a sua palavra-passe para continuar a usar o Retrace.ai.",
+    "reasonRotationExpired": "A sua palavra-passe expirou. Defina uma nova para continuar a usar o Retrace.ai.",
     "reasonRotationWarning": "A sua palavra-passe expira em breve. Defina uma nova agora para não perder o acesso ao seu trabalho.",
     "reused": "Esta palavra-passe foi usada recentemente. Escolha uma que não tenha usado nas suas últimas {count} palavras-passe.",
     "expiryBanner": "A sua palavra-passe expira em {count} dia. Atualize-a agora para não perder o acesso ao seu trabalho. | A sua palavra-passe expira em {count} dias. Atualize-a agora para não perder o acesso ao seu trabalho.",
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "Envie os seus dados. O OpenObserve encontra os problemas e avisa-o, com a sua melhor leitura da causa. Quando está tudo calmo, mostra o que verificou e o que não consegue ver.",
+    "subtitle": "Envie os seus dados. O Retrace.ai encontra os problemas e avisa-o, com a sua melhor leitura da causa. Quando está tudo calmo, mostra o que verificou e o que não consegue ver.",
     "phase2": "Fase 2",
     "tabs": {
       "issues": "Problemas",

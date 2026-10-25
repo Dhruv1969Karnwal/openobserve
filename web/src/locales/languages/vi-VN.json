@@ -12029,7 +12029,7 @@
     "search": "Tìm kiếm đích"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "BYOB",
     "title": "Mang Bucket Của Bạn",
     "notEnabled": "{product} chưa được bật cho tổ chức này",
@@ -12672,7 +12672,7 @@
     "dangerZone": "Khu vực Nguy hiểm",
     "deleteOrganization": "Xóa tổ chức",
     "deleteOrganizationTitle": "Xóa tổ chức này",
-    "deleteOrganizationDescription": "Mọi người, kể cả bạn, mất quyền truy cập vào {name} ngay lập tức. Trong thời gian khôi phục, chỉ bộ phận hỗ trợ OpenObserve mới có thể khôi phục nó; sau đó, mọi dữ liệu sẽ bị xóa vĩnh viễn.",
+    "deleteOrganizationDescription": "Mọi người, kể cả bạn, mất quyền truy cập vào {name} ngay lập tức. Trong thời gian khôi phục, chỉ bộ phận hỗ trợ Retrace.ai mới có thể khôi phục nó; sau đó, mọi dữ liệu sẽ bị xóa vĩnh viễn.",
     "deleteOrganizationScopeLoading": "Đang kiểm tra nội dung tổ chức này…",
     "deleteOrganizationScope": "{dashboards} bảng điều khiển · {streams} stream · {size} dữ liệu",
     "deleteFactGracePeriod": "Cửa sổ khôi phục",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "Tất cả quyền truy cập bị thu hồi ngay lập tức",
     "deleteOrganizationConfirm": "Thao tác này sẽ lên lịch xóa \"{name}\" — và tất cả các stream, bảng điều khiển, cảnh báo, pipeline, người dùng và cài đặt của nó.",
     "deleteOrganizationWarning": "Tổ chức trở nên không khả dụng ngay lập tức và bị ẩn khỏi tất cả những người sử dụng nó. Việc thu thập dữ liệu bị chặn và các cảnh báo, pipeline, báo cáo đã lên lịch ngừng chạy, do đó không có thông báo nào được gửi trong khi nó được lên lịch xóa.",
-    "deleteOrganizationRecoverable": "Trong cửa sổ khôi phục, nó vẫn có thể được khôi phục, nhưng không phải bởi bạn — bạn mất quyền truy cập vào tổ chức này ngay khi quá trình xóa bắt đầu và chỉ bộ phận hỗ trợ OpenObserve mới có thể khôi phục nó. Khi cửa sổ đóng, dữ liệu của nó bị xóa vĩnh viễn và không ai có thể khôi phục được.",
+    "deleteOrganizationRecoverable": "Trong cửa sổ khôi phục, nó vẫn có thể được khôi phục, nhưng không phải bởi bạn — bạn mất quyền truy cập vào tổ chức này ngay khi quá trình xóa bắt đầu và chỉ bộ phận hỗ trợ Retrace.ai mới có thể khôi phục nó. Khi cửa sổ đóng, dữ liệu của nó bị xóa vĩnh viễn và không ai có thể khôi phục được.",
     "deleteOrganizationTypeToConfirm": "Để xác nhận, nhập {name} bên dưới:",
     "deleteOrganizationInitiated": "Tổ chức đã được lên lịch xóa. Hiện tổ chức đã bị ẩn; hãy liên hệ bộ phận hỗ trợ để khôi phục trước khi cửa sổ khôi phục đóng.",
     "somethingWentWrong": "Đã xảy ra lỗi",
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "Cập nhật mật khẩu của bạn",
     "signedInAs": "Đã đăng nhập với {email}",
-    "reasonPolicyTightened": "Chính sách mật khẩu đã thay đổi. Hãy cập nhật mật khẩu để tiếp tục sử dụng OpenObserve.",
-    "reasonRotationExpired": "Mật khẩu của bạn đã hết hạn. Hãy đặt mật khẩu mới để tiếp tục sử dụng OpenObserve.",
+    "reasonPolicyTightened": "Chính sách mật khẩu đã thay đổi. Hãy cập nhật mật khẩu để tiếp tục sử dụng Retrace.ai.",
+    "reasonRotationExpired": "Mật khẩu của bạn đã hết hạn. Hãy đặt mật khẩu mới để tiếp tục sử dụng Retrace.ai.",
     "reasonRotationWarning": "Mật khẩu của bạn sắp hết hạn. Hãy đặt mật khẩu mới ngay để tránh bị khóa khỏi công việc của bạn.",
     "reused": "Mật khẩu này đã được dùng gần đây. Hãy chọn mật khẩu bạn chưa dùng trong {count} mật khẩu gần nhất.",
     "expiryBanner": "Mật khẩu của bạn sẽ hết hạn sau {count} ngày. Hãy cập nhật ngay để tránh bị khóa khỏi công việc của bạn. | Mật khẩu của bạn sẽ hết hạn sau {count} ngày. Hãy cập nhật ngay để tránh bị khóa khỏi công việc của bạn.",
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "Gửi dữ liệu của bạn. OpenObserve tìm ra vấn đề và thông báo cho bạn, kèm theo đánh giá tốt nhất về nguyên nhân. Khi mọi thứ yên ắng, hệ thống cho bạn biết nó đã kiểm tra những gì và những gì nó không thể thấy.",
+    "subtitle": "Gửi dữ liệu của bạn. Retrace.ai tìm ra vấn đề và thông báo cho bạn, kèm theo đánh giá tốt nhất về nguyên nhân. Khi mọi thứ yên ắng, hệ thống cho bạn biết nó đã kiểm tra những gì và những gì nó không thể thấy.",
     "phase2": "Giai đoạn 2",
     "tabs": {
       "issues": "Vấn đề",

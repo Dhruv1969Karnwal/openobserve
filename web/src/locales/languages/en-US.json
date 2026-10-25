@@ -12027,7 +12027,7 @@
     "search": "Search destination"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "BYOB",
     "title": "Bring Your Own Bucket",
     "notEnabled": "{product} is not enabled for this organization",
@@ -12670,7 +12670,7 @@
     "dangerZone": "Danger Zone",
     "deleteOrganization": "Delete organization",
     "deleteOrganizationTitle": "Delete this organization",
-    "deleteOrganizationDescription": "Everyone, including you, loses access to {name} immediately. During the recovery window only OpenObserve support can restore it; after that, all data is permanently erased.",
+    "deleteOrganizationDescription": "Everyone, including you, loses access to {name} immediately. During the recovery window only Retrace.ai support can restore it; after that, all data is permanently erased.",
     "deleteOrganizationScopeLoading": "Checking what this organization contains…",
     "deleteOrganizationScope": "{dashboards} dashboards · {streams} streams · {size} data",
     "deleteFactGracePeriod": "Recovery window",
@@ -12684,7 +12684,7 @@
     "deleteFactMembersDetail": "All access revoked immediately",
     "deleteOrganizationConfirm": "This will schedule \"{name}\" — and all of its streams, dashboards, alerts, pipelines, users, and settings — for deletion.",
     "deleteOrganizationWarning": "The organization becomes unavailable immediately and is hidden from everyone who uses it. Ingestion is blocked and scheduled alerts, pipelines, and reports stop running, so no notifications are sent while it is scheduled for deletion.",
-    "deleteOrganizationRecoverable": "During the recovery window it can still be brought back, but not by you — you lose access to this organization as soon as deletion starts, and only OpenObserve support can restore it. Once the window closes, its data is permanently deleted and cannot be recovered by anyone.",
+    "deleteOrganizationRecoverable": "During the recovery window it can still be brought back, but not by you — you lose access to this organization as soon as deletion starts, and only Retrace.ai support can restore it. Once the window closes, its data is permanently deleted and cannot be recovered by anyone.",
     "deleteOrganizationTypeToConfirm": "To confirm, type {name} below:",
     "deleteOrganizationInitiated": "Organization scheduled for deletion. It is now hidden; contact support to restore it before the recovery window closes.",
     "somethingWentWrong": "Something went wrong",
@@ -21144,8 +21144,8 @@
   "passwordReset": {
     "title": "Update your password",
     "signedInAs": "Signed in as {email}",
-    "reasonPolicyTightened": "The password policy has changed. Update your password to continue using OpenObserve.",
-    "reasonRotationExpired": "Your password has expired. Set a new one to continue using OpenObserve.",
+    "reasonPolicyTightened": "The password policy has changed. Update your password to continue using Retrace.ai.",
+    "reasonRotationExpired": "Your password has expired. Set a new one to continue using Retrace.ai.",
     "reasonRotationWarning": "Your password expires soon. Set a new one now to avoid being locked out of your work.",
     "reused": "This password was used recently. Choose one you have not used in your last {count} passwords.",
     "expiryBanner": "Your password expires in {count} day. Update it now to avoid being locked out of your work. | Your password expires in {count} days. Update it now to avoid being locked out of your work.",
@@ -24597,7 +24597,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "Send your data. OpenObserve finds the problems and tells you, with its best read on the cause. When it's quiet, it shows you what it checked and what it can't see.",
+    "subtitle": "Send your data. Retrace.ai finds the problems and tells you, with its best read on the cause. When it's quiet, it shows you what it checked and what it can't see.",
     "phase2": "Phase 2",
     "tabs": {
       "issues": "Issues",

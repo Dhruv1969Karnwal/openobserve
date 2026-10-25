@@ -12029,7 +12029,7 @@
     "search": "Hedef ara"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "BYOB",
     "title": "Kendi Bucket'ınızı Getirin",
     "notEnabled": "{product} bu kuruluş için etkin değil",
@@ -12672,7 +12672,7 @@
     "dangerZone": "Tehlikeli Bölge",
     "deleteOrganization": "Kuruluşu sil",
     "deleteOrganizationTitle": "Bu kuruluşu sil",
-    "deleteOrganizationDescription": "Herkes, siz dahil, {name} erişimini hemen kaybeder. Kurtarma penceresi sırasında yalnızca OpenObserve destek ekibi onu geri yükleyebilir; sonrasında tüm veriler kalıcı olarak silinir.",
+    "deleteOrganizationDescription": "Herkes, siz dahil, {name} erişimini hemen kaybeder. Kurtarma penceresi sırasında yalnızca Retrace.ai destek ekibi onu geri yükleyebilir; sonrasında tüm veriler kalıcı olarak silinir.",
     "deleteOrganizationScopeLoading": "Bu kuruluşun içeriği denetleniyor…",
     "deleteOrganizationScope": "{dashboards} pano · {streams} akış · {size} veri",
     "deleteFactGracePeriod": "Kurtarma penceresi",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "Tüm erişim anında iptal edilir",
     "deleteOrganizationConfirm": "Bu işlem \"{name}\" kuruluşunu ve ona ait tüm akışları, panoları, uyarıları, işlem hatlarını, kullanıcıları ve ayarları silinmek üzere zamanlar.",
     "deleteOrganizationWarning": "Kuruluş anında kullanılamaz hale gelir ve onu kullanan herkesten gizlenir. Veri alımı engellenir; zamanlanmış uyarılar, işlem hatları ve raporlar çalışmayı durdurur, bu nedenle silinmek üzere zamanlandığı sürece hiçbir bildirim gönderilmez.",
-    "deleteOrganizationRecoverable": "Kurtarma penceresi sırasında hâlâ geri getirilebilir, ancak sizin tarafınızdan değil — silme başladığı anda bu kuruluşa erişiminizi kaybedersiniz ve yalnızca OpenObserve destek ekibi onu geri yükleyebilir. Pencere kapandığında verileri kalıcı olarak silinir ve kimse tarafından kurtarılamaz.",
+    "deleteOrganizationRecoverable": "Kurtarma penceresi sırasında hâlâ geri getirilebilir, ancak sizin tarafınızdan değil — silme başladığı anda bu kuruluşa erişiminizi kaybedersiniz ve yalnızca Retrace.ai destek ekibi onu geri yükleyebilir. Pencere kapandığında verileri kalıcı olarak silinir ve kimse tarafından kurtarılamaz.",
     "deleteOrganizationTypeToConfirm": "Onaylamak için aşağıya {name} yazın:",
     "deleteOrganizationInitiated": "Kuruluş silinmek üzere planlandı. Artık gizli; kurtarma penceresi kapanmadan önce geri yüklemek için destekle iletişime geçin.",
     "somethingWentWrong": "Bir şeyler ters gitti",
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "Parolanızı güncelleyin",
     "signedInAs": "{email} olarak oturum açıldı",
-    "reasonPolicyTightened": "Parola politikası değişti. OpenObserve'u kullanmaya devam etmek için parolanızı güncelleyin.",
-    "reasonRotationExpired": "Parolanızın süresi doldu. OpenObserve'u kullanmaya devam etmek için yeni bir parola belirleyin.",
+    "reasonPolicyTightened": "Parola politikası değişti. Retrace.ai'i kullanmaya devam etmek için parolanızı güncelleyin.",
+    "reasonRotationExpired": "Parolanızın süresi doldu. Retrace.ai'i kullanmaya devam etmek için yeni bir parola belirleyin.",
     "reasonRotationWarning": "Parolanızın süresi yakında doluyor. Çalışmalarınıza erişimi kaybetmemek için şimdi yeni bir parola belirleyin.",
     "reused": "Bu parola yakın zamanda kullanıldı. Son {count} parolanızda kullanmadığınız birini seçin.",
     "expiryBanner": "Parolanızın süresi {count} gün içinde doluyor. Çalışmalarınıza erişimi kaybetmemek için şimdi güncelleyin. | Parolanızın süresi {count} gün içinde doluyor. Çalışmalarınıza erişimi kaybetmemek için şimdi güncelleyin.",
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "Verinizi gönderin. OpenObserve sorunları bulur ve en iyi neden değerlendirmesiyle birlikte size bildirir. Sessiz olduğunda, neleri kontrol ettiğini ve neleri göremediğini gösterir.",
+    "subtitle": "Verinizi gönderin. Retrace.ai sorunları bulur ve en iyi neden değerlendirmesiyle birlikte size bildirir. Sessiz olduğunda, neleri kontrol ettiğini ve neleri göremediğini gösterir.",
     "phase2": "Aşama 2",
     "tabs": {
       "issues": "Sorunlar",

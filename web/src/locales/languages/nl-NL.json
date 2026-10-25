@@ -12029,7 +12029,7 @@
     "search": "Bestemming zoeken"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "Opslag van de organisatie",
     "title": "Opslag van de organisatie",
     "notEnabled": "{product} is niet ingeschakeld voor deze organisatie",
@@ -12672,7 +12672,7 @@
     "dangerZone": "Gevarenzone",
     "deleteOrganization": "Organisatie verwijderen",
     "deleteOrganizationTitle": "Deze organisatie verwijderen",
-    "deleteOrganizationDescription": "Iedereen, inclusief jij, verliest onmiddellijk toegang tot {name}. Tijdens het herstelvenster kan alleen OpenObserve-support het herstellen; daarna worden alle gegevens permanent gewist.",
+    "deleteOrganizationDescription": "Iedereen, inclusief jij, verliest onmiddellijk toegang tot {name}. Tijdens het herstelvenster kan alleen Retrace.ai-support het herstellen; daarna worden alle gegevens permanent gewist.",
     "deleteOrganizationScopeLoading": "Controleren wat deze organisatie bevat…",
     "deleteOrganizationScope": "{dashboards} dashboards · {streams} streams · {size} aan gegevens",
     "deleteFactGracePeriod": "Herstelvenster",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "Alle toegang wordt onmiddellijk ingetrokken",
     "deleteOrganizationConfirm": "Hiermee worden \"{name}\" en alle bijbehorende streams, dashboards, alarmen, pipelines, gebruikers en instellingen ingepland voor verwijdering.",
     "deleteOrganizationWarning": "De organisatie is onmiddellijk niet meer beschikbaar en wordt verborgen voor iedereen die haar gebruikt. Ingestie wordt geblokkeerd en geplande alarmen, pipelines en rapporten stoppen, dus er worden geen meldingen verzonden zolang de verwijdering gepland staat.",
-    "deleteOrganizationRecoverable": "Tijdens het herstelvenster kan het nog worden teruggehaald, maar niet door jou — je verliest toegang tot deze organisatie zodra de verwijdering start, en alleen OpenObserve-support kan het herstellen. Zodra het venster sluit, worden de gegevens permanent verwijderd en kunnen ze door niemand worden hersteld.",
+    "deleteOrganizationRecoverable": "Tijdens het herstelvenster kan het nog worden teruggehaald, maar niet door jou — je verliest toegang tot deze organisatie zodra de verwijdering start, en alleen Retrace.ai-support kan het herstellen. Zodra het venster sluit, worden de gegevens permanent verwijderd en kunnen ze door niemand worden hersteld.",
     "deleteOrganizationTypeToConfirm": "Typ ter bevestiging {name} hieronder:",
     "deleteOrganizationInitiated": "Organisatie gepland voor verwijdering. Deze is nu verborgen; neem contact op met support om deze te herstellen voordat het herstelvenster sluit.",
     "somethingWentWrong": "Er is iets misgegaan",
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "Uw wachtwoord bijwerken",
     "signedInAs": "Aangemeld als {email}",
-    "reasonPolicyTightened": "Het wachtwoordbeleid is gewijzigd. Werk uw wachtwoord bij om OpenObserve te blijven gebruiken.",
-    "reasonRotationExpired": "Uw wachtwoord is verlopen. Stel een nieuw wachtwoord in om OpenObserve te blijven gebruiken.",
+    "reasonPolicyTightened": "Het wachtwoordbeleid is gewijzigd. Werk uw wachtwoord bij om Retrace.ai te blijven gebruiken.",
+    "reasonRotationExpired": "Uw wachtwoord is verlopen. Stel een nieuw wachtwoord in om Retrace.ai te blijven gebruiken.",
     "reasonRotationWarning": "Uw wachtwoord verloopt binnenkort. Stel nu een nieuw wachtwoord in om te voorkomen dat u buitengesloten raakt van uw werk.",
     "reused": "Dit wachtwoord is onlangs gebruikt. Kies een wachtwoord dat u niet hebt gebruikt in uw laatste {count} wachtwoorden.",
     "expiryBanner": "Uw wachtwoord verloopt over {count} dag. Werk het nu bij om te voorkomen dat u buitengesloten raakt van uw werk. | Uw wachtwoord verloopt over {count} dagen. Werk het nu bij om te voorkomen dat u buitengesloten raakt van uw werk.",
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "Stuur je gegevens. OpenObserve vindt de problemen en vertelt het je, met zijn beste inschatting van de oorzaak. Als het rustig is, laat het zien wat het heeft gecontroleerd en wat het niet kan zien.",
+    "subtitle": "Stuur je gegevens. Retrace.ai vindt de problemen en vertelt het je, met zijn beste inschatting van de oorzaak. Als het rustig is, laat het zien wat het heeft gecontroleerd en wat het niet kan zien.",
     "phase2": "Fase 2",
     "tabs": {
       "issues": "Problemen",

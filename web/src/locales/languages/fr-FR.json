@@ -12029,7 +12029,7 @@
     "search": "Rechercher une destination"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "Stockage de l'organisation",
     "title": "Stockage de l'organisation",
     "notEnabled": "{product} n'est pas activé pour cette organisation",
@@ -12672,7 +12672,7 @@
     "dangerZone": "Zone de danger",
     "deleteOrganization": "Supprimer l'organisation",
     "deleteOrganizationTitle": "Supprimer cette organisation",
-    "deleteOrganizationDescription": "Tout le monde, y compris vous, perd immédiatement l'accès à {name}. Pendant la fenêtre de récupération, seul le support OpenObserve peut la restaurer ; après cela, toutes les données sont définitivement effacées.",
+    "deleteOrganizationDescription": "Tout le monde, y compris vous, perd immédiatement l'accès à {name}. Pendant la fenêtre de récupération, seul le support Retrace.ai peut la restaurer ; après cela, toutes les données sont définitivement effacées.",
     "deleteOrganizationScopeLoading": "Vérification du contenu de cette organisation…",
     "deleteOrganizationScope": "{dashboards} tableaux de bord · {streams} flux · {size} de données",
     "deleteFactGracePeriod": "Fenêtre de récupération",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "Tous les accès sont révoqués immédiatement",
     "deleteOrganizationConfirm": "Cette action programmera la suppression de « {name} » et de tous ses flux, tableaux de bord, alertes, pipelines, utilisateurs et paramètres.",
     "deleteOrganizationWarning": "L'organisation devient immédiatement indisponible et est masquée pour toutes les personnes qui l'utilisent. L'ingestion est bloquée et les alertes, pipelines et rapports planifiés cessent de s'exécuter : aucune notification n'est envoyée tant que la suppression est programmée.",
-    "deleteOrganizationRecoverable": "Pendant la fenêtre de récupération, elle peut encore être restaurée, mais pas par vous — vous perdez l'accès à cette organisation dès que la suppression commence, et seul le support OpenObserve peut la restaurer. Une fois la fenêtre fermée, ses données sont définitivement supprimées et ne peuvent être récupérées par personne.",
+    "deleteOrganizationRecoverable": "Pendant la fenêtre de récupération, elle peut encore être restaurée, mais pas par vous — vous perdez l'accès à cette organisation dès que la suppression commence, et seul le support Retrace.ai peut la restaurer. Une fois la fenêtre fermée, ses données sont définitivement supprimées et ne peuvent être récupérées par personne.",
     "deleteOrganizationTypeToConfirm": "Pour confirmer, saisissez {name} ci-dessous :",
     "deleteOrganizationInitiated": "Organisation planifiée pour suppression. Elle est maintenant masquée ; contactez le support pour la restaurer avant la fin de la fenêtre de récupération.",
     "somethingWentWrong": "Quelque chose s'est mal passé",
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "Mettez à jour votre mot de passe",
     "signedInAs": "Connecté en tant que {email}",
-    "reasonPolicyTightened": "La politique de mots de passe a changé. Mettez à jour votre mot de passe pour continuer à utiliser OpenObserve.",
-    "reasonRotationExpired": "Votre mot de passe a expiré. Définissez-en un nouveau pour continuer à utiliser OpenObserve.",
+    "reasonPolicyTightened": "La politique de mots de passe a changé. Mettez à jour votre mot de passe pour continuer à utiliser Retrace.ai.",
+    "reasonRotationExpired": "Votre mot de passe a expiré. Définissez-en un nouveau pour continuer à utiliser Retrace.ai.",
     "reasonRotationWarning": "Votre mot de passe expire bientôt. Définissez-en un nouveau dès maintenant pour éviter d'être bloqué dans votre travail.",
     "reused": "Ce mot de passe a été utilisé récemment. Choisissez-en un que vous n'avez pas utilisé parmi vos {count} derniers mots de passe.",
     "expiryBanner": "Votre mot de passe expire dans {count} jour. Mettez-le à jour maintenant pour éviter d'être bloqué dans votre travail. | Votre mot de passe expire dans {count} jours. Mettez-le à jour maintenant pour éviter d'être bloqué dans votre travail.",
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "Envoyez vos données. OpenObserve détecte les problèmes et vous les signale, avec sa meilleure interprétation de la cause. Quand tout est calme, il vous montre ce qu'il a vérifié et ce qu'il ne peut pas voir.",
+    "subtitle": "Envoyez vos données. Retrace.ai détecte les problèmes et vous les signale, avec sa meilleure interprétation de la cause. Quand tout est calme, il vous montre ce qu'il a vérifié et ce qu'il ne peut pas voir.",
     "phase2": "Phase 2",
     "tabs": {
       "issues": "Problèmes",

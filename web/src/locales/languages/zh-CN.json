@@ -12029,7 +12029,7 @@
     "search": "搜索目标"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "组织存储",
     "title": "组织存储",
     "notEnabled": "{product} 未在此组织启用",
@@ -12672,7 +12672,7 @@
     "dangerZone": "危险区域",
     "deleteOrganization": "删除组织",
     "deleteOrganizationTitle": "删除此组织",
-    "deleteOrganizationDescription": "包括您在内的所有人将立即失去对 {name} 的访问权限。在恢复窗口期间，只有 OpenObserve 支持人员可以恢复它；之后，所有数据将被永久删除。",
+    "deleteOrganizationDescription": "包括您在内的所有人将立即失去对 {name} 的访问权限。在恢复窗口期间，只有 Retrace.ai 支持人员可以恢复它；之后，所有数据将被永久删除。",
     "deleteOrganizationScopeLoading": "正在检查该组织包含的内容…",
     "deleteOrganizationScope": "{dashboards} 个仪表板 · {streams} 个数据流 · {size} 数据",
     "deleteFactGracePeriod": "恢复窗口",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "立即撤销所有访问权限",
     "deleteOrganizationConfirm": "这将安排删除“{name}”及其所有数据流、仪表盘、告警、流水线、用户和设置。",
     "deleteOrganizationWarning": "该组织将立即变为不可用，并对所有使用者隐藏。数据摄取被阻止，定时告警、流水线和报表停止运行，因此在计划删除期间不会发送任何通知。",
-    "deleteOrganizationRecoverable": "在恢复窗口期间，它仍然可以恢复，但您无法恢复 — 删除一开始您就会失去对此组织的访问权限，只有 OpenObserve 支持人员才能恢复它。窗口关闭后，其数据将被永久删除，任何人都无法恢复。",
+    "deleteOrganizationRecoverable": "在恢复窗口期间，它仍然可以恢复，但您无法恢复 — 删除一开始您就会失去对此组织的访问权限，只有 Retrace.ai 支持人员才能恢复它。窗口关闭后，其数据将被永久删除，任何人都无法恢复。",
     "deleteOrganizationTypeToConfirm": "如需确认，请在下方输入 {name}：",
     "deleteOrganizationInitiated": "组织已计划删除。它现在已隐藏；请在恢复窗口关闭前联系支持人员以恢复它。",
     "somethingWentWrong": "出了点问题",
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "更新您的密码",
     "signedInAs": "已登录为 {email}",
-    "reasonPolicyTightened": "密码策略已更改。请更新您的密码以继续使用 OpenObserve。",
-    "reasonRotationExpired": "您的密码已过期。请设置新密码以继续使用 OpenObserve。",
+    "reasonPolicyTightened": "密码策略已更改。请更新您的密码以继续使用 Retrace.ai。",
+    "reasonRotationExpired": "您的密码已过期。请设置新密码以继续使用 Retrace.ai。",
     "reasonRotationWarning": "您的密码即将过期。请立即设置新密码，以免无法继续您的工作。",
     "reused": "此密码最近使用过。请选择一个未在您最近 {count} 个密码中使用过的密码。",
     "expiryBanner": "您的密码将在 {count} 天后过期。请立即更新，以免无法继续您的工作。 | 您的密码将在 {count} 天后过期。请立即更新，以免无法继续您的工作。",
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "发送您的数据。OpenObserve 会发现问题并告知您，同时给出对原因的最佳判断。当一切平静时，它会展示已检查的内容以及无法看到的内容。",
+    "subtitle": "发送您的数据。Retrace.ai 会发现问题并告知您，同时给出对原因的最佳判断。当一切平静时，它会展示已检查的内容以及无法看到的内容。",
     "phase2": "阶段 2",
     "tabs": {
       "issues": "问题",

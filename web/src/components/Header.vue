@@ -132,11 +132,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     <!-- RIGHT SIDE: Controls -->
     <div class="flex shrink-0 items-center justify-end gap-1 pe-3">
-      <!-- QUOTA WARNING SECTION: Shows warning when quota threshold is reached -->
-      <div
-        class="me-4 flex items-center gap-1 max-md:hidden"
-        v-if="store.state.organizationData.quotaThresholdMsg"
-      >
+      <!-- QUOTA WARNING SECTION: a plan upsell, so it rides the same policy as the edition CTA. -->
+      <div class="me-4 flex items-center gap-1 max-md:hidden" v-if="quotaUpsellVisible">
         <div type="warning" icon="cloud" class="bg-status-warning-bg rounded-default inline p-1.25">
           <OIcon name="warning" size="xs" class="text-warning" />{{
             store.state.organizationData.quotaThresholdMsg
@@ -711,6 +708,11 @@ export default defineComponent({
     // policy as the features it advertises.
     const enterpriseDialogVisible = computed(() => !hidesPaidFeatures);
 
+    // The quota banner's only action is "upgrade to pro", so it is an upsell too.
+    const quotaUpsellVisible = computed(
+      () => !hidesPaidFeatures && Boolean(props.store.state.organizationData.quotaThresholdMsg),
+    );
+
     // The edition gate and the org's runtime switch both have to pass, as for Settings › Slack.
     const linkedAccountsVisible = computed(() => {
       const access = checkFeatureAccess("slack", {
@@ -730,7 +732,8 @@ export default defineComponent({
       const isCloud = props.config.isCloud === "true";
 
       if (isCloud) {
-        return t("about.header_button.cloud_features", { product: raw("Retrace.ai") });
+        // The dialog this button opens advertises upstream's editions, so the label names upstream.
+        return t("about.header_button.cloud_features", { product: raw("OpenObserve") });
       } else if (isEnterprise) {
         return t("about.header_button.enterprise_edition");
       } else {
@@ -834,6 +837,7 @@ export default defineComponent({
       raw,
       getImageURL,
       enterpriseButtonText,
+      quotaUpsellVisible,
       ingestionQuotaPercentage,
       ingestionQuotaColor,
       showEnterpriseDialog,

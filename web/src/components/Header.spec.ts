@@ -20,6 +20,11 @@ import i18n from "@/locales";
 import Header from "@/components/Header.vue";
 import * as cookies from "@/utils/cookies";
 import { chartColor } from "@/utils/chartTheme";
+import enLocale from "@/locales/languages/en-US.json";
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
 
 const breakpoint = vi.hoisted(() => ({ lgUp: true }));
 vi.mock("@/composables/useBreakpoint", () => ({
@@ -44,6 +49,11 @@ vi.mock("@/utils/cookies", () => ({
   setToken: vi.fn(),
   removeToken: vi.fn(),
 }));
+
+// Header gates upsell surfaces on the paid-feature policy; this lets one file exercise both sides.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
 
 describe("Header Component", () => {
   let wrapper: any;
@@ -197,6 +207,8 @@ describe("Header Component", () => {
     wrapper = createWrapper();
   });
 
+  afterEach(() => resetPaidFeaturePolicy());
+
   describe("Logo Rendering", () => {
     it("should display the product wordmark by default", async () => {
       const logoWrapper = createWrapper({
@@ -333,7 +345,8 @@ describe("Header Component", () => {
   });
 
   describe("Quota Warning", () => {
-    it("should display quota threshold message when present", async () => {
+    it("keeps the quota upsell out of the header on the policy this product ships", async () => {
+      setPaidFeaturePolicy("hide");
       const quotaWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -348,15 +361,47 @@ describe("Header Component", () => {
 
       await quotaWrapper.vm.$nextTick();
 
-      // Verify the quota message is actually displayed in the DOM
-      const html = quotaWrapper.html();
-      expect(html).toContain("Quota exceeded");
-
-      // Also check that text is visible
-      const text = quotaWrapper.text();
-      expect(text).toContain("Quota exceeded");
+      // The message and its "upgrade to pro" action are one upsell block, so both are gone.
+      expect(quotaWrapper.html()).not.toContain("Quota exceeded");
+      expect(quotaWrapper.text()).not.toContain("Quota exceeded");
+      expect(quotaWrapper.text()).not.toContain(enLocale.menu.upgradeToProPlan);
 
       quotaWrapper.unmount();
+    });
+
+    it("still shows the quota upsell where the policy sells paid features", async () => {
+      setPaidFeaturePolicy("lock");
+      const quotaWrapper = createWrapper({
+        mountType: "mount",
+        storeOverrides: {
+          state: {
+            organizationData: {
+              quotaThresholdMsg: "Quota exceeded",
+            },
+          },
+        },
+        stubsOverrides: {},
+      });
+
+      await quotaWrapper.vm.$nextTick();
+
+      const html = quotaWrapper.html();
+      expect(html).toContain("Quota exceeded");
+      expect(quotaWrapper.text()).toContain(enLocale.menu.upgradeToProPlan);
+
+      quotaWrapper.unmount();
+    });
+  });
+
+  describe("Edition CTA referent", () => {
+    it("names the same vendor in the cloud CTA as in the dialog it opens", () => {
+      const cloudWrapper = createWrapper({ configOverrides: { isCloud: "true" } });
+
+      expect(cloudWrapper.vm.enterpriseButtonText).toBe("OpenObserve Features");
+      expect(cloudWrapper.vm.enterpriseButtonText).not.toContain("Retrace.ai");
+      expect(enLocale.about.enterprise_offer.cloud.features_title).toContain("OpenObserve");
+
+      cloudWrapper.unmount();
     });
   });
 

@@ -12029,7 +12029,7 @@
     "search": "宛先を検索"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "組織ストレージ",
     "title": "組織ストレージ",
     "notEnabled": "{product} はこの組織で有効になっていません",
@@ -12672,7 +12672,7 @@
     "dangerZone": "危険ゾーン",
     "deleteOrganization": "組織を削除",
     "deleteOrganizationTitle": "この組織を削除",
-    "deleteOrganizationDescription": "あなたを含む全員が、{name} へのアクセスを直ちに失います。回復ウィンドウの間は、OpenObserve サポートのみが復元できます。その後は、すべてのデータが完全に消去されます。",
+    "deleteOrganizationDescription": "あなたを含む全員が、{name} へのアクセスを直ちに失います。回復ウィンドウの間は、Retrace.ai サポートのみが復元できます。その後は、すべてのデータが完全に消去されます。",
     "deleteOrganizationScopeLoading": "この組織の内容を確認しています…",
     "deleteOrganizationScope": "ダッシュボード {dashboards} 件 · ストリーム {streams} 件 · データ {size}",
     "deleteFactGracePeriod": "回復ウィンドウ",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "すべてのアクセスが直ちに取り消されます",
     "deleteOrganizationConfirm": "「{name}」と、そのすべてのストリーム、ダッシュボード、アラート、パイプライン、ユーザー、設定が削除予定になります。",
     "deleteOrganizationWarning": "組織は直ちに利用できなくなり、使用しているすべてのユーザーから非表示になります。取り込みはブロックされ、スケジュールされたアラート、パイプライン、レポートは実行を停止するため、削除予定の間は通知は送信されません。",
-    "deleteOrganizationRecoverable": "回復ウィンドウの間はまだ復元できますが、あなたはできません。削除が開始されるとすぐにこの組織へのアクセスを失い、OpenObserve サポートのみが復元できます。ウィンドウが閉じると、そのデータは完全に削除され、誰も復元できません。",
+    "deleteOrganizationRecoverable": "回復ウィンドウの間はまだ復元できますが、あなたはできません。削除が開始されるとすぐにこの組織へのアクセスを失い、Retrace.ai サポートのみが復元できます。ウィンドウが閉じると、そのデータは完全に削除され、誰も復元できません。",
     "deleteOrganizationTypeToConfirm": "確認のため、下に {name} と入力してください:",
     "deleteOrganizationInitiated": "削除が予定されている組織です。現在は非表示になっています。回復ウィンドウが閉じる前にサポートに連絡して復元してください。",
     "somethingWentWrong": "何かがおかしくなった",
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "パスワードを更新",
     "signedInAs": "{email} としてサインイン中",
-    "reasonPolicyTightened": "パスワードポリシーが変更されました。OpenObserve の使用を続けるにはパスワードを更新してください。",
-    "reasonRotationExpired": "パスワードの有効期限が切れました。OpenObserve の使用を続けるには新しいパスワードを設定してください。",
+    "reasonPolicyTightened": "パスワードポリシーが変更されました。Retrace.ai の使用を続けるにはパスワードを更新してください。",
+    "reasonRotationExpired": "パスワードの有効期限が切れました。Retrace.ai の使用を続けるには新しいパスワードを設定してください。",
     "reasonRotationWarning": "パスワードの有効期限がまもなく切れます。作業からロックアウトされないよう、今すぐ新しいパスワードを設定してください。",
     "reused": "このパスワードは最近使用されています。直近 {count} 個のパスワードで使用していないものを選択してください。",
     "expiryBanner": "{count} 日後にパスワードの有効期限が切れます。作業からロックアウトされないよう、今すぐ更新してください。 | {count} 日後にパスワードの有効期限が切れます。作業からロックアウトされないよう、今すぐ更新してください。",
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "データを送信してください。OpenObserve が問題を検出し、原因についての最善の見解とともに通知します。問題がないときは、チェックした内容と、確認できない内容を示します。",
+    "subtitle": "データを送信してください。Retrace.ai が問題を検出し、原因についての最善の見解とともに通知します。問題がないときは、チェックした内容と、確認できない内容を示します。",
     "phase2": "フェーズ2",
     "tabs": {
       "issues": "インシデント",
