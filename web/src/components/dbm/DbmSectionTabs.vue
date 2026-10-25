@@ -173,8 +173,7 @@ const isEnterprise = computed(() => config.isEnterprise === "true");
 /** The three tabs the OSS backend refuses. */
 const ENTERPRISE_ONLY_TABS = ["deadlocks", "blocked", "tableHealth"];
 
-// Under PAID_FEATURE_POLICY = "hide" the gated tabs are dropped from the strip
-// instead of sitting inert on it; the routes bounce a hand-typed URL back anyway.
+// Under PAID_FEATURE_POLICY = "hide" a gated tab is dropped, not left inert on the strip; the route guard bounces a hand-typed URL anyway.
 const isSectionOffered = (key: string) =>
   !ENTERPRISE_ONLY_TABS.includes(key) || isEnterprise.value || !hidesPaidFeatures;
 
@@ -317,91 +316,89 @@ const carriedQuery = computed(() => {
   return rest;
 });
 
+const offeredSections = computed<Section[]>(() => [
+  {
+    key: "overview",
+    label: t("dbm.page.tabs.overview"),
+    to: { name: "dbmDatabases", query: carriedQuery.value },
+    count: badgeCount(props.databaseCount),
+  },
+  {
+    // Beside Overview: the fleet's vital signs, before any per-query view.
+    // No badge — a chart grid has no one population to count.
+    key: "metrics",
+    label: t("dbm.page.tabs.metrics"),
+    to: { name: "dbmMetrics", query: carriedQuery.value },
+    hint: t("dbm.page.tabs.metricsHint"),
+  },
+  {
+    key: "queries",
+    label: t("dbm.page.tabs.queries"),
+    to: { name: "dbmQueries", query: carriedQuery.value },
+    count: badgeCount(props.queryCount),
+    // Not an overlap MEASURE (a distinct-statement count is not calls or
+    // database time), but its provenance swaps between the trace rollup and
+    // the database-reported list exactly as the samples badge's does — so the
+    // reader is told which list was counted, on the same terms.
+    vantageLabel: queriesVantageLabel.value,
+  },
+  {
+    // Beside Top queries, deliberately: the aggregate and the per-execution
+    // view of the same client-observed data.
+    key: "samples",
+    label: t("dbm.page.tabs.samples"),
+    to: { name: "dbmSamples", query: carriedQuery.value },
+    count: badgeCount(props.sampleCallsCount),
+    // A CALL COUNT — one of the exactly two overlap measures — so it carries
+    // its vantage rather than the generic population claim it used to make.
+    ...overlapBadge(props.sampleCallsCount),
+  },
+  {
+    // Before the two lock tabs: "what is happening now" is the question a
+    // reader asks before drilling into any one query.
+    key: "activity",
+    label: t("dbm.page.tabs.activity"),
+    to: { name: "dbmActivity", query: carriedQuery.value },
+    count: badgeCount(props.activityCount),
+    hint: t("dbm.page.tabs.activityHint"),
+  },
+  {
+    key: "deadlocks",
+    label: t("dbm.page.tabs.deadlocks"),
+    to: { name: "dbmDeadlocks", query: carriedQuery.value },
+    // A locked tab has no count to badge — the read that produces it is the
+    // one the OSS backend refuses — and its hint explains the lock rather
+    // than the (absent) number.
+    count: isEnterprise.value ? badgeCount(props.deadlockCount) : null,
+    hint: isEnterprise.value
+      ? t("dbm.page.tabs.deadlocksHint")
+      : t("dbm.page.tabs.deadlocksLocked"),
+    disabled: !isEnterprise.value,
+  },
+  {
+    key: "blocked",
+    label: t("dbm.page.tabs.blocked"),
+    to: { name: "dbmBlocking", query: carriedQuery.value },
+    count: isEnterprise.value ? badgeCount(props.blockedCount) : null,
+    hint: isEnterprise.value ? t("dbm.page.tabs.blockedHint") : t("dbm.page.tabs.blockedLocked"),
+    disabled: !isEnterprise.value,
+  },
+  {
+    // LAST: schema health is the slow-moving background question, read after
+    // the four "what is happening right now" views rather than before them.
+    key: "tableHealth",
+    label: t("dbm.page.tabs.tableHealth"),
+    to: { name: "dbmTableHealth", query: carriedQuery.value },
+    count: isEnterprise.value ? badgeCount(props.tableHealthCount) : null,
+    hint: isEnterprise.value
+      ? t("dbm.page.tabs.tableHealthHint")
+      : t("dbm.page.tabs.tableHealthLocked"),
+    disabled: !isEnterprise.value,
+  },
+]);
+
 const sections = computed<Section[]>(() =>
-  (
-    [
-      {
-        key: "overview",
-        label: t("dbm.page.tabs.overview"),
-        to: { name: "dbmDatabases", query: carriedQuery.value },
-        count: badgeCount(props.databaseCount),
-      },
-      {
-        // Beside Overview: the fleet's vital signs, before any per-query view.
-        // No badge — a chart grid has no one population to count.
-        key: "metrics",
-        label: t("dbm.page.tabs.metrics"),
-        to: { name: "dbmMetrics", query: carriedQuery.value },
-        hint: t("dbm.page.tabs.metricsHint"),
-      },
-      {
-        key: "queries",
-        label: t("dbm.page.tabs.queries"),
-        to: { name: "dbmQueries", query: carriedQuery.value },
-        count: badgeCount(props.queryCount),
-        // Not an overlap MEASURE (a distinct-statement count is not calls or
-        // database time), but its provenance swaps between the trace rollup and
-        // the database-reported list exactly as the samples badge's does — so the
-        // reader is told which list was counted, on the same terms.
-        vantageLabel: queriesVantageLabel.value,
-      },
-      {
-        // Beside Top queries, deliberately: the aggregate and the per-execution
-        // view of the same client-observed data.
-        key: "samples",
-        label: t("dbm.page.tabs.samples"),
-        to: { name: "dbmSamples", query: carriedQuery.value },
-        count: badgeCount(props.sampleCallsCount),
-        // A CALL COUNT — one of the exactly two overlap measures — so it carries
-        // its vantage rather than the generic population claim it used to make.
-        ...overlapBadge(props.sampleCallsCount),
-      },
-      {
-        // Before the two lock tabs: "what is happening now" is the question a
-        // reader asks before drilling into any one query.
-        key: "activity",
-        label: t("dbm.page.tabs.activity"),
-        to: { name: "dbmActivity", query: carriedQuery.value },
-        count: badgeCount(props.activityCount),
-        hint: t("dbm.page.tabs.activityHint"),
-      },
-      {
-        key: "deadlocks",
-        label: t("dbm.page.tabs.deadlocks"),
-        to: { name: "dbmDeadlocks", query: carriedQuery.value },
-        // A locked tab has no count to badge — the read that produces it is the
-        // one the OSS backend refuses — and its hint explains the lock rather
-        // than the (absent) number.
-        count: isEnterprise.value ? badgeCount(props.deadlockCount) : null,
-        hint: isEnterprise.value
-          ? t("dbm.page.tabs.deadlocksHint")
-          : t("dbm.page.tabs.deadlocksLocked"),
-        disabled: !isEnterprise.value,
-      },
-      {
-        key: "blocked",
-        label: t("dbm.page.tabs.blocked"),
-        to: { name: "dbmBlocking", query: carriedQuery.value },
-        count: isEnterprise.value ? badgeCount(props.blockedCount) : null,
-        hint: isEnterprise.value
-          ? t("dbm.page.tabs.blockedHint")
-          : t("dbm.page.tabs.blockedLocked"),
-        disabled: !isEnterprise.value,
-      },
-      {
-        // LAST: schema health is the slow-moving background question, read after
-        // the four "what is happening right now" views rather than before them.
-        key: "tableHealth",
-        label: t("dbm.page.tabs.tableHealth"),
-        to: { name: "dbmTableHealth", query: carriedQuery.value },
-        count: isEnterprise.value ? badgeCount(props.tableHealthCount) : null,
-        hint: isEnterprise.value
-          ? t("dbm.page.tabs.tableHealthHint")
-          : t("dbm.page.tabs.tableHealthLocked"),
-        disabled: !isEnterprise.value,
-      },
-    ] as Section[]
-  ).filter((s) => isSectionOffered(s.key)),
+  offeredSections.value.filter((s) => isSectionOffered(s.key)),
 );
 
 const navigate = (key: string | number) => {
