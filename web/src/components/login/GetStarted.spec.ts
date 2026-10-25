@@ -189,7 +189,7 @@ describe("GetStarted.vue", () => {
   describe("content", () => {
     it("shows the welcome title and the trial subtitle", async () => {
       await mountAt();
-      expect(byTest("onboarding-get-started-title").text()).toBe("Welcome to OpenObserve");
+      expect(byTest("onboarding-get-started-title").text()).toBe("Welcome to Retrace.ai");
       expect(byTest("onboarding-get-started-subtitle").text()).toContain(
         "Your 14-day trial has started",
       );
