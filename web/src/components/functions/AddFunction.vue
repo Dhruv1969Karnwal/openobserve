@@ -215,6 +215,7 @@ import {
 import { raw, useI18nTyped } from "@/types/i18n";
 import { useStore } from "vuex";
 import config from "@/aws-exports";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 import analytics from "../../services/product_analytics";
 import TestFunction from "@/components/functions/TestFunction.vue";
 import FunctionsToolbar from "@/components/functions/FunctionsToolbar.vue";
@@ -364,17 +365,15 @@ export default defineComponent({
         store.state.selectedOrganization?.identifier === "_meta",
     );
 
-    // Transform type options for the VRL/JS radio group. JavaScript is
-    // always present (shown locked, not hidden, when not entitled) — except
-    // an already-JS function keeps it genuinely unlocked even where JS isn't
-    // offered (e.g. a build that lost the entitlement), so editing it renders
-    // the right language instead of a locked option under the active value.
+    // An already-JS function stays genuinely unlocked where JS isn't offered, so editing it renders its own language.
     const transformTypeOptions = computed(() => {
       const editingJsFunction = String((props.modelValue as any)?.transType ?? "0") === "1";
       const jsUnlocked = isJsAllowed.value || editingJsFunction;
       return [
         { label: t("function.vrl"), value: "0" },
-        { label: raw("JavaScript"), value: "1", disabled: !jsUnlocked },
+        ...(jsUnlocked || showsLockedAffordances
+          ? [{ label: raw("JavaScript"), value: "1", disabled: !jsUnlocked }]
+          : []),
       ];
     });
 

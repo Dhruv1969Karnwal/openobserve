@@ -102,6 +102,25 @@ vi.mock("vue-router", () => ({
 
 // Partial-mock vuex so `createStore` (used by `src/stores/index.ts`)
 // stays intact while we override `useStore` for the component under test.
+// `checkFeatureAccess` reads PAID_FEATURE_POLICY from inside its own module, so the
+// policy helper cannot flip it; the Compare entry is driven off the access object
+// directly instead, which is exactly the contract the template gates on.
+const accessRef = vi.hoisted(() => ({
+  value: { allowed: false, visible: false, message: "", ctaRelevant: false },
+}));
+
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) => {
+  const actual = (await importOriginal()) as any;
+  return {
+    ...actual,
+    checkFeatureAccess: (key: any, ctx: any) => {
+      const real = actual.checkFeatureAccess(key, ctx);
+      if (key !== "genAiAgentMapping" || real.allowed) return real;
+      return { ...real, ...accessRef.value };
+    },
+  };
+});
+
 vi.mock("vuex", async (importOriginal) => {
   const actual = (await importOriginal()) as any;
   return {
@@ -113,6 +132,7 @@ vi.mock("vuex", async (importOriginal) => {
 // ---------------------------------------------------------------------------
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
 import { mount, flushPromises } from "@vue/test-utils";
 import LLMInsightsDashboard from "./LLMInsightsDashboard.vue";
 import config from "@/aws-exports";
@@ -525,6 +545,10 @@ describe("LLMInsightsDashboard — OSS builds (neither isEnterprise nor isCloud 
   const originalIsEnterprise = config.isEnterprise;
   const originalIsCloud = config.isCloud;
 
+  beforeEach(() => {
+    accessRef.value = { allowed: false, visible: false, message: "", ctaRelevant: false };
+  });
+
   afterEach(() => {
     config.isEnterprise = originalIsEnterprise;
     config.isCloud = originalIsCloud;
@@ -536,6 +560,31 @@ describe("LLMInsightsDashboard — OSS builds (neither isEnterprise nor isCloud 
     await flushPromises();
     expect(wrapper.find("[data-test='llm-insights-filter-mode']").exists()).toBe(false);
     expect(wrapper.find("[data-test='llm-insights-compare-entry']").exists()).toBe(false);
+  });
+
+  it("renders NO locked Compare stand-in when access reports the feature not visible (hide policy)", async () => {
+    // A locked Compare button opens a dialog the policy refuses, so the whole
+    // affordance has to go — `compare-entry` being absent is not enough.
+    config.isEnterprise = "false";
+    config.isCloud = "false";
+    accessRef.value = { allowed: false, visible: false, message: "", ctaRelevant: false };
+    const wrapper = mountDashboard();
+    await flushPromises();
+    expect(wrapper.find("[data-test='llm-insights-compare-locked']").exists()).toBe(false);
+  });
+
+  it("does render the locked Compare stand-in when access reports it visible but not allowed (lock policy)", async () => {
+    config.isEnterprise = "false";
+    config.isCloud = "false";
+    accessRef.value = {
+      allowed: false,
+      visible: true,
+      message: "locked" as unknown as never,
+      ctaRelevant: true,
+    };
+    const wrapper = mountDashboard();
+    await flushPromises();
+    expect(wrapper.find("[data-test='llm-insights-compare-locked']").exists()).toBe(true);
   });
 
   it("still shows the toggle on a cloud build (isCloud true) even with isEnterprise false — cloud registers the same enterprise route/backend", async () => {

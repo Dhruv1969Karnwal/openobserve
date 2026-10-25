@@ -31,6 +31,16 @@ vi.mock("@/aws-exports", () => ({
   default: { isEnterprise: "false", isCloud: "false" },
 }));
 
+// The JS option also branches on PAID_FEATURE_POLICY; both sides are asserted below.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
+
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
+
 const makeStore = (orgIdentifier = "test-org") =>
   createStore({
     state: {
@@ -56,8 +66,8 @@ const mockStore = makeStore();
 const mockRouter = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: "/functions", name: "functions" },
-    { path: "/pipeline/functions", name: "pipeline-functions" },
+    { path: "/functions", name: "functions", component: { template: "<div />" } },
+    { path: "/pipeline/functions", name: "pipeline-functions", component: { template: "<div />" } },
   ],
 });
 
@@ -99,6 +109,7 @@ describe("AddFunction.vue Branch Coverage", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetPaidFeaturePolicy();
   });
 
   // Function name / method-name validation is now owned by the Zod schema —
@@ -129,9 +140,9 @@ describe("AddFunction.vue Branch Coverage", () => {
     });
   const getForm = (wrapper: any) => (wrapper.findComponent(OForm).vm as any).form;
 
-  // JavaScript functions are an enterprise/cloud entitlement; OSS shows the
-  // option locked (not hidden) instead of omitting it, so the gate now drives
-  // a `disabled` flag on the option rather than the option's presence.
+  // JavaScript functions are an enterprise/cloud entitlement. Under the shipped
+  // "hide" policy the option is omitted (a locked one would open a refused dialog);
+  // under "lock" it stays present with a `disabled` flag.
   describe("JS entitlement gate (enterprise/cloud only)", () => {
     const values = (wrapper: any) =>
       ((wrapper.vm as any).transformTypeOptions as any[]).map((o) => o.value);
@@ -143,7 +154,14 @@ describe("AddFunction.vue Branch Coverage", () => {
       (config as any).isCloud = "false";
     });
 
-    it("OSS: offers VRL + a locked JavaScript option", () => {
+    it("OSS under the shipped hide policy: offers VRL only — no locked option to click", () => {
+      const wrapper = mountAddFunction();
+      expect(values(wrapper)).toEqual(["0"]);
+      expect(jsOption(wrapper)).toBeUndefined();
+    });
+
+    it("OSS under the lock policy: offers VRL + a locked JavaScript option", () => {
+      setPaidFeaturePolicy("lock");
       const wrapper = mountAddFunction();
       expect(values(wrapper)).toEqual(["0", "1"]);
       expect(jsOption(wrapper).disabled).toBe(true);
@@ -176,7 +194,9 @@ describe("AddFunction.vue Branch Coverage", () => {
       expect(jsOption(wrapper).disabled).toBe(false);
     });
 
-    it("OSS non-_meta org gets a locked JS option", () => {
+    it("OSS non-_meta org: no JS option under hide, a locked one under lock", () => {
+      expect(values(mountAddFunction(defaultProps, "some-org"))).toEqual(["0"]);
+      setPaidFeaturePolicy("lock");
       const wrapper = mountAddFunction(defaultProps, "some-org");
       expect(values(wrapper)).toEqual(["0", "1"]);
       expect(jsOption(wrapper).disabled).toBe(true);
@@ -193,14 +213,28 @@ describe("AddFunction.vue Branch Coverage", () => {
       expect(jsOption(wrapper).disabled).toBe(false);
     });
 
-    it("OSS editing a VRL function: JS option stays locked", () => {
-      const wrapper = mountAddFunction({
+    it("OSS editing a VRL function: no JS option under hide, locked under lock", () => {
+      const props = {
         ...defaultProps,
         isUpdated: true,
         modelValue: { ...defaultProps.modelValue, transType: "0" },
-      });
+      };
+      expect(values(mountAddFunction(props))).toEqual(["0"]);
+      setPaidFeaturePolicy("lock");
+      const wrapper = mountAddFunction(props);
       expect(values(wrapper)).toEqual(["0", "1"]);
       expect(jsOption(wrapper).disabled).toBe(true);
+    });
+
+    it("OSS editing an existing JS function keeps the option under hide", () => {
+      // the hide policy must not strip the language a saved function is written in.
+      const wrapper = mountAddFunction({
+        ...defaultProps,
+        isUpdated: true,
+        modelValue: { ...defaultProps.modelValue, transType: "1" },
+      });
+      expect(values(wrapper)).toEqual(["0", "1"]);
+      expect(jsOption(wrapper).disabled).toBe(false);
     });
   });
 
@@ -523,13 +557,13 @@ describe("AddFunction.vue Branch Coverage", () => {
           ...mockStore.state,
           isAiChatEnabled: true, // Branch condition: true
         },
-        actions: mockStore.actions,
+        actions: (mockStore as any).actions,
       });
 
       // Mock router to simulate not being in functions route
       const nonFunctionRouter = createRouter({
         history: createWebHistory(),
-        routes: [{ path: "/pipeline/test", name: "test" }],
+        routes: [{ path: "/pipeline/test", name: "test", component: { template: "<div />" } }],
       });
       await nonFunctionRouter.push("/pipeline/test");
 
@@ -563,7 +597,7 @@ describe("AddFunction.vue Branch Coverage", () => {
       // Mock router to simulate being in functions route
       const functionRouter = createRouter({
         history: createWebHistory(),
-        routes: [{ path: "/functions", name: "functions" }],
+        routes: [{ path: "/functions", name: "functions", component: { template: "<div />" } }],
       });
       await functionRouter.push("/functions");
 
@@ -655,7 +689,7 @@ describe("AddFunction.vue Branch Coverage", () => {
 
       // Test openChat function (line 464-466)
       vm.openChat(true);
-      expect(mockStore._actions.setIsAiChatEnabled).toHaveLength(1);
+      expect((mockStore as any)._actions.setIsAiChatEnabled).toHaveLength(1);
 
       // Test sendToAiChat function (line 468-479)
       const testValue = "test AI chat message";
