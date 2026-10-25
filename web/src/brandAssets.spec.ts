@@ -14,16 +14,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { describe, expect, it } from "vitest";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { inflateSync } from "node:zlib";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
-const at = (rel: string) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)));
+// vitest runs specs with the `web/` package root as cwd; the assets under test are static
+// files outside the component tree, so they are read from disk rather than imported.
+const at = (rel: string) => readFileSync(join(process.cwd(), rel));
 
-const html = at("../index.html").toString("utf8");
-const svg = at("../public/favicon.svg").toString("utf8");
-const ico = at("../public/favicon.ico");
-const wordmark = at("./components/BrandWordmark.vue").toString("utf8");
+const html = at("index.html").toString("utf8");
+const svg = at("public/favicon.svg").toString("utf8");
+const ico = at("public/favicon.ico");
+const wordmark = at("src/components/BrandWordmark.vue").toString("utf8");
 
 function isNeutralHex(colour: string) {
   const m = /^#([0-9a-f]{6})$/i.exec(colour);
@@ -122,6 +125,14 @@ describe("shipped brand assets", () => {
         expect(Math.max(Math.abs(r - g), Math.abs(g - b))).toBeLessThanOrEqual(4);
       }
     }
+  });
+
+  it("regenerates the committed raster from the vector, byte for byte", () => {
+    const out = execFileSync(process.execPath, ["scripts/make-favicon.mjs", "--check"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    });
+    expect(out).toContain("matches favicon.svg");
   });
 
   it("keeps the glyph legible at the smallest shipped size", () => {
