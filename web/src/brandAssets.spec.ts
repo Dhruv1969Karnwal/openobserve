@@ -15,7 +15,7 @@
 
 import { describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { inflateSync } from "node:zlib";
 import { join } from "node:path";
 
@@ -123,6 +123,26 @@ describe("shipped brand assets", () => {
       expect(dark(entry).length).toBeGreaterThan(0);
       for (const [r, g, b] of painted(entry)) {
         expect(Math.max(Math.abs(r - g), Math.abs(g - b))).toBeLessThanOrEqual(4);
+      }
+    }
+  });
+
+  it("ships no upstream tab icon alongside the vector mark", () => {
+    const files = readdirSync(join(process.cwd(), "public"));
+    expect(files).not.toContain("favicon_old.ico");
+    expect(files).not.toContain("openobserve_favicon_light.ico");
+    expect(files.filter((f) => /openobserve/i.test(f))).toEqual([]);
+
+    const icons = files.filter((f) => f.startsWith("favicon") && f.endsWith(".ico"));
+    expect(icons.length).toBeGreaterThan(0);
+    for (const name of icons) {
+      for (const entry of icoEntries(at(`public/${name}`))) {
+        // Upstream's icons are BMP-in-ICO and carry its four accent hues; this mark is neither.
+        expect(entry.isPng).toBe(true);
+        expect(painted(entry).length).toBeGreaterThan(0);
+        for (const [r, g, b] of painted(entry)) {
+          expect(Math.max(Math.abs(r - g), Math.abs(g - b))).toBeLessThanOrEqual(4);
+        }
       }
     }
   });
