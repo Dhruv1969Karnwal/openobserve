@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Copyright 2026 OpenObserve Inc.
 //
-// CI guard: type/template check the files a branch actually touched.
+// Local scoped guard: type/template check the files a branch actually touched.
 //
 // WHY THIS EXISTS: `type-check:app` compiles the whole app program and that
 // program does not fit in memory here — it dies in V8 at ~6.1 GiB after ~165 s
@@ -9,6 +9,10 @@
 // diff finishes in seconds, and a planted TS2322 in a .ts file plus a TS2339 in a
 // .vue template both fail it, so the guard does bite. Wide diffs can still OOM,
 // so a heap failure retries in shrinking chunks instead of reporting "fail".
+//
+// HEAP: default 6144 MiB suits machines with >=8 GiB; inside a 6 GiB cgroup the
+// slice OOM-kills that before V8 self-limits, so pass `--heap=4608` there. Only
+// an external SIGKILL can still leave tsconfig.changes.tmp.json (gitignored).
 
 import { execFileSync } from "node:child_process";
 import { writeFileSync, rmSync, existsSync } from "node:fs";
@@ -17,6 +21,9 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = join(__dirname, "..");
+
+// Local bin, never `npx`: an npx miss resolves vue-tsc through the registry.
+const VUE_TSC = join(WEB_ROOT, "node_modules", ".bin", "vue-tsc");
 
 const argv = process.argv.slice(2);
 const arg = (name, fallback) => {
@@ -89,7 +96,7 @@ const CFG = join(WEB_ROOT, "tsconfig.changes.tmp.json");
 function runProgram(subset) {
   writeFileSync(CFG, JSON.stringify(program(subset), null, 2) + "\n");
   try {
-    const out = execFileSync("npx", ["vue-tsc", "--noEmit", "-p", CFG, "--composite", "false"], {
+    const out = execFileSync(VUE_TSC, ["--noEmit", "-p", CFG, "--composite", "false"], {
       cwd: WEB_ROOT,
       encoding: "utf8",
       maxBuffer: 64 * 1024 * 1024,
@@ -119,8 +126,16 @@ if (!existsSync(CONFIG)) {
   process.exit(2);
 }
 
+if (!existsSync(VUE_TSC)) {
+  console.error(
+    `type-check:changes — ${relative(WEB_ROOT, VUE_TSC)} not found; run \`npm ci\` in web/ first.`,
+  );
+  process.exit(2);
+}
+
 let unverified = [];
 let failed = false;
+let exitCode = 0;
 try {
   console.log(`type-check:changes — ${files.length} changed file(s) vs ${BASE}`);
   const first = runProgram(files);
@@ -128,7 +143,7 @@ try {
     console.log("type-check:changes — PASS");
   } else if (!first.oom) {
     console.error("type-check:changes — FAIL (type errors above)");
-    process.exit(first.status || 1);
+    exitCode = first.status || 1;
   } else {
     // The diff is too wide for one program, which says nothing about the types in it.
     console.log("whole-diff program exhausted the heap; retrying in chunks");
@@ -162,14 +177,17 @@ try {
           " MiB; run `type-check:app` where memory allows):",
       );
       for (const f of unverified) console.error("  " + f);
-      process.exit(2);
-    }
-    if (failed) {
+      exitCode = 2;
+    } else if (failed) {
       console.error("type-check:changes — FAIL (type errors above, from the chunked retries)");
-      process.exit(1);
+      exitCode = 1;
+    } else {
+      console.log("type-check:changes — PASS (chunked)");
     }
-    console.log("type-check:changes — PASS (chunked)");
   }
 } finally {
   rmSync(CFG, { force: true });
 }
+
+// `process.exit()` inside the try above would skip that `finally` and leak CFG.
+process.exit(exitCode);
