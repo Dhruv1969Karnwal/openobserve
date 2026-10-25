@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "Voorbeeld"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "Retrace.ai",
+    "openObserveLogoAlt": "OpenObserve",
     "currencySymbol": "$",
     "header": "Prijzen van het LLM-model",
     "matchingPriorityTooltip": "Prioriteit voor modelaanpassing: uw organisatie > Globaal > Ingebouwd",

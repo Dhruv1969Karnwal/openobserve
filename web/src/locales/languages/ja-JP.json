@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "例"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "Retrace.ai",
+    "openObserveLogoAlt": "OpenObserve",
     "currencySymbol": "$",
     "header": "LLM モデルの価格設定",
     "matchingPriorityTooltip": "モデルマッチング優先度:組織 > グローバル > 組み込み",

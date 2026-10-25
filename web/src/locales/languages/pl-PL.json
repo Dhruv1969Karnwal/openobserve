@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "Przykład"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "Retrace.ai",
+    "openObserveLogoAlt": "OpenObserve",
     "currencySymbol": "$",
     "header": "Cennik modeli LLM",
     "matchingPriorityTooltip": "Priorytet dopasowania modelu: Twoja organizacja > Globalne > Wbudowane",

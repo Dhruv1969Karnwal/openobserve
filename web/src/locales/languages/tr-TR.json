@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "Örnek"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "Retrace.ai",
+    "openObserveLogoAlt": "OpenObserve",
     "currencySymbol": "$",
     "header": "LLM Model Fiyatlandırması",
     "matchingPriorityTooltip": "Model Eşleştirme Önceliği: Kuruluşunuz > Genel > Yerleşik",

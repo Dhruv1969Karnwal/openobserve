@@ -14652,7 +14652,7 @@
     "guideExampleHeader": "Example"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "Retrace.ai",
+    "openObserveLogoAlt": "OpenObserve",
     "currencySymbol": "$",
     "header": "LLM Model Pricing",
     "matchingPriorityTooltip": "Model Matching Priority: Your Org > Global > Built-in",

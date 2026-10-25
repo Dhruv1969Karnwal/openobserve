@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "예시"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "Retrace.ai",
+    "openObserveLogoAlt": "OpenObserve",
     "currencySymbol": "$",
     "header": "LLM 모델 가격 책정",
     "matchingPriorityTooltip": "모델 매칭 우선 순위: 조직 > 글로벌 > 내장",

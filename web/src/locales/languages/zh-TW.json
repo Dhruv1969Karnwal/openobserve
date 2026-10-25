@@ -14649,7 +14649,7 @@
     "guideExampleHeader": "範例"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "Retrace.ai",
+    "openObserveLogoAlt": "OpenObserve",
     "currencySymbol": "$",
     "header": "LLM 模型定價",
     "matchingPriorityTooltip": "模型比對優先順序：組織 > 全域 > 內建",

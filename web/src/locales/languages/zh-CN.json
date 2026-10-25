@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "示例"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "Retrace.ai",
+    "openObserveLogoAlt": "OpenObserve",
     "currencySymbol": "$",
     "header": "LLM 模型定价",
     "matchingPriorityTooltip": "模型匹配优先级：您的组织 > 全局 > 内置",

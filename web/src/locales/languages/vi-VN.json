@@ -14654,7 +14654,7 @@
     "guideExampleHeader": "Ví dụ"
   },
   "modelPricing": {
-    "openObserveLogoAlt": "Retrace.ai",
+    "openObserveLogoAlt": "OpenObserve",
     "currencySymbol": "$",
     "header": "Định giá mô hình LLM",
     "matchingPriorityTooltip": "Ưu tiên khớp mô hình: Tổ chức của bạn > Toàn cầu > Tích hợp sẵn",
