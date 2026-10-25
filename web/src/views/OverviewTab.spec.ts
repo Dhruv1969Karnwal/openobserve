@@ -984,7 +984,7 @@ describe("OverviewTab", () => {
       expect(wrapper.find(EMPTY_STATE).exists()).toBe(false);
       const hero = wrapper.find(HERO);
       expect(hero.exists()).toBe(true);
-      expect(hero.text()).toContain("Start sending data to OpenObserve");
+      expect(hero.text()).toContain("Start sending data to Retrace.ai");
       expect(hero.text()).toContain(
         "There's no data in Acme Prod yet. Alerts and recent events show here once it arrives. Pick how you want to start.",
       );

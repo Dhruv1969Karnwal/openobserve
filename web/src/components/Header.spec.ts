@@ -1225,7 +1225,7 @@ describe("Header Component", () => {
       expect(html).not.toContain("data:image; base64,");
 
       // The brand is text the page draws with its own font, not an <img> (see BrandWordmark.vue).
-      expect(html).toContain("openobserve-logo");
+      expect(html).toContain("retrace-logo");
       const mark = wrapper.find('[data-test="header-retrace-logo"]');
       expect(mark.exists()).toBe(true);
       expect(mark.text()).toBe("Retrace.ai");

@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         data-test="logs-no-data-another-way"
         >{{ t("ingestion.firstDataPanel.anotherWay") }}</span
       >
-      <template v-else>{{ t("logs.noData.title", { product: raw("OpenObserve") }) }}</template>
+      <template v-else>{{ t("logs.noData.title", { product: raw("Retrace.ai") }) }}</template>
     </template>
 
     <template v-if="!alternativesOnly" #description>

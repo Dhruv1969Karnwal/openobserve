@@ -17,16 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <template>
   <div class="azure-marketplace-setup bg-surface-base min-h-screen">
     <div class="relative-position flex px-3 pt-2">
-      <img
-        :alt="t('login.openObserveLogoAlt')"
-        data-test="azure-marketplace-setup-logo"
-        class="h-10"
-        loading="lazy"
-        :src="
-          isDark
-            ? getImageURL('images/common/openobserve_latest_dark_2.svg')
-            : getImageURL('images/common/openobserve_latest_light_2.svg')
-        "
+      <BrandWordmark
+        size="hero"
+        test-id="azure-marketplace-setup-logo"
+        :name="t('login.openObserveLogoAlt')"
       />
     </div>
 
@@ -190,6 +184,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
 import OCard from "@/lib/core/Card/OCard.vue";
+import BrandWordmark from "@/components/BrandWordmark.vue";
 import OCardSection from "@/lib/core/Card/OCardSection.vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
@@ -219,7 +214,17 @@ type SetupState = "select_org" | "no_token" | "processing" | "success" | "paymen
 
 export default defineComponent({
   name: "AzureMarketplaceSetup",
-  components: { OButton, OSpinner, OForm, OFormInput, OFormSelect, OIcon, OCard, OCardSection },
+  components: {
+    OButton,
+    OSpinner,
+    OForm,
+    OFormInput,
+    OFormSelect,
+    OIcon,
+    OCard,
+    OCardSection,
+    BrandWordmark,
+  },
   setup() {
     const store = useStore();
     const { isDark } = useTheme();

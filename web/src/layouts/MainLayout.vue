@@ -103,16 +103,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <div
             class="border-border-default flex shrink-0 items-center justify-between border-b px-4 py-3"
           >
-            <img
-              class="h-6 w-auto"
-              :src="
-                getImageURL(
-                  isDark
-                    ? 'images/common/openobserve_latest_dark_2.svg'
-                    : 'images/common/openobserve_latest_light_2.svg',
-                )
-              "
-              :alt="raw('OpenObserve')"
+            <BrandWordmark
+              test-id="main-layout-mobile-nav-retrace-logo"
+              :name="t('login.openObserveLogoAlt')"
             />
             <OButton
               :aria-label="t('common.close')"
@@ -240,6 +233,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { configFullQuery } from "@/services/config.queries";
 import { orgSettingsQuery } from "@/services/organizations.queries";
 import ONavbar from "@/lib/core/Navbar/ONavbar.vue";
+import BrandWordmark from "@/components/BrandWordmark.vue";
 import type { NavItem } from "@/lib/core/Navbar/ONavbar.types";
 import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
 import AppHeader from "../components/Header.vue";
@@ -333,6 +327,7 @@ export default defineComponent({
   mixins: [mainLayoutMixin],
   components: {
     AppHeader,
+    BrandWordmark,
     WebinarBanner,
     AnnouncementBanner,
     PasswordExpiryBanner,

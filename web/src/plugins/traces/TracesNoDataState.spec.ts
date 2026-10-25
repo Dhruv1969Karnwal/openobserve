@@ -53,7 +53,7 @@ describe("TracesNoDataState", () => {
     mountState();
     expect(shellProps()).toMatchObject({ size: "hero", illustration: "trace" });
     expect(Object.keys(shellProps())).not.toContain("backdrop");
-    expect(wrapper.find("h2").text()).toBe("Start sending traces to OpenObserve");
+    expect(wrapper.find("h2").text()).toBe("Start sending traces to Retrace.ai");
     expect(wrapper.text()).toContain("No trace streams found in this organization yet");
     expect(wrapper.find('[data-test="traces-no-data-another-way"]').exists()).toBe(false);
     expect(wrapper.find('[data-test="traces-no-data-otlp-card"]').exists()).toBe(true);
@@ -68,7 +68,7 @@ describe("TracesNoDataState", () => {
       at("No trace streams found in this organization yet"),
     );
     expect(at('data-test="status-line"')).toBeLessThan(at('data-test="traces-no-data-otlp-card"'));
-    expect(wrapper.find("h2").text()).toBe("Start sending traces to OpenObserve");
+    expect(wrapper.find("h2").text()).toBe("Start sending traces to Retrace.ai");
   });
 
   it("keeps only the cards and chips under an Or start another way caption below the panel (e1)", () => {
@@ -78,7 +78,7 @@ describe("TracesNoDataState", () => {
     expect(wrapper.find('[data-test="traces-no-data-another-way"]').text()).toBe(
       "Or start another way",
     );
-    expect(wrapper.text()).not.toContain("Start sending traces to OpenObserve");
+    expect(wrapper.text()).not.toContain("Start sending traces to Retrace.ai");
     expect(wrapper.text()).not.toContain("No trace streams found in this organization yet");
     expect(wrapper.find('[data-test="traces-no-data-otlp-card"]').exists()).toBe(true);
     expect(wrapper.find('[data-test="traces-no-data-kubernetes-btn"]').exists()).toBe(true);
