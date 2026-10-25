@@ -100,6 +100,9 @@ const store = createStore({
       // The server's configurable step cap; specs covering an override set it themselves.
       synthetics_browser_max_steps: 50,
       service_streams_enabled: false,
+      // Read as `zoConfig?.profiling_enabled` by Home/MainLayout/LogStream; the
+      // OSS default is off, and specs covering an override set it themselves.
+      profiling_enabled: false,
       sql_mode: false,
       sql_reserved_keywords: [
         "all",

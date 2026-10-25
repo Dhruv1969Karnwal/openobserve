@@ -23,6 +23,18 @@ const push = vi.fn();
 vi.mock("vue-router", () => ({ useRouter: () => ({ push }) }));
 
 describe("HomeNoDataState", () => {
+  it("titles the tab empty state with the product the user is actually in", () => {
+    const wrapper = mount(HomeNoDataState, {
+      props: { tab: "overview" },
+      global: { plugins: [i18n, store] },
+    });
+
+    expect(wrapper.text()).toContain("Start sending data to Retrace.ai");
+    expect(wrapper.text()).not.toContain("Start sending data to OpenObserve");
+
+    wrapper.unmount();
+  });
+
   it("sends the Profiles chip to the profiles setup page, as every other chip goes to setup", async () => {
     store.state.zoConfig = { ...store.state.zoConfig, profiling_enabled: true };
     const wrapper = mount(HomeNoDataState, {
