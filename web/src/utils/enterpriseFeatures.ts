@@ -336,9 +336,14 @@ export type PaidFeaturePolicy = "hide" | "lock";
 /**
  * Retrace.ai ships one edition, so an entitlement-gated feature is not sold in
  * the UI: `"hide"` renders nothing at all instead of a locked affordance.
- * Set to `"lock"` to restore the upstream lock-icon + upsell-dialog treatment;
- * every surface reads this through {@link checkFeatureAccess}, so nothing else
- * needs to change.
+ * Setting `"lock"` restores BEHAVIOR and VISIBILITY: gated controls become
+ * visible-but-locked and their clicks open the upsell dialog again, because
+ * every surface reads the policy through {@link checkFeatureAccess} or
+ * {@link showsLockedAffordances}. It does NOT restore the lock-icon GLYPHS
+ * deleted during the hide rollout (10 icons across Header, QueryEditor,
+ * ServiceAccountsList, PipelineEditor, JsonPreview, logs/SearchBar and
+ * traces/TraceDetails): a `"lock"` build shows those affordances unlocked-
+ * looking while still routing their clicks to the dialog.
  */
 export const PAID_FEATURE_POLICY: PaidFeaturePolicy = "hide";
 
@@ -380,7 +385,9 @@ export function checkFeatureAccess(key: FeatureKey, context: FeatureGateContext)
   const hidden = hidesPaidFeatures;
   // RBAC alone depends on an admin toggle, not just edition — an edition
   // that already supports it just needs the toggle on, so "upgrade" is a
-  // false, confusing CTA here.
+  // false, confusing CTA here. Accepted consequence under the shipped "hide"
+  // policy: this explanation becomes unreachable by design — the gated
+  // surfaces vanish silently instead of telling the admin to flip the toggle.
   if (key === "rbac" && (context.isEnterprise || context.isCloud) && !context.rbac) {
     return {
       allowed: false,
@@ -421,6 +428,8 @@ export function withFeatureGate(
   return (to: any, from: any, next: any) => {
     if (!checkFeatureAccess(key, getContext()).allowed) {
       if (hidesPaidFeatures) {
+        // Intentionally drops the `redirect: to.fullPath` the lock page
+        // preserves: a hidden feature has no in-app unlock path to return from.
         next({ name: "home", query: { org_identifier: to.query?.org_identifier } });
         return;
       }
