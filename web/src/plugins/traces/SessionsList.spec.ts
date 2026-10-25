@@ -31,7 +31,7 @@ const mockFetchPage = vi.fn();
 const mockCancelAll = vi.fn();
 const mockListAgents = vi.fn();
 const mockRouterPush = vi.fn();
-const mockRouterReplace = vi.fn(() => Promise.resolve());
+const mockRouterReplace = vi.fn((_to: any) => Promise.resolve());
 let mockRouteQuery: Record<string, any> = {};
 
 // The real module pulls in the streaming-search stack (vuex store et al), so

@@ -335,7 +335,7 @@ describe("ImportFunction", () => {
 
       // The controls are async components jsdom never mounts, so what is
       // asserted is the field the pane renders the name box and checkbox from.
-      expect(wrapper.vm.functionErrors.at(-1).map((e: any) => e.field)).toEqual(["name_exists"]);
+      expect(wrapper.vm.functionErrors.at(-1)?.map((e: any) => e.field)).toEqual(["name_exists"]);
     });
 
     it("imports under a new name when the clash is renamed away", async () => {
@@ -652,7 +652,7 @@ describe("ImportFunction", () => {
       // what is asserted is the pair of fields the pane renders them from.
       // Language first: it is the smaller control and it decides how the body
       // below it is read.
-      expect(wrapper.vm.functionErrors.at(-1).map((e: any) => e.field)).toEqual([
+      expect(wrapper.vm.functionErrors.at(-1)?.map((e: any) => e.field)).toEqual([
         "trans_type",
         "function_body",
       ]);
@@ -921,7 +921,7 @@ describe("ImportFunction", () => {
 
       // Previously invisible to validation, so it went out as transType 0.
       expect(mockCreate).not.toHaveBeenCalled();
-      expect(wrapper.vm.functionErrors.at(-1).map((e: any) => e.field)).toContain("trans_type");
+      expect(wrapper.vm.functionErrors.at(-1)?.map((e: any) => e.field)).toContain("trans_type");
     });
 
     it("opens the language control on the snake_case value it found", async () => {

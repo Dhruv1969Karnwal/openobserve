@@ -45,7 +45,7 @@ function freshLibraryState() {
 // here would also reset cacheExpiry and quietly diverge from production.
 const mockStore = {
   state: { alertLibrary: freshLibraryState() },
-  commit: vi.fn((type: string, payload: unknown) => {
+  commit: vi.fn((type: string, payload?: unknown) => {
     const lib = mockStore.state.alertLibrary;
     if (type === "setAlertLibraryManifest") {
       lib.manifest = payload;
@@ -71,6 +71,7 @@ import {
   SUPPORTED_MANIFEST_MAJOR,
   alertFileUrl,
 } from "@/constants/alertLibrary";
+import type { AlertLibraryEntry } from "@/types/alertLibrary";
 
 // The composable memoises its in-flight request at module scope (that is what
 // makes concurrent callers share one GET), so each test needs a fresh module
@@ -95,7 +96,7 @@ function entry(overrides: Record<string, unknown> = {}) {
     path: "packs/k8s/alerts/pod/pod_oom_killed.json",
     content_hash: "1c09e8f6ac33",
     ...overrides,
-  };
+  } as unknown as AlertLibraryEntry;
 }
 
 function manifest(overrides: Record<string, unknown> = {}) {
@@ -529,7 +530,7 @@ describe("useAlertLibrary — loadAlertFile", () => {
     respondOnceWith({ name: "pod_oom_killed", trigger_condition: { threshold: 1 } });
     const file = await useAlertLibrary().loadAlertFile(entry());
 
-    expect(file.trigger_condition.threshold).toBe(1);
+    expect((file.trigger_condition as any).threshold).toBe(1);
   });
 
   it("caches the file under its id AND content hash", async () => {

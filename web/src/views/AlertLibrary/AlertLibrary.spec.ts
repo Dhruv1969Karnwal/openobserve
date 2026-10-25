@@ -1364,9 +1364,9 @@ describe("AlertLibrary", () => {
       wrapper.findComponent({ name: "LibraryRail" }).vm.$emit("update:severity", "critical");
       await flushPromises();
 
-      const noResults = wrapper.findComponent('[data-test="alert-library-no-results"]');
+      const noResults = wrapper.find('[data-test="alert-library-no-results"]');
       expect(noResults.exists()).toBe(true);
-      noResults.vm.$emit("action");
+      await noResults.findComponent({ name: "OButton" }).trigger("click");
       await flushPromises();
       expect(podCard(wrapper).exists()).toBe(true);
       expect(card(wrapper).exists()).toBe(true);

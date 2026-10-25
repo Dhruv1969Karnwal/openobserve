@@ -628,7 +628,7 @@ describe("Header Component", () => {
 
       // Verify update:isHovered event was emitted with true
       expect(aiWrapper.emitted("update:isHovered")).toBeTruthy();
-      expect(aiWrapper.emitted("update:isHovered")[0]).toEqual([true]);
+      expect(aiWrapper.emitted("update:isHovered")?.[0]).toEqual([true]);
 
       aiWrapper.unmount();
     });
@@ -659,7 +659,7 @@ describe("Header Component", () => {
 
       // Verify update:isHovered event was emitted with false
       expect(aiWrapper.emitted("update:isHovered")).toBeTruthy();
-      expect(aiWrapper.emitted("update:isHovered")[0]).toEqual([false]);
+      expect(aiWrapper.emitted("update:isHovered")?.[0]).toEqual([false]);
 
       aiWrapper.unmount();
     });
@@ -970,7 +970,7 @@ describe("Header Component", () => {
 
         const emitted = langWrapper.emitted("changeLanguage");
         expect(emitted).toBeTruthy();
-        expect(emitted[index]).toEqual([lang]);
+        expect(emitted?.[index]).toEqual([lang]);
       });
     });
 

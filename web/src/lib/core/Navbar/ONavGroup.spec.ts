@@ -8,6 +8,7 @@ import { createI18n } from "vue-i18n";
 import ONavGroup from "./ONavGroup.vue";
 import type { SubnavChild } from "./ONavbar.types";
 import { NAV_GROUPS } from "./navGroups";
+import { raw } from "@/types/i18n";
 import { AIM_IDLE, aim } from "./hoverIntent";
 
 // Breakpoint and paywall are app state; the spec drives both directly.
@@ -50,7 +51,7 @@ const OPEN_DELAY = 120;
 const CLOSE_DELAY = 220;
 
 const children: SubnavChild[] = [
-  { titleKey: "menu.streams", icon: "table", name: "logstreams" },
+  { titleKey: "menu.index", icon: "table", name: "logstreams" },
   { titleKey: "menu.pipeline", icon: "graph-2", name: "pipelines" },
 ];
 
@@ -140,7 +141,7 @@ describe("ONavGroup", () => {
     return mount(ONavGroup, {
       props: {
         groupKey: "data",
-        title: "Data",
+        title: raw("Data"),
         icon: "database",
         children,
         // Link+subnav mode — the tile navigates, the flyout is hover-driven.
@@ -317,7 +318,7 @@ describe("ONavGroup", () => {
       return mount(ONavGroup, {
         props: {
           groupKey: "infra",
-          title: "Infra",
+          title: raw("Infra"),
           icon: "dns",
           children: [
             {
@@ -358,7 +359,9 @@ describe("ONavGroup", () => {
       // The other half of the filter: `router.hasRoute` rather than `gate`.
       wrapper = mountGroup();
       await wrapper.setProps({
-        children: [{ titleKey: "menu.ghost", icon: "x", name: "notARoute" }] as SubnavChild[],
+        children: [
+          { titleKey: "menu.ghost", icon: "x", name: "notARoute" },
+        ] as unknown as SubnavChild[],
       });
       expect(wrapper.find('[data-test="nav-group-data"]').exists()).toBe(false);
     });
@@ -430,7 +433,7 @@ describe("ONavGroup", () => {
       return mount(ONavGroup, {
         props: {
           groupKey: "infra",
-          title: "Infra",
+          title: raw("Infra"),
           icon: "dns",
           children,
           parentItem: { link: parentLink, title: "Infra", icon: "dns", name: "infra" },
@@ -494,7 +497,7 @@ describe("ONavGroup", () => {
       wrapper = mount(ONavGroup, {
         props: {
           groupKey: "data",
-          title: "Data",
+          title: raw("Data"),
           icon: "database",
           children: children.filter((c) => c.name !== "logstreams"),
           filteredChildren: children.filter((c) => c.name === "logstreams"),
@@ -512,7 +515,7 @@ describe("ONavGroup", () => {
       wrapper = mount(ONavGroup, {
         props: {
           groupKey: "data",
-          title: "Data",
+          title: raw("Data"),
           icon: "database",
           children: [],
           filteredChildren: children,
@@ -531,7 +534,7 @@ describe("ONavGroup", () => {
       wrapper = mount(ONavGroup, {
         props: {
           groupKey: "data",
-          title: "Data",
+          title: raw("Data"),
           icon: "database",
           children,
           parentItem: { link: "/streams", title: "Data", icon: "database", name: "logstreams" },
@@ -836,7 +839,7 @@ describe("ONavGroup", () => {
       const w = mount(ONavGroup, {
         props: {
           groupKey: "reliability",
-          title: "Reliability",
+          title: raw("Reliability"),
           icon: "shield",
           children,
           parentItem: {
@@ -941,7 +944,7 @@ describe("ONavGroup", () => {
       const w = mount(ONavGroup, {
         props: {
           groupKey: "traces",
-          title: "Traces",
+          title: raw("Traces"),
           icon: "account-tree",
           children: tracesChildren,
           parentItem: {
@@ -1017,7 +1020,7 @@ describe("ONavGroup", () => {
       );
 
       const href = wrapper.get('[data-test="nav-group-item-traces-spans"]').attributes("href");
-      const query = new URL(href, "http://localhost").searchParams;
+      const query = new URL(href!, "http://localhost").searchParams;
 
       expect(query.get("org_identifier")).toBe("default");
       expect(query.get("tab")).toBe("spans");
@@ -1061,7 +1064,7 @@ describe("ONavGroup", () => {
       const w = mount(ONavGroup, {
         props: {
           groupKey: "traces",
-          title: "Traces",
+          title: raw("Traces"),
           icon: "account-tree",
           children: lockedTracesChildren,
           parentItem: { link: "/traces", title: "Traces", icon: "account-tree", name: "traces" },
@@ -1168,7 +1171,7 @@ describe("ONavGroup", () => {
       const w = mount(ONavGroup, {
         props: {
           groupKey: "experience",
-          title: "Experience",
+          title: raw("Experience"),
           icon: "devices",
           children: experienceChildren,
           parentItem: { link: "/rum", title: "Experience", icon: "devices", name: "experience" },
@@ -1245,7 +1248,7 @@ describe("ONavGroup", () => {
       return mount(ONavGroup, {
         props: {
           groupKey: "data",
-          title: "Data",
+          title: raw("Data"),
           icon: "database",
           children,
           parentItem: { link: "/streams", title: "Data", icon: "database", name: "logstreams" },
@@ -1331,7 +1334,7 @@ describe("ONavGroup", () => {
       wrapper = mount(ONavGroup, {
         props: {
           groupKey: "reliability",
-          title: "Reliability",
+          title: raw("Reliability"),
           icon: "shield",
           children: rows(n),
           parentItem: { link: "/rel/0", title: "Reliability", icon: "shield", name: "rel0" },
@@ -1341,7 +1344,7 @@ describe("ONavGroup", () => {
       neighbour = mount(ONavGroup, {
         props: {
           groupKey: "infra",
-          title: "Infra",
+          title: raw("Infra"),
           icon: "dns",
           children: [{ titleKey: "menu.alerts", icon: "dns", name: "infraHosts" }],
           parentItem: { link: "/infra/hosts", title: "Infra", icon: "dns", name: "infra" },
@@ -1635,7 +1638,7 @@ describe("ONavGroup", () => {
       return mount(ONavGroup, {
         props: {
           groupKey: "data",
-          title: "Data",
+          title: raw("Data"),
           icon: "database",
           children,
           parentItem: { link: "/streams", title: "Data", icon: "database", name: "logstreams" },
@@ -1710,7 +1713,7 @@ describe("ONavGroup", () => {
       wrapper = mount(ONavGroup, {
         props: {
           groupKey: "reliability",
-          title: "Reliability",
+          title: raw("Reliability"),
           icon: "shield",
           children: [{ titleKey: "menu.alerts", icon: "shield", name: "alertList" }],
           filteredChildren: [{ titleKey: "menu.alerts", icon: "webhook", name: "alertSources" }],
@@ -1784,7 +1787,7 @@ describe("ONavGroup", () => {
       wrapper.unmount();
 
       wrapper = mount(ONavGroup, {
-        props: { groupKey: "data", title: "Data", icon: "database", children },
+        props: { groupKey: "data", title: raw("Data"), icon: "database", children },
         global: {
           plugins: [makeRouter(), store, i18n],
           stubs: { MenuLink: menuLinkStub, OIcon: oIconStub, teleport: true },

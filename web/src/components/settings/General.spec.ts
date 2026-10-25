@@ -287,7 +287,7 @@ describe("General", () => {
     mockSettingsService.updateCustomText.mockResolvedValue({ status: 200 });
     mockConfigService.get_config.mockResolvedValue({ data: {} });
     mockConfigService.get_config_full.mockResolvedValue({ data: {} });
-    mockDOMPurify.sanitize.mockImplementation((text) => text);
+    mockDOMPurify.sanitize.mockImplementation((text: any) => text);
   });
 
   afterEach(() => {
@@ -641,7 +641,7 @@ describe("General", () => {
     });
 
     it("should show file upload when no logo exists", async () => {
-      mockStore.state.zoConfig.custom_logo_img = null;
+      mockStore.state.zoConfig.custom_logo_img = null as any;
       const wrapper = createWrapper();
 
       const fileUpload = wrapper.find('[data-test="setting_ent_custom_logo_img_file_upload"]');
@@ -714,7 +714,7 @@ describe("General", () => {
         expect(wrapper.vm.confirmDeleteImage).toBe(true);
       } else {
         // Fallback: call the confirmDeleteLogo method directly
-        await wrapper.vm.confirmDeleteLogo();
+        await wrapper.vm.confirmDeleteLogo(undefined as any);
         expect(wrapper.vm.confirmDeleteImage).toBe(true);
       }
     });
@@ -841,7 +841,7 @@ describe("General", () => {
       // Select the color-picker dialog by title (order-independent — other dialogs
       // like the delete-org confirmation also exist in the template).
       const dialogs = wrapper.findAll('[data-test-stub="o-dialog"]');
-      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color");
+      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color")!;
       const closeBtn = colorDialog.find('[data-test-stub="o-dialog-primary"]');
       await closeBtn.trigger("click");
       await nextTick();
@@ -864,7 +864,7 @@ describe("General", () => {
       const dialogs = wrapper.findAll('[data-test-stub="o-dialog"]');
       // Select by title (order-independent — the delete-org confirmation dialog also
       // exists and would otherwise be the last dialog in the template).
-      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color");
+      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color")!;
       expect(colorDialog.attributes("data-size")).toBe("xs");
       expect(colorDialog.attributes("data-primary-label")).toBe("Close");
     });
@@ -996,7 +996,7 @@ describe("General", () => {
     it("should use default organization when no selected organization", async () => {
       // Create wrapper first, then modify store state
       const wrapper = createWrapper();
-      mockStore.state.selectedOrganization = null;
+      mockStore.state.selectedOrganization = null as any;
 
       await wrapper.vm.uploadImage(new File(["test"], "test.png"));
 
@@ -1019,7 +1019,7 @@ describe("General", () => {
 
   describe("Edge cases", () => {
     it("should handle missing organization settings gracefully", () => {
-      mockStore.state.organizationData.organizationSettings = null;
+      mockStore.state.organizationData.organizationSettings = null as any;
       const wrapper = createWrapper();
 
       // The form falls back to the default scrape_interval (15) from the schema defaults.

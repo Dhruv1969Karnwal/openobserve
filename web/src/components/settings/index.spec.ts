@@ -447,7 +447,7 @@ describe("SettingsIndex", () => {
 
   describe("Edge cases", () => {
     it("should handle missing organization identifier", () => {
-      mockStore.state.selectedOrganization = { identifier: undefined };
+      mockStore.state.selectedOrganization = { identifier: undefined } as any;
       const wrapper = createWrapper();
       expect(wrapper.exists()).toBe(true);
     });
@@ -481,7 +481,7 @@ describe("SettingsIndex", () => {
         meta_org: "some-meta-org",
         service_streams_enabled: true,
         synthetics_enabled: false,
-      };
+      } as any;
 
       const awsConfig = await import("@/aws-exports");
       vi.mocked(awsConfig.default).isEnterprise = "false";
@@ -513,7 +513,7 @@ describe("SettingsIndex", () => {
     };
 
     it("should redirect query_management to general after switching to a non-meta org", async () => {
-      mockStore.state.zoConfig = { meta_org: "_meta", service_streams_enabled: true };
+      mockStore.state.zoConfig = { meta_org: "_meta", service_streams_enabled: true } as any;
       mockIsMetaOrg.value = false;
 
       const awsConfig = await import("@/aws-exports");
@@ -532,7 +532,7 @@ describe("SettingsIndex", () => {
     });
 
     it("should NOT redirect query_management inside the meta org", async () => {
-      mockStore.state.zoConfig = { meta_org: "_meta", service_streams_enabled: true };
+      mockStore.state.zoConfig = { meta_org: "_meta", service_streams_enabled: true } as any;
       mockIsMetaOrg.value = true;
 
       const awsConfig = await import("@/aws-exports");
@@ -550,7 +550,7 @@ describe("SettingsIndex", () => {
     it.each(["announcementBanners", "announcementBannerEditor"])(
       "should redirect %s to general outside the meta org",
       async (name) => {
-        mockStore.state.zoConfig = { meta_org: "_meta", service_streams_enabled: true };
+        mockStore.state.zoConfig = { meta_org: "_meta", service_streams_enabled: true } as any;
         mockIsMetaOrg.value = false;
 
         const awsConfig = await import("@/aws-exports");
@@ -574,7 +574,7 @@ describe("SettingsIndex", () => {
         meta_org: "some-meta-org",
         service_streams_enabled: true,
         synthetics_enabled: true,
-      };
+      } as any;
 
       const awsConfig = await import("@/aws-exports");
       vi.mocked(awsConfig.default).isEnterprise = "false";
