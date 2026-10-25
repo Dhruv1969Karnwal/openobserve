@@ -53,6 +53,8 @@ import {
   writeLogsUrl,
 } from "@/composables/useLogs/useLogsUrl";
 import { columnsFromUrl } from "@/composables/useLogs/useLogPermalink";
+import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
+import { resolveLogsVisualizeToggle } from "@/ts/interfaces/logs";
 
 const useLogs = (t: TranslateFn) => {
   const store = useStore();
@@ -515,7 +517,10 @@ const useLogs = (t: TranslateFn) => {
       Object.prototype.hasOwnProperty.call(queryParams, "logs_visualize_toggle") &&
       queryParams.logs_visualize_toggle != ""
     ) {
-      searchObj.meta.logsVisualizeToggle = queryParams.logs_visualize_toggle;
+      searchObj.meta.logsVisualizeToggle = resolveLogsVisualizeToggle(
+        queryParams.logs_visualize_toggle,
+        checkFeatureAccess("logPatterns", buildFeatureGateContext(store.state.zoConfig)).allowed,
+      );
     }
 
     //here we restore the fn editor state from the url query params

@@ -103,3 +103,13 @@ export interface TraceContext {
   traceparent: string;
   traceId: string;
 }
+
+/**
+ * Sanitizes a restored `?logs_visualize_toggle=` URL value: `patterns` is an
+ * entitlement-gated tab, so a build that does not unlock it falls back to
+ * `logs` instead of mounting the hidden panel (mirrors resolveTraceSearchMode
+ * for the traces `?tab=` deep link). `patternsAllowed` comes from
+ * checkFeatureAccess("logPatterns", …) at the call site.
+ */
+export const resolveLogsVisualizeToggle = (value: unknown, patternsAllowed: boolean): unknown =>
+  value === "patterns" && !patternsAllowed ? "logs" : value;
