@@ -20,6 +20,7 @@ import { createI18n } from "vue-i18n";
 import { createMemoryHistory, createRouter, type Router } from "vue-router";
 import enLocale from "@/locales/languages/en-US.json";
 import GetStarted from "./GetStarted.vue";
+import config from "@/aws-exports";
 import { makeGetStartedSchema } from "./GetStarted.schema";
 import { FIRST_SOURCE_PREFILL_KEY } from "./firstSourceOptions";
 import { gt } from "@/types/i18n";
@@ -157,8 +158,13 @@ describe("GetStarted.vue", () => {
 
   const pushSpy = () => vi.spyOn(router, "push");
 
+  const originalIsCloud = config.isCloud;
+  const originalIsEnterprise = config.isEnterprise;
+
   beforeEach(() => {
     resetPaidFeaturePolicy();
+    (config as any).isCloud = originalIsCloud;
+    (config as any).isEnterprise = originalIsEnterprise;
     submitNewUserInfo.mockReset();
     submitNewUserInfo.mockResolvedValue({ status: 200 });
     httpCalls.mockClear();
@@ -207,8 +213,24 @@ describe("GetStarted.vue", () => {
       expect(byTest("onboarding-get-started-subtitle").exists()).toBe(false);
     });
 
-    it("keeps the trial subtitle for the upstream locked-affordance treatment", async () => {
+    it("still withholds the trial subtitle under the lock policy on the OSS edition", async () => {
       setPaidFeaturePolicy("lock");
+      await mountAt();
+      expect(byTest("onboarding-get-started-subtitle").exists()).toBe(false);
+    });
+
+    it("shows the trial subtitle when the edition actually sells the trial", async () => {
+      setPaidFeaturePolicy("lock");
+      (config as any).isCloud = "true";
+      await mountAt();
+      expect(byTest("onboarding-get-started-subtitle").text()).toContain(
+        "Your 14-day trial has started",
+      );
+    });
+
+    it("gates on the edition, not the paid-feature policy", async () => {
+      setPaidFeaturePolicy("hide");
+      (config as any).isEnterprise = "true";
       await mountAt();
       expect(byTest("onboarding-get-started-subtitle").text()).toContain(
         "Your 14-day trial has started",
