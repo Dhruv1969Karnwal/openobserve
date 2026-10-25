@@ -99,6 +99,7 @@ const store = createStore({
       synthetics_private_locations_enabled: true,
       // The server's configurable step cap; specs covering an override set it themselves.
       synthetics_browser_max_steps: 50,
+      service_streams_enabled: false,
       sql_mode: false,
       sql_reserved_keywords: [
         "all",
@@ -168,6 +169,10 @@ const store = createStore({
       organizationPasscodeForbidden: false,
       orgTokens: [] as Array<{ name: string; token: string; enabled: boolean }>,
       allDashboardList: {},
+      correlatedTracesStreams: {
+        byTraceId: {} as Record<string, { stream: string; range?: TraceTimeRange }>,
+        knownStreams: [] as string[],
+      },
       rumToken: {
         rum_token: "",
       },
