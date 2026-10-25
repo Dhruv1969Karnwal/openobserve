@@ -19,6 +19,7 @@ import { mount, flushPromises } from "@vue/test-utils";
 import { initializeLogsIndexDom } from "@/test/unit/helpers/logsIndex";
 import Index from "@/plugins/logs/Index.vue";
 import i18n from "@/locales";
+import config from "@/aws-exports";
 import store from "@/test/unit/helpers/store";
 vi.mock("@/stores", async () => {
   const { default: store } = await import("@/test/unit/helpers/store");
@@ -58,6 +59,12 @@ vi.mock("@/composables/useLogs", async () => {
         loadVisualizeData: () => {
           loaderCalls.push("visualize");
           return api.loadVisualizeData();
+        },
+        loadPatternsData: () => {
+          loaderCalls.push("patterns");
+          const run = api.loadPatternsData();
+          loadRuns.push(run);
+          return run;
         },
       };
     },
@@ -109,6 +116,7 @@ describe("Logs Index — first landing and URL loads (item 2)", { timeout: 30000
   let wrapper: any;
   const org = store.state.selectedOrganization.identifier;
   const originalZoConfig = { ...store.state.zoConfig };
+  const originalIsEnterprise = config.isEnterprise;
 
   const land = async (query: Record<string, string>, zoConfig: Record<string, unknown>) => {
     store.state.zoConfig = { ...originalZoConfig, ...zoConfig };
@@ -138,6 +146,7 @@ describe("Logs Index — first landing and URL loads (item 2)", { timeout: 30000
   afterEach(async () => {
     wrapper?.unmount();
     store.state.zoConfig = originalZoConfig;
+    (config as any).isEnterprise = originalIsEnterprise;
     vi.restoreAllMocks();
     localStorage.clear();
     await router.replace({ path: router.currentRoute.value.path, query: {} });
@@ -342,6 +351,35 @@ describe("Logs Index — first landing and URL loads (item 2)", { timeout: 30000
       });
       expect(logs).toHaveBeenCalledTimes(1);
       expect(logs.mock.calls[0][0]).toMatchObject({ reason: "narrow" });
+    });
+  });
+
+  // F-43: ?logs_visualize_toggle=patterns is a paid deep link; the shipped
+  // hide policy must sanitize it on restore, exactly like the toggle and the
+  // click path are gated.
+  describe("patterns deep-link restore vs the logPatterns entitlement (F-43)", () => {
+    const patternsUrl = {
+      stream: "k8s_json",
+      stream_type: "logs",
+      period: "15m",
+      logs_visualize_toggle: "patterns",
+    };
+    const zoCfg = { auto_query_enabled: true, query_on_stream_selection: true };
+
+    it("lands on logs and never touches loadPatternsData when the build cannot unlock patterns", async () => {
+      await land(patternsUrl, zoCfg);
+      expect(loaderCalls).toContain("logs");
+      expect(loaderCalls).not.toContain("patterns");
+      expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("logs");
+    });
+
+    it("still lands on patterns when the entitlement unlocks log patterns", async () => {
+      (config as any).isEnterprise = "true";
+      await land(patternsUrl, zoCfg);
+      // setupLogsTab still preps the logs tab (upstream behavior) — the tell is
+      // that the paid panel loads and the toggle is NOT sanitized away.
+      expect(loaderCalls).toContain("patterns");
+      expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("patterns");
     });
   });
 });
