@@ -94,11 +94,13 @@
             <!-- Pipe divider between the two options -->
             <OSeparator v-if="transformTypeOptions[1]" vertical class="my-1.5" />
 
-            <!-- JavaScript — shown locked (not hidden) in builds that don't
-                 unlock it; see isJsAllowed in AddFunction.vue. The toggle
-                 writes straight to form state on click, so a locked click is
-                 caught on this wrapper BEFORE it reaches the item — removing
-                 `disabled` there would let it write "1" to the form. -->
+            <!-- JavaScript is only ever offered when the edition unlocks it, or
+                 when the paid-feature policy locks instead of hiding — the
+                 option is absent otherwise, see transformTypeOptions in
+                 AddFunction.vue. The toggle writes straight to form state on
+                 click, so a locked click is caught on this wrapper BEFORE it
+                 reaches the item — removing `disabled` there would let it write
+                 "1" to the form. -->
             <span
               v-if="transformTypeOptions[1]"
               class="contents"
