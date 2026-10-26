@@ -176,9 +176,9 @@ describe("Schema Component Tests", () => {
     const originalIsEnterprise = (config as any).isEnterprise;
 
     beforeEach(async () => {
-      // The SDR column/action is shown locked (not hidden) in builds that
-      // don't unlock it — these tests exercise the unlocked action itself,
-      // so they need an entitled build. `columns` reads this once at setup,
+      // The SDR column/action renders only while the gate is `visible`, which the
+      // shipped "hide" policy grants only to an entitled build — these tests
+      // exercise the unlocked action itself. `columns` reads this once at setup,
       // so it must be set before mount, not inside an individual `it`.
       (config as any).isEnterprise = "true";
       mockGetStream.mockResolvedValue({

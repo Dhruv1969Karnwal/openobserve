@@ -692,8 +692,9 @@ export default defineComponent({
     const { isDark } = useTheme();
     const router: any = useRouter();
 
-    // Self-hosted-only (cloudOffers: false) — pure Cloud gets `visible: false`
-    // (hidden, matching today's real behavior), OSS gets locked-but-visible.
+    // Self-hosted-only (cloudOffers: false) — pure Cloud is force-hidden by that
+    // flag, and OSS hides as well under the shipped "hide" policy: the section
+    // renders on `customBrandingAccess.visible`.
     const customBrandingAccess = useLockedAffordance("customBranding");
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
     function onLockedBrandingClick(event: MouseEvent) {

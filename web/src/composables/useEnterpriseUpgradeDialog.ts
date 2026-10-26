@@ -30,6 +30,7 @@ const isEnterpriseUpgradeDialogOpen = ref(false);
 
 /** A locked affordance survived the hide policy, so its click can only offer nothing. */
 function reportLockedAffordanceUnderHide() {
+  // DEV also holds under vitest (MODE "test"), which is how the spec asserts this fires.
   if (!import.meta.env.DEV) return;
   console.error(
     '[useEnterpriseUpgradeDialog] a locked control was clicked while PAID_FEATURE_POLICY is "hide", so it did nothing. Render it only when showsLockedAffordances is true, or gate it on FeatureAccess.visible.',

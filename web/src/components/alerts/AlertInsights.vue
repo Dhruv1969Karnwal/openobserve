@@ -283,8 +283,9 @@ const store = useStore();
 const { t } = useI18nTyped();
 const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 
-// Frequency/Correlation tabs — shown locked (not hidden) in builds that
-// don't unlock it.
+// Frequency/Correlation tabs — rendered on `insightsAccess.visible` (both tabs in
+// the template), so the shipped "hide" policy drops them and only a "lock" build
+// renders them locked.
 const insightsAccess = computed(() =>
   checkFeatureAccess("alertInsights", buildFeatureGateContext(store.state.zoConfig)),
 );

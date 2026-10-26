@@ -40,9 +40,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :label="lt.label"
             :icon="lt.icon"
           />
-          <!-- Correlation tabs are present whenever service streams are
-               enabled; shown locked (not hidden) without an enterprise
-               license — see availableTabs. -->
+          <!-- Correlation tabs enter the list when service streams are enabled AND
+               the gate is visible; the shipped "hide" policy never renders them, the
+               lock icon below is a "lock" build affordance — see availableTabs. -->
           <template v-for="tabItem in tabOrder" :key="tabItem.name">
             <OTab
               :data-test="tabItem.dataTest"

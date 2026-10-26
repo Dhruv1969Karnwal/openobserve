@@ -419,10 +419,9 @@ describe("General", () => {
     });
   });
 
-  // customBranding is self-hosted-only (cloudOffers: false): OSS sees the
-  // section locked-but-visible (disabled controls + lock), pure Cloud doesn't
-  // see it at all — same split as the other cloudOffers:false gates (e.g.
-  // cipherKeys in settings/index.vue).
+  // customBranding is self-hosted-only (cloudOffers: false), so pure Cloud never
+  // sees it at all; on OSS the shipped "hide" policy hides it too — same shape as
+  // the other cloudOffers:false gates (e.g. cipherKeys in settings/index.vue).
   describe("Custom branding gating", () => {
     const originalIsEnterprise = config.isEnterprise;
     const originalIsCloud = config.isCloud;

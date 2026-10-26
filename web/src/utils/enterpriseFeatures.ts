@@ -123,7 +123,8 @@ const FEATURE_GATES: Record<FeatureKey, FeatureGateDefinition> = {
   // Used for groups/roles AND quota — quota additionally requires meta-org,
   // applied as a separate `visible` hide at the call site (see the doc
   // comment on FeatureGateContext). Cloud DOES offer RBAC, so no
-  // `cloudOffers: false` here — a locked-but-visible state is correct.
+  // `cloudOffers: false` here — that flag force-hides on pure Cloud under ANY
+  // policy, which would be wrong for a feature Cloud actually sells.
   rbac: {
     predicate: (c) => (c.isEnterprise || c.isCloud) && c.rbac,
     labelKey: "iam.sectionPermissions",

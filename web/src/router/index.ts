@@ -77,7 +77,7 @@ export default function (store: any) {
   const router = createRouter(routerMap);
 
   router.beforeEach((to: any, from: any, next: any) => {
-    // Set page title with OpenObserve prefix.
+    // Set page title with the Retrace.ai prefix.
     //
     // Routes carry an i18n KEY (`meta.titleKey`), not the text: the route tables
     // are module-scope, so translating where a route is declared would freeze the

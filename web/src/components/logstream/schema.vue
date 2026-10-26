@@ -933,8 +933,8 @@ export default defineComponent({
     const store = useStore();
     const { isDark } = useTheme();
     // The "SDR" (Sensitive Data Redaction) column is the same capability as
-    // Settings → Regex Patterns, surfaced per-field here — shown locked (not
-    // hidden) in builds that don't unlock it.
+    // Settings → Regex Patterns, surfaced per-field here — `columns` builds it only
+    // while `sdrAccess.visible`, so the shipped "hide" policy drops the column.
     const sdrAccess = computed(() =>
       checkFeatureAccess("regexPatterns", buildFeatureGateContext(store.state.zoConfig)),
     );

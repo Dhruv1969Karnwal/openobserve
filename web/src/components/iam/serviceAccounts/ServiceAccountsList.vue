@@ -688,14 +688,15 @@ export default defineComponent({
     });
 
     // Same rbac gate AddServiceAccount.vue / IdentityAccessManagement.vue use
-    // for the Groups/Roles rail — reused here so the quick-add links and the
-    // Roles column lock instead of vanish when rbac isn't allowed.
+    // for the Groups/Roles rail: the quick-add links and the Roles column render
+    // on `rbacAccess.visible`, so the shipped "hide" policy drops them and only a
+    // "lock" build renders them locked.
     const rbacAccess = useLockedAffordance("rbac");
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 
     // Step 2 framing: unlocked nudges toward the Groups page (with a link
-    // below); locked still shows the links (disabled, with the lock tooltip)
-    // and points to Roles & Groups in copy instead.
+    // below); not allowed points at Roles & Groups in copy instead (the links
+    // themselves are `visible`-gated, so "hide" renders none here at all).
     const tokenNextStepHint = computed(() => {
       if (rbacAccess.value.allowed) return t("serviceAccounts.tokenReveal.nextStepGrant");
       return t("serviceAccounts.tokenReveal.nextStepOss");
@@ -713,8 +714,8 @@ export default defineComponent({
       meta: { align: "left" },
     }));
 
-    // Quick-add links stay visible when locked — clicking opens the upgrade
-    // dialog instead of navigating to Roles/Groups.
+    // The links render only when the gate is `visible`; on a "lock" build a click
+    // opens the upgrade dialog instead of navigating to Roles/Groups.
     const onQuickLinkClick = (e: Event) => {
       if (!rbacAccess.value.allowed) {
         e.preventDefault();

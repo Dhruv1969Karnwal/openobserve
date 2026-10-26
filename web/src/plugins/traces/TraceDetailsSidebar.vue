@@ -440,7 +440,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           data-test="trace-details-sidebar-tabs-links"
           class="font-normal! capitalize"
         />
-        <!-- Correlation Tabs (visible whenever service streams are enabled; locked without an enterprise license) -->
+        <!-- Correlation Tabs (enter the tab list when service streams are enabled AND correlationAccess is visible: the shipped "hide" policy omits them, a "lock" build locks them) -->
         <OTab
           v-if="serviceStreamsEnabled && correlationAccess.visible"
           name="correlated-logs"

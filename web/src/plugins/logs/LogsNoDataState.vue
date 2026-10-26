@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <!--
   LogsNoDataState — shown when the selected organization has no log streams yet.
-  Each card routes to a distinct, real ingestion path in OpenObserve.
+  Each card routes to a distinct, real in-app ingestion path.
 -->
 <template>
   <OEmptyState v-bind="shell" :hide-action="true">

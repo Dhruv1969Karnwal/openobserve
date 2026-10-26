@@ -36,7 +36,7 @@ export const resetPaidFeaturePolicy = (): void => {
 
 export const paidFeaturePolicy = (): PaidFeaturePolicy => cell.mode;
 
-// LIMITATION: the spread keeps the real checkFeatureAccess/useLockedFeatureGate, which read the
+// LIMITATION: the spread keeps the real checkFeatureAccess/useLockedAffordance, which read the
 // shipped constant from inside their own module. This flips what CONSUMERS see.
 export const withPaidFeaturePolicy = async (
   importOriginal: () => Promise<Record<string, unknown>>,

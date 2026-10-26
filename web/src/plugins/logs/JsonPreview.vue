@@ -514,14 +514,15 @@ export default {
     let multiStreamFields: any = ref([]);
 
     const showViewRelatedBtn = ref(false);
-    // Shown locked (not hidden) in builds that don't unlock it — clicking
-    // opens the enterprise upgrade dialog instead of the real action.
+    // The "View related" button renders on `correlationAccess.visible` in the
+    // template: the shipped "hide" policy omits it, and only a "lock" build shows
+    // it locked with clicks opening the enterprise upgrade dialog.
     const correlationAccess = computed(() =>
       checkFeatureAccess("correlation", buildFeatureGateContext(store.state.zoConfig)),
     );
-    // Same locked-visible treatment for the per-field "Send to AI Chat" and
-    // "Create regex pattern" menu items below — `ai_enabled` is a separate
-    // runtime toggle layered on top (hide, not lock) for the AI item only.
+    // Same `visible` gating for the per-field "Send to AI Chat" and "Create regex
+    // pattern" menu items below — `ai_enabled` is a separate runtime toggle layered
+    // on top for the AI item only.
     const aiAssistantAccess = computed(() =>
       checkFeatureAccess("aiAssistant", buildFeatureGateContext(store.state.zoConfig)),
     );

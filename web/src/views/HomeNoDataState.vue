@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <!--
   HomeNoDataState — empty state for the Home/Usage tab when the org has no ingested data.
-  Each card and chip routes to a distinct, real ingestion path in OpenObserve,
+  Each card and chip routes to a distinct, real in-app ingestion path,
   covering logs, traces, metrics, and AI integrations.
 -->
 <template>

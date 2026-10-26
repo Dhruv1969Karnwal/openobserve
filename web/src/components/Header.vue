@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       >
         <OIcon name="menu" size="sm" class="size-5!" />
       </OButton>
-      <!-- LOGO SECTION: Displays custom or default OpenObserve logo -->
+      <!-- LOGO SECTION: Displays the enterprise custom logo, else the product wordmark -->
       <!-- Shows custom logo/text if configured in enterprise mode -->
       <div
         class="relative-position flex"
@@ -682,8 +682,9 @@ export default defineComponent({
       event.stopPropagation();
     };
 
-    // AI chat toggle — shown locked (not hidden) in builds that don't unlock
-    // it. Same `ai_enabled`-is-an-admin-preference-not-an-upsell-target
+    // AI chat toggle — rendered on `aiAccess.visible` (see `aiButtonVisible`), so
+    // the shipped "hide" policy omits it and only a "lock" build shows it locked.
+    // Same `ai_enabled`-is-an-admin-preference-not-an-upsell-target
     // reasoning as QueryEditor.vue's floating AI icon: an entitled org that's
     // turned AI off still never sees the button at all.
     //

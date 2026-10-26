@@ -222,8 +222,9 @@ export default defineComponent({
       groups: [],
     }));
 
-    // Same rbac gate IdentityAccessManagement.vue uses for the Groups/Roles
-    // rail items — reused here so the pickers lock instead of vanish in OSS.
+    // Same rbac gate IdentityAccessManagement.vue uses for the Groups/Roles rail
+    // items: the pickers render on `rbacAccess.visible`, so the shipped "hide"
+    // policy drops them and only a "lock" build renders them locked.
     const rbacAccess = useLockedAffordance("rbac");
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 

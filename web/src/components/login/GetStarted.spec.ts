@@ -202,7 +202,7 @@ describe("GetStarted.vue", () => {
   });
 
   describe("content", () => {
-    it("shows the welcome title under either paid-feature policy", async () => {
+    it("shows the welcome title on the shipped hide policy", async () => {
       await mountAt();
       expect(byTest("onboarding-get-started-title").text()).toBe("Welcome to Retrace.ai");
     });

@@ -196,8 +196,8 @@ export const themeNameSlug = (name: string): string => name.toLowerCase().replac
 
 /**
  * User-facing label for a theme. The stored `name` is the persisted selection key
- * and must never change, but the "O2 " prefix is dropped for display on every
- * theme except the signature theme ("O2 Signature" stays branded).
+ * and must never change; the "O2 " prefix is dropped for display, and the
+ * signature theme is remapped below to carry this product's name instead.
  */
 // Stored names stay historical so saved preferences keep resolving; only the display name carries the product.
 export const THEME_DISPLAY_NAMES: Record<string, string> = {
