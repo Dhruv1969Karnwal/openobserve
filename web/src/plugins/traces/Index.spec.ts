@@ -3751,6 +3751,44 @@ describe("Index.vue (Main Traces Page)", () => {
 
         expect(mockSearchObj.meta.searchMode).toBe("service-graph");
       });
+
+      /**
+       * F-98 / EDGE-04: the same resolver now also runs AT the sinks. Both callers
+       * are already entitled-only — the tab control refuses a locked tab, the URL and
+       * view paths resolve before assigning, and the Service Graph view only mounts
+       * with the feature — so these cells pin defense-in-depth rather than a
+       * reachable flow: a caller that forgets to resolve can no longer land the paid
+       * mode in state.
+       */
+      it("refuses service-graph at the onSearchModeChange sink on an un-entitled build", async () => {
+        (config as any).isEnterprise = "false";
+        mockSearchObj.meta.searchMode = "spans";
+        await mountPage();
+
+        wrapper.vm.onSearchModeChange("service-graph");
+
+        expect(mockSearchObj.meta.searchMode).toBe("spans");
+      });
+
+      it("refuses service-graph at the view-traces handoff sink on an un-entitled build", async () => {
+        (config as any).isEnterprise = "false";
+        mockSearchObj.meta.searchMode = "spans";
+        await mountPage();
+
+        wrapper.vm.handleServiceGraphViewTraces({ mode: "service-graph", serviceName: "cart" });
+
+        expect(mockSearchObj.meta.searchMode).toBe("spans");
+      });
+
+      /** Entitled mirror: the sink must not eat the mode the edition unlocked. */
+      it("keeps service-graph at the sink when the edition unlocks it", async () => {
+        mockSearchObj.meta.searchMode = "spans";
+        await mountPage();
+
+        wrapper.vm.onSearchModeChange("service-graph");
+
+        expect(mockSearchObj.meta.searchMode).toBe("service-graph");
+      });
     });
 
     it("toasts an error and leaves state unchanged for an unknown view version", async () => {
