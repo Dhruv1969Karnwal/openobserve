@@ -72,7 +72,11 @@
                              the dashboard-folder hover (theme-tinted, not grey) */
   --d-selected: color-mix(in srgb, var(--color-primary-500) 30%, var(--d-panel));
   /* selected row — teal-tinted (brand signal)       */
-  --d-zebra: #1a1d21; /* striped-row bg — one step off the base canvas    */
+  --d-zebra: #101215; /* striped-row bg — OUTSIDE the elevation band, a hair BELOW
+                             the base canvas (L .00597: chrome .00400 < zebra < base
+                             .00847) so a stripe reads as a row rule, never a tier.
+                             Step off base 1.045:1, below the 1.112:1 base→panel
+                             elevation step and below its square root (1.055). */
 
   /* --- Text: label/muted/placeholder use grey-450, sized to clear 4.5:1 on the LIGHTEST tier
          (--d-overlay, 4.76:1) and not just on the canvas; grey-500 is 3.79:1 there, under AA. --- */
@@ -808,7 +812,7 @@
   --color-table-header-bg: var(--d-overlay); /* header band lifts off rows */
   --color-table-row-hover-bg: var(--d-hover); /* neutral hover (not teal-washed) */
   --color-table-row-selected-bg: var(--d-selected); /* teal-tinted selection */
-  --color-table-row-striped-bg: var(--d-zebra); /* panel +1 step zebra */
+  --color-table-row-striped-bg: var(--d-zebra); /* stripe BELOW the canvas — sub-tier row rule */
   --color-table-row-divider: var(--d-divider); /* solid, visible row separators */
   --color-table-highlight-bg: color-mix(in srgb, var(--color-warning-700) 40%, transparent);
   --color-table-sort-icon-active: var(--color-primary-400);
