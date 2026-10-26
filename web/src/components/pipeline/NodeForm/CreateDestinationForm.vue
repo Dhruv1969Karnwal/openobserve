@@ -488,7 +488,7 @@ const outputFormats = [
 ];
 const destinationTypes = [
   {
-    label: raw("OpenObserve"),
+    label: raw("Retrace.ai"),
     value: "openobserve",
     icon: "insights",
     image: getImageURL("images/pipeline/openobserve.svg"),

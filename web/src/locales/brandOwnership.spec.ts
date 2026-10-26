@@ -14,6 +14,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import arSa from "./languages/ar-SA.json";
 import deDe from "./languages/de-DE.json";
 import enUs from "./languages/en-US.json";
@@ -102,5 +104,233 @@ describe("brand ownership in locale strings", () => {
   it("keeps the two alt keys apart, because the two logos are not the same company's", () => {
     expect(enUs.login.openObserveLogoAlt).not.toBe(enUs.modelPricing.openObserveLogoAlt);
     expect(zhTw.login.openObserveLogoAlt).not.toBe(zhTw.modelPricing.openObserveLogoAlt);
+  });
+});
+
+const atPath = (locale: Locale, dotted: string) =>
+  dotted.split(".").reduce((node: any, part) => (node == null ? undefined : node[part]), locale);
+
+// Keys whose referent is the product the user is looking at (iteration-6 F-76 sweep). They name this
+// deployment, so naming upstream in them is a missed rename; none of them is a wire value.
+const PRODUCT_REFERENT_KEYS = [
+  "emptyState.noRemoteTasks.actionDesc",
+  "rum.analytics.sdkSampledTip",
+  "ingestion.firstEvent.askAiPrompt",
+  "ingestion.webServerGuide.verifyTitle",
+  "ingestion.vmagent.tipSuffix",
+  "ingestion.azureSetup.activityLogsDescription",
+  "ingestion.setupCard.advancedInstallDescSelfHosted",
+  "ingestion.setupCard.agentTroubleUnreachableA",
+  "ingestion.setupCard.dynamodbFirehoseEndpointTitle",
+  "ingestion.setupCard.gcpSinkDesc",
+  "ingestion.setupCard.gcpSubscriptionTitle",
+  "ingestion.setupCard.gcpTroublePartialA",
+  "ingestion.setupCard.k8sInternalEndpointNote",
+  "ingestion.setupCard.pointExporterTitle",
+  "ingestion.setupCard.rumFixBody",
+  "ingestion.setupCard.rumTroublePlainHttpQ",
+  "ingestion.setupCard.sendNotebookLogsDesc",
+  "ingestion.setupCard.verifyDataTitle",
+  "ingestion.setupCard.taglineDatabricks",
+  "ingestion.setupCard.taglineGcp",
+  "ingestion.setupCard.taglineOtlpTraces",
+  "ingestion.setupCard.gpuShipTitle",
+  "ingestion.setupCard.gpuShipDesc",
+  "ingestion.setupCard.aerospikeTagline",
+  "ingestion.setupCard.cassandraTagline",
+  "ingestion.setupCard.dynamodbTagline",
+  "ingestion.setupCard.mariadbTagline",
+  "ingestion.setupCard.mongodbTagline",
+  "ingestion.setupCard.mysqlTagline",
+  "ingestion.setupCard.oracleTagline",
+  "ingestion.setupCard.postgresqlTagline",
+  "ingestion.setupCard.redisTagline",
+  "ingestion.setupCard.snowflakeTagline",
+  "ingestion.setupCard.sqlServerTagline",
+  "ingestion.setupCard.zookeeperTagline",
+  "ingestion.integrations.aws.cloudwatch-logs.description",
+  "ingestion.integrations.aws.vpc-flow-logs.cloudwatchIntegrationDescription",
+  "ingestion.integrations.aws.dynamodb.lambdaIntegrationDescription",
+  "ingestion.integrations.aws.dynamodb.directIntegrationDescription",
+  "ingestion.integrations.aws.cloudfront.directIntegrationDescription",
+  "ingestion.integrations.aws.kinesis.lambdaIntegrationDescription",
+  "ingestion.integrations.azure.activity-logs.description",
+  "aiAssistant.suggestions.datadogToO2",
+  "alerts.alertSettings.builtInVars.alertUrl",
+  "alerts.prebuiltDestinations.servicenowResolutionCodeHelp",
+  "alert_library.noCollectorDescription",
+  "correlation.semanticFieldGroupsCaption",
+  "onlineEvals.job.inputMapping.systemProvided.description",
+  "dbm.activity.notCollecting.checks.sampling.noDetail",
+  "statusPages.domains.nextStepCname",
+  "infra.k8s2.workloadsRuleTip",
+  "fleet.settings.targetVersionDesc",
+  "storage_settings.awsStsCloudInfo",
+];
+
+// Keys whose referent is an upstream-run artifact — editions and license banners, the Terraform
+// provider, the registered Slack app, npm/SDK names, k8s/Helm wire identifiers, upstream hosts and
+// docs. Renaming any of these would attribute upstream's things to this product.
+const UPSTREAM_REFERENT_KEYS = [
+  "about.license_info_note",
+  "about.os_libraries_msg",
+  "about.enterprise_offer.cloud.offer_text",
+  "enterpriseFeature.locked",
+  "traces.serviceGraph.errorApiNotFound",
+  "common.openProviderOnRegistry",
+  "common.exportTerraformSkipped",
+  "alerts.exportDialogSubtitle",
+  "slos.exportSubtitle",
+  "communitySlackInvite.description",
+  "ingestion.setupCard.otlpGrpcCloudNote",
+  "slackApp.wizard.subtitle",
+  "settings.slackAppDesc",
+  "alert_destinations.slackOAuth.selfHostedApp",
+  "ingestion.mcp.name",
+  "ingestion.setupCard.initRumLogsDesc",
+  "rum.emptyState.webAppDesc",
+  "ingestion.setupCard.k8sTroubleEndpointA",
+  "ingestion.setupCard.k8sTroubleNoDataA",
+];
+
+// Ambiguous referents held back on purpose (collector/agent prose, a pipeline destination that may
+// be a foreign instance, the upstream-owned built-in model catalog): untouched, still upstream-named.
+const AMBIGUOUS_HELD_KEYS = [
+  "pipeline.destinationNotes.openobserveTitle",
+  "alert_destinations.organizationHelpText",
+  "synthetics.createBrowserTest.setupInstallTitle",
+  "ingestion.setupCard.taglineKubernetes",
+];
+
+// Not a credit and not a miss: this is the label the backend itself puts in the alert it sends —
+// DEFAULT_LINK_LABEL ("src/core/src/alerts/notifications/render/mod.rs:86", used by slack.rs,
+// teams.rs, email.rs and webhook.rs) — so the preview that promises it must say what arrives.
+const PAYLOAD_FIDELITY_KEYS = ["alert_templates.viewAlertLinkLabel"];
+
+function collectStrings(node: any, path: string, into: [string, string][]): void {
+  if (typeof node === "string") into.push([path, node]);
+  else if (Array.isArray(node)) node.forEach((v, i) => collectStrings(v, `${path}[${i}]`, into));
+  else if (node && typeof node === "object") {
+    for (const [key, value] of Object.entries(node))
+      collectStrings(value, path ? `${path}.${key}` : key, into);
+  }
+}
+
+describe("product referents name this product, upstream referents do not", () => {
+  for (const [code, locale] of LOCALES) {
+    it(`${code} stops naming upstream in the ${PRODUCT_REFERENT_KEYS.length} product-referent keys`, () => {
+      for (const key of PRODUCT_REFERENT_KEYS) {
+        const value = atPath(locale, key);
+        expect(typeof value, key).toBe("string");
+        expect(value, key).not.toMatch(/openobserve/i);
+      }
+    });
+
+    it(`${code} never credits an upstream-owned or wire-payload string to this product`, () => {
+      for (const key of [
+        ...UPSTREAM_REFERENT_KEYS,
+        ...AMBIGUOUS_HELD_KEYS,
+        ...PAYLOAD_FIDELITY_KEYS,
+      ]) {
+        expect(String(atPath(locale, key)), key).not.toContain(PRODUCT);
+      }
+    });
+
+    it(`${code} carries no string that names both brands at once`, () => {
+      const flat: [string, string][] = [];
+      collectStrings(locale, "", flat);
+      expect(flat.length).toBeGreaterThan(1000);
+      const mixed = flat.filter(
+        ([, value]) => /retrace/i.test(value) && /openobserve/i.test(value),
+      );
+      expect(mixed.map(([key]) => key)).toEqual([]);
+    });
+  }
+
+  it("names this product in English where the sweep applied", () => {
+    for (const key of PRODUCT_REFERENT_KEYS) {
+      expect(String(atPath(enUs, key)), key).toContain(PRODUCT);
+    }
+  });
+
+  it("keeps upstream's own name in English on upstream-owned and payload-owned strings", () => {
+    for (const key of [
+      ...UPSTREAM_REFERENT_KEYS,
+      ...AMBIGUOUS_HELD_KEYS,
+      ...PAYLOAD_FIDELITY_KEYS,
+    ]) {
+      expect(String(atPath(enUs, key)), key).toContain(UPSTREAM);
+    }
+  });
+
+  it("renders the AWS STS contact with the correct casing of whoever is being contacted", () => {
+    expect(enUs.storage_settings.awsStsCloudInfo).toContain(PRODUCT);
+    expect(enUs.storage_settings.awsStsCloudInfo).not.toMatch(/Openobserve/);
+  });
+
+  it("re-translates the Turkish Slack wizard lines to what English actually says", () => {
+    expect(trTr.slackApp.wizard.instanceAdminContact).toBe("Örneğinizin yöneticisi: {contact}");
+    expect(trTr.slackApp.wizard.takeOverAction).toBe("Bunu örneğin çalışma alanı yap");
+    for (const value of [
+      trTr.slackApp.wizard.instanceAdminContact,
+      trTr.slackApp.wizard.takeOverAction,
+    ]) {
+      expect(value).not.toMatch(/openobserve/i);
+      expect(value).not.toContain(PRODUCT);
+    }
+  });
+});
+
+const componentSource = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
+
+describe("raw product-name slots in components", () => {
+  for (const [file, call] of [
+    ["src/components/ingestion/logs/SplunkHec.vue", 't("ingestion.splunkHec.intro"'],
+    ["src/components/ingestion/logs/SplunkHec.vue", 't("ingestion.splunkHec.authBody"'],
+    ["src/components/ingestion/logs/SplunkHec.vue", 't("ingestion.splunkHec.tlsBody"'],
+    [
+      "src/components/alerts/AlertSettingsHelpDrawer.vue",
+      't("alerts.alertSettings.helpBuiltInIntro"',
+    ],
+    ["src/components/settings/OrgStorageEditor.vue", 't("storage_settings.awsStsCloudInfo"'],
+  ] as [string, string][]) {
+    it(`${file} fills ${call} with this product's name`, () => {
+      const source = componentSource(file);
+      const slot = source.slice(source.indexOf(call), source.indexOf(call) + 400);
+      expect(slot).toContain(`raw("${PRODUCT}")`);
+      expect(slot).not.toContain(`raw("${UPSTREAM}")`);
+    });
+  }
+
+  it("labels the built-in cipher key type and the openobserve pipeline type as this product", () => {
+    expect(componentSource("src/components/cipherkeys/AddCipherKey.vue")).toContain(
+      `{ label: raw("${PRODUCT}"), value: "local" }`,
+    );
+    const pipeline = componentSource("src/components/pipeline/NodeForm/CreateDestinationForm.vue");
+    expect(pipeline).toContain(`label: raw("${PRODUCT}"),\n    value: "openobserve",`);
+    expect(pipeline).toContain('getImageURL("images/pipeline/openobserve.svg")');
+  });
+
+  // Mirror, not credit: this is the Opsgenie resolve body this build sends, `{"source":"OpenObserve"}`
+  // (src/core/src/alerts/notifications/platform.rs:116) plus DEFAULT_LINK_LABEL (render/mod.rs:86).
+  it("leaves preview copy that mirrors the sent payload saying what actually arrives", () => {
+    const preview = componentSource("src/components/alerts/DestinationPreview.vue");
+    expect(preview).toContain(`<strong>{{ raw("Source:") }}</strong> {{ raw("${UPSTREAM}") }}`);
+    expect(preview).toContain(`raw("${UPSTREAM} Alert: High CPU Usage")`);
+    expect(preview).toContain(`raw("View in ${UPSTREAM}")`);
+  });
+
+  // Credit, not a miss: the built-in model catalog, the enterprise-edition CTA, the Slack workspace
+  // and the npm/`@openobserve` MCP surface all belong to upstream (F-27, F-33, F-44).
+  it("leaves the slots that credit upstream standing as upstream", () => {
+    const keeps: [string, string][] = [
+      ["src/components/settings/ModelPricingList.vue", `raw('${UPSTREAM}')`],
+      ["src/components/Header.vue", `raw("${UPSTREAM}")`],
+      ["src/components/CommunitySlackInvite.vue", `raw("${UPSTREAM}")`],
+      ["src/components/ingestion/ai/McpServerCard.vue", `raw("${UPSTREAM}")`],
+    ];
+    for (const [file, needle] of keeps) {
+      expect(componentSource(file), file).toContain(needle);
+    }
   });
 });

@@ -565,7 +565,7 @@
       "title": "No remote tasks yet",
       "description": "A remote task is an HTTP service your experiments call to produce outputs. Publish it once, prove the connection works, and every experiment can pin the exact version it ran against.",
       "action": "New Task",
-      "actionDesc": "Point OpenObserve at your endpoint and test the connection."
+      "actionDesc": "Point Retrace.ai at your endpoint and test the connection."
     },
     "noDowntimes": {
       "title": "No downtimes yet",
@@ -1880,7 +1880,7 @@
       "refresh": "Refresh",
       "refreshDataThrough": "Refresh · data through {time}",
       "sdkSampled": "Counts reflect sampled SDK sessions",
-      "sdkSampledTip": "Only sessions your RUM SDK keeps ({field}) reach OpenObserve, so every count here covers those sessions.",
+      "sdkSampledTip": "Only sessions your RUM SDK keeps ({field}) reach Retrace.ai, so every count here covers those sessions.",
       "identityExcluded": "{count} identity value excluded ({pct}%) | {count} identity values excluded ({pct}%)",
       "identityIncluded": "All identity values included",
       "identityExcludedHelp": "One value covers {pct}% of identified sessions, likely a test or shared account. It is left out of every users count, funnel and retention grid.",
@@ -5116,7 +5116,7 @@
       "askAi": "Ask AI",
       "guideDocs": "{guide} docs",
       "setupDocs": "Setup docs",
-      "askAiPrompt": "I'm setting up {guide} in OpenObserve and no data has arrived yet. The first-event check says: {details} Org id: {org}. Endpoint: {endpoint}. What should I check next?",
+      "askAiPrompt": "I'm setting up {guide} in Retrace.ai and no data has arrived yet. The first-event check says: {details} Org id: {org}. Endpoint: {endpoint}. What should I check next?",
       "askAiRejected": "requests are refused with {status} {reason} on {path}.",
       "askAiNoRequests": "nothing has arrived and no request was refused.",
       "askAiUnavailable": "rejected requests could not be read, so no cause is known.",
@@ -5170,7 +5170,7 @@
       "configTitle": "Save this as {path} and restart Fluent Bit",
       "configDescription": "Tails the {server} logs and posts them to the {stream} stream of {org} with the org token.",
       "restartHint": "Then run {command}.",
-      "verifyTitle": "Verify data in OpenObserve"
+      "verifyTitle": "Verify data in Retrace.ai"
     },
     "copyContentError": "Error while copy content.",
     "passcodeForbiddenMessage": "Admin or Root role required to view the ingestion token. Ask an administrator for the setup command, or for the role needed to see it here.",
@@ -5253,7 +5253,7 @@
       "singleTargetTitle": "Single remote write target",
       "fanoutTitle": "Fan-out to multiple backends",
       "tipPrefix": "Tip: `vmagent` can duplicate writes by repeating the",
-      "tipSuffix": "flag, so you can keep an existing VictoriaMetrics destination while also forwarding metrics to OpenObserve.",
+      "tipSuffix": "flag, so you can keep an existing VictoriaMetrics destination while also forwarding metrics to Retrace.ai.",
       "docLinkText": "to learn more about configuring vmagent remote write targets."
     },
     "ai": {
@@ -5339,7 +5339,7 @@
       "selectAtLeastOneCategory": "Select at least one log category above.",
       "runCommandAfterDeployment": "Run this command after your ARM deployment completes:",
       "activityLogsTitle": "Azure Activity Logs",
-      "activityLogsDescription": "Stream Azure subscription activity logs to OpenObserve via {product}. The ARM template sets up the Event Hub infrastructure — you then configure Azure to export logs to it.",
+      "activityLogsDescription": "Stream Azure subscription activity logs to Retrace.ai via {product}. The ARM template sets up the Event Hub infrastructure — you then configure Azure to export logs to it.",
       "manualTitle": "Manual Configuration (for reference)"
     },
     "awsSetup": {
@@ -5462,16 +5462,16 @@
     "splunkHecUrlHelp": "Point your Splunk forwarder at this URL and send the token as the Authorization header value \"Splunk <token>\".",
     "setupCard": {
       "advancedInstallDescCloud": "For custom configurations, or to pin versions and customise the chart values. Run the steps in order.",
-      "advancedInstallDescSelfHosted": "For custom configurations, or to pin versions and customise the chart values. Run the steps in order. If OpenObserve runs in this same cluster, replace the exporter endpoints with `{url}`.",
+      "advancedInstallDescSelfHosted": "For custom configurations, or to pin versions and customise the chart values. Run the steps in order. If Retrace.ai runs in this same cluster, replace the exporter endpoints with `{url}`.",
       "advancedInstallLabel": "Advanced installation (manual steps)",
       "aerospikeHostLabel": "Aerospike Host",
-      "aerospikeTagline": "Collect Aerospike metrics with the OpenTelemetry Collector and ship them to OpenObserve.",
+      "aerospikeTagline": "Collect Aerospike metrics with the OpenTelemetry Collector and ship them to Retrace.ai.",
       "agentServiceFixTitle": "Check The Agent Service",
       "agentTroubleInstanceIdA": "That is the EC2 variant without its IAM role. {iamNote} Attach the role, then restart the agent.",
       "agentTroubleInstanceIdQ": "Hosts show up under an instance id instead of a name",
       "agentTroubleNoDataA": "Check the agent is running with {hint}. A 401 in its logs means the ingestion token is stale — re-copy the command from this page, which always carries this organization's current token.",
       "agentTroubleNoDataQ": "The install script runs but no data arrives",
-      "agentTroubleUnreachableA": "The agent needs outbound access to this OpenObserve endpoint. Confirm with `curl -v` from the host itself — a proxy or egress firewall is the usual cause.",
+      "agentTroubleUnreachableA": "The agent needs outbound access to this Retrace.ai endpoint. Confirm with `curl -v` from the host itself — a proxy or egress firewall is the usual cause.",
       "agentTroubleUnreachableQ": "The endpoint is unreachable from the host",
       "aiCategoryAnalytics": "Analytics & Evaluation",
       "aiCategoryFrameworks": "AI Frameworks & Agents",
@@ -5486,7 +5486,7 @@
       "autoInstrumentTracesDesc": "Both give you **distributed traces without touching application code or rebuilding images**. **Language libraries:** the OpenTelemetry operator injects auto-instrumentation into the pods of an annotated namespace. **eBPF:** the collector traces the processes you select, in any language, Go included.",
       "autoInstrumentTracesTitle": "Trace your applications: language libraries or eBPF",
       "cassandraJmxNote": "Enable JMX remote access on Cassandra for the receiver to connect.",
-      "cassandraTagline": "Collect Cassandra metrics via the OpenTelemetry Collector's JMX receiver and ship them to OpenObserve.",
+      "cassandraTagline": "Collect Cassandra metrics via the OpenTelemetry Collector's JMX receiver and ship them to Retrace.ai.",
       "checking": "Checking…",
       "checkingForLogs": "Checking for logs…",
       "checkingForMetrics": "Checking for metrics…",
@@ -5519,10 +5519,10 @@
       "downloadJmxJarDesc": "The JMX receiver runs this helper jar (requires Java on the collector host).",
       "downloadJmxJarTitle": "Download the JMX Metrics Jar",
       "dynamodbFirehoseEndpointDesc": "Use these as the **HTTP Endpoint** destination when creating your Kinesis Data Firehose delivery stream.",
-      "dynamodbFirehoseEndpointTitle": "OpenObserve Firehose Endpoint",
+      "dynamodbFirehoseEndpointTitle": "Retrace.ai Firehose Endpoint",
       "dynamodbPipelineDesc": "Enable **DynamoDB Streams** on your table, connect it to a **Kinesis Data Stream**, then point a **Kinesis Data Firehose** delivery stream at the HTTP endpoint above.",
       "dynamodbPipelineTitle": "Stream DynamoDB → Firehose",
-      "dynamodbTagline": "Stream DynamoDB item changes into OpenObserve via Kinesis Firehose.",
+      "dynamodbTagline": "Stream DynamoDB item changes into Retrace.ai via Kinesis Firehose.",
       "ec2IamNote": "Requires an IAM role on the instance with ec2:DescribeTags and ec2:DescribeInstances, so the agent can read the Name tag and use it as the host identifier.",
       "enableSessionReplayDesc": "Session Replay is configured **separately** from RUM and does **not** inherit `rumConfiguration.customEndpoint`. Give it its own base URL below — same shape as the RUM/Logs one. The bridge appends `/replay` itself, so do **not** add it yourself: a manually appended `/replay` double-appends the path and every upload is rejected with 401, which is the usual reason RUM events arrive but replays never do.",
       "enableSessionReplayTitle": "Enable Session Replay",
@@ -5532,15 +5532,15 @@
       "gcpFixBody": "GCP reports delivery failures on the subscription itself. If the sink is publishing but nothing lands here, the push endpoint is usually rejecting the request:",
       "gcpFixTitle": "Check The Push Subscription",
       "gcpPushUrlNote": "Keep this URL secret — it embeds the ingestion key. Rotate it from this page's header if it leaks.",
-      "gcpSinkDesc": "In the GCP console, create a **Log Router sink** (Logging → Log Router → Create sink) with Pub/Sub as the destination, and let it create the topic. The sink's inclusion filter decides which logs reach OpenObserve.",
+      "gcpSinkDesc": "In the GCP console, create a **Log Router sink** (Logging → Log Router → Create sink) with Pub/Sub as the destination, and let it create the topic. The sink's inclusion filter decides which logs reach Retrace.ai.",
       "gcpSinkTitle": "Route Logs to a Pub/Sub Topic",
       "gcpSinkWriterNote": "Grant the sink's writer identity the Pub/Sub Publisher role on the topic, or it will silently publish nothing.",
       "gcpStreamHelp": "Used in the push URL above and watched by the check below. A dedicated stream keeps GCP logs separate.",
       "gcpSubscriptionDesc": "Create a **push** subscription on that topic and paste this as the endpoint URL. It already carries this organization and its ingestion key.",
-      "gcpSubscriptionTitle": "Push the Topic to OpenObserve",
+      "gcpSubscriptionTitle": "Push the Topic to Retrace.ai",
       "gcpTroubleDeliveryA": "A 401 means the `API-Key` in the URL is stale — re-copy the endpoint from this page. A 404 usually means the org or stream segment was edited by hand; the URL above is already correct for this organization.",
       "gcpTroubleDeliveryQ": "The subscription shows delivery errors",
-      "gcpTroublePartialA": "That is the sink's inclusion filter, not OpenObserve. Widen the `--log-filter` on the sink to cover the services and severities you expect.",
+      "gcpTroublePartialA": "That is the sink's inclusion filter, not Retrace.ai. Widen the `--log-filter` on the sink to cover the services and severities you expect.",
       "gcpTroublePartialQ": "Only some logs arrive",
       "gcpTroubleTopicA": "The sink's **writer identity** needs the Pub/Sub Publisher role on the topic. GCP creates the sink successfully without it and then drops everything, silently.",
       "gcpTroubleTopicQ": "The sink exists but the topic receives nothing",
@@ -5573,7 +5573,7 @@
       "k8sEbpfVariant": "eBPF (any language, no code changes)",
       "k8sLibrariesVariant": "Language libraries (auto-instrumentation)",
       "k8sInstallerNote": "This installs cert-manager, the OpenTelemetry operator and the OpenObserve collector automatically.",
-      "k8sInternalEndpointNote": "Use this when OpenObserve runs in this same cluster — traffic never leaves it.",
+      "k8sInternalEndpointNote": "Use this when Retrace.ai runs in this same cluster — traffic never leaves it.",
       "k8sTroubleAnnotationA": "Injection happens at pod creation, so existing pods are unaffected until they restart — run `kubectl rollout restart deployment -n my-namespace`. Confirm the annotation landed with `kubectl get ns my-namespace -o yaml`, and check that the value matches `openobserve-collector/openobserve-<language>`.",
       "k8sTroubleAnnotationQ": "I annotated a namespace but no traces appear",
       "k8sTroubleEndpointA": "Use the **Internal endpoint** only when OpenObserve itself runs in this cluster; traffic then stays inside it and never crosses the network. The URL is `http://<helm-release>-openobserve-router.<namespace>.svc.cluster.local:5080` — the default assumes release `o2` in namespace `openobserve`, so edit it if yours differ. Everyone else uses the external endpoint.",
@@ -5595,7 +5595,7 @@
       "runCollectorMariadbDesc": "Start the collector (the user's password via env var).",
       "mariadbHostLabel": "MariaDB Host",
       "verifyMariadbMetricsDesc": "The check below turns green when data arrives, or check Streams for the `mysql_*` metrics (MariaDB reports through the MySQL receiver).",
-      "mariadbTagline": "Collect MariaDB metrics with the OpenTelemetry Collector and ship them to OpenObserve.",
+      "mariadbTagline": "Collect MariaDB metrics with the OpenTelemetry Collector and ship them to Retrace.ai.",
       "logsStreamNameLabel": "Logs Stream Name",
       "macosAgentFixBody": "The installer registers two launchd daemons: the agent itself and the unified log bridge. If nothing arrives, confirm both are loaded and read the agent's log for an auth or connectivity error:",
       "macosAgentServicesFixTitle": "Check The Agent Services",
@@ -5607,11 +5607,11 @@
       "macosTroubleVolumeQ": "The unified log is sending far more than expected",
       "macQuarantineNote": "If macOS blocks the unsigned binary, clear the quarantine flag: xattr -d com.apple.quarantine ./otelcol-contrib",
       "mongodbHostLabel": "MongoDB Host",
-      "mongodbTagline": "Collect MongoDB metrics with the OpenTelemetry Collector and ship them to OpenObserve.",
+      "mongodbTagline": "Collect MongoDB metrics with the OpenTelemetry Collector and ship them to Retrace.ai.",
       "mostLikelyFix": "Most likely fix —",
       "mysqlAdminNote": "Run as a MySQL admin (it prompts for the password).",
       "mysqlHostLabel": "MySQL Host",
-      "mysqlTagline": "Collect MySQL metrics with the OpenTelemetry Collector and ship them to OpenObserve.",
+      "mysqlTagline": "Collect MySQL metrics with the OpenTelemetry Collector and ship them to Retrace.ai.",
       "noLogsFoundYet": "No logs found yet",
       "noMetricsFoundYet": "No metrics found yet",
       "noSpansFoundYet": "No spans found yet",
@@ -5620,7 +5620,7 @@
       "onStream": "on {stream}",
       "optionalLabel": "Optional",
       "oracleHostLabel": "Oracle Host",
-      "oracleTagline": "Collect Oracle DB metrics with the OpenTelemetry Collector and ship them to OpenObserve.",
+      "oracleTagline": "Collect Oracle DB metrics with the OpenTelemetry Collector and ship them to Retrace.ai.",
       "otlpFixBody": "Defining an exporter is not enough — it has to be listed in a pipeline. This is the single most common reason a correct-looking config sends nothing:",
       "otlpFixTitle": "Check The Exporter Is Actually Wired Into The Pipeline",
       "otlpGrpcCloudNote": "OpenObserve Cloud's public gRPC gateway — lower overhead than HTTP for high span volumes, no self-hosted networking to configure.",
@@ -5708,10 +5708,10 @@
       "pillWireframeCapture": "Wireframe capture",
       "pillWriteLatency": "Write Latency",
       "pointExporterDesc": "Add this to your collector config, or set the environment variables if your app exports directly. Everything is already filled in for this organization.",
-      "pointExporterTitle": "Point Your Exporter at OpenObserve",
+      "pointExporterTitle": "Point Your Exporter at Retrace.ai",
       "portLabel": "Port",
       "postgresqlHostLabel": "PostgreSQL Host",
-      "postgresqlTagline": "Collect PostgreSQL metrics with the OpenTelemetry Collector and ship them to OpenObserve.",
+      "postgresqlTagline": "Collect PostgreSQL metrics with the OpenTelemetry Collector and ship them to Retrace.ai.",
       "postgresSuperuserNote": "Run as a Postgres superuser (psql prompts for its password).",
       "prepareMongodbDesc": "Create a monitoring user with clusterMonitor — run it in mongosh, **not** your shell.",
       "prepareMongodbTitle": "Prepare MongoDB",
@@ -5729,7 +5729,7 @@
       "quickInstallTitle": "Quick install (recommended)",
       "redisHostLabel": "Redis Host",
       "redisNoAuthNote": "Use REDIS_PASSWORD='' if Redis has no auth.",
-      "redisTagline": "Collect Redis metrics with the OpenTelemetry Collector and ship them to OpenObserve.",
+      "redisTagline": "Collect Redis metrics with the OpenTelemetry Collector and ship them to Retrace.ai.",
       "revealToken": "Reveal Token",
       "rnFixBody": "`localhost` inside an emulator or on a physical device is the device itself, not your machine — the most common reason nothing arrives at all. Use the right host for where the app runs:",
       "rnFixTitle": "Point The SDK At A Host Your Device Can Actually Reach",
@@ -5753,7 +5753,7 @@
       "rnTroubleScreenNamesQ": "Sessions appear but screens are all named the same",
       "rumCdnInitNote": "Keep this right after the loader in <head>. onReady() queues init until each bundle arrives — nothing blocks rendering.",
       "rumCdnInstallNote": "Paste at the top of <head>. Pinned to v{version} for immutable caching; async + preconnect keep it off the critical rendering path. For strict CSP, self-host the two bundles instead.",
-      "rumFixBody": "If your app runs but nothing arrives, the browser most likely blocked the SDK or its requests — usually a Content-Security-Policy or an ad-blocker. Allow the CDN and your OpenObserve endpoint, then reload:",
+      "rumFixBody": "If your app runs but nothing arrives, the browser most likely blocked the SDK or its requests — usually a Content-Security-Policy or an ad-blocker. Allow the CDN and your Retrace.ai endpoint, then reload:",
       "rumFixTitle": "Allow The SDK In Your Content Security Policy",
       "rumInitDesc": "Both SDKs are initialized with this org's values — copy as-is, then adjust `service`, `env` and `applicationId` to describe your app. The `clientToken` ships to visitors' browsers by design (NPM bundles it, CDN inlines it) — it can only write RUM events, and you can rotate it from this page's header anytime.",
       "rumInitTitle": "Initialize RUM + Logs",
@@ -5774,7 +5774,7 @@
       "rumTroublePerfA": "No — the bundles load with `async` off the critical rendering path, `preconnect` warms DNS/TLS before the first upload, and events are batched before sending. Lower `sessionReplaySampleRate` if you want to bound replay overhead further.",
       "rumTroublePerfQ": "Will the SDK slow my site down?",
       "rumTroublePlainHttpA": "Browsers refuse mixed content and the SDK defaults to HTTPS — keep `insecureHTTP: {insecureHTTP}` (already set from this org's endpoint) so uploads use the right scheme.",
-      "rumTroublePlainHttpQ": "My OpenObserve endpoint is plain HTTP",
+      "rumTroublePlainHttpQ": "My Retrace.ai endpoint is plain HTTP",
       "rumTroubleTokenVisibleA": "Yes — the `clientToken` is a client-side token by design, like every browser RUM product's. NPM setups expose it inside the JS bundle and CDN setups inline it in the HTML; DevTools reveals it either way. It can only **write** RUM events — it grants no read access and is separate from the ingestion passcode. If someone abuses it to send fake events, regenerate it from this page's header and redeploy your app.",
       "rumTroubleTokenVisibleQ": "Is it safe that the token is visible in my page source?",
       "runCollectorDesc": "Start the collector.",
@@ -5787,7 +5787,7 @@
       "runtimeCluster": "Cluster",
       "runtimeHost": "Host",
       "seeAllTroubleshooting": "See all troubleshooting",
-      "sendNotebookLogsDesc": "Paste into a Databricks notebook cell — it POSTs records to OpenObserve's logs API.",
+      "sendNotebookLogsDesc": "Paste into a Databricks notebook cell — it POSTs records to Retrace.ai's logs API.",
       "sendNotebookLogsTitle": "Send Logs From Your Notebook",
       "setup": "setup",
       "setupTime1Min": "~1 min",
@@ -5827,23 +5827,23 @@
       "androidTroubleScreenNamesA": "View tracking is not wired up. Pass a `useViewTrackingStrategy(...)` — e.g. `ActivityViewTrackingStrategy(trackExtras = true)` for Activities, or `NavigationViewTrackingStrategy(...)` if you use AndroidX Navigation — when building the `RumConfiguration`.",
       "setupTime5Min": "~5 min",
       "snowflakeCollectorVersionNote": "Snowflake needs collector v0.92.0 — newer builds have a known bug.",
-      "snowflakeTagline": "Collect Snowflake account metrics with the OpenTelemetry Collector and ship them to OpenObserve.",
+      "snowflakeTagline": "Collect Snowflake account metrics with the OpenTelemetry Collector and ship them to Retrace.ai.",
       "sqlClientGuiVariant": "SQL Client (GUI)",
       "sqlServerHostLabel": "SQL Server Host",
       "sqlServerPasswordNote": "Replace YOUR_SA_PASSWORD.",
-      "sqlServerTagline": "Collect SQL Server metrics with the OpenTelemetry Collector and ship them to OpenObserve.",
+      "sqlServerTagline": "Collect SQL Server metrics with the OpenTelemetry Collector and ship them to Retrace.ai.",
       "startIngestingTestForLogs": "start ingesting, then test for logs",
       "startIngestingTestForMetrics": "start ingesting, then test for metrics",
       "startIngestingTestForSpans": "start ingesting, then test for spans",
       "streamNameError": "Use letters, numbers and _ only.",
       "streamNameLabel": "Stream Name",
       "stuck": "Stuck?",
-      "taglineDatabricks": "Ship Databricks notebook logs to OpenObserve over the logs API.",
-      "taglineGcp": "Stream Google Cloud logs into OpenObserve with a Pub/Sub push subscription — no agent or collector to run.",
+      "taglineDatabricks": "Ship Databricks notebook logs to Retrace.ai over the logs API.",
+      "taglineGcp": "Stream Google Cloud logs into Retrace.ai with a Pub/Sub push subscription — no agent or collector to run.",
       "taglineKubernetes": "Deploy the OpenObserve collector to your cluster — container logs, Kubernetes events and cluster metrics, plus zero-code traces for your workloads.",
       "taglineLinux": "Install the OpenObserve agent on any Linux host — system and journald logs plus CPU, memory, disk and network metrics, with optional eBPF traces.",
       "taglineMacos": "Install the OpenObserve agent on any Mac — the unified log and standard log files plus CPU, memory, disk and network metrics.",
-      "taglineOtlpTraces": "Point any OpenTelemetry exporter at OpenObserve — collector or SDK, HTTP or gRPC. Your endpoint and token are filled in below.",
+      "taglineOtlpTraces": "Point any OpenTelemetry exporter at Retrace.ai — collector or SDK, HTTP or gRPC. Your endpoint and token are filled in below.",
       "taglineWindows": "Install the OpenObserve agent on any Windows host — Event Log, performance counters and host metrics.",
       "testAgain": "Test again",
       "traceCmdHelp": "For Python, Node.js and Java apps.",
@@ -5865,7 +5865,7 @@
       "verifyAerospikeMetricsDesc": "The check below turns green when data arrives, or check Streams for the `aerospike_*` metrics.",
       "verifyCassandraMetricsDesc": "The check below turns green when data arrives, or check Streams for the `cassandra_*` metrics.",
       "verifyDatabricksLogsDesc": "The check below turns green when data arrives, or open Logs and search `source:databricks`.",
-      "verifyDataTitle": "Verify data in OpenObserve",
+      "verifyDataTitle": "Verify data in Retrace.ai",
       "verifyDynamodbLogsDesc": "The check below turns green when data arrives, or open Logs for the `dynamodb` stream once items change.",
       "verifyGcpLogsDesc": "Generate some activity in the project (or wait for the sink to match a log); the check below turns green when data arrives.",
       "verifyK8sDataDesc": "Give the collector a few seconds to start; the check below turns green when data arrives — cluster logs land in the `default` stream.",
@@ -5894,7 +5894,7 @@
       "windowsTroubleScriptQ": "The script fails to run at all",
       "writesTheseKeysTo": "Writes these keys to",
       "zookeeperHostLabel": "Zookeeper Host",
-      "zookeeperTagline": "Collect Zookeeper metrics with the OpenTelemetry Collector and ship them to OpenObserve.",
+      "zookeeperTagline": "Collect Zookeeper metrics with the OpenTelemetry Collector and ship them to Retrace.ai.",
       "pillKeyspace": "Keyspace",
       "pillZnodes": "Znodes",
       "stepNumber": "Step {n}",
@@ -5961,8 +5961,8 @@
       "gpuExporterDesc": "NVIDIA's exporter reads GPU telemetry through DCGM and serves it on port `9400`.",
       "gpuExporterDockerNote": "`--network host` keeps the real machine name in the `Hostname` label, and the listener stays on `127.0.0.1` so GPU data isn't exposed to the network. `SYS_ADMIN` is only needed for the profiling (`DCGM_FI_PROF_*`) metrics.",
       "gpuExporterK8sNote": "Runs as a DaemonSet on GPU nodes only, matched by common GPU node labels. The pod annotations let the OpenObserve collector discover it, so no ServiceMonitor or Prometheus is needed.",
-      "gpuShipTitle": "Send GPU metrics to OpenObserve",
-      "gpuShipDesc": "Get the exporter's metrics into OpenObserve over OTLP.",
+      "gpuShipTitle": "Send GPU metrics to Retrace.ai",
+      "gpuShipDesc": "Get the exporter's metrics into Retrace.ai over OTLP.",
       "gpuShipDockerNote": "Uses the guide's settings: scrape every 30s, keep only the `DCGM_*` series and batch 10s / 1,024 points. The Collector Contrib image runs next to the exporter, and both use host networking, so `localhost:9400` resolves.",
       "gpuShipK8sNote": "Nothing to install: the OpenObserve collector gateway scrapes annotated pods every 30s and ships everything they expose. These commands confirm the exporter is reachable.",
       "gpuVerifyDesc": "GPU metrics land as `dcgm_fi_*` streams within one or two scrapes. When they arrive we add the **GPU Monitoring - NVIDIA** dashboard to your Default folder.",
@@ -6017,14 +6017,14 @@
           "description": "Monitor ALB access logs for request patterns, errors, and latency"
         },
         "cloudwatch-logs": {
-          "description": "Stream CloudWatch logs to OpenObserve for analysis"
+          "description": "Stream CloudWatch logs to Retrace.ai for analysis"
         },
         "cloudwatch-metrics": {
           "description": "Collect and analyze CloudWatch metrics"
         },
         "vpc-flow-logs": {
           "description": "Analyze network traffic in your VPC",
-          "cloudwatchIntegrationDescription": "Stream VPC Flow Logs via CloudWatch to OpenObserve",
+          "cloudwatchIntegrationDescription": "Stream VPC Flow Logs via CloudWatch to Retrace.ai",
           "firehoseIntegrationDescription": "Stream VPC Flow Logs directly via Kinesis Firehose"
         },
         "ec2": {
@@ -6051,12 +6051,12 @@
         },
         "dynamodb": {
           "description": "Track DynamoDB operations",
-          "lambdaIntegrationDescription": "Stream DynamoDB data to OpenObserve via Lambda",
-          "directIntegrationDescription": "Stream DynamoDB data directly to OpenObserve"
+          "lambdaIntegrationDescription": "Stream DynamoDB data to Retrace.ai via Lambda",
+          "directIntegrationDescription": "Stream DynamoDB data directly to Retrace.ai"
         },
         "cloudfront": {
           "description": "Analyze CloudFront access logs",
-          "directIntegrationDescription": "Stream CloudFront logs directly to OpenObserve",
+          "directIntegrationDescription": "Stream CloudFront logs directly to Retrace.ai",
           "s3IntegrationDescription": "Ingest CloudFront logs from S3 bucket"
         },
         "route53": {
@@ -6070,7 +6070,7 @@
         },
         "kinesis": {
           "description": "Integrate with Kinesis data streams",
-          "lambdaIntegrationDescription": "Stream Kinesis data to OpenObserve via Lambda",
+          "lambdaIntegrationDescription": "Stream Kinesis data to Retrace.ai via Lambda",
           "firehoseIntegrationDescription": "Stream Kinesis data directly via Kinesis Firehose"
         }
       },
@@ -6124,7 +6124,7 @@
           "description": "Monitor Virtual Network flow logs and diagnostics"
         },
         "activity-logs": {
-          "description": "Stream Azure subscription activity logs to OpenObserve via Event Hub and Event Publisher"
+          "description": "Stream Azure subscription activity logs to Retrace.ai via Event Hub and Event Publisher"
         }
       }
     },
@@ -8231,7 +8231,7 @@
       "regexRedact": "Generate a regex pattern to redact emails",
       "mapStreamSchema": "Map my \"default\" stream schema",
       "promqlCpu": "Write PromQL for pods using > 80% CPU",
-      "datadogToO2": "Convert this Datadog query to OpenObserve SQL",
+      "datadogToO2": "Convert this Datadog query to Retrace.ai SQL",
       "lastAlertFired": "Why was my last alert fired?"
     },
     "placeholderRotation": {
@@ -10308,7 +10308,7 @@
         "alertEndTime": "Window end time (ISO 8601)",
         "alertStartTimeMillis": "Window start time in epoch millis",
         "alertEndTimeMillis": "Window end time in epoch millis",
-        "alertUrl": "Link back to OpenObserve to investigate",
+        "alertUrl": "Link back to Retrace.ai to investigate",
         "alertTriggerTime": "When the alert fired (ISO 8601)",
         "alertTriggerTimeMillis": "Trigger time in epoch millis",
         "alertTriggerTimeSeconds": "Trigger time in epoch seconds",
@@ -10609,7 +10609,7 @@
       "servicenowAssignmentGroup": "Assignment Group (optional)",
       "servicenowAssignmentGroupHelp": "Group to assign incidents to (e.g., IT Operations)",
       "servicenowResolutionCode": "Resolution code (optional)",
-      "servicenowResolutionCodeHelp": "Must match a valid resolution code on your ServiceNow instance. Used when OpenObserve resolves the incident. Defaults to Solved (Permanently).",
+      "servicenowResolutionCodeHelp": "Must match a valid resolution code on your ServiceNow instance. Used when Retrace.ai resolves the incident. Defaults to Solved (Permanently).",
       "usernameRequired": "Username is required",
       "passwordRequired": "Password is required",
       "emailRecipients": "Recipient Email Addresses",
@@ -11510,7 +11510,7 @@
     "notIngestedHint": "This organization is not receiving {stream}, so this alert would never fire. Add it anyway and it will start working once the data arrives.",
     "alertCount": "{count} alert | {count} alerts",
     "noCollectorTitle": "Nothing here matches your data yet",
-    "noCollectorDescription": "None of these {count} alerts query a stream this organization is receiving. Send {group} telemetry to OpenObserve and they light up here.",
+    "noCollectorDescription": "None of these {count} alerts query a stream this organization is receiving. Send {group} telemetry to Retrace.ai and they light up here.",
     "setupGuide": "Ingestion guide",
     "emptyLibraryTitle": "The alert library is empty",
     "emptyLibraryDescription": "The catalog loaded but contains no alerts. This is a publishing problem, not a filter — try again shortly.",
@@ -12065,7 +12065,7 @@
     "continue": "Continue",
     "save": "Save",
     "update": "Update",
-    "awsStsCloudInfo": "This uses AWS sts to assume role and perform operations. You must add {product} AWS account as trusted entity type for this role in AWS console. Please contact Openobserve team to get the account information or for further help setting this up.",
+    "awsStsCloudInfo": "This uses AWS sts to assume role and perform operations. You must add {product} AWS account as trusted entity type for this role in AWS console. Please contact Retrace.ai team to get the account information or for further help setting this up.",
     "awsStsSelfHostedInfo": "This uses AWS sts to assume role and perform operations. Make sure you have configured aws credentials in the installation env that have access to this role."
   },
   "metrics": {
@@ -14487,7 +14487,7 @@
     "noTracesDescription": "No traces found for this correlation in the selected time range.",
     "viewInTraces": "View in Traces",
     "filters": "Filters",
-    "semanticFieldGroupsCaption": "Map your telemetry field names to common groups so OpenObserve can correlate them across streams.",
+    "semanticFieldGroupsCaption": "Map your telemetry field names to common groups so Retrace.ai can correlate them across streams.",
     "exportToJson": "Export to JSON",
     "importFromJson": "Import from JSON",
     "addCustomGroup": "Add Custom Group",
@@ -17341,7 +17341,7 @@
         "systemProvided": {
           "about": "About system-provided values",
           "title": "{scope} system values",
-          "description": "OpenObserve builds these values separately for each {scope} this job evaluates. Use them as sources when mapping the scorer's prompt variables.",
+          "description": "Retrace.ai builds these values separately for each {scope} this job evaluates. Use them as sources when mapping the scorer's prompt variables.",
           "badge": "System provided",
           "selectorRequired": "Span Selector required",
           "columns": {
@@ -19514,7 +19514,7 @@
       "txtNameCopied": "Record name copied",
       "txtValueCopied": "Record value copied",
       "nextStepVerify": "Verification runs automatically every {seconds} seconds. You can also verify now.",
-      "nextStepCname": "Once verified, point {domain} at OpenObserve with a CNAME to this app's host so it serves your status page.",
+      "nextStepCname": "Once verified, point {domain} at Retrace.ai with a CNAME to this app's host so it serves your status page.",
       "serving": "Verified. This domain now serves your status page, as long as its CNAME points at this app's host."
     },
     "preview": {
@@ -21775,7 +21775,7 @@
       "workloadsStatusScheduled": "Scheduled: {count}",
       "workloadsStatusSuspended": "Suspended: {count}",
       "workloadsNone": "None",
-      "workloadsRuleTip": "OpenObserve rule, not Lens: an object with no pods is counted from its own replica or job signals, and incomplete data counts as Unknown",
+      "workloadsRuleTip": "Retrace.ai rule, not Lens: an object with no pods is counted from its own replica or job signals, and incomplete data counts as Unknown",
       "workloadsRecentEvents": "Recent events",
       "workloadsViewAll": "View all",
       "workloadsColType": "Type",
@@ -23050,7 +23050,7 @@
           },
           "sampling": {
             "no": "Nothing is sampling your databases' session tables",
-            "noDetail": "Session samples come from your collector: enable db.server.query_sample in the collector recipe on the database host — the setup page walks through it. OpenObserve accepts this feed whenever database monitoring is on, so the fix is on the collector side."
+            "noDetail": "Session samples come from your collector: enable db.server.query_sample in the collector recipe on the database host — the setup page walks through it. Retrace.ai accepts this feed whenever database monitoring is on, so the fix is on the collector side."
           }
         }
       }
@@ -26574,7 +26574,7 @@
       "restrictedDesc": "Configurations using these components fail validation.",
       "restrictedPlaceholder": "None, all components are allowed",
       "targetVersion": "Target collector version",
-      "targetVersionDesc": "Collectors older than this are outdated. Leave empty to use the latest version OpenObserve supports.",
+      "targetVersionDesc": "Collectors older than this are outdated. Leave empty to use the latest version Retrace.ai supports.",
       "targetVersionPlaceholder": "Latest supported (e.g. 0.163.1)",
       "save": "Save",
       "saved": "Fleet Manager settings saved",

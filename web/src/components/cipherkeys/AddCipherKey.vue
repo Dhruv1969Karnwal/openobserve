@@ -206,7 +206,7 @@ const pendingContinue = ref(false);
 const originalData = ref("");
 
 const cipherKeyTypes = [
-  { label: raw("OpenObserve"), value: "local" },
+  { label: raw("Retrace.ai"), value: "local" },
   { label: raw("Akeyless"), value: "akeyless" },
 ];
 

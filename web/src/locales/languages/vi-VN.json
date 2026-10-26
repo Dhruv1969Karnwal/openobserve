@@ -565,7 +565,7 @@
       "title": "Chưa có tác vụ từ xa nào",
       "description": "Tác vụ từ xa là một dịch vụ HTTP mà các thử nghiệm của bạn gọi để tạo đầu ra. Xuất bản nó một lần, xác minh kết nối hoạt động, và mọi thử nghiệm có thể ghim chính xác phiên bản mà nó đã chạy.",
       "action": "Tác vụ mới",
-      "actionDesc": "Trỏ OpenObserve tới endpoint của bạn và kiểm tra kết nối."
+      "actionDesc": "Trỏ Retrace.ai tới endpoint của bạn và kiểm tra kết nối."
     },
     "noDowntimes": {
       "title": "Chưa có thời gian bảo trì nào",
@@ -1880,7 +1880,7 @@
       "refresh": "Làm mới",
       "refreshDataThrough": "Làm mới · dữ liệu đến {time}",
       "sdkSampled": "Số liệu phản ánh các phiên SDK được lấy mẫu",
-      "sdkSampledTip": "Chỉ những phiên mà RUM SDK của bạn giữ lại ({field}) mới đến được OpenObserve, nên mọi số liệu ở đây đều tính trên các phiên đó.",
+      "sdkSampledTip": "Chỉ những phiên mà RUM SDK của bạn giữ lại ({field}) mới đến được Retrace.ai, nên mọi số liệu ở đây đều tính trên các phiên đó.",
       "identityExcluded": "{count} giá trị nhận dạng bị loại trừ ({pct}%) | {count} giá trị nhận dạng bị loại trừ ({pct}%)",
       "identityIncluded": "Tất cả giá trị nhận dạng đều được tính",
       "identityExcludedHelp": "Một giá trị chiếm {pct}% số phiên đã nhận dạng, có thể là tài khoản thử nghiệm hoặc tài khoản dùng chung. Giá trị này bị loại khỏi mọi số đếm người dùng, phễu và bảng giữ chân.",
@@ -5116,7 +5116,7 @@
       "askAi": "Hỏi AI",
       "guideDocs": "Tài liệu {guide}",
       "setupDocs": "Tài liệu thiết lập",
-      "askAiPrompt": "Tôi đang thiết lập {guide} trong OpenObserve và chưa có dữ liệu nào đến. Kiểm tra sự kiện đầu tiên cho biết: {details} ID tổ chức: {org}. Endpoint: {endpoint}. Tôi nên kiểm tra gì tiếp theo?",
+      "askAiPrompt": "Tôi đang thiết lập {guide} trong Retrace.ai và chưa có dữ liệu nào đến. Kiểm tra sự kiện đầu tiên cho biết: {details} ID tổ chức: {org}. Endpoint: {endpoint}. Tôi nên kiểm tra gì tiếp theo?",
       "askAiRejected": "các yêu cầu bị từ chối với {status} {reason} trên {path}.",
       "askAiNoRequests": "chưa có gì đến và không có yêu cầu nào bị từ chối.",
       "askAiUnavailable": "không thể đọc các yêu cầu bị từ chối, nên không xác định được nguyên nhân.",
@@ -5170,7 +5170,7 @@
       "configTitle": "Lưu nội dung này thành {path} và khởi động lại Fluent Bit",
       "configDescription": "Theo dõi nhật ký của {server} và gửi chúng đến stream {stream} của {org} bằng token của tổ chức.",
       "restartHint": "Sau đó chạy {command}.",
-      "verifyTitle": "Xác minh dữ liệu trong OpenObserve"
+      "verifyTitle": "Xác minh dữ liệu trong Retrace.ai"
     },
     "copyContentError": "Lỗi khi sao chép nội dung.",
     "passcodeForbiddenMessage": "Cần vai trò Admin hoặc Root để xem token tiếp nhận dữ liệu. Hãy hỏi quản trị viên để biết lệnh thiết lập, hoặc vai trò cần thiết để xem token này tại đây.",
@@ -5253,7 +5253,7 @@
       "singleTargetTitle": "Đích ghi từ xa đơn",
       "fanoutTitle": "Phân tán đến nhiều backend",
       "tipPrefix": "Mẹo: `vmagent` có thể nhân bản các lần ghi bằng cách lặp lại",
-      "tipSuffix": "cờ, để bạn có thể giữ đích VictoriaMetrics hiện có trong khi vẫn chuyển tiếp chỉ số đến OpenObserve.",
+      "tipSuffix": "cờ, để bạn có thể giữ đích VictoriaMetrics hiện có trong khi vẫn chuyển tiếp chỉ số đến Retrace.ai.",
       "docLinkText": "để tìm hiểu thêm về việc cấu hình các đích ghi từ xa của vmagent."
     },
     "ai": {
@@ -5339,7 +5339,7 @@
       "selectAtLeastOneCategory": "Vui lòng chọn ít nhất một danh mục nhật ký ở trên.",
       "runCommandAfterDeployment": "Chạy lệnh này sau khi quá trình triển khai ARM của bạn hoàn tất:",
       "activityLogsTitle": "Nhật ký hoạt động Azure",
-      "activityLogsDescription": "Truyền nhật ký hoạt động của đăng ký Azure đến OpenObserve qua {product}. Mẫu ARM thiết lập cơ sở hạ tầng Event Hub — sau đó bạn cấu hình Azure để xuất nhật ký đến đó.",
+      "activityLogsDescription": "Truyền nhật ký hoạt động của đăng ký Azure đến Retrace.ai qua {product}. Mẫu ARM thiết lập cơ sở hạ tầng Event Hub — sau đó bạn cấu hình Azure để xuất nhật ký đến đó.",
       "manualTitle": "Cấu hình thủ công (để tham khảo)"
     },
     "awsSetup": {
@@ -5462,16 +5462,16 @@
     "splunkHecUrlHelp": "Trỏ forwarder Splunk của bạn đến URL này và gửi token làm giá trị của header Authorization \"Splunk <token>\".",
     "setupCard": {
       "advancedInstallDescCloud": "Đối với cấu hình tùy chỉnh, hoặc để khóa phiên bản và tùy chỉnh các giá trị chart. Chạy các bước theo thứ tự.",
-      "advancedInstallDescSelfHosted": "Đối với cấu hình tùy chỉnh, hoặc để khóa phiên bản và tùy chỉnh các giá trị chart. Chạy các bước theo thứ tự. Nếu OpenObserve chạy trong cùng cụm này, hãy thay thế các điểm cuối exporter bằng `{url}`.",
+      "advancedInstallDescSelfHosted": "Đối với cấu hình tùy chỉnh, hoặc để khóa phiên bản và tùy chỉnh các giá trị chart. Chạy các bước theo thứ tự. Nếu Retrace.ai chạy trong cùng cụm này, hãy thay thế các điểm cuối exporter bằng `{url}`.",
       "advancedInstallLabel": "Cài đặt nâng cao (các bước thủ công)",
       "aerospikeHostLabel": "Aerospike Host",
-      "aerospikeTagline": "Thu thập chỉ số Aerospike bằng OpenTelemetry Collector và gửi chúng đến OpenObserve.",
+      "aerospikeTagline": "Thu thập chỉ số Aerospike bằng OpenTelemetry Collector và gửi chúng đến Retrace.ai.",
       "agentServiceFixTitle": "Kiểm tra dịch vụ Agent",
       "agentTroubleInstanceIdA": "Đây là biến thể EC2 không có vai trò IAM. {iamNote} Gán vai trò, sau đó khởi động lại agent.",
       "agentTroubleInstanceIdQ": "Các máy chủ hiển thị theo ID phiên bản thay vì tên",
       "agentTroubleNoDataA": "Kiểm tra agent đang chạy bằng {hint}. Mã 401 trong nhật ký của nó có nghĩa là mã thông báo ingestion đã cũ — hãy sao chép lại lệnh từ trang này, lệnh này luôn mang mã thông báo hiện tại của tổ chức.",
       "agentTroubleNoDataQ": "Tập lệnh cài đặt chạy nhưng không có dữ liệu nào đến",
-      "agentTroubleUnreachableA": "Agent cần quyền truy cập ra ngoài đến điểm cuối OpenObserve này. Xác nhận bằng `curl -v` từ chính máy chủ — nguyên nhân thường gặp là proxy hoặc tường lửa egress.",
+      "agentTroubleUnreachableA": "Agent cần quyền truy cập ra ngoài đến điểm cuối Retrace.ai này. Xác nhận bằng `curl -v` từ chính máy chủ — nguyên nhân thường gặp là proxy hoặc tường lửa egress.",
       "agentTroubleUnreachableQ": "Không thể truy cập điểm cuối từ máy chủ",
       "aiCategoryAnalytics": "Phân tích & Đánh giá",
       "aiCategoryFrameworks": "Frameworks AI & Tác nhân",
@@ -5486,7 +5486,7 @@
       "autoInstrumentTracesDesc": "Cả hai đều cho bạn **trace phân tán mà không cần chạm vào mã ứng dụng hay build lại image**. **Thư viện ngôn ngữ:** OpenTelemetry Operator tiêm auto-instrumentation vào các pod của namespace được gắn annotation. **eBPF:** collector trace các tiến trình bạn chọn, bằng mọi ngôn ngữ, kể cả Go.",
       "autoInstrumentTracesTitle": "Trace ứng dụng của bạn: thư viện ngôn ngữ hoặc eBPF",
       "cassandraJmxNote": "Bật truy cập từ xa JMX trên Cassandra để bộ thu có thể kết nối.",
-      "cassandraTagline": "Thu thập chỉ số Cassandra qua bộ thu JMX của OpenTelemetry Collector và gửi chúng đến OpenObserve.",
+      "cassandraTagline": "Thu thập chỉ số Cassandra qua bộ thu JMX của OpenTelemetry Collector và gửi chúng đến Retrace.ai.",
       "checking": "Đang kiểm tra…",
       "checkingForLogs": "Đang kiểm tra nhật ký…",
       "checkingForMetrics": "Đang kiểm tra chỉ số…",
@@ -5519,10 +5519,10 @@
       "downloadJmxJarDesc": "Trình thu JMX chạy jar trợ giúp này (yêu cầu Java trên máy chủ thu thập).",
       "downloadJmxJarTitle": "Tải xuống Jar chỉ số JMX",
       "dynamodbFirehoseEndpointDesc": "Sử dụng các giá trị này làm đích **HTTP Endpoint** khi tạo stream phân phối Kinesis Data Firehose.",
-      "dynamodbFirehoseEndpointTitle": "OpenObserve Firehose Endpoint",
+      "dynamodbFirehoseEndpointTitle": "Retrace.ai Firehose Endpoint",
       "dynamodbPipelineDesc": "Bật **DynamoDB Streams** trên bảng của bạn, kết nối nó với một **Kinesis Data Stream**, sau đó trỏ một delivery stream **Kinesis Data Firehose** đến HTTP endpoint ở trên.",
       "dynamodbPipelineTitle": "Phát trực tiếp DynamoDB → Firehose",
-      "dynamodbTagline": "Truyền các thay đổi mục DynamoDB vào OpenObserve qua Kinesis Firehose.",
+      "dynamodbTagline": "Truyền các thay đổi mục DynamoDB vào Retrace.ai qua Kinesis Firehose.",
       "ec2IamNote": "Yêu cầu vai trò IAM trên instance với quyền ec2:DescribeTags và ec2:DescribeInstances, để agent có thể đọc thẻ Name và sử dụng nó làm định danh máy chủ.",
       "enableSessionReplayDesc": "Session Replay được cấu hình **riêng biệt** với RUM và **không** kế thừa `rumConfiguration.customEndpoint`. Hãy cung cấp cho nó một base URL riêng bên dưới — cùng định dạng với base URL của RUM/Nhật ký. Bridge tự thêm `/replay`, vì vậy **đừng** tự thêm nó: nếu tự thêm `/replay`, đường dẫn sẽ bị lặp và mọi lần tải lên đều bị từ chối với mã 401 — đây là lý do thường gặp khiến các sự kiện RUM đến được nhưng bản replay thì không.",
       "enableSessionReplayTitle": "Bật Session Replay",
@@ -5532,15 +5532,15 @@
       "gcpFixBody": "GCP báo cáo lỗi gửi trên chính subscription. Nếu sink đang xuất bản nhưng không có gì đến đây, điểm cuối push thường đang từ chối yêu cầu:",
       "gcpFixTitle": "Kiểm tra Push Subscription",
       "gcpPushUrlNote": "Giữ bí mật URL này — nó chứa khóa tiếp nhận. Nếu bị lộ, hãy xoay vòng từ phần đầu trang này.",
-      "gcpSinkDesc": "Trong console GCP, tạo một **sink Log Router** (Nhật ký → Bộ định tuyến nhật ký → Tạo sink) với Pub/Sub làm đích và để nó tạo topic. Bộ lọc đưa vào của sink quyết định nhật ký nào đến được OpenObserve.",
+      "gcpSinkDesc": "Trong console GCP, tạo một **sink Log Router** (Nhật ký → Bộ định tuyến nhật ký → Tạo sink) với Pub/Sub làm đích và để nó tạo topic. Bộ lọc đưa vào của sink quyết định nhật ký nào đến được Retrace.ai.",
       "gcpSinkTitle": "Chuyển hướng nhật ký đến một Pub/Sub Topic",
       "gcpSinkWriterNote": "Cấp cho danh tính ghi của sink vai trò Pub/Sub Publisher trên topic, nếu không nó sẽ âm thầm không xuất bản gì.",
       "gcpStreamHelp": "Được dùng trong URL đẩy ở trên và được theo dõi bởi kiểm tra bên dưới. Một stream chuyên dụng giữ nhật ký GCP riêng biệt.",
       "gcpSubscriptionDesc": "Tạo một subscription kiểu **push** trên topic đó và dán URL này làm endpoint. Nó đã chứa tổ chức này và khóa ingestion của nó.",
-      "gcpSubscriptionTitle": "Đẩy Topic đến OpenObserve",
+      "gcpSubscriptionTitle": "Đẩy Topic đến Retrace.ai",
       "gcpTroubleDeliveryA": "Mã 401 có nghĩa là `API-Key` trong URL đã cũ — hãy sao chép lại điểm cuối từ trang này. Mã 404 thường có nghĩa là phân đoạn org hoặc stream đã bị chỉnh sửa thủ công; URL ở trên đã đúng cho tổ chức này.",
       "gcpTroubleDeliveryQ": "Subscription hiển thị lỗi gửi",
-      "gcpTroublePartialA": "Đó là bộ lọc bao gồm của sink, không phải OpenObserve. Hãy mở rộng `--log-filter` trên sink để bao phủ các dịch vụ và mức độ nghiêm trọng bạn mong đợi.",
+      "gcpTroublePartialA": "Đó là bộ lọc bao gồm của sink, không phải Retrace.ai. Hãy mở rộng `--log-filter` trên sink để bao phủ các dịch vụ và mức độ nghiêm trọng bạn mong đợi.",
       "gcpTroublePartialQ": "Chỉ một số nhật ký đến được",
       "gcpTroubleTopicA": "**Danh tính ghi** của sink cần vai trò Pub/Sub Publisher trên topic. GCP vẫn tạo sink thành công mà không cần nó, sau đó âm thầm bỏ tất cả.",
       "gcpTroubleTopicQ": "Sink tồn tại nhưng topic không nhận được gì",
@@ -5573,7 +5573,7 @@
       "k8sEbpfVariant": "eBPF (mọi ngôn ngữ, không cần sửa mã)",
       "k8sLibrariesVariant": "Thư viện ngôn ngữ (tự động instrument)",
       "k8sInstallerNote": "Thao tác này tự động cài đặt cert-manager, operator OpenTelemetry và collector OpenObserve.",
-      "k8sInternalEndpointNote": "Sử dụng tùy chọn này khi OpenObserve chạy trong chính cụm này — lưu lượng không bao giờ rời khỏi cụm.",
+      "k8sInternalEndpointNote": "Sử dụng tùy chọn này khi Retrace.ai chạy trong chính cụm này — lưu lượng không bao giờ rời khỏi cụm.",
       "k8sTroubleAnnotationA": "Việc tiêm xảy ra khi tạo pod, vì vậy các pod hiện tại không bị ảnh hưởng cho đến khi chúng khởi động lại — chạy `kubectl rollout restart deployment -n my-namespace`. Xác nhận chú thích đã được áp dụng bằng `kubectl get ns my-namespace -o yaml`, và kiểm tra giá trị khớp với `openobserve-collector/openobserve-<language>`.",
       "k8sTroubleAnnotationQ": "Tôi đã chú thích một namespace nhưng không có trace nào xuất hiện",
       "k8sTroubleEndpointA": "Chỉ dùng **Endpoint bên trong** khi chính OpenObserve chạy trong cluster này; khi đó lưu lượng ở lại bên trong và không bao giờ đi ra ngoài mạng. URL là `http://<helm-release>-openobserve-router.<namespace>.svc.cluster.local:5080` — mặc định giả định release `o2` trong namespace `openobserve`, nên hãy sửa nếu của bạn khác. Mọi trường hợp khác đều dùng endpoint bên ngoài.",
@@ -5595,7 +5595,7 @@
       "runCollectorMariadbDesc": "Khởi động collector (mật khẩu của người dùng qua biến môi trường).",
       "mariadbHostLabel": "Máy chủ MariaDB",
       "verifyMariadbMetricsDesc": "Mục kiểm tra bên dưới sẽ chuyển xanh khi dữ liệu đến, hoặc kiểm tra Stream để tìm các chỉ số `mysql_*` (MariaDB báo cáo qua MySQL receiver).",
-      "mariadbTagline": "Thu thập chỉ số MariaDB bằng OpenTelemetry Collector và gửi chúng đến OpenObserve.",
+      "mariadbTagline": "Thu thập chỉ số MariaDB bằng OpenTelemetry Collector và gửi chúng đến Retrace.ai.",
       "logsStreamNameLabel": "Tên stream nhật ký",
       "macosAgentFixBody": "Trình cài đặt đăng ký hai daemon launchd: agent và cầu nối nhật ký thống nhất. Nếu không có gì đến, hãy xác nhận cả hai đã được nạp và đọc nhật ký của agent để tìm lỗi xác thực hoặc kết nối:",
       "macosAgentServicesFixTitle": "Kiểm tra Dịch vụ Agent",
@@ -5607,11 +5607,11 @@
       "macosTroubleVolumeQ": "Nhật ký hợp nhất đang gửi nhiều hơn nhiều so với dự kiến",
       "macQuarantineNote": "Nếu macOS chặn tệp nhị phân chưa ký, hãy xóa cờ cách ly: xattr -d com.apple.quarantine ./otelcol-contrib",
       "mongodbHostLabel": "MongoDB Host",
-      "mongodbTagline": "Thu thập chỉ số MongoDB bằng OpenTelemetry Collector và gửi chúng đến OpenObserve.",
+      "mongodbTagline": "Thu thập chỉ số MongoDB bằng OpenTelemetry Collector và gửi chúng đến Retrace.ai.",
       "mostLikelyFix": "Cách khắc phục khả dĩ nhất —",
       "mysqlAdminNote": "Chạy với quyền quản trị MySQL (nó sẽ yêu cầu mật khẩu).",
       "mysqlHostLabel": "MySQL Host",
-      "mysqlTagline": "Thu thập các chỉ số MySQL với OpenTelemetry Collector và gửi chúng tới OpenObserve.",
+      "mysqlTagline": "Thu thập các chỉ số MySQL với OpenTelemetry Collector và gửi chúng tới Retrace.ai.",
       "noLogsFoundYet": "Chưa tìm thấy nhật ký nào",
       "noMetricsFoundYet": "Chưa tìm thấy chỉ số nào",
       "noSpansFoundYet": "Chưa tìm thấy span nào",
@@ -5620,7 +5620,7 @@
       "onStream": "trên {stream}",
       "optionalLabel": "Tùy chọn",
       "oracleHostLabel": "Oracle Host",
-      "oracleTagline": "Thu thập các chỉ số Oracle DB với OpenTelemetry Collector và gửi chúng tới OpenObserve.",
+      "oracleTagline": "Thu thập các chỉ số Oracle DB với OpenTelemetry Collector và gửi chúng tới Retrace.ai.",
       "otlpFixBody": "Việc định nghĩa exporter là chưa đủ — nó phải được liệt kê trong pipeline. Đây là lý do phổ biến nhất khiến một cấu hình trông có vẻ đúng nhưng lại không gửi dữ liệu:",
       "otlpFixTitle": "Kiểm tra exporter đã thực sự được nối vào pipeline",
       "otlpGrpcCloudNote": "Cổng gRPC công khai của OpenObserve Cloud — chi phí thấp hơn so với HTTP cho khối lượng span lớn, không cần cấu hình mạng tự triển khai.",
@@ -5708,10 +5708,10 @@
       "pillWireframeCapture": "Chụp wireframe",
       "pillWriteLatency": "Độ trễ ghi",
       "pointExporterDesc": "Thêm phần này vào cấu hình collector của bạn, hoặc đặt các biến môi trường nếu ứng dụng của bạn xuất trực tiếp. Mọi thứ đã được điền sẵn cho tổ chức này.",
-      "pointExporterTitle": "Trỏ Exporter của bạn tới OpenObserve",
+      "pointExporterTitle": "Trỏ Exporter của bạn tới Retrace.ai",
       "portLabel": "Cổng",
       "postgresqlHostLabel": "PostgreSQL Host",
-      "postgresqlTagline": "Thu thập các chỉ số PostgreSQL với OpenTelemetry Collector và gửi chúng tới OpenObserve.",
+      "postgresqlTagline": "Thu thập các chỉ số PostgreSQL với OpenTelemetry Collector và gửi chúng tới Retrace.ai.",
       "postgresSuperuserNote": "Chạy với quyền siêu người dùng Postgres (psql sẽ yêu cầu mật khẩu).",
       "prepareMongodbDesc": "Tạo người dùng giám sát với clusterMonitor — chạy trong mongosh, **không phải** shell của bạn.",
       "prepareMongodbTitle": "Chuẩn bị MongoDB",
@@ -5729,7 +5729,7 @@
       "quickInstallTitle": "Cài đặt nhanh (khuyến nghị)",
       "redisHostLabel": "Redis Host",
       "redisNoAuthNote": "Sử dụng REDIS_PASSWORD='' nếu Redis không có xác thực.",
-      "redisTagline": "Thu thập chỉ số Redis bằng OpenTelemetry Collector và gửi chúng đến OpenObserve.",
+      "redisTagline": "Thu thập chỉ số Redis bằng OpenTelemetry Collector và gửi chúng đến Retrace.ai.",
       "revealToken": "Hiển thị Token",
       "rnFixBody": "`localhost` trong trình giả lập hoặc trên thiết bị vật lý chính là thiết bị đó, không phải máy của bạn — lý do phổ biến nhất khiến không có gì đến được. Hãy sử dụng đúng máy chủ cho nơi ứng dụng chạy:",
       "rnFixTitle": "Trỏ SDK đến máy chủ mà thiết bị của bạn thực sự có thể truy cập",
@@ -5753,7 +5753,7 @@
       "rnTroubleScreenNamesQ": "Các phiên xuất hiện nhưng tất cả màn hình đều có tên giống nhau",
       "rumCdnInitNote": "Đặt phần này ngay sau loader trong <head>. onReady() xếp hàng đợi khởi tạo cho đến khi từng bundle đến — không có gì chặn việc kết xuất.",
       "rumCdnInstallNote": "Dán vào đầu <head>. Được ghim vào v{version} để bộ nhớ đệm bất biến; async + preconnect giữ nó ngoài luồng kết xuất quan trọng. Đối với CSP nghiêm ngặt, hãy tự lưu trữ hai bundle thay thế.",
-      "rumFixBody": "Nếu ứng dụng của bạn chạy nhưng không có gì đến, rất có thể trình duyệt đã chặn SDK hoặc các yêu cầu của nó — thường là Content-Security-Policy hoặc trình chặn quảng cáo. Hãy cho phép CDN và điểm cuối OpenObserve của bạn, sau đó tải lại:",
+      "rumFixBody": "Nếu ứng dụng của bạn chạy nhưng không có gì đến, rất có thể trình duyệt đã chặn SDK hoặc các yêu cầu của nó — thường là Content-Security-Policy hoặc trình chặn quảng cáo. Hãy cho phép CDN và điểm cuối Retrace.ai của bạn, sau đó tải lại:",
       "rumFixTitle": "Cho phép SDK trong Chính sách bảo mật nội dung của bạn",
       "rumInitDesc": "Cả hai SDK được khởi tạo với các giá trị của tổ chức này — hãy sao chép nguyên trạng, sau đó điều chỉnh `service`, `env` và `applicationId` để mô tả ứng dụng của bạn. `clientToken` được gửi đến trình duyệt của khách truy cập theo thiết kế (NPM đóng gói nó, CDN nhúng nó) — nó chỉ có thể ghi các sự kiện RUM, và bạn có thể xoay nó từ tiêu đề trang này bất cứ lúc nào.",
       "rumInitTitle": "Khởi tạo RUM + Logs",
@@ -5774,7 +5774,7 @@
       "rumTroublePerfA": "Không — các bundle tải với `async` ngoài luồng kết xuất quan trọng, `preconnect` làm ấm DNS/TLS trước lần tải lên đầu tiên, và các sự kiện được gộp lại trước khi gửi. Giảm `sessionReplaySampleRate` nếu bạn muốn giới hạn chi phí replay hơn nữa.",
       "rumTroublePerfQ": "SDK có làm chậm trang web của tôi không?",
       "rumTroublePlainHttpA": "Trình duyệt từ chối nội dung hỗn hợp và SDK mặc định dùng HTTPS — giữ `insecureHTTP: {insecureHTTP}` (đã được đặt từ endpoint của tổ chức này) để các lần tải lên dùng đúng giao thức.",
-      "rumTroublePlainHttpQ": "Endpoint OpenObserve của tôi là HTTP thuần",
+      "rumTroublePlainHttpQ": "Endpoint Retrace.ai của tôi là HTTP thuần",
       "rumTroubleTokenVisibleA": "Có — `clientToken` là token phía máy khách theo thiết kế, giống như mọi sản phẩm RUM cho trình duyệt. Thiết lập NPM để lộ nó bên trong bundle JS và thiết lập CDN nhúng nó vào HTML; DevTools đều hiển thị được. Nó chỉ có thể **ghi** sự kiện RUM — không cấp quyền đọc và tách biệt với mật khẩu ingestion. Nếu ai đó lạm dụng nó để gửi sự kiện giả, hãy tạo lại từ tiêu đề trang này và triển khai lại ứng dụng.",
       "rumTroubleTokenVisibleQ": "Việc token hiển thị trong mã nguồn trang của tôi có an toàn không?",
       "runCollectorDesc": "Khởi động collector.",
@@ -5787,7 +5787,7 @@
       "runtimeCluster": "Cụm",
       "runtimeHost": "Máy chủ",
       "seeAllTroubleshooting": "Xem tất cả khắc phục sự cố",
-      "sendNotebookLogsDesc": "Dán vào một ô notebook Databricks — nó POST các bản ghi đến API nhật ký của OpenObserve.",
+      "sendNotebookLogsDesc": "Dán vào một ô notebook Databricks — nó POST các bản ghi đến API nhật ký của Retrace.ai.",
       "sendNotebookLogsTitle": "Gửi nhật ký từ Notebook của bạn",
       "setup": "Thiết lập",
       "setupTime1Min": "~1 phút",
@@ -5827,23 +5827,23 @@
       "androidTroubleScreenNamesA": "Theo dõi View chưa được thiết lập. Truyền `useViewTrackingStrategy(...)` — ví dụ: `ActivityViewTrackingStrategy(trackExtras = true)` cho Activity, hoặc `NavigationViewTrackingStrategy(...)` nếu bạn dùng AndroidX Navigation — khi xây dựng `RumConfiguration`.",
       "setupTime5Min": "~5 phút",
       "snowflakeCollectorVersionNote": "Snowflake cần collector v0.92.0 — các bản mới hơn có lỗi đã biết.",
-      "snowflakeTagline": "Thu thập chỉ số tài khoản Snowflake bằng OpenTelemetry Collector và gửi chúng đến OpenObserve.",
+      "snowflakeTagline": "Thu thập chỉ số tài khoản Snowflake bằng OpenTelemetry Collector và gửi chúng đến Retrace.ai.",
       "sqlClientGuiVariant": "SQL Client (GUI)",
       "sqlServerHostLabel": "SQL Server Host",
       "sqlServerPasswordNote": "Thay thế YOUR_SA_PASSWORD.",
-      "sqlServerTagline": "Thu thập các chỉ số SQL Server với OpenTelemetry Collector và gửi chúng tới OpenObserve.",
+      "sqlServerTagline": "Thu thập các chỉ số SQL Server với OpenTelemetry Collector và gửi chúng tới Retrace.ai.",
       "startIngestingTestForLogs": "bắt đầu thu thập, sau đó kiểm tra nhật ký",
       "startIngestingTestForMetrics": "bắt đầu thu thập, sau đó kiểm tra chỉ số",
       "startIngestingTestForSpans": "bắt đầu tiếp nhận dữ liệu, sau đó kiểm tra span",
       "streamNameError": "Chỉ sử dụng chữ cái, số và _.",
       "streamNameLabel": "Tên Stream",
       "stuck": "Bị kẹt?",
-      "taglineDatabricks": "Gửi log notebook Databricks đến OpenObserve qua logs API.",
-      "taglineGcp": "Truyền log Google Cloud vào OpenObserve bằng subscription push Pub/Sub — không cần chạy agent hoặc collector.",
+      "taglineDatabricks": "Gửi log notebook Databricks đến Retrace.ai qua logs API.",
+      "taglineGcp": "Truyền log Google Cloud vào Retrace.ai bằng subscription push Pub/Sub — không cần chạy agent hoặc collector.",
       "taglineKubernetes": "Triển khai collector OpenObserve vào cụm của bạn — nhật ký container, sự kiện Kubernetes và chỉ số cụm, cùng với trace không cần mã cho các workload của bạn.",
       "taglineLinux": "Cài đặt agent OpenObserve trên mọi máy chủ Linux — nhật ký hệ thống và journald cùng các chỉ số CPU, bộ nhớ, ổ đĩa và mạng, với trace eBPF tùy chọn.",
       "taglineMacos": "Cài đặt agent OpenObserve trên bất kỳ Mac nào — log hợp nhất và các tệp log chuẩn cùng với chỉ số CPU, bộ nhớ, ổ đĩa và mạng.",
-      "taglineOtlpTraces": "Trỏ bất kỳ exporter OpenTelemetry nào đến OpenObserve — collector hoặc SDK, HTTP hoặc gRPC. Endpoint và token của bạn đã được điền bên dưới.",
+      "taglineOtlpTraces": "Trỏ bất kỳ exporter OpenTelemetry nào đến Retrace.ai — collector hoặc SDK, HTTP hoặc gRPC. Endpoint và token của bạn đã được điền bên dưới.",
       "taglineWindows": "Cài đặt agent OpenObserve trên bất kỳ máy chủ Windows nào — Event Log, bộ đếm hiệu suất và chỉ số máy chủ.",
       "testAgain": "Kiểm tra lại",
       "traceCmdHelp": "Dành cho ứng dụng Python, Node.js và Java.",
@@ -5865,7 +5865,7 @@
       "verifyAerospikeMetricsDesc": "Mục kiểm tra bên dưới sẽ chuyển xanh khi dữ liệu đến, hoặc kiểm tra Stream để tìm các chỉ số `aerospike_*`.",
       "verifyCassandraMetricsDesc": "Mục kiểm tra bên dưới sẽ chuyển xanh khi dữ liệu đến, hoặc kiểm tra Stream để tìm các chỉ số `cassandra_*`.",
       "verifyDatabricksLogsDesc": "Mục kiểm tra bên dưới sẽ chuyển xanh khi dữ liệu đến, hoặc mở Nhật ký và tìm `source:databricks`.",
-      "verifyDataTitle": "Xác minh dữ liệu trong OpenObserve",
+      "verifyDataTitle": "Xác minh dữ liệu trong Retrace.ai",
       "verifyDynamodbLogsDesc": "Mục kiểm tra bên dưới sẽ chuyển xanh khi dữ liệu đến, hoặc mở Nhật ký cho stream `dynamodb` khi các mục thay đổi.",
       "verifyGcpLogsDesc": "Tạo một số hoạt động trong dự án (hoặc chờ sink khớp với một nhật ký); mục kiểm tra bên dưới sẽ chuyển xanh khi dữ liệu đến.",
       "verifyK8sDataDesc": "Hãy đợi collector khởi động trong vài giây; mục kiểm tra bên dưới sẽ chuyển xanh khi dữ liệu đến — nhật ký cụm sẽ vào stream `default`.",
@@ -5894,7 +5894,7 @@
       "windowsTroubleScriptQ": "Tập lệnh hoàn toàn không chạy được",
       "writesTheseKeysTo": "Ghi các khóa này vào",
       "zookeeperHostLabel": "Zookeeper Host",
-      "zookeeperTagline": "Thu thập chỉ số Zookeeper bằng OpenTelemetry Collector và gửi chúng đến OpenObserve.",
+      "zookeeperTagline": "Thu thập chỉ số Zookeeper bằng OpenTelemetry Collector và gửi chúng đến Retrace.ai.",
       "pillKeyspace": "Keyspace",
       "pillZnodes": "Znodes",
       "stepNumber": "Bước {n}",
@@ -5961,8 +5961,8 @@
       "gpuExporterDesc": "Exporter của NVIDIA đọc dữ liệu telemetry GPU qua DCGM và cung cấp nó trên cổng `9400`.",
       "gpuExporterDockerNote": "`--network host` giữ tên máy thật trong nhãn `Hostname`, và trình lắng nghe vẫn ở `127.0.0.1` để dữ liệu GPU không bị lộ ra mạng. `SYS_ADMIN` chỉ cần cho các chỉ số profiling (`DCGM_FI_PROF_*`).",
       "gpuExporterK8sNote": "Chạy dưới dạng DaemonSet chỉ trên các node GPU, được khớp bởi các nhãn node GPU phổ biến. Các chú thích pod cho phép collector OpenObserve phát hiện nó, nên không cần ServiceMonitor hay Prometheus.",
-      "gpuShipTitle": "Gửi chỉ số GPU đến OpenObserve",
-      "gpuShipDesc": "Đưa chỉ số của exporter vào OpenObserve qua OTLP.",
+      "gpuShipTitle": "Gửi chỉ số GPU đến Retrace.ai",
+      "gpuShipDesc": "Đưa chỉ số của exporter vào Retrace.ai qua OTLP.",
       "gpuShipDockerNote": "Dùng cài đặt của hướng dẫn: thu thập mỗi 30 giây, chỉ giữ chuỗi `DCGM_*` và gom lô 10 giây / 1.024 điểm. Image Collector Contrib chạy cạnh exporter, và cả hai dùng host networking, nên `localhost:9400` phân giải được.",
       "gpuShipK8sNote": "Không cần cài gì: gateway collector OpenObserve thu thập các pod được chú thích mỗi 30 giây và gửi mọi thứ chúng công bố. Các lệnh này xác nhận exporter có thể truy cập được.",
       "gpuVerifyDesc": "Chỉ số GPU sẽ xuất hiện dưới dạng stream `dcgm_fi_*` trong một hoặc hai lần thu thập. Khi chúng đến, chúng tôi thêm bảng điều khiển **GPU Monitoring - NVIDIA** vào thư mục Mặc định của bạn.",
@@ -6017,14 +6017,14 @@
           "description": "Giám sát nhật ký truy cập ALB để xem mẫu yêu cầu, lỗi và độ trễ"
         },
         "cloudwatch-logs": {
-          "description": "Truyền nhật ký CloudWatch đến OpenObserve để phân tích"
+          "description": "Truyền nhật ký CloudWatch đến Retrace.ai để phân tích"
         },
         "cloudwatch-metrics": {
           "description": "Thu thập và phân tích chỉ số CloudWatch"
         },
         "vpc-flow-logs": {
           "description": "Phân tích lưu lượng mạng trong VPC của bạn",
-          "cloudwatchIntegrationDescription": "Truyền VPC Flow Logs qua CloudWatch đến OpenObserve",
+          "cloudwatchIntegrationDescription": "Truyền VPC Flow Logs qua CloudWatch đến Retrace.ai",
           "firehoseIntegrationDescription": "Truyền VPC Flow Logs trực tiếp qua Kinesis Firehose"
         },
         "ec2": {
@@ -6051,12 +6051,12 @@
         },
         "dynamodb": {
           "description": "Theo dõi các hoạt động DynamoDB",
-          "lambdaIntegrationDescription": "Truyền dữ liệu DynamoDB đến OpenObserve qua Lambda",
-          "directIntegrationDescription": "Truyền dữ liệu DynamoDB trực tiếp đến OpenObserve"
+          "lambdaIntegrationDescription": "Truyền dữ liệu DynamoDB đến Retrace.ai qua Lambda",
+          "directIntegrationDescription": "Truyền dữ liệu DynamoDB trực tiếp đến Retrace.ai"
         },
         "cloudfront": {
           "description": "Phân tích nhật ký truy cập CloudFront",
-          "directIntegrationDescription": "Truyền nhật ký CloudFront trực tiếp đến OpenObserve",
+          "directIntegrationDescription": "Truyền nhật ký CloudFront trực tiếp đến Retrace.ai",
           "s3IntegrationDescription": "Tiếp nhận nhật ký CloudFront từ bucket S3"
         },
         "route53": {
@@ -6070,7 +6070,7 @@
         },
         "kinesis": {
           "description": "Tích hợp với Kinesis Data Streams",
-          "lambdaIntegrationDescription": "Truyền dữ liệu Kinesis đến OpenObserve qua Lambda",
+          "lambdaIntegrationDescription": "Truyền dữ liệu Kinesis đến Retrace.ai qua Lambda",
           "firehoseIntegrationDescription": "Truyền dữ liệu Kinesis trực tiếp qua Kinesis Firehose"
         }
       },
@@ -6124,7 +6124,7 @@
           "description": "Theo dõi nhật ký luồng và chẩn đoán của Mạng ảo"
         },
         "activity-logs": {
-          "description": "Truyền nhật ký hoạt động đăng ký Azure đến OpenObserve qua Event Hub và Event Publisher"
+          "description": "Truyền nhật ký hoạt động đăng ký Azure đến Retrace.ai qua Event Hub và Event Publisher"
         }
       }
     },
@@ -8233,7 +8233,7 @@
       "regexRedact": "Tạo mẫu regex để ẩn email",
       "mapStreamSchema": "Ánh xạ lược đồ stream \"default\" của tôi",
       "promqlCpu": "Viết PromQL cho các pods sử dụng > 80% CPU",
-      "datadogToO2": "Chuyển đổi truy vấn Datadog này thành SQL OpenObserve",
+      "datadogToO2": "Chuyển đổi truy vấn Datadog này thành SQL Retrace.ai",
       "lastAlertFired": "Tại sao cảnh báo cuối cùng của tôi lại kích hoạt?"
     },
     "placeholderRotation": {
@@ -10310,7 +10310,7 @@
         "alertEndTime": "Thời gian kết thúc cửa sổ (ISO 8601)",
         "alertStartTimeMillis": "Thời gian bắt đầu cửa sổ theo epoch mili giây",
         "alertEndTimeMillis": "Thời gian kết thúc cửa sổ theo epoch mili giây",
-        "alertUrl": "Liên kết trở lại OpenObserve để điều tra",
+        "alertUrl": "Liên kết trở lại Retrace.ai để điều tra",
         "alertTriggerTime": "Thời điểm cảnh báo kích hoạt (ISO 8601)",
         "alertTriggerTimeMillis": "Thời gian kích hoạt theo epoch millis",
         "alertTriggerTimeSeconds": "Thời gian kích hoạt theo epoch giây",
@@ -10611,7 +10611,7 @@
       "servicenowAssignmentGroup": "Nhóm phân công (tùy chọn)",
       "servicenowAssignmentGroupHelp": "Nhóm để phân công sự cố (ví dụ: IT Operations)",
       "servicenowResolutionCode": "Mã giải quyết (tùy chọn)",
-      "servicenowResolutionCodeHelp": "Phải khớp với một mã giải quyết hợp lệ trên ServiceNow instance của bạn. Được dùng khi OpenObserve giải quyết sự cố. Mặc định là Solved (Permanently).",
+      "servicenowResolutionCodeHelp": "Phải khớp với một mã giải quyết hợp lệ trên ServiceNow instance của bạn. Được dùng khi Retrace.ai giải quyết sự cố. Mặc định là Solved (Permanently).",
       "usernameRequired": "Tên người dùng là bắt buộc",
       "passwordRequired": "Mật khẩu là bắt buộc",
       "emailRecipients": "Địa chỉ email người nhận",
@@ -11512,7 +11512,7 @@
     "notIngestedHint": "Tổ chức này không đang tiếp nhận {stream}, nên cảnh báo này sẽ không bao giờ kích hoạt. Bạn vẫn có thể thêm và nó sẽ bắt đầu hoạt động khi dữ liệu đến.",
     "alertCount": "{count} cảnh báo | {count} cảnh báo",
     "noCollectorTitle": "Chưa có gì ở đây khớp với dữ liệu của bạn",
-    "noCollectorDescription": "Không có cảnh báo nào trong số {count} cảnh báo này truy vấn một stream mà tổ chức này đang nhận. Gửi telemetry {group} đến OpenObserve và chúng sẽ sáng lên ở đây.",
+    "noCollectorDescription": "Không có cảnh báo nào trong số {count} cảnh báo này truy vấn một stream mà tổ chức này đang nhận. Gửi telemetry {group} đến Retrace.ai và chúng sẽ sáng lên ở đây.",
     "setupGuide": "Hướng dẫn thu thập dữ liệu",
     "emptyLibraryTitle": "Thư viện cảnh báo trống",
     "emptyLibraryDescription": "Danh mục đã tải nhưng không chứa cảnh báo nào. Đây là sự cố xuất bản, không phải bộ lọc — hãy thử lại sớm.",
@@ -12067,7 +12067,7 @@
     "continue": "Tiếp tục",
     "save": "Lưu",
     "update": "Cập nhật",
-    "awsStsCloudInfo": "Thao tác này sử dụng AWS sts để giả định vai trò và thực hiện các thao tác. Bạn phải thêm tài khoản AWS {product} làm loại thực thể được tin cậy cho vai trò này trong console AWS. Vui lòng liên hệ nhóm Openobserve để biết thông tin tài khoản hoặc được hỗ trợ thêm trong việc thiết lập.",
+    "awsStsCloudInfo": "Thao tác này sử dụng AWS sts để giả định vai trò và thực hiện các thao tác. Bạn phải thêm tài khoản AWS {product} làm loại thực thể được tin cậy cho vai trò này trong console AWS. Vui lòng liên hệ nhóm Retrace.ai để biết thông tin tài khoản hoặc được hỗ trợ thêm trong việc thiết lập.",
     "awsStsSelfHostedInfo": "Tính năng này sử dụng AWS sts để đảm nhận vai trò và thực hiện các thao tác. Đảm bảo bạn đã cấu hình thông tin xác thực aws trong môi trường cài đặt có quyền truy cập vào vai trò này."
   },
   "metrics": {
@@ -14489,7 +14489,7 @@
     "noTracesDescription": "Không tìm thấy trace nào cho tương quan này trong khoảng thời gian đã chọn.",
     "viewInTraces": "Xem trong Trace",
     "filters": "Bộ lọc",
-    "semanticFieldGroupsCaption": "Ánh xạ tên trường đo từ xa của bạn thành các nhóm chung để OpenObserve có thể tương quan chúng qua các stream.",
+    "semanticFieldGroupsCaption": "Ánh xạ tên trường đo từ xa của bạn thành các nhóm chung để Retrace.ai có thể tương quan chúng qua các stream.",
     "exportToJson": "Xuất ra JSON",
     "importFromJson": "Nhập từ JSON",
     "addCustomGroup": "Thêm Nhóm Tùy chỉnh",
@@ -17343,7 +17343,7 @@
         "systemProvided": {
           "about": "Về các giá trị do hệ thống cung cấp",
           "title": "Giá trị hệ thống của {scope}",
-          "description": "OpenObserve xây dựng các giá trị này riêng biệt cho mỗi {scope} mà công việc này đánh giá. Sử dụng chúng làm nguồn khi ánh xạ các biến prompt của bộ chấm điểm.",
+          "description": "Retrace.ai xây dựng các giá trị này riêng biệt cho mỗi {scope} mà công việc này đánh giá. Sử dụng chúng làm nguồn khi ánh xạ các biến prompt của bộ chấm điểm.",
           "badge": "Hệ thống cung cấp",
           "selectorRequired": "Span Selector là bắt buộc.",
           "columns": {
@@ -19516,7 +19516,7 @@
       "txtNameCopied": "Đã sao chép tên bản ghi",
       "txtValueCopied": "Đã sao chép giá trị bản ghi",
       "nextStepVerify": "Việc xác minh tự động chạy mỗi {seconds} giây. Bạn cũng có thể xác minh ngay bây giờ.",
-      "nextStepCname": "Sau khi được xác minh, trỏ {domain} đến OpenObserve bằng bản ghi CNAME tới máy chủ của ứng dụng này để nó phục vụ trang trạng thái của bạn.",
+      "nextStepCname": "Sau khi được xác minh, trỏ {domain} đến Retrace.ai bằng bản ghi CNAME tới máy chủ của ứng dụng này để nó phục vụ trang trạng thái của bạn.",
       "serving": "Đã xác minh. Tên miền này hiện phục vụ trang trạng thái của bạn, miễn là CNAME của nó trỏ đến máy chủ của ứng dụng này."
     },
     "preview": {
@@ -21777,7 +21777,7 @@
       "workloadsStatusScheduled": "Đã lên lịch: {count}",
       "workloadsStatusSuspended": "Tạm dừng: {count}",
       "workloadsNone": "Không có",
-      "workloadsRuleTip": "Quy tắc của OpenObserve, không phải Lens: đối tượng không có pod nào được đếm từ tín hiệu replica hoặc job của chính nó, và dữ liệu không đầy đủ được tính là Không xác định",
+      "workloadsRuleTip": "Quy tắc của Retrace.ai, không phải Lens: đối tượng không có pod nào được đếm từ tín hiệu replica hoặc job của chính nó, và dữ liệu không đầy đủ được tính là Không xác định",
       "workloadsRecentEvents": "Sự kiện gần đây",
       "workloadsViewAll": "Xem tất cả",
       "workloadsColType": "Loại",
@@ -23052,7 +23052,7 @@
           },
           "sampling": {
             "no": "Không có gì đang lấy mẫu các bảng phiên của cơ sở dữ liệu của bạn",
-            "noDetail": "Các mẫu phiên đến từ bộ thu thập của bạn: bật db.server.query_sample trong công thức bộ thu thập trên máy chủ cơ sở dữ liệu — trang thiết lập sẽ hướng dẫn. OpenObserve chấp nhận nguồn dữ liệu này khi giám sát cơ sở dữ liệu được bật, vì vậy cách khắc phục nằm ở phía bộ thu thập."
+            "noDetail": "Các mẫu phiên đến từ bộ thu thập của bạn: bật db.server.query_sample trong công thức bộ thu thập trên máy chủ cơ sở dữ liệu — trang thiết lập sẽ hướng dẫn. Retrace.ai chấp nhận nguồn dữ liệu này khi giám sát cơ sở dữ liệu được bật, vì vậy cách khắc phục nằm ở phía bộ thu thập."
           }
         }
       }
@@ -26576,7 +26576,7 @@
       "restrictedDesc": "Các cấu hình dùng những thành phần này sẽ không qua được bước xác thực.",
       "restrictedPlaceholder": "Không có, cho phép mọi thành phần",
       "targetVersion": "Phiên bản collector mục tiêu",
-      "targetVersionDesc": "Các collector cũ hơn phiên bản này bị coi là lỗi thời. Để trống để dùng phiên bản mới nhất mà OpenObserve hỗ trợ.",
+      "targetVersionDesc": "Các collector cũ hơn phiên bản này bị coi là lỗi thời. Để trống để dùng phiên bản mới nhất mà Retrace.ai hỗ trợ.",
       "targetVersionPlaceholder": "Mới nhất được hỗ trợ (vd. 0.163.1)",
       "save": "Lưu",
       "saved": "Đã lưu cài đặt Fleet Manager",

@@ -565,7 +565,7 @@
       "title": "Henüz uzak görev yok",
       "description": "Uzak görev, deneylerinizin çıktı üretmek için çağırdığı bir HTTP hizmetidir. Bir kez yayınlayın, bağlantının çalıştığını doğrulayın ve her deney, üzerinde çalıştığı tam sürümü sabitleyebilir.",
       "action": "Yeni Görev",
-      "actionDesc": "OpenObserve'i uç noktanıza yönlendirin ve bağlantıyı test edin."
+      "actionDesc": "Retrace.ai'i uç noktanıza yönlendirin ve bağlantıyı test edin."
     },
     "noDowntimes": {
       "title": "Henüz bakım penceresi yok",
@@ -1880,7 +1880,7 @@
       "refresh": "Yenile",
       "refreshDataThrough": "Yenile · veriler {time} itibarıyla",
       "sdkSampled": "Sayımlar örneklenmiş SDK oturumlarını yansıtır",
-      "sdkSampledTip": "OpenObserve'a yalnızca RUM SDK'nızın sakladığı oturumlar ({field}) ulaşır, bu nedenle buradaki her sayım bu oturumları kapsar.",
+      "sdkSampledTip": "Retrace.ai'a yalnızca RUM SDK'nızın sakladığı oturumlar ({field}) ulaşır, bu nedenle buradaki her sayım bu oturumları kapsar.",
       "identityExcluded": "{count} kimlik değeri hariç tutuldu (%{pct}) | {count} kimlik değeri hariç tutuldu (%{pct})",
       "identityIncluded": "Tüm kimlik değerleri dahil",
       "identityExcludedHelp": "Tek bir değer, tanımlanmış oturumların %{pct}'ini kapsıyor; muhtemelen bir test veya paylaşılan hesap. Her kullanıcı sayımından, huniden ve elde tutma tablosundan hariç bırakılır.",
@@ -5116,7 +5116,7 @@
       "askAi": "Yapay Zeka'ya Sor",
       "guideDocs": "{guide} dokümanları",
       "setupDocs": "Kurulum dokümanları",
-      "askAiPrompt": "OpenObserve'da {guide} kuruyorum ve henüz hiçbir veri ulaşmadı. İlk olay kontrolü şunu söylüyor: {details} Org kimliği: {org}. Uç nokta: {endpoint}. Bundan sonra neyi kontrol etmeliyim?",
+      "askAiPrompt": "Retrace.ai'da {guide} kuruyorum ve henüz hiçbir veri ulaşmadı. İlk olay kontrolü şunu söylüyor: {details} Org kimliği: {org}. Uç nokta: {endpoint}. Bundan sonra neyi kontrol etmeliyim?",
       "askAiRejected": "istekler {path} üzerinde {status} {reason} ile reddediliyor.",
       "askAiNoRequests": "hiçbir şey ulaşmadı ve hiçbir istek reddedilmedi.",
       "askAiUnavailable": "reddedilen istekler okunamadı, bu yüzden neden bilinmiyor.",
@@ -5170,7 +5170,7 @@
       "configTitle": "Bunu {path} olarak kaydedin ve Fluent Bit'i yeniden başlatın",
       "configDescription": "{server} günlüklerini takip eder ve kuruluş token'ıyla bunları {org} kuruluşunun {stream} akışına gönderir.",
       "restartHint": "Ardından {command} komutunu çalıştırın.",
-      "verifyTitle": "OpenObserve'de verileri doğrulayın"
+      "verifyTitle": "Retrace.ai'de verileri doğrulayın"
     },
     "copyContentError": "İçerik kopyalanırken hata oluştu.",
     "passcodeForbiddenMessage": "Veri alımı token'ını görüntülemek için Yönetici veya Root rolü gerekir. Kurulum komutunu ya da burada görmek için gereken rolü bir yöneticiden isteyin.",
@@ -5253,7 +5253,7 @@
       "singleTargetTitle": "Tek uzak yazma hedefi",
       "fanoutTitle": "Birden çok backend'e dağıtım",
       "tipPrefix": "İpucu: `vmagent` yazma işlemlerini şu",
-      "tipSuffix": "bayrağı, mevcut bir VictoriaMetrics hedefini korurken aynı zamanda metrikleri OpenObserve'e iletebilirsiniz.",
+      "tipSuffix": "bayrağı, mevcut bir VictoriaMetrics hedefini korurken aynı zamanda metrikleri Retrace.ai'e iletebilirsiniz.",
       "docLinkText": "vmagent uzak yazma hedeflerini yapılandırma hakkında daha fazla bilgi edinmek için."
     },
     "ai": {
@@ -5339,7 +5339,7 @@
       "selectAtLeastOneCategory": "Yukarıdan en az bir günlük kategorisi seçin.",
       "runCommandAfterDeployment": "ARM dağıtımınız tamamlandıktan sonra şu komutu çalıştırın:",
       "activityLogsTitle": "Azure Etkinlik Günlükleri",
-      "activityLogsDescription": "Azure abonelik etkinlik günlüklerini {product} aracılığıyla OpenObserve'e aktarın. ARM şablonu Event Hub altyapısını kurar — ardından Azure'u günlükleri buraya dışa aktaracak şekilde yapılandırırsınız.",
+      "activityLogsDescription": "Azure abonelik etkinlik günlüklerini {product} aracılığıyla Retrace.ai'e aktarın. ARM şablonu Event Hub altyapısını kurar — ardından Azure'u günlükleri buraya dışa aktaracak şekilde yapılandırırsınız.",
       "manualTitle": "Manuel Yapılandırma (referans için)"
     },
     "awsSetup": {
@@ -5462,16 +5462,16 @@
     "splunkHecUrlHelp": "Splunk forwarder'ınızı bu URL'ye yönlendirin ve token'ı Authorization başlık değeri olarak \"Splunk <token>\" şeklinde gönderin.",
     "setupCard": {
       "advancedInstallDescCloud": "Özel yapılandırmalar için veya sürümleri sabitlemek ve grafik değerlerini özelleştirmek için. Adımları sırayla çalıştırın.",
-      "advancedInstallDescSelfHosted": "Özel yapılandırmalar için veya sürümleri sabitlemek ve grafik değerlerini özelleştirmek için. Adımları sırayla çalıştırın. OpenObserve aynı kümede çalışıyorsa, dışa aktarıcı uç noktalarını `{url}` ile değiştirin.",
+      "advancedInstallDescSelfHosted": "Özel yapılandırmalar için veya sürümleri sabitlemek ve grafik değerlerini özelleştirmek için. Adımları sırayla çalıştırın. Retrace.ai aynı kümede çalışıyorsa, dışa aktarıcı uç noktalarını `{url}` ile değiştirin.",
       "advancedInstallLabel": "Gelişmiş kurulum (manuel adımlar)",
       "aerospikeHostLabel": "Aerospike Sunucusu",
-      "aerospikeTagline": "Aerospike metriklerini OpenTelemetry Collector ile toplayın ve OpenObserve'e gönderin.",
+      "aerospikeTagline": "Aerospike metriklerini OpenTelemetry Collector ile toplayın ve Retrace.ai'e gönderin.",
       "agentServiceFixTitle": "Aracı Hizmetini Kontrol Edin",
       "agentTroubleInstanceIdA": "Bu, IAM rolü olmayan EC2 varyantıdır. {iamNote} Rolü ekleyin, ardından aracıyı yeniden başlatın.",
       "agentTroubleInstanceIdQ": "Sunucular bir ad yerine bir örnek kimliği altında görünüyor",
       "agentTroubleNoDataA": "Aracının {hint} ile çalıştığını kontrol edin. Günlüklerindeki 401, alım token'ının eski olduğu anlamına gelir — bu sayfadaki komutu yeniden kopyalayın; bu komut her zaman bu kuruluşun güncel token'ını taşır.",
       "agentTroubleNoDataQ": "Kurulum betiği çalışıyor ancak veri gelmiyor",
-      "agentTroubleUnreachableA": "Aracının bu OpenObserve uç noktasına giden erişime ihtiyacı var. Ana bilgisayardan `curl -v` ile doğrulayın — genellikle bir proxy veya çıkış güvenlik duvarı neden olur.",
+      "agentTroubleUnreachableA": "Aracının bu Retrace.ai uç noktasına giden erişime ihtiyacı var. Ana bilgisayardan `curl -v` ile doğrulayın — genellikle bir proxy veya çıkış güvenlik duvarı neden olur.",
       "agentTroubleUnreachableQ": "Uç noktaya ana bilgisayardan erişilemiyor",
       "aiCategoryAnalytics": "Analitik ve Değerlendirme",
       "aiCategoryFrameworks": "AI Çerçeveleri ve Aracılar",
@@ -5486,7 +5486,7 @@
       "autoInstrumentTracesDesc": "Her ikisi de **uygulama koduna dokunmadan veya imajları yeniden oluşturmadan dağıtık izler** sağlar. **Dil kütüphaneleri:** OpenTelemetry operatörü, annotation eklenmiş bir ad alanındaki pod'lara otomatik enstrümantasyon enjekte eder. **eBPF:** toplayıcı, seçtiğiniz süreçleri Go dahil her dilde izler.",
       "autoInstrumentTracesTitle": "Uygulamalarınızı izleyin: dil kütüphaneleri veya eBPF",
       "cassandraJmxNote": "Alıcının bağlanabilmesi için Cassandra'da JMX uzaktan erişimini etkinleştirin.",
-      "cassandraTagline": "Cassandra metriklerini OpenTelemetry Collector'ın JMX alıcısı aracılığıyla toplayın ve OpenObserve'e gönderin.",
+      "cassandraTagline": "Cassandra metriklerini OpenTelemetry Collector'ın JMX alıcısı aracılığıyla toplayın ve Retrace.ai'e gönderin.",
       "checking": "Kontrol ediliyor…",
       "checkingForLogs": "Günlükler kontrol ediliyor…",
       "checkingForMetrics": "Metrikler kontrol ediliyor…",
@@ -5519,10 +5519,10 @@
       "downloadJmxJarDesc": "JMX alıcısı bu yardımcı jar'ı çalıştırır (toplayıcı ana bilgisayarda Java gerektirir).",
       "downloadJmxJarTitle": "JMX Metrikleri JAR'ını İndir",
       "dynamodbFirehoseEndpointDesc": "Bunları, Kinesis Data Firehose teslimat akışınızı oluştururken **HTTP Endpoint** hedefi olarak kullanın.",
-      "dynamodbFirehoseEndpointTitle": "OpenObserve Firehose Uç Noktası",
+      "dynamodbFirehoseEndpointTitle": "Retrace.ai Firehose Uç Noktası",
       "dynamodbPipelineDesc": "Tablonuzda **DynamoDB Streams** özelliğini etkinleştirin, bir **Kinesis Data Stream**'e bağlayın ve ardından bir **Kinesis Data Firehose** teslimat akışını yukarıdaki HTTP uç noktasına yönlendirin.",
       "dynamodbPipelineTitle": "DynamoDB → Firehose Aktarımı",
-      "dynamodbTagline": "DynamoDB öğe değişikliklerini Kinesis Firehose aracılığıyla OpenObserve'e aktarın.",
+      "dynamodbTagline": "DynamoDB öğe değişikliklerini Kinesis Firehose aracılığıyla Retrace.ai'e aktarın.",
       "ec2IamNote": "Örneğin üzerinde ec2:DescribeTags ve ec2:DescribeInstances izinlerine sahip bir IAM rolü gerektirir; böylece aracı Name etiketini okuyup bunu ana bilgisayar tanımlayıcısı olarak kullanabilir.",
       "enableSessionReplayDesc": "Oturum tekrarı, RUM'dan **ayrı olarak** yapılandırılır ve `rumConfiguration.customEndpoint` değerini **devralmaz**. Aşağıya kendi temel URL'sini verin — RUM/Logs URL'si ile aynı biçimde. Köprü, `/replay` sonekini kendisi ekler; bu yüzden **siz** eklemeyin: elle eklenen bir `/replay`, yolu iki kez ekler ve her yükleme 401 ile reddedilir; bu, RUM olaylarının gelmesine rağmen oturum tekrarlarının hiç gelmemesinin olağan nedenidir.",
       "enableSessionReplayTitle": "Oturum Tekrar Oynatmayı Etkinleştir",
@@ -5532,15 +5532,15 @@
       "gcpFixBody": "GCP, teslimat hatalarını aboneliğin kendisinde raporlar. Sink yayın yapıyor ama buraya hiçbir şey gelmiyorsa, push uç noktası genellikle isteği reddediyordur:",
       "gcpFixTitle": "Push Aboneliğini Kontrol Et",
       "gcpPushUrlNote": "Bu URL'yi gizli tutun — veri alımı anahtarını içerir. Sızarsa bu sayfanın başlığından yenileyin.",
-      "gcpSinkDesc": "GCP konsolunda, hedef olarak Pub/Sub ile bir **Log Router sink** oluşturun (Logging → Log Router → Create sink) ve konuyu (topic) oluşturmasına izin verin. Sink'in dahil etme filtresi, hangi günlüklerin OpenObserve'e ulaşacağını belirler.",
+      "gcpSinkDesc": "GCP konsolunda, hedef olarak Pub/Sub ile bir **Log Router sink** oluşturun (Logging → Log Router → Create sink) ve konuyu (topic) oluşturmasına izin verin. Sink'in dahil etme filtresi, hangi günlüklerin Retrace.ai'e ulaşacağını belirler.",
       "gcpSinkTitle": "Günlükleri Pub/Sub Konusuna Yönlendirin",
       "gcpSinkWriterNote": "Sink'in yazar kimliğine konu üzerinde Pub/Sub Publisher rolü verin, aksi halde sessizce hiçbir şey yayınlamaz.",
       "gcpStreamHelp": "Yukarıdaki gönderme URL'sinde kullanılır ve aşağıdaki denetim tarafından izlenir. Özel bir akış, GCP günlüklerini ayrı tutar.",
       "gcpSubscriptionDesc": "Bu konuda bir **push** aboneliği oluşturun ve bunu uç nokta URL'si olarak yapıştırın. Bu, bu kuruluşu ve alım anahtarını zaten taşır.",
-      "gcpSubscriptionTitle": "Konuyu OpenObserve'e İtin",
+      "gcpSubscriptionTitle": "Konuyu Retrace.ai'e İtin",
       "gcpTroubleDeliveryA": "401, URL'deki `API-Key` değerinin eski olduğu anlamına gelir — uç noktayı bu sayfadan yeniden kopyalayın. 404 genellikle org veya akış bölümünün elle düzenlendiği anlamına gelir; yukarıdaki URL bu kuruluş için zaten doğrudur.",
       "gcpTroubleDeliveryQ": "Abonelik teslimat hataları gösteriyor",
-      "gcpTroublePartialA": "Bu, OpenObserve değil, sink'in dahil etme filtresidir. Beklediğiniz hizmetleri ve önem derecelerini kapsaması için sink üzerindeki `--log-filter` değerini genişletin.",
+      "gcpTroublePartialA": "Bu, Retrace.ai değil, sink'in dahil etme filtresidir. Beklediğiniz hizmetleri ve önem derecelerini kapsaması için sink üzerindeki `--log-filter` değerini genişletin.",
       "gcpTroublePartialQ": "Sadece bazı günlükler geliyor",
       "gcpTroubleTopicA": "Sink'in **yazar kimliğinin** konu üzerinde Pub/Sub Publisher rolüne ihtiyacı vardır. GCP, sink'i bu rol olmadan başarıyla oluşturur ve ardından her şeyi sessizce düşürür.",
       "gcpTroubleTopicQ": "Sink mevcut ancak konu hiçbir şey almıyor",
@@ -5573,7 +5573,7 @@
       "k8sEbpfVariant": "eBPF (her dil, kod değişikliği yok)",
       "k8sLibrariesVariant": "Dil kütüphaneleri (otomatik enstrümantasyon)",
       "k8sInstallerNote": "Bu, cert-manager'ı, OpenTelemetry operatörünü ve OpenObserve toplayıcısını otomatik olarak kurar.",
-      "k8sInternalEndpointNote": "Bunu, OpenObserve aynı kümede çalışıyorsa kullanın — trafik asla kümeden dışarı çıkmaz.",
+      "k8sInternalEndpointNote": "Bunu, Retrace.ai aynı kümede çalışıyorsa kullanın — trafik asla kümeden dışarı çıkmaz.",
       "k8sTroubleAnnotationA": "Enjeksiyon pod oluşturulurken gerçekleşir, bu nedenle mevcut podlar yeniden başlatılana kadar etkilenmez — `kubectl rollout restart deployment -n my-namespace` komutunu çalıştırın. Notun yerleştiğini `kubectl get ns my-namespace -o yaml` ile doğrulayın ve değerin `openobserve-collector/openobserve-<language>` ile eşleştiğini kontrol edin.",
       "k8sTroubleAnnotationQ": "Bir namespace'e annotasyon ekledim ama hiç iz görünmüyor",
       "k8sTroubleEndpointA": "**Dahili uç noktayı** yalnızca OpenObserve'ün kendisi bu kümede çalışıyorsa kullanın; bu durumda trafik kümenin içinde kalır ve ağı hiç geçmez. URL `http://<helm-release>-openobserve-router.<namespace>.svc.cluster.local:5080` şeklindedir — varsayılan, `openobserve` ad alanında `o2` sürümünü varsayar, farklıysa düzenleyin. Diğer herkes harici uç noktayı kullanır.",
@@ -5595,7 +5595,7 @@
       "runCollectorMariadbDesc": "Collector'ı başlatın (kullanıcının şifresi ortam değişkeniyle).",
       "mariadbHostLabel": "MariaDB Sunucusu",
       "verifyMariadbMetricsDesc": "Veri geldiğinde aşağıdaki kontrol yeşile döner; ya da `mysql_*` metrikleri için Akışlar'a bakın (MariaDB, MySQL alıcısı üzerinden raporlar).",
-      "mariadbTagline": "MariaDB metriklerini OpenTelemetry Collector ile toplayın ve OpenObserve'e gönderin.",
+      "mariadbTagline": "MariaDB metriklerini OpenTelemetry Collector ile toplayın ve Retrace.ai'e gönderin.",
       "logsStreamNameLabel": "Günlük Akışı Adı",
       "macosAgentFixBody": "Kurucu iki launchd arka plan programı kaydeder: aracının kendisi ve birleşik günlük köprüsü. Hiçbir şey gelmezse ikisinin de yüklendiğini doğrulayın ve kimlik doğrulama veya bağlantı hatası için aracının günlüğünü okuyun:",
       "macosAgentServicesFixTitle": "Aracı Hizmetlerini Kontrol Et",
@@ -5607,11 +5607,11 @@
       "macosTroubleVolumeQ": "Birleşik günlük beklenenden çok daha fazlasını gönderiyor",
       "macQuarantineNote": "macOS imzasız ikili dosyayı engellerse karantina bayrağını temizleyin: xattr -d com.apple.quarantine ./otelcol-contrib",
       "mongodbHostLabel": "MongoDB Sunucusu",
-      "mongodbTagline": "MongoDB metriklerini OpenTelemetry Collector ile toplayın ve OpenObserve'e gönderin.",
+      "mongodbTagline": "MongoDB metriklerini OpenTelemetry Collector ile toplayın ve Retrace.ai'e gönderin.",
       "mostLikelyFix": "Büyük olasılıkla çözüm —",
       "mysqlAdminNote": "Bir MySQL yöneticisi olarak çalıştırın (şifre sorar).",
       "mysqlHostLabel": "MySQL Sunucusu",
-      "mysqlTagline": "MySQL metriklerini OpenTelemetry Collector ile topla ve OpenObserve'e gönder.",
+      "mysqlTagline": "MySQL metriklerini OpenTelemetry Collector ile topla ve Retrace.ai'e gönder.",
       "noLogsFoundYet": "Henüz günlük bulunamadı",
       "noMetricsFoundYet": "Henüz metrik bulunamadı",
       "noSpansFoundYet": "Henüz span bulunamadı",
@@ -5620,7 +5620,7 @@
       "onStream": "{stream} üzerinde",
       "optionalLabel": "İsteğe Bağlı",
       "oracleHostLabel": "Oracle Sunucusu",
-      "oracleTagline": "Oracle DB metriklerini OpenTelemetry Collector ile topla ve OpenObserve'e gönder.",
+      "oracleTagline": "Oracle DB metriklerini OpenTelemetry Collector ile topla ve Retrace.ai'e gönder.",
       "otlpFixBody": "Bir dışa aktarıcı tanımlamak yeterli değildir — bir işlem hattında listelenmesi gerekir. Bu, doğru görünen bir yapılandırmanın hiçbir şey göndermemesinin en yaygın tek nedenidir:",
       "otlpFixTitle": "Dışa Aktarıcının Gerçekten İşlem Hattına Bağlı Olduğunu Kontrol Edin",
       "otlpGrpcCloudNote": "OpenObserve Cloud'un herkese açık gRPC ağ geçidi — yüksek span hacimleri için HTTP'den daha düşük ek yük, yapılandırılacak kendi barındırılan ağ gerekmez.",
@@ -5708,10 +5708,10 @@
       "pillWireframeCapture": "Wireframe Yakalama",
       "pillWriteLatency": "Yazma Gecikmesi",
       "pointExporterDesc": "Bunu collector yapılandırmana ekle veya uygulaman doğrudan dışa aktarıyorsa ortam değişkenlerini ayarla. Bu kuruluş için her şey zaten dolduruldu.",
-      "pointExporterTitle": "Exporter'ını OpenObserve'e Yönlendir",
+      "pointExporterTitle": "Exporter'ını Retrace.ai'e Yönlendir",
       "portLabel": "Port",
       "postgresqlHostLabel": "PostgreSQL Sunucusu",
-      "postgresqlTagline": "PostgreSQL metriklerini OpenTelemetry Collector ile topla ve OpenObserve'e gönder.",
+      "postgresqlTagline": "PostgreSQL metriklerini OpenTelemetry Collector ile topla ve Retrace.ai'e gönder.",
       "postgresSuperuserNote": "Postgres süper kullanıcısı olarak çalıştırın (psql parolasını sorar).",
       "prepareMongodbDesc": "clusterMonitor ile bir izleme kullanıcısı oluştur — bunu mongosh'da çalıştır, shell'inde **değil**.",
       "prepareMongodbTitle": "MongoDB'yi Hazırla",
@@ -5729,7 +5729,7 @@
       "quickInstallTitle": "Hızlı kurulum (önerilir)",
       "redisHostLabel": "Redis Sunucusu",
       "redisNoAuthNote": "Redis kimlik doğrulaması yoksa REDIS_PASSWORD='' kullanın.",
-      "redisTagline": "Redis metriklerini OpenTelemetry Collector ile toplayın ve OpenObserve'e gönderin.",
+      "redisTagline": "Redis metriklerini OpenTelemetry Collector ile toplayın ve Retrace.ai'e gönderin.",
       "revealToken": "Token'ı Göster",
       "rnFixBody": "`localhost` bir emülatörün içinde veya fiziksel bir cihazda cihazın kendisidir, makineniz değildir — hiçbir şeyin ulaşmamasının en yaygın nedeni budur. Uygulamanın çalıştığı yer için doğru ana bilgisayarı kullanın:",
       "rnFixTitle": "SDK'yı Cihazınızın Gerçekten Erişebileceği Bir Ana Bilgisayara Yönlendirin",
@@ -5753,7 +5753,7 @@
       "rnTroubleScreenNamesQ": "Oturumlar görünüyor ancak ekranların tümü aynı adı taşıyor.",
       "rumCdnInitNote": "Bunu <head> içindeki yükleyiciden hemen sonra tutun. onReady(), her paket gelene kadar başlatmayı sıraya alır — hiçbir şey işlemeyi engellemez.",
       "rumCdnInstallNote": "<head> öğesinin en üstüne yapıştırın. Değişmez önbellek için v{version} sürümüne sabitlenmiştir; async + preconnect onu kritik işleme yolunun dışında tutar. Katı CSP için iki paketi kendi sunucunuzda barındırın.",
-      "rumFixBody": "Uygulamanız çalışıyor ancak hiçbir şey gelmiyorsa, tarayıcı büyük olasılıkla SDK'yı veya isteklerini engelledi — genellikle bir İçerik Güvenliği Politikası veya bir reklam engelleyici. CDN'ye ve OpenObserve uç noktanıza izin verin, ardından yeniden yükleyin:",
+      "rumFixBody": "Uygulamanız çalışıyor ancak hiçbir şey gelmiyorsa, tarayıcı büyük olasılıkla SDK'yı veya isteklerini engelledi — genellikle bir İçerik Güvenliği Politikası veya bir reklam engelleyici. CDN'ye ve Retrace.ai uç noktanıza izin verin, ardından yeniden yükleyin:",
       "rumFixTitle": "İçerik Güvenliği Politikanızda SDK'ya İzin Verin",
       "rumInitDesc": "Her iki SDK da bu kuruluşun değerleriyle başlatılır — olduğu gibi kopyalayın, ardından uygulamanızı tanımlamak için `service`, `env` ve `applicationId` değerlerini ayarlayın. `clientToken`, tasarım gereği ziyaretçilerin tarayıcılarına gönderilir (NPM paketler, CDN satır içine alır) — yalnızca RUM olayları yazabilir ve bu sayfanın başlığından istediğiniz zaman yenileyebilirsiniz.",
       "rumInitTitle": "RUM + Günlükleri Başlat",
@@ -5774,7 +5774,7 @@
       "rumTroublePerfA": "Hayır — paketler kritik işleme yolunun dışında `async` ile yüklenir, `preconnect` ilk yüklemeden önce DNS/TLS'i hazırlar ve olaylar gönderilmeden önce toplu hale getirilir. Tekrar yükünü daha da sınırlamak istiyorsanız `sessionReplaySampleRate` değerini düşürün.",
       "rumTroublePerfQ": "SDK sitemi yavaşlatır mı?",
       "rumTroublePlainHttpA": "Tarayıcılar karışık içeriği reddeder ve SDK varsayılan olarak HTTPS kullanır — yüklemelerin doğru şemayı kullanması için `insecureHTTP: {insecureHTTP}` (bu kuruluşun uç noktasından zaten ayarlanmıştır) değerini koruyun.",
-      "rumTroublePlainHttpQ": "OpenObserve uç noktam düz HTTP",
+      "rumTroublePlainHttpQ": "Retrace.ai uç noktam düz HTTP",
       "rumTroubleTokenVisibleA": "Evet — `clientToken`, tasarım gereği istemci tarafı bir token'dır; her tarayıcı RUM ürününün token'ı gibi. NPM kurulumları onu JS paketi içinde açığa çıkarır, CDN kurulumları ise HTML içinde satır içi olarak bulundurur. DevTools her iki durumda da onu gösterir. Yalnızca RUM olaylarını **yazabilir** — okuma erişimi vermez ve veri alımı geçiş kodundan ayrıdır. Biri onu kötüye kullanıp sahte olaylar gönderirse, bu sayfanın başlığından yeniden oluşturun ve uygulamanızı yeniden dağıtın.",
       "rumTroubleTokenVisibleQ": "Token'ın sayfa kaynağımda görünür olması güvenli mi?",
       "runCollectorDesc": "Collector'ı başlat.",
@@ -5787,7 +5787,7 @@
       "runtimeCluster": "Küme",
       "runtimeHost": "Ana Bilgisayar",
       "seeAllTroubleshooting": "Tüm sorun giderme adımlarını gör",
-      "sendNotebookLogsDesc": "Bir Databricks not defteri hücresine yapıştırın — kayıtları OpenObserve'in günlük API'sine POST eder.",
+      "sendNotebookLogsDesc": "Bir Databricks not defteri hücresine yapıştırın — kayıtları Retrace.ai'in günlük API'sine POST eder.",
       "sendNotebookLogsTitle": "Not Defterinizden Günlük Gönderin",
       "setup": "kurulum",
       "setupTime1Min": "~1 dakika",
@@ -5827,23 +5827,23 @@
       "androidTroubleScreenNamesA": "Görünüm izleme bağlanmamış. `RumConfiguration` oluştururken bir `useViewTrackingStrategy(...)` iletin — örn. Etkinlikler için `ActivityViewTrackingStrategy(trackExtras = true)` veya AndroidX Navigation kullanıyorsanız `NavigationViewTrackingStrategy(...)` —.",
       "setupTime5Min": "~5 dakika",
       "snowflakeCollectorVersionNote": "Snowflake, collector v0.92.0 gerektirir — daha yeni sürümlerde bilinen bir hata vardır.",
-      "snowflakeTagline": "Snowflake hesap metriklerini OpenTelemetry Collector ile toplayın ve OpenObserve'e gönderin.",
+      "snowflakeTagline": "Snowflake hesap metriklerini OpenTelemetry Collector ile toplayın ve Retrace.ai'e gönderin.",
       "sqlClientGuiVariant": "SQL İstemcisi (GUI)",
       "sqlServerHostLabel": "SQL Server Sunucusu",
       "sqlServerPasswordNote": "YOUR_SA_PASSWORD değerini değiştirin.",
-      "sqlServerTagline": "SQL Server metriklerini OpenTelemetry Collector ile topla ve OpenObserve'e gönder.",
+      "sqlServerTagline": "SQL Server metriklerini OpenTelemetry Collector ile topla ve Retrace.ai'e gönder.",
       "startIngestingTestForLogs": "veri almaya başlayın, ardından günlükleri test edin",
       "startIngestingTestForMetrics": "Veri almaya başlayın, ardından metrikleri test edin",
       "startIngestingTestForSpans": "veri alımına başlayın, ardından span'ları test edin",
       "streamNameError": "Yalnızca harfler, sayılar ve _ kullanın.",
       "streamNameLabel": "Akış Adı",
       "stuck": "Takıldınız mı?",
-      "taglineDatabricks": "Databricks not defteri günlüklerini günlük API'si üzerinden OpenObserve'e gönderin.",
-      "taglineGcp": "Google Cloud günlüklerini Pub/Sub push aboneliğiyle OpenObserve'e aktarın — çalıştırılacak aracı veya toplayıcı yok.",
+      "taglineDatabricks": "Databricks not defteri günlüklerini günlük API'si üzerinden Retrace.ai'e gönderin.",
+      "taglineGcp": "Google Cloud günlüklerini Pub/Sub push aboneliğiyle Retrace.ai'e aktarın — çalıştırılacak aracı veya toplayıcı yok.",
       "taglineKubernetes": "OpenObserve toplayıcısını kümenize dağıtın — konteyner günlükleri, Kubernetes olayları ve küme metrikleri, ayrıca iş yükleriniz için sıfır kodlu izler.",
       "taglineLinux": "OpenObserve aracını herhangi bir Linux ana bilgisayarına kurun — sistem ve journald günlükleri ile CPU, bellek, disk ve ağ metrikleri, isteğe bağlı eBPF izleriyle birlikte.",
       "taglineMacos": "OpenObserve aracısını herhangi bir Mac'e kurun — birleşik günlük ve standart günlük dosyaları ile CPU, bellek, disk ve ağ metrikleri.",
-      "taglineOtlpTraces": "Herhangi bir OpenTelemetry dışa aktarıcısını OpenObserve'e yönlendirin — toplayıcı veya SDK, HTTP veya gRPC. Uç noktanız ve token'ınız aşağıda doldurulmuştur.",
+      "taglineOtlpTraces": "Herhangi bir OpenTelemetry dışa aktarıcısını Retrace.ai'e yönlendirin — toplayıcı veya SDK, HTTP veya gRPC. Uç noktanız ve token'ınız aşağıda doldurulmuştur.",
       "taglineWindows": "OpenObserve aracısını herhangi bir Windows ana makinesine kurun — Olay Günlüğü, performans sayaçları ve ana makine metrikleri.",
       "testAgain": "Tekrar test et",
       "traceCmdHelp": "Python, Node.js ve Java uygulamaları için.",
@@ -5865,7 +5865,7 @@
       "verifyAerospikeMetricsDesc": "Veri geldiğinde aşağıdaki kontrol yeşile döner; ya da `aerospike_*` metrikleri için Akışlar'a bakın.",
       "verifyCassandraMetricsDesc": "Veri geldiğinde aşağıdaki kontrol yeşile döner; ya da `cassandra_*` metrikleri için Akışlar'a bakın.",
       "verifyDatabricksLogsDesc": "Veri geldiğinde aşağıdaki kontrol yeşile döner; ya da Günlükler'i açıp `source:databricks` araması yapın.",
-      "verifyDataTitle": "OpenObserve'de verileri doğrulayın",
+      "verifyDataTitle": "Retrace.ai'de verileri doğrulayın",
       "verifyDynamodbLogsDesc": "Veri geldiğinde aşağıdaki kontrol yeşile döner; ya da öğeler değiştiğinde `dynamodb` akışı için Günlükler'i açın.",
       "verifyGcpLogsDesc": "Projede biraz etkinlik oluşturun (ya da sink'in bir günlükle eşleşmesini bekleyin); veri geldiğinde aşağıdaki kontrol yeşile döner.",
       "verifyK8sDataDesc": "Toplayıcının başlaması için birkaç saniye bekleyin; veri geldiğinde aşağıdaki kontrol yeşile döner — küme günlükleri `default` akışına düşer.",
@@ -5894,7 +5894,7 @@
       "windowsTroubleScriptQ": "Betik hiç çalışmıyor",
       "writesTheseKeysTo": "Bu anahtarları şuraya yazar",
       "zookeeperHostLabel": "Zookeeper Sunucusu",
-      "zookeeperTagline": "Zookeeper metriklerini OpenTelemetry Collector ile toplayın ve OpenObserve'e gönderin.",
+      "zookeeperTagline": "Zookeeper metriklerini OpenTelemetry Collector ile toplayın ve Retrace.ai'e gönderin.",
       "pillKeyspace": "Anahtar Alanı",
       "pillZnodes": "Znode'lar",
       "stepNumber": "Adım {n}",
@@ -5961,8 +5961,8 @@
       "gpuExporterDesc": "NVIDIA'nın dışa aktarıcısı, GPU telemetrisini DCGM aracılığıyla okur ve `9400` portunda sunar.",
       "gpuExporterDockerNote": "`--network host`, gerçek makine adını `Hostname` etiketinde tutar ve dinleyici `127.0.0.1` üzerinde kalır, böylece GPU verileri ağa açılmaz. `SYS_ADMIN` yalnızca profil oluşturma (`DCGM_FI_PROF_*`) metrikleri için gereklidir.",
       "gpuExporterK8sNote": "Yalnızca GPU düğümlerinde, yaygın GPU düğüm etiketleriyle eşleşen bir DaemonSet olarak çalışır. Pod ek açıklamaları, OpenObserve toplayıcısının onu keşfetmesini sağlar, böylece ServiceMonitor veya Prometheus'a gerek yoktur.",
-      "gpuShipTitle": "GPU metriklerini OpenObserve'a gönderin",
-      "gpuShipDesc": "Dışa aktarıcının metriklerini OTLP üzerinden OpenObserve'a alın.",
+      "gpuShipTitle": "GPU metriklerini Retrace.ai'a gönderin",
+      "gpuShipDesc": "Dışa aktarıcının metriklerini OTLP üzerinden Retrace.ai'a alın.",
       "gpuShipDockerNote": "Kılavuzun ayarlarını kullanır: her 30 sn'de bir kazı, yalnızca `DCGM_*` serilerini tut ve 10 sn / 1.024 nokta grupla. Collector Contrib imajı, dışa aktarıcının yanında çalışır ve her ikisi de ana bilgisayar ağını kullanır, böylece `localhost:9400` çözümlenir.",
       "gpuShipK8sNote": "Yüklenecek bir şey yok: OpenObserve toplayıcı ağ geçidi, ek açıklamalı pod'ları her 30 sn'de bir kazır ve sundukları her şeyi gönderir. Bu komutlar, dışa aktarıcıya ulaşılabildiğini doğrular.",
       "gpuVerifyDesc": "GPU metrikleri, bir veya iki kazıma içinde `dcgm_fi_*` akışları olarak düşer. Geldiklerinde, **GPU Monitoring - NVIDIA** gösterge panosunu Varsayılan klasörünüze ekleriz.",
@@ -6017,14 +6017,14 @@
           "description": "İstek desenleri, hatalar ve gecikme için ALB erişim günlüklerini izleyin"
         },
         "cloudwatch-logs": {
-          "description": "Analiz için CloudWatch günlüklerini OpenObserve'e aktarın"
+          "description": "Analiz için CloudWatch günlüklerini Retrace.ai'e aktarın"
         },
         "cloudwatch-metrics": {
           "description": "CloudWatch metriklerini toplayın ve analiz edin"
         },
         "vpc-flow-logs": {
           "description": "VPC'nizdeki ağ trafiğini analiz edin",
-          "cloudwatchIntegrationDescription": "VPC Flow Logs'larını CloudWatch üzerinden OpenObserve'e aktarın",
+          "cloudwatchIntegrationDescription": "VPC Flow Logs'larını CloudWatch üzerinden Retrace.ai'e aktarın",
           "firehoseIntegrationDescription": "VPC Flow Logs'larını doğrudan Kinesis Firehose ile aktarın"
         },
         "ec2": {
@@ -6051,12 +6051,12 @@
         },
         "dynamodb": {
           "description": "DynamoDB işlemlerini takip edin",
-          "lambdaIntegrationDescription": "DynamoDB verilerini Lambda aracılığıyla OpenObserve'e aktarın",
-          "directIntegrationDescription": "DynamoDB verilerini doğrudan OpenObserve'e aktarın"
+          "lambdaIntegrationDescription": "DynamoDB verilerini Lambda aracılığıyla Retrace.ai'e aktarın",
+          "directIntegrationDescription": "DynamoDB verilerini doğrudan Retrace.ai'e aktarın"
         },
         "cloudfront": {
           "description": "CloudFront erişim günlüklerini analiz edin",
-          "directIntegrationDescription": "CloudFront günlüklerini doğrudan OpenObserve'e aktarın",
+          "directIntegrationDescription": "CloudFront günlüklerini doğrudan Retrace.ai'e aktarın",
           "s3IntegrationDescription": "CloudFront günlüklerini S3 bucket'ından alın"
         },
         "route53": {
@@ -6070,7 +6070,7 @@
         },
         "kinesis": {
           "description": "Kinesis veri akışlarıyla entegre olun",
-          "lambdaIntegrationDescription": "Kinesis verilerini Lambda aracılığıyla OpenObserve'e aktarın",
+          "lambdaIntegrationDescription": "Kinesis verilerini Lambda aracılığıyla Retrace.ai'e aktarın",
           "firehoseIntegrationDescription": "Kinesis verilerini doğrudan Kinesis Firehose ile aktarın"
         }
       },
@@ -6124,7 +6124,7 @@
           "description": "Sanal Ağ akış günlüklerini ve tanılamalarını izleyin"
         },
         "activity-logs": {
-          "description": "Azure abonelik etkinlik günlüklerini Event Hub ve Event Publisher aracılığıyla OpenObserve'e aktarın"
+          "description": "Azure abonelik etkinlik günlüklerini Event Hub ve Event Publisher aracılığıyla Retrace.ai'e aktarın"
         }
       }
     },
@@ -8233,7 +8233,7 @@
       "regexRedact": "E-postaları düzenlemek için bir regex kalıbı oluşturun",
       "mapStreamSchema": "\"default\" akış şemamı eşle",
       "promqlCpu": "> %80 CPU kullanan bölmeler için PromQL yazın",
-      "datadogToO2": "Bu Datadog sorgusunu OpenObserve SQL'e dönüştürün",
+      "datadogToO2": "Bu Datadog sorgusunu Retrace.ai SQL'e dönüştürün",
       "lastAlertFired": "Son uyarım neden tetiklendi?"
     },
     "placeholderRotation": {
@@ -10310,7 +10310,7 @@
         "alertEndTime": "Pencere bitiş zamanı (ISO 8601)",
         "alertStartTimeMillis": "Pencere başlangıç zamanı epoch milisaniye cinsinden",
         "alertEndTimeMillis": "Pencere bitiş zamanı epoch milisaniye cinsinden",
-        "alertUrl": "İncelemek için OpenObserve'e dönüş bağlantısı",
+        "alertUrl": "İncelemek için Retrace.ai'e dönüş bağlantısı",
         "alertTriggerTime": "Uyarının tetiklendiği zaman (ISO 8601)",
         "alertTriggerTimeMillis": "Epoch milisaniye cinsinden tetikleme zamanı",
         "alertTriggerTimeSeconds": "Epoch saniye cinsinden tetikleme zamanı",
@@ -10611,7 +10611,7 @@
       "servicenowAssignmentGroup": "Atama Grubu (isteğe bağlı)",
       "servicenowAssignmentGroupHelp": "Vakaların atanacağı grup (ör. IT Operasyonları)",
       "servicenowResolutionCode": "Çözüm kodu (isteğe bağlı)",
-      "servicenowResolutionCodeHelp": "ServiceNow örneğinizde geçerli bir çözüm koduyla eşleşmelidir. OpenObserve vakayı çözdüğünde kullanılır. Varsayılan olarak Solved (Permanently) olur.",
+      "servicenowResolutionCodeHelp": "ServiceNow örneğinizde geçerli bir çözüm koduyla eşleşmelidir. Retrace.ai vakayı çözdüğünde kullanılır. Varsayılan olarak Solved (Permanently) olur.",
       "usernameRequired": "Kullanıcı adı gereklidir",
       "passwordRequired": "Şifre gereklidir",
       "emailRecipients": "Alıcı E-posta Adresleri",
@@ -11512,7 +11512,7 @@
     "notIngestedHint": "Bu kuruluş {stream} almıyor, bu nedenle bu uyarı asla tetiklenmez. Yine de ekleyin; veri geldiğinde çalışmaya başlayacaktır.",
     "alertCount": "{count} uyarı | {count} uyarı",
     "noCollectorTitle": "Burada henüz verilerinizle eşleşen bir şey yok",
-    "noCollectorDescription": "Bu {count} uyarıdan hiçbiri, bu kuruluşun aldığı bir akışı sorgulamıyor. OpenObserve'e {group} telemetrisi gönderin, burada görünür hale gelsinler.",
+    "noCollectorDescription": "Bu {count} uyarıdan hiçbiri, bu kuruluşun aldığı bir akışı sorgulamıyor. Retrace.ai'e {group} telemetrisi gönderin, burada görünür hale gelsinler.",
     "setupGuide": "Veri Alma Kılavuzu",
     "emptyLibraryTitle": "Uyarı kitaplığı boş",
     "emptyLibraryDescription": "Katalog yüklendi ancak uyarı içermiyor. Bu bir filtre sorunu değil, bir yayınlama sorunudur — kısa süre içinde tekrar deneyin.",
@@ -12067,7 +12067,7 @@
     "continue": "Devam et",
     "save": "Kaydet",
     "update": "Güncelle",
-    "awsStsCloudInfo": "Bu, rol üstlenmek ve işlemleri gerçekleştirmek için AWS sts kullanır. AWS konsolunda bu rol için güvenilen varlık türü olarak {product} AWS hesabını eklemelisiniz. Hesap bilgilerini almak veya kurulumda daha fazla yardım için lütfen Openobserve ekibiyle iletişime geçin.",
+    "awsStsCloudInfo": "Bu, rol üstlenmek ve işlemleri gerçekleştirmek için AWS sts kullanır. AWS konsolunda bu rol için güvenilen varlık türü olarak {product} AWS hesabını eklemelisiniz. Hesap bilgilerini almak veya kurulumda daha fazla yardım için lütfen Retrace.ai ekibiyle iletişime geçin.",
     "awsStsSelfHostedInfo": "Bu, rol üstlenmek ve işlemleri gerçekleştirmek için AWS sts kullanır. Kurulum ortamında bu role erişimi olan aws kimlik bilgilerini yapılandırdığınızdan emin olun."
   },
   "metrics": {
@@ -17343,7 +17343,7 @@
         "systemProvided": {
           "about": "Sistem tarafından sağlanan değerler hakkında",
           "title": "{scope} sistem değerleri",
-          "description": "OpenObserve bu değerleri, bu işin değerlendirdiği her {scope} için ayrı ayrı oluşturur. Puanlayıcının prompt değişkenlerini eşlerken bunları kaynak olarak kullanın.",
+          "description": "Retrace.ai bu değerleri, bu işin değerlendirdiği her {scope} için ayrı ayrı oluşturur. Puanlayıcının prompt değişkenlerini eşlerken bunları kaynak olarak kullanın.",
           "badge": "Sistem tarafından sağlanır",
           "selectorRequired": "Span Selector gerekli",
           "columns": {
@@ -19516,7 +19516,7 @@
       "txtNameCopied": "Kayıt adı kopyalandı",
       "txtValueCopied": "Kayıt değeri kopyalandı",
       "nextStepVerify": "Doğrulama her {seconds} saniyede bir otomatik olarak çalışır. Ayrıca şimdi doğrulayabilirsiniz.",
-      "nextStepCname": "Doğrulandıktan sonra, {domain} alan adını OpenObserve'e yönlendirmek için bu uygulamanın ana bilgisayarına bir CNAME ekleyin, böylece durum sayfanızı sunar.",
+      "nextStepCname": "Doğrulandıktan sonra, {domain} alan adını Retrace.ai'e yönlendirmek için bu uygulamanın ana bilgisayarına bir CNAME ekleyin, böylece durum sayfanızı sunar.",
       "serving": "Doğrulandı. Bu alan adı, CNAME'i bu uygulamanın ana bilgisayarını gösterdiği sürece durum sayfanızı sunar."
     },
     "preview": {
@@ -21777,7 +21777,7 @@
       "workloadsStatusScheduled": "Scheduled: {count}",
       "workloadsStatusSuspended": "Suspended: {count}",
       "workloadsNone": "Yok",
-      "workloadsRuleTip": "Lens değil, OpenObserve kuralı: pod'u olmayan bir nesne kendi replika veya job sinyallerinden sayılır ve eksik veri Unknown olarak sayılır",
+      "workloadsRuleTip": "Lens değil, Retrace.ai kuralı: pod'u olmayan bir nesne kendi replika veya job sinyallerinden sayılır ve eksik veri Unknown olarak sayılır",
       "workloadsRecentEvents": "Son olaylar",
       "workloadsViewAll": "Tümünü görüntüle",
       "workloadsColType": "Tür",
@@ -23052,7 +23052,7 @@
           },
           "sampling": {
             "no": "Veritabanlarınızın oturum tablolarını örnekleyen hiçbir şey yok",
-            "noDetail": "Oturum örnekleri toplayıcınızdan gelir: veritabanı ana bilgisayarındaki toplayıcı tarifinde db.server.query_sample'ı etkinleştirin — kurulum sayfası bunu adım adım anlatır. OpenObserve bu akışı veritabanı izleme açık olduğunda kabul eder, bu yüzden çözüm toplayıcı tarafındadır."
+            "noDetail": "Oturum örnekleri toplayıcınızdan gelir: veritabanı ana bilgisayarındaki toplayıcı tarifinde db.server.query_sample'ı etkinleştirin — kurulum sayfası bunu adım adım anlatır. Retrace.ai bu akışı veritabanı izleme açık olduğunda kabul eder, bu yüzden çözüm toplayıcı tarafındadır."
           }
         }
       }
@@ -25845,10 +25845,10 @@
         "signInHelp": "Yönlendirme URL'sini, istemci kimliğini ve gizli anahtarı, herhangi biri bağlanmayı denemeden önce doğrular"
       },
       "instanceTeamRemoved": "{team} için bu sunucuda zaten OpenObserve var. OpenObserve az önce yüklediğiniz uygulamayı {team} içinden kaldırdı; Baştan başla da onu Slack uygulamalarınızdan siler.",
-      "instanceAdminContact": "OpenObserve örneğinizin yöneticisi: {contact}",
+      "instanceAdminContact": "Örneğinizin yöneticisi: {contact}",
       "noAppCreated": "Hiçbir Slack uygulaması oluşturulmadı.",
       "takeOverTitle": "Zaten yüklü olan bir çalışma alanını kullan",
-      "takeOverAction": "Bunu OpenObserve örneğinin çalışma alanı yap",
+      "takeOverAction": "Bunu örneğin çalışma alanı yap",
       "takeOverOrgs": "{orgs} tarafından kullanılıyor"
     },
     "linking": {
@@ -26576,7 +26576,7 @@
       "restrictedDesc": "Bu bileşenleri kullanan yapılandırmalar doğrulamada başarısız olur.",
       "restrictedPlaceholder": "Yok, tüm bileşenlere izin verilir",
       "targetVersion": "Hedef toplayıcı sürümü",
-      "targetVersionDesc": "Bundan eski toplayıcılar güncel değildir. OpenObserve'ün desteklediği en son sürümü kullanmak için boş bırakın.",
+      "targetVersionDesc": "Bundan eski toplayıcılar güncel değildir. Retrace.ai'ün desteklediği en son sürümü kullanmak için boş bırakın.",
       "targetVersionPlaceholder": "Desteklenen en son (ör. 0.163.1)",
       "save": "Kaydet",
       "saved": "Fleet Manager ayarları kaydedildi",

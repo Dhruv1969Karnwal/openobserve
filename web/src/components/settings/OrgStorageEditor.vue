@@ -255,7 +255,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <OIcon name="info" size="sm" class="mt-px flex-shrink-0" />
                     <div class="text-compact text-text-body leading-[1.55]">
                       <template v-if="isCloud">
-                        {{ t("storage_settings.awsStsCloudInfo", { product: raw("OpenObserve") }) }}
+                        {{ t("storage_settings.awsStsCloudInfo", { product: raw("Retrace.ai") }) }}
                       </template>
                       <template v-else>
                         {{ t("storage_settings.awsStsSelfHostedInfo") }}

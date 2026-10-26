@@ -565,7 +565,7 @@
       "title": "Nog geen remote taken",
       "description": "Een remote taak is een HTTP-service die uw experimenten aanroepen om uitvoer te produceren. Publiceer hem eenmalig, bewijs dat de verbinding werkt, en elk experiment kan de exacte versie vastpinnen waartegen het is uitgevoerd.",
       "action": "Nieuwe taak",
-      "actionDesc": "Wijs OpenObserve naar uw endpoint en test de verbinding."
+      "actionDesc": "Wijs Retrace.ai naar uw endpoint en test de verbinding."
     },
     "noDowntimes": {
       "title": "Nog geen onderhoudsperiodes",
@@ -1880,7 +1880,7 @@
       "refresh": "Vernieuwen",
       "refreshDataThrough": "Vernieuwen · gegevens tot {time}",
       "sdkSampled": "Aantallen weerspiegelen gesamplede SDK-sessies",
-      "sdkSampledTip": "Alleen sessies die je RUM SDK bewaart ({field}) bereiken OpenObserve, dus elk aantal hier heeft betrekking op die sessies.",
+      "sdkSampledTip": "Alleen sessies die je RUM SDK bewaart ({field}) bereiken Retrace.ai, dus elk aantal hier heeft betrekking op die sessies.",
       "identityExcluded": "{count} identiteitswaarde uitgesloten ({pct}%) | {count} identiteitswaarden uitgesloten ({pct}%)",
       "identityIncluded": "Alle identiteitswaarden inbegrepen",
       "identityExcludedHelp": "Eén waarde dekt {pct}% van de geïdentificeerde sessies, waarschijnlijk een test- of gedeeld account. Deze wordt buiten elke gebruikerstelling, funnel en retentieraster gelaten.",
@@ -5116,7 +5116,7 @@
       "askAi": "Vraag AI",
       "guideDocs": "{guide}-documentatie",
       "setupDocs": "Installatiedocumentatie",
-      "askAiPrompt": "Ik ben {guide} aan het instellen in OpenObserve en er zijn nog geen gegevens aangekomen. De eerste-gebeurtenis-controle zegt: {details} Org-id: {org}. Endpoint: {endpoint}. Wat moet ik nu controleren?",
+      "askAiPrompt": "Ik ben {guide} aan het instellen in Retrace.ai en er zijn nog geen gegevens aangekomen. De eerste-gebeurtenis-controle zegt: {details} Org-id: {org}. Endpoint: {endpoint}. Wat moet ik nu controleren?",
       "askAiRejected": "verzoeken worden geweigerd met {status} {reason} op {path}.",
       "askAiNoRequests": "er is niets aangekomen en geen enkel verzoek is geweigerd.",
       "askAiUnavailable": "geweigerde verzoeken konden niet worden gelezen, dus er is geen oorzaak bekend.",
@@ -5170,7 +5170,7 @@
       "configTitle": "Sla dit op als {path} en herstart Fluent Bit",
       "configDescription": "Volgt de {server}-logs en stuurt ze met het org-token naar de {stream}-stream van {org}.",
       "restartHint": "Voer vervolgens {command} uit.",
-      "verifyTitle": "Gegevens verifiëren in OpenObserve"
+      "verifyTitle": "Gegevens verifiëren in Retrace.ai"
     },
     "copyContentError": "Fout bij het kopiëren van inhoud.",
     "passcodeForbiddenMessage": "Admin- of Root-rol vereist om het ingestietoken te bekijken. Vraag een beheerder om het installatiecommando, of om de rol die nodig is om het hier te zien.",
@@ -5253,7 +5253,7 @@
       "singleTargetTitle": "Eén remote write-target",
       "fanoutTitle": "Fan-out naar meerdere backends",
       "tipPrefix": "Tip: `vmagent` kan schrijfbewerkingen dupliceren door de",
-      "tipSuffix": "vlag, zodat u een bestaande VictoriaMetrics-bestemming kunt behouden terwijl u ook metrieken naar OpenObserve doorstuurt.",
+      "tipSuffix": "vlag, zodat u een bestaande VictoriaMetrics-bestemming kunt behouden terwijl u ook metrieken naar Retrace.ai doorstuurt.",
       "docLinkText": "om meer te leren over het configureren van vmagent remote write-targets."
     },
     "ai": {
@@ -5339,7 +5339,7 @@
       "selectAtLeastOneCategory": "Selecteer hierboven ten minste één logcategorie.",
       "runCommandAfterDeployment": "Voer deze opdracht uit nadat uw ARM-implementatie is voltooid:",
       "activityLogsTitle": "Azure-activiteitenlogs",
-      "activityLogsDescription": "Stream Azure-abonnementsactiviteitenlogs naar OpenObserve via {product}. De ARM-sjabloon stelt de Event Hub-infrastructuur in — u configureert Azure vervolgens om logs ernaar te exporteren.",
+      "activityLogsDescription": "Stream Azure-abonnementsactiviteitenlogs naar Retrace.ai via {product}. De ARM-sjabloon stelt de Event Hub-infrastructuur in — u configureert Azure vervolgens om logs ernaar te exporteren.",
       "manualTitle": "Handmatige configuratie (ter referentie)"
     },
     "awsSetup": {
@@ -5462,16 +5462,16 @@
     "splunkHecUrlHelp": "Richt uw Splunk-forwarder op deze URL en verzend het token als de Authorization-headerwaarde \"Splunk <token>\".",
     "setupCard": {
       "advancedInstallDescCloud": "Voor aangepaste configuraties, of om versies vast te pinnen en de chart-waarden aan te passen. Voer de stappen in volgorde uit.",
-      "advancedInstallDescSelfHosted": "Voor aangepaste configuraties, of om versies vast te pinnen en de chart-waarden aan te passen. Voer de stappen in volgorde uit. Als OpenObserve in hetzelfde cluster wordt uitgevoerd, vervangt u de exporter-eindpunten door `{url}`.",
+      "advancedInstallDescSelfHosted": "Voor aangepaste configuraties, of om versies vast te pinnen en de chart-waarden aan te passen. Voer de stappen in volgorde uit. Als Retrace.ai in hetzelfde cluster wordt uitgevoerd, vervangt u de exporter-eindpunten door `{url}`.",
       "advancedInstallLabel": "Geavanceerde installatie (handmatige stappen)",
       "aerospikeHostLabel": "Aerospike-host",
-      "aerospikeTagline": "Verzamel Aerospike-metrieken met de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "aerospikeTagline": "Verzamel Aerospike-metrieken met de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "agentServiceFixTitle": "Controleer de agentservice",
       "agentTroubleInstanceIdA": "Dat is de EC2-variant zonder zijn IAM-rol. {iamNote} Koppel de rol en start de agent opnieuw.",
       "agentTroubleInstanceIdQ": "Hosts verschijnen onder een instantie-id in plaats van een naam",
       "agentTroubleNoDataA": "Controleer of de agent actief is met {hint}. Een 401 in de logs betekent dat de ingestietoken verouderd is — kopieer de opdracht opnieuw vanaf deze pagina, die altijd het huidige token van deze organisatie bevat.",
       "agentTroubleNoDataQ": "Het installatiescript wordt uitgevoerd maar er komen geen gegevens binnen",
-      "agentTroubleUnreachableA": "De agent heeft uitgaande toegang tot dit OpenObserve-eindpunt nodig. Bevestig met `curl -v` vanaf de host zelf — een proxy of uitgaande firewall is de gebruikelijke oorzaak.",
+      "agentTroubleUnreachableA": "De agent heeft uitgaande toegang tot dit Retrace.ai-eindpunt nodig. Bevestig met `curl -v` vanaf de host zelf — een proxy of uitgaande firewall is de gebruikelijke oorzaak.",
       "agentTroubleUnreachableQ": "Het eindpunt is niet bereikbaar vanaf de host",
       "aiCategoryAnalytics": "Analyse & Evaluatie",
       "aiCategoryFrameworks": "AI-frameworks & agents",
@@ -5486,7 +5486,7 @@
       "autoInstrumentTracesDesc": "Beide geven je **gedistribueerde traces zonder applicatiecode aan te raken of images opnieuw te bouwen**. **Taalbibliotheken:** de OpenTelemetry-operator injecteert automatische instrumentatie in de pods van een geannoteerde namespace. **eBPF:** de collector traceert de processen die je selecteert, in elke taal, Go inbegrepen.",
       "autoInstrumentTracesTitle": "Traceer je applicaties: taalbibliotheken of eBPF",
       "cassandraJmxNote": "Schakel externe JMX-toegang op Cassandra in zodat de ontvanger verbinding kan maken.",
-      "cassandraTagline": "Verzamel Cassandra-metrieken via de JMX-receiver van de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "cassandraTagline": "Verzamel Cassandra-metrieken via de JMX-receiver van de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "checking": "Controleren…",
       "checkingForLogs": "Controleren op logs…",
       "checkingForMetrics": "Controleren op metrieken…",
@@ -5519,10 +5519,10 @@
       "downloadJmxJarDesc": "De JMX-ontvanger voert deze helper-JAR uit (vereist Java op de collectorhost).",
       "downloadJmxJarTitle": "Download de JMX-metrieken-JAR",
       "dynamodbFirehoseEndpointDesc": "Gebruik deze als de **HTTP Endpoint**-bestemming bij het maken van uw Kinesis Data Firehose-leveringsstream.",
-      "dynamodbFirehoseEndpointTitle": "OpenObserve Firehose-endpoint",
+      "dynamodbFirehoseEndpointTitle": "Retrace.ai Firehose-endpoint",
       "dynamodbPipelineDesc": "Schakel **DynamoDB Streams** in op je tabel, verbind het met een **Kinesis Data Stream** en richt dan een **Kinesis Data Firehose**-leveringsstream op het bovenstaande HTTP-endpoint.",
       "dynamodbPipelineTitle": "Stream DynamoDB → Firehose",
-      "dynamodbTagline": "Stream DynamoDB-itemwijzigingen naar OpenObserve via Kinesis Firehose.",
+      "dynamodbTagline": "Stream DynamoDB-itemwijzigingen naar Retrace.ai via Kinesis Firehose.",
       "ec2IamNote": "Vereist een IAM-rol op de instantie met ec2:DescribeTags en ec2:DescribeInstances, zodat de agent de Name-tag kan lezen en als host-id kan gebruiken.",
       "enableSessionReplayDesc": "Session Replay wordt **apart** van RUM geconfigureerd en erft `rumConfiguration.customEndpoint` **niet**. Geef het hieronder een eigen basis-URL — in dezelfde vorm als die van RUM/Logs. De bridge voegt zelf `/replay` toe, dus voeg het **niet** zelf toe: een handmatig toegevoegd `/replay` verdubbelt het pad en elke upload wordt met 401 afgewezen, wat de gebruikelijke reden is waarom er RUM-gebeurtenissen binnenkomen, maar replays nooit.",
       "enableSessionReplayTitle": "Sessiereplay inschakelen",
@@ -5532,15 +5532,15 @@
       "gcpFixBody": "GCP rapporteert afleveringsfouten op het abonnement zelf. Als de sink publiceert maar er niets hier terechtkomt, wijst het push-eindpunt het verzoek meestal af:",
       "gcpFixTitle": "Controleer het push-abonnement",
       "gcpPushUrlNote": "Houd deze URL geheim — deze bevat de ingestiesleutel. Roteer deze via de koptekst van deze pagina als deze lekt.",
-      "gcpSinkDesc": "Maak in de GCP-console een **Log Router-sink** (Logging → Log Router → Create sink) met Pub/Sub als bestemming en laat de topic automatisch aanmaken. Het inclusiefilter van de sink bepaalt welke logs OpenObserve bereiken.",
+      "gcpSinkDesc": "Maak in de GCP-console een **Log Router-sink** (Logging → Log Router → Create sink) met Pub/Sub als bestemming en laat de topic automatisch aanmaken. Het inclusiefilter van de sink bepaalt welke logs Retrace.ai bereiken.",
       "gcpSinkTitle": "Stuur logs naar een Pub/Sub-topic",
       "gcpSinkWriterNote": "Verleen de schrijversidentiteit van de sink de Pub/Sub Publisher-rol op het onderwerp, anders publiceert deze stilletjes niets.",
       "gcpStreamHelp": "Gebruikt in de push-URL hierboven en bewaakt door de check hieronder. Een speciale stream houdt GCP-logs gescheiden.",
       "gcpSubscriptionDesc": "Maak een **push**-abonnement op dat topic en plak dit als de endpoint-URL. Het bevat al deze organisatie en de bijbehorende ingestiesleutel.",
-      "gcpSubscriptionTitle": "Push het topic naar OpenObserve",
+      "gcpSubscriptionTitle": "Push het topic naar Retrace.ai",
       "gcpTroubleDeliveryA": "Een 401 betekent dat de `API-Key` in de URL verouderd is — kopieer het eindpunt opnieuw van deze pagina. Een 404 betekent meestal dat het org- of streamsegment handmatig is bewerkt; de URL hierboven is al correct voor deze organisatie.",
       "gcpTroubleDeliveryQ": "Het abonnement toont afleveringsfouten",
-      "gcpTroublePartialA": "Dat is het inclusiefilter van de sink, niet OpenObserve. Verbreed de `--log-filter` op de sink om de services en ernstniveaus te bestrijken die je verwacht.",
+      "gcpTroublePartialA": "Dat is het inclusiefilter van de sink, niet Retrace.ai. Verbreed de `--log-filter` op de sink om de services en ernstniveaus te bestrijken die je verwacht.",
       "gcpTroublePartialQ": "Er komen slechts enkele logs binnen",
       "gcpTroubleTopicA": "De **schrijversidentiteit** van de sink heeft de Pub/Sub Publisher-rol op het onderwerp nodig. GCP maakt de sink ook zonder die rol succesvol aan en laat daarna stilzwijgend alles vallen.",
       "gcpTroubleTopicQ": "De sink bestaat, maar het onderwerp ontvangt niets",
@@ -5573,7 +5573,7 @@
       "k8sEbpfVariant": "eBPF (elke taal, geen codewijzigingen)",
       "k8sLibrariesVariant": "Taalbibliotheken (automatische instrumentatie)",
       "k8sInstallerNote": "Dit installeert automatisch cert-manager, de OpenTelemetry-operator en de OpenObserve-collector.",
-      "k8sInternalEndpointNote": "Gebruik dit wanneer OpenObserve in hetzelfde cluster draait — verkeer verlaat het dan nooit.",
+      "k8sInternalEndpointNote": "Gebruik dit wanneer Retrace.ai in hetzelfde cluster draait — verkeer verlaat het dan nooit.",
       "k8sTroubleAnnotationA": "Injectie vindt plaats bij het aanmaken van de pod, dus bestaande pods worden niet beïnvloed tot ze opnieuw opstarten — voer `kubectl rollout restart deployment -n my-namespace` uit. Bevestig dat de annotatie is geplaatst met `kubectl get ns my-namespace -o yaml` en controleer dat de waarde overeenkomt met `openobserve-collector/openobserve-<language>`.",
       "k8sTroubleAnnotationQ": "Ik heb een namespace geannoteerd, maar er verschijnen geen traces",
       "k8sTroubleEndpointA": "Gebruik het **interne eindpunt** alleen wanneer OpenObserve zelf in dit cluster draait; het verkeer blijft dan binnen het cluster en verlaat nooit het netwerk. De URL is `http://<helm-release>-openobserve-router.<namespace>.svc.cluster.local:5080` — de standaardwaarde gaat uit van release `o2` in namespace `openobserve`, dus pas die aan als die van jou afwijken. Alle anderen gebruiken het externe eindpunt.",
@@ -5595,7 +5595,7 @@
       "runCollectorMariadbDesc": "Start de collector (het wachtwoord van de gebruiker via env var).",
       "mariadbHostLabel": "MariaDB-host",
       "verifyMariadbMetricsDesc": "De onderstaande controle wordt groen wanneer er gegevens binnenkomen, of controleer Streams op de `mysql_*`-metrieken (MariaDB rapporteert via de MySQL-receiver).",
-      "mariadbTagline": "Verzamel MariaDB-metrieken met de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "mariadbTagline": "Verzamel MariaDB-metrieken met de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "logsStreamNameLabel": "Logstreamnaam",
       "macosAgentFixBody": "De installateur registreert twee launchd-daemons: de agent zelf en de unified log-bridge. Als er niets aankomt, bevestig dan dat beide zijn geladen en lees het log van de agent voor een authenticatie- of connectiviteitsfout:",
       "macosAgentServicesFixTitle": "Controleer de agentservices",
@@ -5607,11 +5607,11 @@
       "macosTroubleVolumeQ": "De unified log verzendt veel meer dan verwacht",
       "macQuarantineNote": "Als macOS de niet-ondertekende binary blokkeert, wis dan de quarantainevlag: xattr -d com.apple.quarantine ./otelcol-contrib",
       "mongodbHostLabel": "MongoDB-host",
-      "mongodbTagline": "Verzamel MongoDB-metrieken met de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "mongodbTagline": "Verzamel MongoDB-metrieken met de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "mostLikelyFix": "Meest waarschijnlijke oplossing —",
       "mysqlAdminNote": "Voer uit als MySQL-beheerder (er wordt om het wachtwoord gevraagd).",
       "mysqlHostLabel": "MySQL-host",
-      "mysqlTagline": "Verzamel MySQL-metrieken met de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "mysqlTagline": "Verzamel MySQL-metrieken met de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "noLogsFoundYet": "Nog geen logs gevonden",
       "noMetricsFoundYet": "Nog geen metrieken gevonden",
       "noSpansFoundYet": "Nog geen spans gevonden",
@@ -5620,7 +5620,7 @@
       "onStream": "op {stream}",
       "optionalLabel": "Optioneel",
       "oracleHostLabel": "Oracle-host",
-      "oracleTagline": "Verzamel Oracle DB-metrieken met de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "oracleTagline": "Verzamel Oracle DB-metrieken met de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "otlpFixBody": "Een exporter definiëren is niet voldoende — deze moet in een pipeline worden opgenomen. Dit is de meest voorkomende reden dat een correct uitziende configuratie niets verzendt:",
       "otlpFixTitle": "Controleer of de exporter daadwerkelijk in de pipeline is opgenomen",
       "otlpGrpcCloudNote": "De openbare gRPC-gateway van OpenObserve Cloud — minder overhead dan HTTP voor grote hoeveelheden spans, geen zelfgehoste netwerkinfrastructuur te configureren.",
@@ -5708,10 +5708,10 @@
       "pillWireframeCapture": "Wireframe-opname",
       "pillWriteLatency": "Schrijflatentie",
       "pointExporterDesc": "Voeg dit toe aan je collectorconfiguratie, of stel de omgevingsvariabelen in als je app rechtstreeks exporteert. Alles is al ingevuld voor deze organisatie.",
-      "pointExporterTitle": "Richt je exporter op OpenObserve",
+      "pointExporterTitle": "Richt je exporter op Retrace.ai",
       "portLabel": "Poort",
       "postgresqlHostLabel": "PostgreSQL-host",
-      "postgresqlTagline": "Verzamel PostgreSQL-metrieken met de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "postgresqlTagline": "Verzamel PostgreSQL-metrieken met de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "postgresSuperuserNote": "Voer uit als een Postgres-superuser (psql vraagt om het wachtwoord).",
       "prepareMongodbDesc": "Maak een monitoringgebruiker aan met clusterMonitor — voer dit uit in mongosh, **niet** in je shell.",
       "prepareMongodbTitle": "MongoDB voorbereiden",
@@ -5729,7 +5729,7 @@
       "quickInstallTitle": "Snelle installatie (aanbevolen)",
       "redisHostLabel": "Redis-host",
       "redisNoAuthNote": "Gebruik REDIS_PASSWORD='' als Redis geen authenticatie heeft.",
-      "redisTagline": "Verzamel Redis-metrieken met de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "redisTagline": "Verzamel Redis-metrieken met de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "revealToken": "Token tonen",
       "rnFixBody": "`localhost` in een emulator of op een fysiek apparaat is het apparaat zelf, niet je machine — de meest voorkomende reden dat er helemaal niets aankomt. Gebruik de juiste host voor waar de app draait:",
       "rnFixTitle": "Richt de SDK op een host die je apparaat daadwerkelijk kan bereiken",
@@ -5753,7 +5753,7 @@
       "rnTroubleScreenNamesQ": "Sessies verschijnen, maar schermen hebben allemaal dezelfde naam.",
       "rumCdnInitNote": "Plaats dit direct na de loader in <head>. onReady() plaatst init in de wachtrij tot elk bundle arriveert — niets blokkeert de weergave.",
       "rumCdnInstallNote": "Plak dit bovenin <head>. Vastgezet op v{version} voor onveranderlijke caching; async + preconnect houden het buiten het kritieke weergavepad. Voor strikte CSP kun je de twee bundles in plaats daarvan zelf hosten.",
-      "rumFixBody": "Als je app draait maar er niets aankomt, heeft de browser waarschijnlijk de SDK of zijn verzoeken geblokkeerd — meestal een Content-Security-Policy of een ad-blocker. Sta de CDN en je OpenObserve-eindpunt toe en herlaad:",
+      "rumFixBody": "Als je app draait maar er niets aankomt, heeft de browser waarschijnlijk de SDK of zijn verzoeken geblokkeerd — meestal een Content-Security-Policy of een ad-blocker. Sta de CDN en je Retrace.ai-eindpunt toe en herlaad:",
       "rumFixTitle": "Sta de SDK toe in je Content Security Policy",
       "rumInitDesc": "Beide SDK's worden geïnitialiseerd met de waarden van deze org — kopieer ze zoals ze zijn en pas daarna `service`, `env` en `applicationId` aan om je app te beschrijven. De `clientToken` wordt standaard naar de browsers van bezoekers gestuurd (NPM bundelt het, CDN plaatst het inline) — het kan alleen RUM-gebeurtenissen schrijven en je kunt het op elk moment roteren via de header van deze pagina.",
       "rumInitTitle": "Initialiseer RUM + Logs",
@@ -5774,7 +5774,7 @@
       "rumTroublePerfA": "Nee — de bundels laden met `async` buiten het kritieke renderingpad, `preconnect` warmt DNS/TLS op vóór de eerste upload, en gebeurtenissen worden gebatcht voordat ze worden verzonden. Verlaag `sessionReplaySampleRate` als u de overhead van herhaling verder wilt beperken.",
       "rumTroublePerfQ": "Zal de SDK mijn site vertragen?",
       "rumTroublePlainHttpA": "Browsers weigeren gemengde inhoud en de SDK gebruikt standaard HTTPS — behoud `insecureHTTP: {insecureHTTP}` (al ingesteld via het endpoint van deze organisatie) zodat uploads het juiste schema gebruiken.",
-      "rumTroublePlainHttpQ": "Mijn OpenObserve-endpoint is gewoon HTTP",
+      "rumTroublePlainHttpQ": "Mijn Retrace.ai-endpoint is gewoon HTTP",
       "rumTroubleTokenVisibleA": "Ja — de `clientToken` is zoals bij elk browser-RUM-product ontworpen als een client-side token. NPM-installaties stellen het bloot in de JS-bundel en CDN-installaties inline in de HTML; DevTools onthult het in beide gevallen. Het kan alleen RUM-gebeurtenissen **schrijven** — het verleent geen leestoegang en staat los van de ingestie-pascode. Als iemand het misbruikt om nepgebeurtenissen te verzenden, genereer het dan opnieuw via de header van deze pagina en implementeer uw app opnieuw.",
       "rumTroubleTokenVisibleQ": "Is het veilig dat het token zichtbaar is in mijn paginabron?",
       "runCollectorDesc": "Start de collector.",
@@ -5787,7 +5787,7 @@
       "runtimeCluster": "Cluster",
       "runtimeHost": "Host",
       "seeAllTroubleshooting": "Alle probleemoplossing bekijken",
-      "sendNotebookLogsDesc": "Plak in een Databricks-notebookcel — het stuurt records via POST naar de logs-API van OpenObserve.",
+      "sendNotebookLogsDesc": "Plak in een Databricks-notebookcel — het stuurt records via POST naar de logs-API van Retrace.ai.",
       "sendNotebookLogsTitle": "Logs vanaf uw notebook verzenden",
       "setup": "Instellen",
       "setupTime1Min": "~1 min",
@@ -5827,23 +5827,23 @@
       "androidTroubleScreenNamesA": "Weergavetracking is niet aangesloten. Geef een `useViewTrackingStrategy(...)` door — bijv. `ActivityViewTrackingStrategy(trackExtras = true)` voor Activities, of `NavigationViewTrackingStrategy(...)` als u AndroidX Navigation gebruikt — bij het bouwen van de `RumConfiguration`.",
       "setupTime5Min": "~5 min",
       "snowflakeCollectorVersionNote": "Snowflake heeft collector v0.92.0 nodig — nieuwere builds hebben een bekende bug.",
-      "snowflakeTagline": "Verzamel Snowflake-accountmetrieken met de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "snowflakeTagline": "Verzamel Snowflake-accountmetrieken met de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "sqlClientGuiVariant": "SQL-client (GUI)",
       "sqlServerHostLabel": "SQL Server-host",
       "sqlServerPasswordNote": "Vervang YOUR_SA_PASSWORD.",
-      "sqlServerTagline": "Verzamel SQL Server-metrieken met de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "sqlServerTagline": "Verzamel SQL Server-metrieken met de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "startIngestingTestForLogs": "start met opnemen en test dan op logs",
       "startIngestingTestForMetrics": "start met opnemen en test dan op metrieken",
       "startIngestingTestForSpans": "begin met ingesten en test daarna op spans",
       "streamNameError": "Gebruik alleen letters, cijfers en _.",
       "streamNameLabel": "Streamnaam",
       "stuck": "Vastgelopen?",
-      "taglineDatabricks": "Stuur Databricks-notebooklogs naar OpenObserve via de logs-API.",
-      "taglineGcp": "Stream Google Cloud-logs naar OpenObserve met een Pub/Sub-pushabonnement — geen agent of collector om te draaien.",
+      "taglineDatabricks": "Stuur Databricks-notebooklogs naar Retrace.ai via de logs-API.",
+      "taglineGcp": "Stream Google Cloud-logs naar Retrace.ai met een Pub/Sub-pushabonnement — geen agent of collector om te draaien.",
       "taglineKubernetes": "Implementeer de OpenObserve-collector in uw cluster — containerlogs, Kubernetes-gebeurtenissen en clustermetrieken, plus zero-code traces voor uw workloads.",
       "taglineLinux": "Installeer de OpenObserve-agent op elke Linux-host — systeem- en journald-logs plus CPU-, geheugen-, schijf- en netwerkmetrieken, met optionele eBPF-traces.",
       "taglineMacos": "Installeer de OpenObserve-agent op elke Mac — de unified log en standaardlogbestanden plus CPU-, geheugen-, schijf- en netwerkmetrieken.",
-      "taglineOtlpTraces": "Richt elke OpenTelemetry-exporter op OpenObserve — collector of SDK, HTTP of gRPC. Je endpoint en token zijn hieronder ingevuld.",
+      "taglineOtlpTraces": "Richt elke OpenTelemetry-exporter op Retrace.ai — collector of SDK, HTTP of gRPC. Je endpoint en token zijn hieronder ingevuld.",
       "taglineWindows": "Installeer de OpenObserve-agent op elke Windows-host — Event Log, prestatiemeters en hostmetrieken.",
       "testAgain": "Opnieuw testen",
       "traceCmdHelp": "Voor Python-, Node.js- en Java-apps.",
@@ -5865,7 +5865,7 @@
       "verifyAerospikeMetricsDesc": "De onderstaande controle wordt groen wanneer er gegevens binnenkomen, of controleer Streams op de `aerospike_*`-metrieken.",
       "verifyCassandraMetricsDesc": "De onderstaande controle wordt groen wanneer er gegevens binnenkomen, of controleer Streams op de `cassandra_*`-metrieken.",
       "verifyDatabricksLogsDesc": "De onderstaande controle wordt groen wanneer er gegevens binnenkomen, of open Logs en zoek op `source:databricks`.",
-      "verifyDataTitle": "Gegevens verifiëren in OpenObserve",
+      "verifyDataTitle": "Gegevens verifiëren in Retrace.ai",
       "verifyDynamodbLogsDesc": "De onderstaande controle wordt groen wanneer er gegevens binnenkomen, of open Logs voor de `dynamodb`-stream zodra items veranderen.",
       "verifyGcpLogsDesc": "Genereer wat activiteit in het project (of wacht tot de sink overeenkomt met een log); de onderstaande controle wordt groen wanneer er gegevens binnenkomen.",
       "verifyK8sDataDesc": "Geef de collector een paar seconden om te starten; de onderstaande controle wordt groen wanneer er gegevens binnenkomen — clusterlogs belanden in de `default`-stream.",
@@ -5894,7 +5894,7 @@
       "windowsTroubleScriptQ": "Het script kan helemaal niet worden uitgevoerd",
       "writesTheseKeysTo": "Schrijft deze sleutels naar",
       "zookeeperHostLabel": "Zookeeper-host",
-      "zookeeperTagline": "Verzamel Zookeeper-metrieken met de OpenTelemetry Collector en stuur ze naar OpenObserve.",
+      "zookeeperTagline": "Verzamel Zookeeper-metrieken met de OpenTelemetry Collector en stuur ze naar Retrace.ai.",
       "pillKeyspace": "Keyspace",
       "pillZnodes": "Znodes",
       "stepNumber": "Stap {n}",
@@ -5961,8 +5961,8 @@
       "gpuExporterDesc": "De exporter van NVIDIA leest GPU-telemetrie via DCGM en serveert deze op poort `9400`.",
       "gpuExporterDockerNote": "`--network host` houdt de echte machinenaam in het label `Hostname`, en de listener blijft op `127.0.0.1`, zodat GPU-gegevens niet aan het netwerk worden blootgesteld. `SYS_ADMIN` is alleen nodig voor de profiling-metrieken (`DCGM_FI_PROF_*`).",
       "gpuExporterK8sNote": "Draait als een DaemonSet, alleen op GPU-nodes, gekoppeld via gangbare GPU-node-labels. De pod-annotaties laten de OpenObserve-collector deze ontdekken, dus er is geen ServiceMonitor of Prometheus nodig.",
-      "gpuShipTitle": "GPU-metrieken naar OpenObserve sturen",
-      "gpuShipDesc": "Krijg de metrieken van de exporter in OpenObserve via OTLP.",
+      "gpuShipTitle": "GPU-metrieken naar Retrace.ai sturen",
+      "gpuShipDesc": "Krijg de metrieken van de exporter in Retrace.ai via OTLP.",
       "gpuShipDockerNote": "Gebruikt de instellingen uit de gids: scrape elke 30s, behoud alleen de `DCGM_*`-reeksen en batch 10s / 1.024 punten. De Collector Contrib-image draait naast de exporter, en beide gebruiken host-networking, zodat `localhost:9400` wordt geresolveerd.",
       "gpuShipK8sNote": "Niets te installeren: de OpenObserve-collector-gateway scrapet geannoteerde pods elke 30s en verzendt alles wat ze beschikbaar stellen. Deze commando's bevestigen dat de exporter bereikbaar is.",
       "gpuVerifyDesc": "GPU-metrieken komen binnen als `dcgm_fi_*`-streams binnen één of twee scrapes. Zodra ze arriveren, voegen we het dashboard **GPU Monitoring - NVIDIA** toe aan je map Default.",
@@ -6017,14 +6017,14 @@
           "description": "Bewaak ALB-toegangslogs voor aanvraagpatronen, fouten en latentie"
         },
         "cloudwatch-logs": {
-          "description": "Stream CloudWatch-logs naar OpenObserve voor analyse"
+          "description": "Stream CloudWatch-logs naar Retrace.ai voor analyse"
         },
         "cloudwatch-metrics": {
           "description": "Verzamel en analyseer CloudWatch-metrieken"
         },
         "vpc-flow-logs": {
           "description": "Analyseer netwerkverkeer in uw VPC",
-          "cloudwatchIntegrationDescription": "Stream VPC-flowlogs via CloudWatch naar OpenObserve",
+          "cloudwatchIntegrationDescription": "Stream VPC-flowlogs via CloudWatch naar Retrace.ai",
           "firehoseIntegrationDescription": "Stream VPC-flowlogs rechtstreeks via Kinesis Firehose"
         },
         "ec2": {
@@ -6051,12 +6051,12 @@
         },
         "dynamodb": {
           "description": "DynamoDB-bewerkingen volgen",
-          "lambdaIntegrationDescription": "DynamoDB-gegevens streamen naar OpenObserve via Lambda",
-          "directIntegrationDescription": "DynamoDB-gegevens rechtstreeks naar OpenObserve streamen"
+          "lambdaIntegrationDescription": "DynamoDB-gegevens streamen naar Retrace.ai via Lambda",
+          "directIntegrationDescription": "DynamoDB-gegevens rechtstreeks naar Retrace.ai streamen"
         },
         "cloudfront": {
           "description": "CloudFront-toegangslogs analyseren",
-          "directIntegrationDescription": "CloudFront-logs rechtstreeks naar OpenObserve streamen",
+          "directIntegrationDescription": "CloudFront-logs rechtstreeks naar Retrace.ai streamen",
           "s3IntegrationDescription": "CloudFront-logs uit S3-bucket opnemen"
         },
         "route53": {
@@ -6070,7 +6070,7 @@
         },
         "kinesis": {
           "description": "Integreren met Kinesis-datastreams",
-          "lambdaIntegrationDescription": "Kinesis-gegevens streamen naar OpenObserve via Lambda",
+          "lambdaIntegrationDescription": "Kinesis-gegevens streamen naar Retrace.ai via Lambda",
           "firehoseIntegrationDescription": "Kinesis-gegevens rechtstreeks streamen via Kinesis Firehose"
         }
       },
@@ -6124,7 +6124,7 @@
           "description": "Virtual Network-stroomlogs en diagnostische gegevens bewaken"
         },
         "activity-logs": {
-          "description": "Azure-abonnementsactiviteitslogs streamen naar OpenObserve via Event Hub en Event Publisher"
+          "description": "Azure-abonnementsactiviteitslogs streamen naar Retrace.ai via Event Hub en Event Publisher"
         }
       }
     },
@@ -8233,7 +8233,7 @@
       "regexRedact": "Genereer een regex-patroon om e-mails te redigeren",
       "mapStreamSchema": "Breng het schema van mijn stream \"default\" in kaart",
       "promqlCpu": "Schrijf PromQL voor pods met een CPU van > 80%",
-      "datadogToO2": "Converteer deze Datadog-query naar OpenObserve SQL",
+      "datadogToO2": "Converteer deze Datadog-query naar Retrace.ai SQL",
       "lastAlertFired": "Waarom is mijn laatste alarm afgegaan?"
     },
     "placeholderRotation": {
@@ -10310,7 +10310,7 @@
         "alertEndTime": "Eindtijd van het venster (ISO 8601)",
         "alertStartTimeMillis": "Starttijd van het venster in epoch milliseconden",
         "alertEndTimeMillis": "Eindtijd van het venster in epoch milliseconden",
-        "alertUrl": "Link terug naar OpenObserve om te onderzoeken",
+        "alertUrl": "Link terug naar Retrace.ai om te onderzoeken",
         "alertTriggerTime": "Wanneer het alarm werd geactiveerd (ISO 8601)",
         "alertTriggerTimeMillis": "Triggentijd in epoch-milliseconden",
         "alertTriggerTimeSeconds": "Triggentijd in epoch-seconden",
@@ -10611,7 +10611,7 @@
       "servicenowAssignmentGroup": "Toewijzingsgroep (optioneel)",
       "servicenowAssignmentGroupHelp": "Groep waaraan incidenten worden toegewezen (bijv., IT Operations)",
       "servicenowResolutionCode": "Oplossingscode (optioneel)",
-      "servicenowResolutionCodeHelp": "Moet overeenkomen met een geldige oplossingscode op uw ServiceNow-exemplaar. Wordt gebruikt wanneer OpenObserve het incident oplost. Standaard is Solved (Permanently).",
+      "servicenowResolutionCodeHelp": "Moet overeenkomen met een geldige oplossingscode op uw ServiceNow-exemplaar. Wordt gebruikt wanneer Retrace.ai het incident oplost. Standaard is Solved (Permanently).",
       "usernameRequired": "Gebruikersnaam is vereist",
       "passwordRequired": "Wachtwoord is vereist",
       "emailRecipients": "E-mailadressen van ontvangers",
@@ -11512,7 +11512,7 @@
     "notIngestedHint": "Deze organisatie ontvangt geen {stream}, dus dit alarm zou nooit afgaan. Voeg het toch toe en het zal werken zodra de gegevens arriveren.",
     "alertCount": "{count} melding | {count} meldingen",
     "noCollectorTitle": "Niets hier komt nog overeen met uw gegevens.",
-    "noCollectorDescription": "Geen van deze {count} meldingen voert een query uit op een stream die deze organisatie ontvangt. Stuur {group}-telemetrie naar OpenObserve en ze lichten hier op.",
+    "noCollectorDescription": "Geen van deze {count} meldingen voert een query uit op een stream die deze organisatie ontvangt. Stuur {group}-telemetrie naar Retrace.ai en ze lichten hier op.",
     "setupGuide": "Ingestiehandleiding",
     "emptyLibraryTitle": "De alertbibliotheek is leeg",
     "emptyLibraryDescription": "De catalogus is geladen maar bevat geen alarmen. Dit is een publicatieprobleem, geen filter — probeer het binnenkort opnieuw.",
@@ -12067,7 +12067,7 @@
     "continue": "Ga verder",
     "save": "Opslaan",
     "update": "Bijwerken",
-    "awsStsCloudInfo": "Dit gebruikt AWS STS om een rol aan te nemen en bewerkingen uit te voeren. U moet {product} AWS-account als vertrouwd entiteitstype voor deze rol toevoegen in de AWS-console. Neem contact op met het Openobserve-team om de accountinformatie te verkrijgen of voor verdere hulp bij het instellen.",
+    "awsStsCloudInfo": "Dit gebruikt AWS STS om een rol aan te nemen en bewerkingen uit te voeren. U moet {product} AWS-account als vertrouwd entiteitstype voor deze rol toevoegen in de AWS-console. Neem contact op met het Retrace.ai-team om de accountinformatie te verkrijgen of voor verdere hulp bij het instellen.",
     "awsStsSelfHostedInfo": "Dit maakt gebruik van AWS sts om de rol op zich te nemen en operaties uit te voeren. Zorg ervoor dat u aws-inloggegevens hebt geconfigureerd in de installatie-env die toegang hebben tot deze rol."
   },
   "metrics": {
@@ -17343,7 +17343,7 @@
         "systemProvided": {
           "about": "Over systeemwaarden",
           "title": "{scope} systeemwaarden",
-          "description": "OpenObserve bouwt deze waarden afzonderlijk op voor elke {scope} die deze job evalueert. Gebruik ze als bronnen bij het toewijzen van de promptvariabelen van de scorer.",
+          "description": "Retrace.ai bouwt deze waarden afzonderlijk op voor elke {scope} die deze job evalueert. Gebruik ze als bronnen bij het toewijzen van de promptvariabelen van de scorer.",
           "badge": "Systeem geleverd",
           "selectorRequired": "Span Selector vereist",
           "columns": {
@@ -19516,7 +19516,7 @@
       "txtNameCopied": "Recordnaam gekopieerd",
       "txtValueCopied": "Recordwaarde gekopieerd",
       "nextStepVerify": "Verificatie wordt automatisch elke {seconds} seconden uitgevoerd. U kunt ook nu verifiëren.",
-      "nextStepCname": "Wijs {domain} na verificatie naar OpenObserve met een CNAME naar de host van deze app, zodat het uw statuspagina bedient.",
+      "nextStepCname": "Wijs {domain} na verificatie naar Retrace.ai met een CNAME naar de host van deze app, zodat het uw statuspagina bedient.",
       "serving": "Geverifieerd. Dit domein bedient nu uw statuspagina, zolang de CNAME naar de host van deze app verwijst."
     },
     "preview": {
@@ -21777,7 +21777,7 @@
       "workloadsStatusScheduled": "Scheduled: {count}",
       "workloadsStatusSuspended": "Suspended: {count}",
       "workloadsNone": "Geen",
-      "workloadsRuleTip": "OpenObserve-regel, niet Lens: een object zonder pods wordt geteld op basis van zijn eigen replica- of jobsignalen, en onvolledige gegevens tellen als Unknown",
+      "workloadsRuleTip": "Retrace.ai-regel, niet Lens: een object zonder pods wordt geteld op basis van zijn eigen replica- of jobsignalen, en onvolledige gegevens tellen als Unknown",
       "workloadsRecentEvents": "Recente gebeurtenissen",
       "workloadsViewAll": "Alles bekijken",
       "workloadsColType": "Type",
@@ -23052,7 +23052,7 @@
           },
           "sampling": {
             "no": "Niets bemonstert de sessietabellen van je databases",
-            "noDetail": "Sessiemonsters komen van je collector: schakel db.server.query_sample in in het collector-recept op de databasehost — de installatiepagina legt het uit. OpenObserve accepteert deze feed wanneer databasemonitoring aan staat, dus de oplossing ligt aan de collectorzijde."
+            "noDetail": "Sessiemonsters komen van je collector: schakel db.server.query_sample in in het collector-recept op de databasehost — de installatiepagina legt het uit. Retrace.ai accepteert deze feed wanneer databasemonitoring aan staat, dus de oplossing ligt aan de collectorzijde."
           }
         }
       }
@@ -26576,7 +26576,7 @@
       "restrictedDesc": "Configuraties die deze componenten gebruiken, falen bij validatie.",
       "restrictedPlaceholder": "Geen, alle componenten zijn toegestaan",
       "targetVersion": "Doelversie van collector",
-      "targetVersionDesc": "Oudere collectors dan deze zijn verouderd. Laat leeg om de nieuwste door OpenObserve ondersteunde versie te gebruiken.",
+      "targetVersionDesc": "Oudere collectors dan deze zijn verouderd. Laat leeg om de nieuwste door Retrace.ai ondersteunde versie te gebruiken.",
       "targetVersionPlaceholder": "Nieuwste ondersteunde (bijv. 0.163.1)",
       "save": "Opslaan",
       "saved": "Instellingen van Fleet Manager opgeslagen",

@@ -565,7 +565,7 @@
       "title": "リモートタスクはまだありません",
       "description": "リモートタスクとは、実験が出力を生成するために呼び出すHTTPサービスです。一度公開して接続を確認すれば、すべての実験で使用した正確なバージョンを固定できます。",
       "action": "新規タスク",
-      "actionDesc": "OpenObserveをエンドポイントに指定して接続をテストします。"
+      "actionDesc": "Retrace.aiをエンドポイントに指定して接続をテストします。"
     },
     "noDowntimes": {
       "title": "ダウンタイムはまだありません",
@@ -1880,7 +1880,7 @@
       "refresh": "更新",
       "refreshDataThrough": "更新 · {time} までのデータ",
       "sdkSampled": "カウントはサンプリングされた SDK セッションを反映します",
-      "sdkSampledTip": "RUM SDK が保持するセッション ({field}) のみが OpenObserve に到達するため、ここでのすべてのカウントはそれらのセッションを対象とします。",
+      "sdkSampledTip": "RUM SDK が保持するセッション ({field}) のみが Retrace.ai に到達するため、ここでのすべてのカウントはそれらのセッションを対象とします。",
       "identityExcluded": "{count} 件の identity 値を除外 ({pct}%) | {count} 件の identity 値を除外 ({pct}%)",
       "identityIncluded": "すべての identity 値が含まれます",
       "identityExcludedHelp": "1 つの値が識別済みセッションの {pct}% を占めており、テストまたは共有アカウントの可能性があります。これはすべてのユーザー数、ファネル、リテンショングリッドから除外されます。",
@@ -5116,7 +5116,7 @@
       "askAi": "AI に質問",
       "guideDocs": "{guide} のドキュメント",
       "setupDocs": "セットアップドキュメント",
-      "askAiPrompt": "OpenObserve で {guide} を設定していますが、まだデータが到着していません。初回イベントチェックの結果: {details} 組織 ID: {org}。エンドポイント: {endpoint}。次に何を確認すべきですか？",
+      "askAiPrompt": "Retrace.ai で {guide} を設定していますが、まだデータが到着していません。初回イベントチェックの結果: {details} 組織 ID: {org}。エンドポイント: {endpoint}。次に何を確認すべきですか？",
       "askAiRejected": "{path} で {status} {reason} によりリクエストが拒否されています。",
       "askAiNoRequests": "何も到着しておらず、リクエストも拒否されていません。",
       "askAiUnavailable": "拒否されたリクエストを読み取れなかったため、原因は不明です。",
@@ -5170,7 +5170,7 @@
       "configTitle": "これを {path} として保存し、Fluent Bit を再起動",
       "configDescription": "{server} のログを tail し、org トークンを使用して {org} の {stream} ストリームに送信します。",
       "restartHint": "次に {command} を実行します。",
-      "verifyTitle": "OpenObserve でデータを確認"
+      "verifyTitle": "Retrace.ai でデータを確認"
     },
     "copyContentError": "コンテンツのコピー中にエラーが発生しました。",
     "passcodeForbiddenMessage": "取り込みトークンを表示するには管理者または Root ロールが必要です。セットアップコマンド、またはこの画面で表示するために必要なロールについて、管理者にお問い合わせください。",
@@ -5253,7 +5253,7 @@
       "singleTargetTitle": "単一のリモート書き込みターゲット",
       "fanoutTitle": "複数のバックエンドへのファンアウト",
       "tipPrefix": "ヒント: `vmagent`はフラグを繰り返すことで書き込みを複製できます",
-      "tipSuffix": "フラグを指定すると、既存のVictoriaMetrics宛先を維持しつつ、メトリクスをOpenObserveにも転送できます。",
+      "tipSuffix": "フラグを指定すると、既存のVictoriaMetrics宛先を維持しつつ、メトリクスをRetrace.aiにも転送できます。",
       "docLinkText": "vmagentのリモート書き込みターゲットの設定について詳しく学ぶ。"
     },
     "ai": {
@@ -5339,7 +5339,7 @@
       "selectAtLeastOneCategory": "上記のログ カテゴリを少なくとも 1 つ選択してください。",
       "runCommandAfterDeployment": "ARM デプロイ完了後に次のコマンドを実行します:",
       "activityLogsTitle": "Azure アクティビティログ",
-      "activityLogsDescription": "{product} を介して Azure サブスクリプションのアクティビティログを OpenObserve にストリーミングします。ARM テンプレートが Event Hub インフラストラクチャをセットアップし、その後 Azure を構成してログをそこにエクスポートします。",
+      "activityLogsDescription": "{product} を介して Azure サブスクリプションのアクティビティログを Retrace.ai にストリーミングします。ARM テンプレートが Event Hub インフラストラクチャをセットアップし、その後 Azure を構成してログをそこにエクスポートします。",
       "manualTitle": "手動設定（参考用）"
     },
     "awsSetup": {
@@ -5462,16 +5462,16 @@
     "splunkHecUrlHelp": "Splunk フォワーダーの送信先をこの URL に設定し、トークンを Authorization ヘッダーの値 \"Splunk <token>\" として送信してください。",
     "setupCard": {
       "advancedInstallDescCloud": "カスタム構成の場合、またはバージョンを固定してチャートの値をカスタマイズする場合。手順を順に実行します。",
-      "advancedInstallDescSelfHosted": "カスタム構成の場合、またはバージョンを固定してチャートの値をカスタマイズする場合。手順を順に実行します。OpenObserve がこの同じクラスターで実行されている場合は、エクスポーターのエンドポイントを `{url}` に置き換えます。",
+      "advancedInstallDescSelfHosted": "カスタム構成の場合、またはバージョンを固定してチャートの値をカスタマイズする場合。手順を順に実行します。Retrace.ai がこの同じクラスターで実行されている場合は、エクスポーターのエンドポイントを `{url}` に置き換えます。",
       "advancedInstallLabel": "詳細インストール（手動手順）",
       "aerospikeHostLabel": "Aerospike ホスト",
-      "aerospikeTagline": "OpenTelemetry Collector を使用して Aerospike メトリクスを収集し、OpenObserve に送信します。",
+      "aerospikeTagline": "OpenTelemetry Collector を使用して Aerospike メトリクスを収集し、Retrace.ai に送信します。",
       "agentServiceFixTitle": "エージェントサービスを確認",
       "agentTroubleInstanceIdA": "これは IAM ロールを持たない EC2 バリアントです。{iamNote} ロールをアタッチしてから、エージェントを再起動してください。",
       "agentTroubleInstanceIdQ": "ホストが名前ではなくインスタンス ID で表示される",
       "agentTroubleNoDataA": "{hint} を使用してエージェントが実行されているか確認してください。ログの 401 は取り込みトークンが古いことを意味します。このページからコマンドを再コピーしてください。このページのコマンドには常にこの組織の現在のトークンが含まれています。",
       "agentTroubleNoDataQ": "インストールスクリプトは実行されるがデータが届かない",
-      "agentTroubleUnreachableA": "エージェントはこの OpenObserve エンドポイントへのアウトバウンドアクセスが必要です。ホスト自体から `curl -v` で確認してください。通常の原因はプロキシまたはエグレスファイアウォールです。",
+      "agentTroubleUnreachableA": "エージェントはこの Retrace.ai エンドポイントへのアウトバウンドアクセスが必要です。ホスト自体から `curl -v` で確認してください。通常の原因はプロキシまたはエグレスファイアウォールです。",
       "agentTroubleUnreachableQ": "エンドポイントがホストから到達不能です",
       "aiCategoryAnalytics": "アナリティクスと評価",
       "aiCategoryFrameworks": "AIフレームワークとエージェント",
@@ -5486,7 +5486,7 @@
       "autoInstrumentTracesDesc": "どちらも**アプリケーションコードに手を触れず、イメージを再ビルドすることなく分散トレースを取得できます**。**言語ライブラリ：** OpenTelemetry Operator がアノテーションを付けた名前空間の Pod に自動インストルメンテーションを注入します。**eBPF：** コレクターが選択したプロセスを、Go を含むあらゆる言語でトレースします。",
       "autoInstrumentTracesTitle": "アプリケーションをトレース：言語ライブラリまたは eBPF",
       "cassandraJmxNote": "レシーバーが接続できるように、Cassandra で JMX リモートアクセスを有効にします。",
-      "cassandraTagline": "OpenTelemetry Collector の JMX レシーバーを使用して Cassandra メトリクスを収集し、OpenObserve に送信します。",
+      "cassandraTagline": "OpenTelemetry Collector の JMX レシーバーを使用して Cassandra メトリクスを収集し、Retrace.ai に送信します。",
       "checking": "確認中…",
       "checkingForLogs": "ログを確認中…",
       "checkingForMetrics": "メトリクスを確認中…",
@@ -5519,10 +5519,10 @@
       "downloadJmxJarDesc": "JMX レシーバーはこのヘルパー JAR を実行します（コレクターホストに Java が必要です）。",
       "downloadJmxJarTitle": "JMX メトリクス JAR をダウンロード",
       "dynamodbFirehoseEndpointDesc": "Kinesis Data Firehose 配信ストリームを作成する際に、これらを **HTTP エンドポイント** 宛先として使用します。",
-      "dynamodbFirehoseEndpointTitle": "OpenObserve Firehose エンドポイント",
+      "dynamodbFirehoseEndpointTitle": "Retrace.ai Firehose エンドポイント",
       "dynamodbPipelineDesc": "テーブルで **DynamoDB Streams** を有効にし、**Kinesis Data Stream** に接続して、上記の HTTP エンドポイントを指す **Kinesis Data Firehose** 配信ストリームを設定します。",
       "dynamodbPipelineTitle": "DynamoDB → Firehose をストリーミング",
-      "dynamodbTagline": "Kinesis Firehose を介して DynamoDB アイテムの変更を OpenObserve にストリーミングします。",
+      "dynamodbTagline": "Kinesis Firehose を介して DynamoDB アイテムの変更を Retrace.ai にストリーミングします。",
       "ec2IamNote": "インスタンスにec2:DescribeTagsおよびec2:DescribeInstancesを含むIAMロールが必要です。エージェントがNameタグを読み取り、ホスト識別子として使用できるようにするためです。",
       "enableSessionReplayDesc": "Session Replay は RUM とは**別個に**設定され、`rumConfiguration.customEndpoint` は**継承されません**。以下に専用のベース URL を指定してください — RUM/Logs と同じ形式です。ブリッジが `/replay` を自動的に追加するため、自分で**追加しないでください**。手動で `/replay` を追加するとパスが二重になり、すべてのアップロードが 401 で拒否されます。これは RUM イベントは届くのにリプレイが届かない場合によくある原因です。",
       "enableSessionReplayTitle": "セッションリプレイを有効にする",
@@ -5532,15 +5532,15 @@
       "gcpFixBody": "GCPはサブスクリプション自体の配信失敗を報告します。シンクがパブリッシュしているのにここに何も届かない場合、通常はプッシュエンドポイントがリクエストを拒否しています：",
       "gcpFixTitle": "プッシュサブスクリプションを確認",
       "gcpPushUrlNote": "このURLは秘密にしてください — 取り込みキーが埋め込まれています。漏洩した場合はこのページのヘッダーからローテーションしてください。",
-      "gcpSinkDesc": "GCPコンソールで、宛先としてPub/Subを使用して**Log Routerシンク**（Logging → Log Router → Create sink）を作成し、トピックを作成させます。シンクの包含フィルターが、どのログがOpenObserveに到達するかを決定します。",
+      "gcpSinkDesc": "GCPコンソールで、宛先としてPub/Subを使用して**Log Routerシンク**（Logging → Log Router → Create sink）を作成し、トピックを作成させます。シンクの包含フィルターが、どのログがRetrace.aiに到達するかを決定します。",
       "gcpSinkTitle": "ログを Pub/Sub トピックにルーティングする",
       "gcpSinkWriterNote": "シンクのライターIDにトピックのPub/Subパブリッシャーロールを付与してください。そうしないと、静かに何もパブリッシュされません。",
       "gcpStreamHelp": "上記のプッシュ URL で使用され、下のチェックで監視されます。専用のストリームにより GCP ログを分離できます。",
       "gcpSubscriptionDesc": "そのトピックに **push** サブスクリプションを作成し、これをエンドポイント URL として貼り付けます。これには、この組織とその取り込みキーがすでに含まれています。",
-      "gcpSubscriptionTitle": "トピックを OpenObserve にプッシュする",
+      "gcpSubscriptionTitle": "トピックを Retrace.ai にプッシュする",
       "gcpTroubleDeliveryA": "401はURL内の`API-Key`が古いことを意味します — このページからエンドポイントを再コピーしてください。404は通常、組織またはストリームセグメントが手動で編集されたことを意味します。上記のURLはこの組織にとってすでに正しいものです。",
       "gcpTroubleDeliveryQ": "サブスクリプションに配信エラーが表示されています",
-      "gcpTroublePartialA": "これはOpenObserveではなく、シンクの包含フィルターです。シンクの`--log-filter`を広げて、期待するサービスと重大度をカバーしてください。",
+      "gcpTroublePartialA": "これはRetrace.aiではなく、シンクの包含フィルターです。シンクの`--log-filter`を広げて、期待するサービスと重大度をカバーしてください。",
       "gcpTroublePartialQ": "一部のログのみが届きます",
       "gcpTroubleTopicA": "シンクの**ライターID**にはトピックのPub/Subパブリッシャーロールが必要です。GCPはそれがなくてもシンクを正常に作成し、その後すべてを静かにドロップします。",
       "gcpTroubleTopicQ": "シンクは存在しますが、トピックは何も受信しません",
@@ -5573,7 +5573,7 @@
       "k8sEbpfVariant": "eBPF（全言語対応、コード変更不要）",
       "k8sLibrariesVariant": "言語ライブラリ（自動インストルメンテーション）",
       "k8sInstallerNote": "これにより、cert-manager、OpenTelemetryオペレーター、OpenObserveコレクターが自動的にインストールされます。",
-      "k8sInternalEndpointNote": "OpenObserveがこの同じクラスター内で実行される場合にこれを使用してください — トラフィックはクラスター外に出ることはありません。",
+      "k8sInternalEndpointNote": "Retrace.aiがこの同じクラスター内で実行される場合にこれを使用してください — トラフィックはクラスター外に出ることはありません。",
       "k8sTroubleAnnotationA": "インジェクションはポッド作成時に行われるため、既存のポッドは再起動するまで影響を受けません — `kubectl rollout restart deployment -n my-namespace`を実行してください。アノテーションが適用されたことを`kubectl get ns my-namespace -o yaml`で確認し、値が`openobserve-collector/openobserve-<language>`と一致することを確認してください。",
       "k8sTroubleAnnotationQ": "ネームスペースに注釈を付けたのにトレースが表示されません",
       "k8sTroubleEndpointA": "OpenObserve 自体がこのクラスタで実行されている場合にのみ **内部エンドポイント** を使用してください。その場合トラフィックはクラスタ内にとどまり、ネットワークを越えることはありません。URL は `http://<helm-release>-openobserve-router.<namespace>.svc.cluster.local:5080` です。デフォルトでは名前空間 `openobserve` のリリース `o2` を想定しているため、異なる場合は編集してください。それ以外の場合は外部エンドポイントを使用します。",
@@ -5595,7 +5595,7 @@
       "runCollectorMariadbDesc": "コレクターを起動します（ユーザーのパスワードは環境変数で指定）。",
       "mariadbHostLabel": "MariaDB ホスト",
       "verifyMariadbMetricsDesc": "データが到着すると以下のチェックが緑になります。または、ストリームで `mysql_*` メトリクスを確認してください（MariaDB は MySQL レシーバー経由で報告します）。",
-      "mariadbTagline": "OpenTelemetry Collector を使用して MariaDB メトリクスを収集し、OpenObserve に送信します。",
+      "mariadbTagline": "OpenTelemetry Collector を使用して MariaDB メトリクスを収集し、Retrace.ai に送信します。",
       "logsStreamNameLabel": "ログストリーム名",
       "macosAgentFixBody": "インストーラーは2つのlaunchdデーモンを登録します：エージェント自体と統合ログブリッジです。何も届かない場合は、両方がロードされていることを確認し、認証または接続エラーがないかエージェントのログを確認してください：",
       "macosAgentServicesFixTitle": "エージェントサービスを確認",
@@ -5607,11 +5607,11 @@
       "macosTroubleVolumeQ": "統合ログが予想よりもはるかに多く送信されています",
       "macQuarantineNote": "macOSが署名されていないバイナリをブロックする場合は、検疫フラグをクリアしてください：xattr -d com.apple.quarantine ./otelcol-contrib",
       "mongodbHostLabel": "MongoDB ホスト",
-      "mongodbTagline": "OpenTelemetry Collector を使用して MongoDB メトリクスを収集し、OpenObserve に送信します。",
+      "mongodbTagline": "OpenTelemetry Collector を使用して MongoDB メトリクスを収集し、Retrace.ai に送信します。",
       "mostLikelyFix": "最も可能性の高い対処 —",
       "mysqlAdminNote": "MySQL管理者として実行します（パスワードの入力を求められます）。",
       "mysqlHostLabel": "MySQL ホスト",
-      "mysqlTagline": "OpenTelemetry Collector で MySQL メトリクスを収集し、OpenObserve に送信してください。",
+      "mysqlTagline": "OpenTelemetry Collector で MySQL メトリクスを収集し、Retrace.ai に送信してください。",
       "noLogsFoundYet": "ログはまだ見つかりません",
       "noMetricsFoundYet": "メトリクスはまだ見つかりません",
       "noSpansFoundYet": "スパンはまだ見つかりません",
@@ -5620,7 +5620,7 @@
       "onStream": "{stream}上",
       "optionalLabel": "オプション",
       "oracleHostLabel": "Oracle ホスト",
-      "oracleTagline": "OpenTelemetry Collector で Oracle DB メトリクスを収集し、OpenObserve に送信してください。",
+      "oracleTagline": "OpenTelemetry Collector で Oracle DB メトリクスを収集し、Retrace.ai に送信してください。",
       "otlpFixBody": "エクスポーターを定義するだけでは不十分です — パイプラインにリストされる必要があります。これは、正しく見える設定が何も送信しない最も一般的な理由です：",
       "otlpFixTitle": "エクスポーターが実際にパイプラインに配線されているか確認",
       "otlpGrpcCloudNote": "OpenObserve Cloud の公開 gRPC ゲートウェイ — 大量の Span を扱う場合、HTTP よりもオーバーヘッドが小さく、セルフホストのネットワーク設定も不要です。",
@@ -5708,10 +5708,10 @@
       "pillWireframeCapture": "ワイヤーフレームキャプチャ",
       "pillWriteLatency": "書き込みレイテンシ",
       "pointExporterDesc": "これをコレクター設定に追加するか、アプリが直接エクスポートする場合は環境変数を設定してください。この組織向けにすべて入力済みです。",
-      "pointExporterTitle": "OpenObserve にエクスポーターを向ける",
+      "pointExporterTitle": "Retrace.ai にエクスポーターを向ける",
       "portLabel": "ポート",
       "postgresqlHostLabel": "PostgreSQL ホスト",
-      "postgresqlTagline": "OpenTelemetry Collector で PostgreSQL メトリクスを収集し、OpenObserve に送信してください。",
+      "postgresqlTagline": "OpenTelemetry Collector で PostgreSQL メトリクスを収集し、Retrace.ai に送信してください。",
       "postgresSuperuserNote": "Postgres スーパーユーザーとして実行します (psql がパスワードを要求します)。",
       "prepareMongodbDesc": "clusterMonitor 権限を持つ監視ユーザーを作成してください — mongosh で実行してください。**シェルではなく**。",
       "prepareMongodbTitle": "MongoDB の準備",
@@ -5729,7 +5729,7 @@
       "quickInstallTitle": "クイックインストール（推奨）",
       "redisHostLabel": "Redis ホスト",
       "redisNoAuthNote": "Redis に認証がない場合は REDIS_PASSWORD='' を使用します。",
-      "redisTagline": "OpenTelemetry Collector を使用して Redis メトリクスを収集し、OpenObserve に送信します。",
+      "redisTagline": "OpenTelemetry Collector を使用して Redis メトリクスを収集し、Retrace.ai に送信します。",
       "revealToken": "トークンを表示",
       "rnFixBody": "エミュレータ内または実機上の `localhost` はデバイス自身を指し、あなたのマシンではありません。何も届かない最も一般的な理由です。アプリの実行場所に適したホストを使用してください:",
       "rnFixTitle": "SDK をデバイスが実際に到達できるホストに向ける",
@@ -5753,7 +5753,7 @@
       "rnTroubleScreenNamesQ": "セッションは表示されるがすべての画面が同じ名前になっている",
       "rumCdnInitNote": "これを <head> 内のローダーの直後に配置します。onReady() は各バンドルが到着するまで init をキューに入れます。レンダリングをブロックするものはありません。",
       "rumCdnInstallNote": "<head> の先頭に貼り付けます。不変キャッシュのために v{version} に固定。async + preconnect によりクリティカルレンダリングパスから外れます。厳格な CSP の場合は、代わりに 2 つのバンドルをセルフホストしてください。",
-      "rumFixBody": "アプリは動作するが何も届かない場合、ブラウザが SDK またはそのリクエストをブロックしている可能性が高いです。通常は Content-Security-Policy または広告ブロッカーが原因です。CDN と OpenObserve エンドポイントを許可してからリロードしてください:",
+      "rumFixBody": "アプリは動作するが何も届かない場合、ブラウザが SDK またはそのリクエストをブロックしている可能性が高いです。通常は Content-Security-Policy または広告ブロッカーが原因です。CDN と Retrace.ai エンドポイントを許可してからリロードしてください:",
       "rumFixTitle": "コンテンツセキュリティポリシーで SDK を許可する",
       "rumInitDesc": "両方の SDK はこの組織の値で初期化されます — そのままコピーし、`service`、`env`、`applicationId` をアプリに合わせて調整してください。`clientToken` は設計上、訪問者のブラウザに送信されます（NPM ではバンドルされ、CDN ではインライン化されます） — これは RUM イベントの書き込みのみ可能で、このページのヘッダーからいつでもローテーションできます。",
       "rumInitTitle": "RUM + ログを初期化する",
@@ -5774,7 +5774,7 @@
       "rumTroublePerfA": "いいえ。バンドルは `async` でクリティカルレンダリングパス外から読み込まれ、`preconnect` が最初のアップロード前に DNS/TLS をウォームアップし、イベントは送信前にバッチ処理されます。リプレイのオーバーヘッドをさらに制限したい場合は `sessionReplaySampleRate` を下げてください。",
       "rumTroublePerfQ": "SDK はサイトを遅くしますか?",
       "rumTroublePlainHttpA": "ブラウザは混在コンテンツを拒否し、SDK はデフォルトで HTTPS になります。`insecureHTTP: {insecureHTTP}` を維持してください (この組織のエンドポイントから既に設定済み)。アップロードが正しいスキームを使用するように。",
-      "rumTroublePlainHttpQ": "OpenObserve エンドポイントは平文 HTTP です",
+      "rumTroublePlainHttpQ": "Retrace.ai エンドポイントは平文 HTTP です",
       "rumTroubleTokenVisibleA": "はい — `clientToken` は、すべてのブラウザ RUM 製品と同様に、設計上クライアントサイドのトークンです。NPM セットアップでは JS バンドル内に公開され、CDN セットアップでは HTML 内にインライン化されます。DevTools ではどちらの場合も表示されます。これは RUM イベントを**書き込む**ことしかできず、読み取りアクセスは一切許可されず、取り込みパスコードとは別のものです。悪用されて偽のイベントが送信された場合は、このページのヘッダーから再生成し、アプリを再デプロイしてください。",
       "rumTroubleTokenVisibleQ": "トークンがページソースに表示されても安全ですか？",
       "runCollectorDesc": "コレクターを起動してください。",
@@ -5787,7 +5787,7 @@
       "runtimeCluster": "クラスター",
       "runtimeHost": "ホスト",
       "seeAllTroubleshooting": "トラブルシューティングをすべて表示",
-      "sendNotebookLogsDesc": "Databricks ノートブックのセルに貼り付けます — レコードを OpenObserve のログ API に POST 送信します。",
+      "sendNotebookLogsDesc": "Databricks ノートブックのセルに貼り付けます — レコードを Retrace.ai のログ API に POST 送信します。",
       "sendNotebookLogsTitle": "ノートブックからログを送信",
       "setup": "セットアップ",
       "setupTime1Min": "約1分",
@@ -5827,23 +5827,23 @@
       "androidTroubleScreenNamesA": "ビュートラッキングが設定されていません。`RumConfiguration` をビルドするときに `useViewTrackingStrategy(...)` を渡してください。例: Activity では `ActivityViewTrackingStrategy(trackExtras = true)`、AndroidX Navigation を使用している場合は `NavigationViewTrackingStrategy(...)`。",
       "setupTime5Min": "約5分",
       "snowflakeCollectorVersionNote": "Snowflake には collector v0.92.0 が必要です — 新しいビルドには既知のバグがあります。",
-      "snowflakeTagline": "OpenTelemetry Collector を使用して Snowflake アカウントメトリクスを収集し、OpenObserve に送信します。",
+      "snowflakeTagline": "OpenTelemetry Collector を使用して Snowflake アカウントメトリクスを収集し、Retrace.ai に送信します。",
       "sqlClientGuiVariant": "SQL クライアント（GUI）",
       "sqlServerHostLabel": "SQL Server ホスト",
       "sqlServerPasswordNote": "YOUR_SA_PASSWORD を置き換えてください。",
-      "sqlServerTagline": "OpenTelemetry Collector で SQL Server メトリクスを収集し、OpenObserve に送信してください。",
+      "sqlServerTagline": "OpenTelemetry Collector で SQL Server メトリクスを収集し、Retrace.ai に送信してください。",
       "startIngestingTestForLogs": "取り込みを開始し、ログをテストしてください",
       "startIngestingTestForMetrics": "取り込みを開始し、メトリクスをテストしてください",
       "startIngestingTestForSpans": "取り込みを開始して、スパンをテストする",
       "streamNameError": "使用できるのは文字、数字、_ のみです。",
       "streamNameLabel": "ストリーム名",
       "stuck": "行き詰まっていますか？",
-      "taglineDatabricks": "ログ API を使用して Databricks ノートブックのログを OpenObserve に送信します。",
-      "taglineGcp": "Pub/Sub プッシュサブスクリプションを使用して Google Cloud ログを OpenObserve にストリーミングします — エージェントやコレクターを実行する必要はありません。",
+      "taglineDatabricks": "ログ API を使用して Databricks ノートブックのログを Retrace.ai に送信します。",
+      "taglineGcp": "Pub/Sub プッシュサブスクリプションを使用して Google Cloud ログを Retrace.ai にストリーミングします — エージェントやコレクターを実行する必要はありません。",
       "taglineKubernetes": "OpenObserveコレクターをクラスターにデプロイします — コンテナログ、Kubernetesイベント、クラスターメトリクスに加え、ワークロード向けのコード不要のトレースも取得できます。",
       "taglineLinux": "任意の Linux ホストに OpenObserve エージェントをインストールします。システムおよび journald のログに加えて、CPU、メモリ、ディスク、ネットワークのメトリクスを取得でき、eBPF トレースはオプションです。",
       "taglineMacos": "任意の Mac に OpenObserve エージェントをインストールします — 統合ログと標準ログファイルに加え、CPU、メモリ、ディスク、ネットワークのメトリクスを収集します。",
-      "taglineOtlpTraces": "任意の OpenTelemetry エクスポーターを OpenObserve に向けます — コレクターまたは SDK、HTTP または gRPC。エンドポイントとトークンは下に入力されています。",
+      "taglineOtlpTraces": "任意の OpenTelemetry エクスポーターを Retrace.ai に向けます — コレクターまたは SDK、HTTP または gRPC。エンドポイントとトークンは下に入力されています。",
       "taglineWindows": "任意の Windows ホストに OpenObserve エージェントをインストールします — イベントログ、パフォーマンスカウンター、ホストメトリクスを収集します。",
       "testAgain": "再テスト",
       "traceCmdHelp": "Python、Node.js、Java のアプリ向けです。",
@@ -5865,7 +5865,7 @@
       "verifyAerospikeMetricsDesc": "データが到着すると以下のチェックが緑になります。または、ストリームで `aerospike_*` メトリクスを確認してください。",
       "verifyCassandraMetricsDesc": "データが到着すると以下のチェックが緑になります。または、ストリームで `cassandra_*` メトリクスを確認してください。",
       "verifyDatabricksLogsDesc": "データが到着すると以下のチェックが緑になります。または、ログを開いて `source:databricks` を検索してください。",
-      "verifyDataTitle": "OpenObserve でデータを確認",
+      "verifyDataTitle": "Retrace.ai でデータを確認",
       "verifyDynamodbLogsDesc": "データが到着すると以下のチェックが緑になります。または、項目が変更されたら `dynamodb` ストリームのログを開いてください。",
       "verifyGcpLogsDesc": "プロジェクトで何らかのアクティビティを生成してください（またはシンクがログに一致するのを待ちます）。データが到着すると以下のチェックが緑になります。",
       "verifyK8sDataDesc": "コレクターが起動するまで数秒待ってください。データが到着すると以下のチェックが緑になります — クラスターログは `default` ストリームに格納されます。",
@@ -5894,7 +5894,7 @@
       "windowsTroubleScriptQ": "スクリプトがまったく実行されない",
       "writesTheseKeysTo": "次のキーを書き込みます:",
       "zookeeperHostLabel": "Zookeeper ホスト",
-      "zookeeperTagline": "OpenTelemetry Collector を使用して Zookeeper メトリクスを収集し、OpenObserve に送信します。",
+      "zookeeperTagline": "OpenTelemetry Collector を使用して Zookeeper メトリクスを収集し、Retrace.ai に送信します。",
       "pillKeyspace": "キースペース",
       "pillZnodes": "Zノード",
       "stepNumber": "ステップ {n}",
@@ -5961,8 +5961,8 @@
       "gpuExporterDesc": "NVIDIA のエクスポーターは DCGM を介して GPU テレメトリを読み取り、ポート `9400` で公開します。",
       "gpuExporterDockerNote": "`--network host` は実際のマシン名を `Hostname` ラベルに保持し、リスナーは `127.0.0.1` に留まるため GPU データがネットワークに公開されません。`SYS_ADMIN` はプロファイリング（`DCGM_FI_PROF_*`）メトリクスにのみ必要です。",
       "gpuExporterK8sNote": "一般的な GPU ノードラベルでマッチする GPU ノード上でのみ DaemonSet として実行されます。Pod アノテーションにより OpenObserve コレクターが検出できるため、ServiceMonitor や Prometheus は不要です。",
-      "gpuShipTitle": "GPU メトリクスを OpenObserve に送信する",
-      "gpuShipDesc": "エクスポーターのメトリクスを OTLP 経由で OpenObserve に取り込みます。",
+      "gpuShipTitle": "GPU メトリクスを Retrace.ai に送信する",
+      "gpuShipDesc": "エクスポーターのメトリクスを OTLP 経由で Retrace.ai に取り込みます。",
       "gpuShipDockerNote": "ガイドの設定を使用します。30 秒ごとにスクレイプし、`DCGM_*` シリーズのみを保持し、10 秒 / 1,024 ポイントでバッチ処理します。Collector Contrib イメージはエクスポーターの隣で実行され、どちらもホストネットワーキングを使用するため、`localhost:9400` が解決できます。",
       "gpuShipK8sNote": "インストールは不要です。OpenObserve コレクターゲートウェイがアノテーション付きの Pod を 30 秒ごとにスクレイプし、それらが公開するすべてを送信します。以下のコマンドでエクスポーターに到達できることを確認します。",
       "gpuVerifyDesc": "GPU メトリクスは 1〜2 回のスクレイプで `dcgm_fi_*` ストリームとして到着します。到着すると、**GPU Monitoring - NVIDIA** ダッシュボードをデフォルトフォルダに追加します。",
@@ -6017,14 +6017,14 @@
           "description": "ALBアクセスログを監視してリクエストパターン、エラー、レイテンシーを確認する"
         },
         "cloudwatch-logs": {
-          "description": "分析のためにCloudWatchログをOpenObserveにストリームする"
+          "description": "分析のためにCloudWatchログをRetrace.aiにストリームする"
         },
         "cloudwatch-metrics": {
           "description": "CloudWatchメトリクスを収集して分析する"
         },
         "vpc-flow-logs": {
           "description": "VPC内のネットワークトラフィックを分析する",
-          "cloudwatchIntegrationDescription": "CloudWatch経由でVPCフローログをOpenObserveにストリームする",
+          "cloudwatchIntegrationDescription": "CloudWatch経由でVPCフローログをRetrace.aiにストリームする",
           "firehoseIntegrationDescription": "Kinesis Firehose経由でVPCフローログを直接ストリームする"
         },
         "ec2": {
@@ -6051,12 +6051,12 @@
         },
         "dynamodb": {
           "description": "DynamoDBの操作を追跡",
-          "lambdaIntegrationDescription": "Lambda経由でDynamoDBデータをOpenObserveにストリーミング",
-          "directIntegrationDescription": "DynamoDBデータをOpenObserveに直接ストリーミング"
+          "lambdaIntegrationDescription": "Lambda経由でDynamoDBデータをRetrace.aiにストリーミング",
+          "directIntegrationDescription": "DynamoDBデータをRetrace.aiに直接ストリーミング"
         },
         "cloudfront": {
           "description": "CloudFrontアクセスログを分析",
-          "directIntegrationDescription": "CloudFrontログをOpenObserveに直接ストリーミング",
+          "directIntegrationDescription": "CloudFrontログをRetrace.aiに直接ストリーミング",
           "s3IntegrationDescription": "S3バケットからCloudFrontログを取り込む"
         },
         "route53": {
@@ -6070,7 +6070,7 @@
         },
         "kinesis": {
           "description": "Kinesisデータストリームと統合",
-          "lambdaIntegrationDescription": "Lambda経由でKinesisデータをOpenObserveにストリーミング",
+          "lambdaIntegrationDescription": "Lambda経由でKinesisデータをRetrace.aiにストリーミング",
           "firehoseIntegrationDescription": "Kinesis Firehose経由でKinesisデータを直接ストリーミング"
         }
       },
@@ -6124,7 +6124,7 @@
           "description": "Virtual Networkのフローログと診断を監視"
         },
         "activity-logs": {
-          "description": "Event HubとEvent Publisherを介してAzureサブスクリプションのアクティビティログをOpenObserveにストリーミング"
+          "description": "Event HubとEvent Publisherを介してAzureサブスクリプションのアクティビティログをRetrace.aiにストリーミング"
         }
       }
     },
@@ -8233,7 +8233,7 @@
       "regexRedact": "正規表現パターンを生成してメールを編集する",
       "mapStreamSchema": "「default」ストリームのスキーマをマップする",
       "promqlCpu": "80% 以上の CPU を使用するポッド用の PromQL を記述する",
-      "datadogToO2": "このデータドッグクエリを OpenObserve SQL に変換",
+      "datadogToO2": "このデータドッグクエリを Retrace.ai SQL に変換",
       "lastAlertFired": "前回のアラートはなぜ起動されたのですか？"
     },
     "placeholderRotation": {
@@ -10310,7 +10310,7 @@
         "alertEndTime": "ウィンドウ終了時刻（ISO 8601）",
         "alertStartTimeMillis": "ウィンドウ開始時刻（エポックミリ秒）",
         "alertEndTimeMillis": "ウィンドウ終了時刻（エポックミリ秒）",
-        "alertUrl": "調査のためにOpenObserveに戻るリンク",
+        "alertUrl": "調査のためにRetrace.aiに戻るリンク",
         "alertTriggerTime": "アラート発火時刻（ISO 8601）",
         "alertTriggerTimeMillis": "トリガー時刻（エポックミリ秒）",
         "alertTriggerTimeSeconds": "トリガー時刻（エポック秒）",
@@ -10611,7 +10611,7 @@
       "servicenowAssignmentGroup": "割り当てグループ (オプション)",
       "servicenowAssignmentGroupHelp": "インシデントを割り当てるグループ (例: IT運用)",
       "servicenowResolutionCode": "解決コード（任意）",
-      "servicenowResolutionCodeHelp": "ServiceNow インスタンスの有効な解決コードと一致する必要があります。OpenObserve がインシデントを解決するときに使用されます。デフォルトは Solved (Permanently) です。",
+      "servicenowResolutionCodeHelp": "ServiceNow インスタンスの有効な解決コードと一致する必要があります。Retrace.ai がインシデントを解決するときに使用されます。デフォルトは Solved (Permanently) です。",
       "usernameRequired": "ユーザー名は必須です",
       "passwordRequired": "パスワードは必須です",
       "emailRecipients": "受信者メールアドレス",
@@ -11512,7 +11512,7 @@
     "notIngestedHint": "この組織は {stream} を受信していないため、このアラートは発火しません。それでも追加すると、データが到着した時点で動作を開始します。",
     "alertCount": "{count}件のアラート | {count}件のアラート",
     "noCollectorTitle": "ここに一致するデータはまだありません",
-    "noCollectorDescription": "これらの{count}件のアラートは、この組織が受信しているストリームを照会するものはありません。{group} テレメトリを OpenObserve に送信すると、ここに表示されます。",
+    "noCollectorDescription": "これらの{count}件のアラートは、この組織が受信しているストリームを照会するものはありません。{group} テレメトリを Retrace.ai に送信すると、ここに表示されます。",
     "setupGuide": "取り込みガイド",
     "emptyLibraryTitle": "アラートライブラリは空です",
     "emptyLibraryDescription": "カタログは読み込まれましたが、アラートが含まれていません。これはフィルターではなく公開の問題です。しばらくしてから再試行してください。",
@@ -12067,7 +12067,7 @@
     "continue": "続行",
     "save": "保存",
     "update": "更新",
-    "awsStsCloudInfo": "これはAWS STSを使用してロールを引き受け、操作を実行します。AWSコンソールでこのロールの信頼されたエンティティタイプとして {product} AWSアカウントを追加する必要があります。アカウント情報を取得するか、設定に関する詳細なヘルプについては、Openobserveチームにお問い合わせください。",
+    "awsStsCloudInfo": "これはAWS STSを使用してロールを引き受け、操作を実行します。AWSコンソールでこのロールの信頼されたエンティティタイプとして {product} AWSアカウントを追加する必要があります。アカウント情報を取得するか、設定に関する詳細なヘルプについては、Retrace.aiチームにお問い合わせください。",
     "awsStsSelfHostedInfo": "これは AWS sts を使用してロールを引き受け、操作を実行します。インストール環境で、このロールにアクセスできる AWS 認証情報が設定されていることを確認してください。"
   },
   "metrics": {
@@ -17343,7 +17343,7 @@
         "systemProvided": {
           "about": "システム提供の値について",
           "title": "{scope} システム値",
-          "description": "OpenObserve は、このジョブが評価する各 {scope} について、これらの値を個別に構築します。スコアラーのプロンプト変数をマッピングする際にソースとして使用してください。",
+          "description": "Retrace.ai は、このジョブが評価する各 {scope} について、これらの値を個別に構築します。スコアラーのプロンプト変数をマッピングする際にソースとして使用してください。",
           "badge": "システム提供",
           "selectorRequired": "スパンセレクターが必要です",
           "columns": {
@@ -21777,7 +21777,7 @@
       "workloadsStatusScheduled": "スケジュール済み: {count}",
       "workloadsStatusSuspended": "一時停止中: {count}",
       "workloadsNone": "なし",
-      "workloadsRuleTip": "OpenObserve のルールであり Lens ではありません。Pod を持たないオブジェクトは自身のレプリカまたはジョブのシグナルからカウントされ、不完全なデータは不明としてカウントされます",
+      "workloadsRuleTip": "Retrace.ai のルールであり Lens ではありません。Pod を持たないオブジェクトは自身のレプリカまたはジョブのシグナルからカウントされ、不完全なデータは不明としてカウントされます",
       "workloadsRecentEvents": "最近のイベント",
       "workloadsViewAll": "すべて表示",
       "workloadsColType": "種類",
@@ -23052,7 +23052,7 @@
           },
           "sampling": {
             "no": "データベースのセッションテーブルをサンプリングしているものはありません",
-            "noDetail": "セッションサンプルはコレクターから取得されます。データベースホストのコレクターレシピで db.server.query_sample を有効にしてください。セットアップページで手順を説明しています。OpenObserve はデータベースモニタリングがオンのときはいつでもこのフィードを受け入れるため、修正はコレクター側にあります。"
+            "noDetail": "セッションサンプルはコレクターから取得されます。データベースホストのコレクターレシピで db.server.query_sample を有効にしてください。セットアップページで手順を説明しています。Retrace.ai はデータベースモニタリングがオンのときはいつでもこのフィードを受け入れるため、修正はコレクター側にあります。"
           }
         }
       }
@@ -26576,7 +26576,7 @@
       "restrictedDesc": "これらのコンポーネントを使用する構成は検証に失敗します。",
       "restrictedPlaceholder": "なし（すべてのコンポーネントを許可）",
       "targetVersion": "目標コレクターバージョン",
-      "targetVersionDesc": "これより古いコレクターは古いバージョンとみなされます。空にすると、OpenObserve がサポートする最新バージョンを使用します。",
+      "targetVersionDesc": "これより古いコレクターは古いバージョンとみなされます。空にすると、Retrace.ai がサポートする最新バージョンを使用します。",
       "targetVersionPlaceholder": "サポートされる最新バージョン（例: 0.163.1）",
       "save": "保存",
       "saved": "Fleet Manager の設定を保存しました",
