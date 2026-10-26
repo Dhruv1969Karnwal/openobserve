@@ -531,6 +531,9 @@ const useLogs = (t: TranslateFn) => {
     initShownSearchFromUrl(queryParams);
     void writeLogsUrl("replace", {
       ...queryParams,
+      // The raw param may carry a gated or unknown toggle the sanitizer rewrote;
+      // the re-persisted URL must describe the restored state, not the incoming string.
+      logs_visualize_toggle: searchObj.meta.logsVisualizeToggle,
       sql_mode: searchObj.meta.sqlMode,
       defined_schemas: searchObj.meta.useUserDefinedSchemas,
     });

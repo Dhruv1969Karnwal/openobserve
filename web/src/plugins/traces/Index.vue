@@ -364,7 +364,7 @@ interface TracesSavedView {
   stream: { label: string; value: string };
   editorValue: string;
   datetime: { type: string; relativeTimePeriod: string; startTime: number; endTime: number };
-  searchMode: "spans" | "traces";
+  searchMode: TraceSearchMode;
   sortBy: string;
   sortOrder: string;
   selectedFields?: string[];
@@ -2003,7 +2003,10 @@ const onApplySavedView = async (view: TracesSavedView) => {
     if (seq !== savedViewApplySeq) return;
   }
 
-  searchObj.meta.searchMode = view.searchMode;
+  // The view payload is client-writable server data: restore the tab through the
+  // same resolver the URL paths use, or a non-enterprise apply desyncs state and URL.
+  const searchMode = supportedTraceSearchMode(view.searchMode);
+  searchObj.meta.searchMode = searchMode;
   searchObj.data.datetime = { ...searchObj.data.datetime, ...view.datetime };
   await syncSavedViewDateTime(view.datetime);
   if (seq !== savedViewApplySeq) return;
@@ -2015,10 +2018,10 @@ const onApplySavedView = async (view: TracesSavedView) => {
   // A zero-hit search never rebuilds the columns, so the view's columns are applied here.
   searchObj.data.stream.selectedFields = [...(view.selectedFields ?? [])];
   rebuildColumns();
-  updatedLocalLogFilterField(view.searchMode);
+  updatedLocalLogFilterField(searchMode);
 
   // getUrlQueryParams copies trace_id/span_id from the route, which would reopen a trace.
-  const query = { ...router.currentRoute.value.query, tab: view.searchMode };
+  const query = { ...router.currentRoute.value.query, tab: searchMode };
   delete query.trace_id;
   delete query.span_id;
   await router.replace({ query });

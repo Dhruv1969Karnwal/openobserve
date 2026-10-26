@@ -1789,6 +1789,7 @@ import type {
   PersistReasonCode,
 } from "@/composables/useLogs/useAutoRun";
 import { applySearchSnapshot, prepareSearchForSave } from "@/utils/logs/transientSearchKeys";
+import { resolveLogsVisualizeToggle } from "@/ts/interfaces/logs";
 import { useSearchStream } from "@/composables/useLogs/useSearchStream";
 import useStreamFields from "@/composables/useLogs/useStreamFields";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
@@ -3525,6 +3526,18 @@ export default defineComponent({
           if (res.status == 200) {
             store.dispatch("setSavedViewFlag", true);
             const extractedObj = res.data.data;
+
+            // A saved view is org-stored client-writable JSON, so its panel toggle
+            // re-enters through the same sanitizer the URL restore uses (F-43).
+            // TRANSIENT_SEARCH_KEYS is the wrong mechanism: views legitimately persist
+            // the toggle (build/visualize), only gated or unknown values may not
+            // survive the merge.
+            if (extractedObj?.meta && Object.hasOwn(extractedObj.meta, "logsVisualizeToggle")) {
+              extractedObj.meta.logsVisualizeToggle = resolveLogsVisualizeToggle(
+                extractedObj.meta.logsVisualizeToggle,
+                patternsAccess.value.allowed,
+              );
+            }
 
             // A saved view's columns are an explicit user choice, not a system
             // FTS default, so they must persist and never be auto-overridden.

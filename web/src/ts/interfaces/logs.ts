@@ -104,12 +104,26 @@ export interface TraceContext {
   traceId: string;
 }
 
+// The complete set of panel keys the logs route renders (grid v-shows and panel
+// v-ifs match exactly these); anything else leaves every branch unmatched.
+export const LOGS_VISUALIZE_TOGGLES = ["logs", "visualize", "build", "drilldown", "patterns"];
+
+export type LogsVisualizeToggle = (typeof LOGS_VISUALIZE_TOGGLES)[number];
+
+export const isLogsVisualizeToggle = (value: unknown): value is LogsVisualizeToggle =>
+  typeof value === "string" && LOGS_VISUALIZE_TOGGLES.some((toggle) => toggle === value);
+
 /**
- * Sanitizes a restored `?logs_visualize_toggle=` URL value: `patterns` is an
- * entitlement-gated tab, so a build that does not unlock it falls back to
- * `logs` instead of mounting the hidden panel (mirrors resolveTraceSearchMode
- * for the traces `?tab=` deep link). `patternsAllowed` comes from
- * checkFeatureAccess("logPatterns", …) at the call site.
+ * Sanitizes a restored logs panel toggle (URL `?logs_visualize_toggle=` or a
+ * saved-view snapshot): `patterns` is entitlement-gated so un-entitled builds
+ * fall back to `logs`, and values outside the known set coerce to `logs` as
+ * well (mirrors resolveTraceSearchMode for the traces `?tab=` deep link).
+ * `patternsAllowed` comes from checkFeatureAccess("logPatterns", …).
  */
-export const resolveLogsVisualizeToggle = (value: unknown, patternsAllowed: boolean): unknown =>
-  value === "patterns" && !patternsAllowed ? "logs" : value;
+export const resolveLogsVisualizeToggle = (
+  value: unknown,
+  patternsAllowed: boolean,
+): LogsVisualizeToggle =>
+  !isLogsVisualizeToggle(value) || (value === "patterns" && !patternsAllowed)
+    ? "logs"
+    : (value as LogsVisualizeToggle);
