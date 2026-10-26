@@ -1119,14 +1119,40 @@ describe("useRoutes (router.ts)", () => {
    * the same feature — they must answer the same editions. The raw
    * `isEnterprise` check refused pure-Cloud visits while the registry rendered
    * the menu entry allowed; both halves now read the `scheduledSearch` gate.
+   *
+   * F-103 took the next step: the guard was an inline `checkFeatureAccess` +
+   * `next({ name: "logs" })`, which dropped `org_identifier` (a shared link
+   * silently switched org) and could never reach the locked page a `"lock"`
+   * build promises. It is now `withFeatureGate("scheduledSearch", routeGuard)`,
+   * the same helper `alertInsights` / `pipelineBackfill` use. The locked-page
+   * half of that contract is not reachable from a spec: `hidesPaidFeatures` is a
+   * module const fixed by `PAID_FEATURE_POLICY` (see the flip proof in
+   * iter-7/fixer-notes-11.md — a source-flipped copy lands
+   * `enterpriseFeatureLocked` with `feature` + `redirect`).
    */
   describe("homeChildRoutes — searchScheduler guard reads the registry", () => {
-    it("bounces the direct URL to logs on the shipped OSS build", () => {
+    it("bounces the direct URL to home on the shipped OSS build, org preserved", () => {
       const { homeChildRoutes } = useRoutes();
       const next = vi.fn();
-      findRoute(homeChildRoutes, "searchScheduler").beforeEnter({ query: {} }, {}, next);
-      expect(next).toHaveBeenCalledWith({ name: "logs" });
+      findRoute(homeChildRoutes, "searchScheduler").beforeEnter(
+        { query: { org_identifier: "acme" }, fullPath: "/default/logs/search-scheduler" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "acme" } });
       expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /** The old target (`logs`) is reachable too, but home is what the shared gate lands on. */
+    it("does not bounce without an org_identifier — the param travels with the reader", () => {
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchScheduler").beforeEnter(
+        { query: {}, fullPath: "/logs/search-scheduler" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: undefined } });
     });
 
     it("lets the page through on an enterprise build", async () => {

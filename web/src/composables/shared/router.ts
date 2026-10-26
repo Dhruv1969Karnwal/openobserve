@@ -434,8 +434,11 @@ const useRoutes = () => {
     },
     {
       // Standalone page (was a `?action=search_scheduler` overlay on /logs).
-      // Enterprise-only: the scheduled-search endpoints 403 in OSS, so a
-      // hand-typed URL is bounced back to the logs page.
+      // Enterprise/cloud-only: the scheduled-search endpoints 403 in OSS, so a
+      // hand-typed URL is bounced. Same `withFeatureGate` the sibling paid routes
+      // use, so the bounce keeps `org_identifier` and a `"lock"` build lands on
+      // the shared locked page with `redirect` (the inline guard this replaces
+      // dropped both and never reached the lock page).
       path: "logs/search-scheduler",
       name: "searchScheduler",
       component: SearchSchedulersList,
@@ -443,15 +446,7 @@ const useRoutes = () => {
         keepAlive: false,
         titleKey: "routeTitles.searchScheduler",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        // Registry predicate for `scheduledSearch` (isEnterprise || isCloud) —
-        // the menu entry and this page must answer the same editions.
-        if (!checkFeatureAccess("scheduledSearch", buildFeatureGateContext()).allowed) {
-          next({ name: "logs" });
-          return;
-        }
-        routeGuard(to, from, next);
-      },
+      beforeEnter: withFeatureGate("scheduledSearch", routeGuard),
     },
     {
       // The zero-query browse grid.
