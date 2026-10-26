@@ -157,7 +157,6 @@ const REAL_SURFACES = [
   "--color-surface-chrome",
   "--color-surface-chrome-deeper",
   "--color-surface-overlay",
-  "--color-surface-chip",
 ];
 
 const MINIMUMS: Record<Exclude<Category, "exempt" | "pending">, number> = {

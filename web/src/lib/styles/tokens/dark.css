@@ -21,15 +21,19 @@
        below (surfaces, borders, text, per-component overrides) references
        ONLY these vars, so the whole dark theme is tuned from here.
 
-       Elevation order (deepest → lightest) preserves the light-mode
-       relationship (subtle < panel < base < overlay) so cards LIFT and
-       sub-rails RECEDE — what creates visible "sections":
+       Elevation order (deepest → lightest), monotonic by measured WCAG
+       relative luminance — lighter floats, and the chrome recedes under the
+       content card; what creates visible "sections":
 
-         chrome   top bar / left rail / gutter behind the card  (deepest)
-         well     recessed fills, segmented-control track
-         panel    folder & sub rails, cards, table-header base
-         base     THE content card + table canvas               (main, lifted)
-         overlay  menus, dialogs, inputs, table-header, tooltips (highest)
+         chrome   top bar / left rail / gutter behind the card  (deepest, L .00400)
+         base     THE content card + table canvas               (main,    L .00847)
+         panel    folder & sub rails, cards, table-header base  (         L .01504)
+         well     recessed fills, segmented-control track       (         L .02022)
+         overlay  menus, dialogs, inputs, table-header, tooltips (highest, L .02491)
+
+       The recessed well sits UNDER the floating overlay tier — panel→well
+       1.080:1, well→overlay 1.067:1 — and the --d-zebra stripe lives OUTSIDE
+       the band (L .00597, below base) so a striped row never reads as a tier.
 
        Two rules that must survive any tuning:
         1. BASE (the content card) is clearly LIGHTER than the chrome behind
@@ -49,7 +53,9 @@
        overlay = menus, dropdowns, tooltips */
   --d-chrome: #0c0d0f; /* title bar + left activity-bar strip             */
   --d-base: #15171a; /* MAIN: content card + table canvas               */
-  --d-well: #2b2f34; /* recessed wells, segmented-control track         */
+  --d-well: #232730; /* recessed wells, segmented-control track — between panel
+                             (L .01504) and overlay (L .02491) at L .02022: a
+                             recess NEVER floats above the overlay tier        */
   --d-panel: #1e2126; /* folder sidebar, sub rails, cards, dialogs (DM)  */
   --d-overlay: #282c33; /* menus, dropdowns, tooltips, table-header (top tier,
                                 lifts above panel by lightness alone)          */
@@ -152,10 +158,17 @@
   --color-surface-panel: var(--d-panel); /* folder rails, cards, table-header base */
   --color-surface-overlay: var(--d-overlay); /* dropdowns, dialogs, selects, popovers */
   --color-surface-subtle: var(--d-well); /* recessed fills, segmented track */
-  --color-surface-subtle-hover: var(--d-panel); /* hover on a recessed fill (one step up) */
-  /* Floating chip on a dark panel — a lighter grey so it lifts off the surface. */
-  --color-surface-chip: var(--color-grey-700);
-  --color-surface-chip-hover: var(--color-grey-600);
+  --color-surface-subtle-hover: var(
+    --d-overlay
+  ); /* hover on a recessed fill — one step UP:
+                                                     well L .02022 → overlay .02491 (1.067:1
+                                                     lighter). The old value (--d-panel) sat
+                                                     1.198:1 DARKER than the well it hovered,
+                                                     contradicting this comment. Consumers:
+                                                     pagination hover (component.css:555,561)
+                                                     and the ScheduledDashboards rum-tab
+                                                     (ScheduledDashboards.vue:461); its text
+                                                     --color-text-secondary reads 5.56:1 here. */
   /* Accent-tinted interaction surfaces — dark accent hover/active values. */
   --color-surface-accent-hover: var(--color-primary-900);
   --color-surface-accent-active: var(--color-primary-800);
@@ -819,8 +832,13 @@
   --color-table-streaming-bar: var(--color-primary-400);
   --color-table-row-expanded-bg: var(--d-overlay);
 
-  /* Chart panel bar lifts off --d-base like the light header; a literal, so --d-overlay/--d-well can move freely. */
-  --color-panel-bar-bg: #30353c;
+  /* Chart panel bar lifts off --d-base like the light header, kept in step with its
+     light twin by arithmetic, not eyeballing: this band is 1.152:1 off --d-base
+     (L .01736, below --d-well so a resting panel header never outranks a floating
+     menu); the light side (--color-grey-100 on the white canvas, component.css) is
+     1.090:1. A literal, so tier moves cannot drift the band — if a tier crosses
+     1.1–1.2:1 off base, re-measure both themes and change the pair together. */
+  --color-panel-bar-bg: #20242a;
   --color-panel-bar-border: var(--d-border);
 }
 /* Domain data-viz & color tokens (dark) */
