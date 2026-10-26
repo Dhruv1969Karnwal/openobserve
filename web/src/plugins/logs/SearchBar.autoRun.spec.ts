@@ -128,12 +128,12 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
     });
 
   const setup = async (opts: { aqe?: boolean; liveMode?: boolean } = {}) => {
-    store.state.zoConfig = {
-      ...originalZoConfig,
+    const zoCfg: Record<string, unknown> = {
       auto_query_enabled: opts.aqe ?? true,
       query_on_stream_selection: true,
       web_url: "https://o2.example",
     };
+    store.state.zoConfig = { ...originalZoConfig, ...zoCfg };
     wrapper = mountSearchBar();
     const { searchObj } = wrapper.vm;
     searchObj.meta.logsVisualizeToggle = "logs";
@@ -146,6 +146,11 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
     searchObj.meta.autoRunBlocked = null;
     searchObj.data.query = "";
     searchObj.data.editorValue = "";
+    // A prior test's function payload would make the apply open the async
+    // function editor and crash on its not-yet-mounted ref.
+    searchObj.data.tempFunctionContent = "";
+    searchObj.data.transformType = "";
+    searchObj.meta.showTransformEditor = false;
     searchObj.data.stream.selectedStream = ["app_logs"];
     searchObj.data.stream.streamLists = [{ label: "app_logs", value: "app_logs" }];
     searchObj.data.datetime = { type: "relative", relativeTimePeriod: "15m" };
@@ -263,7 +268,7 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
       config.isEnterprise = "true";
       config.isCloud = "false";
       await setup({ liveMode: false });
-      store.state.zoConfig.search_inspector_enabled = true;
+      (store.state.zoConfig as any).search_inspector_enabled = true;
       markExecuted();
       await wrapper!.get('[data-test="logs-search-bar-more-options-btn"]').trigger("click");
       await flushPromises();
@@ -678,7 +683,7 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
       expect(searchObj.data.customDownloadQueryObj).toBeUndefined();
       expect(wrapper!.vm.autoRun.engine.isResultsStale()).toBe(false);
       await vi.waitFor(() => expect(logs).toHaveBeenCalled(), { timeout: 4000 });
-      expect(logs.mock.calls.at(-1)[0]).toMatchObject({ reason: "saved-view", op: "full" });
+      expect(logs.mock.calls.at(-1)![0]).toMatchObject({ reason: "saved-view", op: "full" });
     });
 
     const applyView = async (view: any) => {
@@ -694,6 +699,48 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
       view.data.resultGrid = { ...(view.data.resultGrid ?? {}), colOrder: {}, colSizes: {} };
       return view;
     };
+
+    // F-64: the saved-view payload is org-stored client-writable JSON and merges
+    // into searchObj wholesale, so the gated toggle must pass the URL sanitizer.
+    it("a view payload cannot open the gated patterns panel on the shipped build", async () => {
+      await router.replace({ name: "logs", query: {} });
+      const { searchObj, logs } = await setup();
+      const patterns = vi.fn();
+      wrapper!.vm.autoRun.setExecutors({ patterns });
+      markExecuted();
+      const view = viewOf();
+      view.meta.logsVisualizeToggle = "patterns";
+
+      await applyView(view);
+
+      expect(toastMock).not.toHaveBeenCalledWith(expect.objectContaining({ variant: "error" }));
+      expect(searchObj.meta.logsVisualizeToggle).toBe("logs");
+      await vi.waitFor(() => expect(logs).toHaveBeenCalled(), { timeout: 4000 });
+      expect(patterns).not.toHaveBeenCalled();
+    });
+
+    it("a garbage view payload toggle lands on logs too, not a blank panel", async () => {
+      await router.replace({ name: "logs", query: {} });
+      const { searchObj } = await setup();
+      const view = viewOf();
+      view.meta.logsVisualizeToggle = "service-graph";
+
+      await applyView(view);
+
+      expect(searchObj.meta.logsVisualizeToggle).toBe("logs");
+    });
+
+    it("keeps the patterns payload toggle when the entitlement unlocks log patterns", async () => {
+      (config as any).isEnterprise = "true";
+      await router.replace({ name: "logs", query: {} });
+      const { searchObj } = await setup();
+      const view = viewOf();
+      view.meta.logsVisualizeToggle = "patterns";
+
+      await applyView(view);
+
+      expect(searchObj.meta.logsVisualizeToggle).toBe("patterns");
+    });
 
     it("after a view apply with no run, Custom range says to run the query and never sends a reset request", async () => {
       await router.replace({ name: "logs", query: {} });

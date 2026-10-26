@@ -656,6 +656,70 @@ describe("Use Logs Composable", () => {
       });
     });
 
+    // F-65: the trailing writeLogsUrl spread used to re-persist the RAW query
+    // params, leaving state=logs while the address bar (and any share of it)
+    // still claimed the gated/garbage toggle.
+    describe("gated/garbage toggle re-persist (F-65)", () => {
+      afterEach(() => {
+        // The searchObj singleton is shared; a restored tab must not leak
+        // into later tests (refreshData branches on it).
+        wrapper.vm.searchObj.meta.logsVisualizeToggle = "logs";
+      });
+
+      it("re-persists the sanitized toggle, not the raw gated param (F-65)", async () => {
+        resetLogsUrlForTests();
+        bindLogsUrlRouter(wrapper.vm.router);
+        wrapper.vm.router.replace = vi.fn();
+        wrapper.vm.router.currentRoute.value.query = {
+          stream: "app",
+          period: "15m",
+          logs_visualize_toggle: "patterns",
+        };
+
+        await wrapper.vm.restoreUrlQueryParams();
+
+        expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("logs");
+        expect(wrapper.vm.router.replace).toHaveBeenCalledTimes(1);
+        expect(wrapper.vm.router.replace.mock.calls[0][0].query.logs_visualize_toggle).toBe("logs");
+      });
+
+      it("re-persists an unknown toggle as the default in state and URL alike (F-65, F-66)", async () => {
+        resetLogsUrlForTests();
+        bindLogsUrlRouter(wrapper.vm.router);
+        wrapper.vm.router.replace = vi.fn();
+        wrapper.vm.router.currentRoute.value.query = {
+          stream: "app",
+          period: "15m",
+          logs_visualize_toggle: "foo",
+        };
+
+        await wrapper.vm.restoreUrlQueryParams();
+
+        expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("logs");
+        expect(wrapper.vm.router.replace).toHaveBeenCalledTimes(1);
+        expect(wrapper.vm.router.replace.mock.calls[0][0].query.logs_visualize_toggle).toBe("logs");
+      });
+
+      it("keeps the entitlement-unlocked patterns param in the re-persisted URL", async () => {
+        resetLogsUrlForTests();
+        bindLogsUrlRouter(wrapper.vm.router);
+        wrapper.vm.router.replace = vi.fn();
+        wrapper.vm.router.currentRoute.value.query = {
+          stream: "app",
+          period: "15m",
+          logs_visualize_toggle: "visualize",
+        };
+
+        await wrapper.vm.restoreUrlQueryParams();
+
+        expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("visualize");
+        expect(wrapper.vm.router.replace).toHaveBeenCalledTimes(1);
+        expect(wrapper.vm.router.replace.mock.calls[0][0].query.logs_visualize_toggle).toBe(
+          "visualize",
+        );
+      });
+    });
+
     it("applies rows and columns before the first query and names the opened link (C7)", async () => {
       bindLogsUrlRouter(wrapper.vm.router);
       wrapper.vm.router.replace = vi.fn();
@@ -2068,7 +2132,7 @@ describe("Use Logs Composable", () => {
     describe("getFunctions", () => {
       it("should get functions successfully", async () => {
         wrapper.vm.searchObj.organizationIdentifier = "test-org";
-        mockSearchService.search_around = vi.fn().mockResolvedValue({
+        (mockSearchService as any).search_around = vi.fn().mockResolvedValue({
           data: { list: [] },
         });
 
@@ -2079,7 +2143,9 @@ describe("Use Logs Composable", () => {
 
       it("should handle errors when getting functions", async () => {
         wrapper.vm.searchObj.organizationIdentifier = "test-org";
-        mockSearchService.search_around = vi.fn().mockRejectedValue(new Error("API error"));
+        (mockSearchService as any).search_around = vi
+          .fn()
+          .mockRejectedValue(new Error("API error"));
 
         await expect(wrapper.vm.getFunctions()).resolves.not.toThrow();
       });
@@ -2476,7 +2542,7 @@ describe("Use Logs Composable", () => {
     describe("getJobData", () => {
       it("should get job data", async () => {
         wrapper.vm.buildSearch = vi.fn().mockReturnValue({ query: "test" });
-        mockSearchService.search_around = vi.fn().mockResolvedValue({
+        (mockSearchService as any).search_around = vi.fn().mockResolvedValue({
           data: { hits: [], total: 0 },
         });
 
@@ -2487,7 +2553,7 @@ describe("Use Logs Composable", () => {
 
       it("should handle job data with pagination", async () => {
         wrapper.vm.buildSearch = vi.fn().mockReturnValue({ query: "test" });
-        mockSearchService.search_around = vi.fn().mockResolvedValue({
+        (mockSearchService as any).search_around = vi.fn().mockResolvedValue({
           data: { hits: [], total: 0 },
         });
 
@@ -2506,7 +2572,7 @@ describe("Use Logs Composable", () => {
     describe("processHttpHistogramResults", () => {
       it("should process HTTP histogram results", async () => {
         const queryReq = { query: "SELECT * FROM logs" };
-        mockSearchService.search = vi.fn().mockResolvedValue({
+        (mockSearchService as any).search = vi.fn().mockResolvedValue({
           data: {
             hits: [],
             aggs: { histogram: { buckets: [] } },
@@ -2520,7 +2586,9 @@ describe("Use Logs Composable", () => {
 
       it("should handle histogram processing errors", async () => {
         const queryReq = { query: "SELECT * FROM logs" };
-        mockSearchService.search = vi.fn().mockRejectedValue(new Error("Processing failed"));
+        (mockSearchService as any).search = vi
+          .fn()
+          .mockRejectedValue(new Error("Processing failed"));
 
         await expect(wrapper.vm.processHttpHistogramResults(queryReq)).resolves.not.toThrow();
       });

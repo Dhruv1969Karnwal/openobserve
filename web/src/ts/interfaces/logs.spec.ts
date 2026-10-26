@@ -32,8 +32,31 @@ describe("resolveLogsVisualizeToggle — patterns deep-link restore (F-43)", () 
     }
   });
 
-  it("leaves non-string query values to the existing restore semantics", () => {
-    expect(resolveLogsVisualizeToggle(["patterns"], false)).toEqual(["patterns"]);
-    expect(resolveLogsVisualizeToggle(null, false)).toBe(null);
+  // F-66: the results grid and every panel v-if match only the known toggle set,
+  // so any other restored value used to blank the content area.
+  describe("coerces every value outside the known set to logs (F-66)", () => {
+    it.each([
+      ["an unknown word", "foo"],
+      ["a near-miss tab name", "metrics"],
+      ["the empty string", ""],
+      ["wrong casing of a known tab", "PATTERNS"],
+      ["trailing whitespace", "patterns "],
+      ["a unicode look-alike", "pattéerns"],
+      ["a repeated URL param array naming patterns", ["patterns"]],
+      ["a repeated URL param array of garbage", ["foo", "bar"]],
+      ["null", null],
+      ["undefined", undefined],
+      ["a number", 42],
+      ["an object", { value: "patterns" }],
+    ])("maps %s to logs, allowed or not", (_label, value) => {
+      expect(resolveLogsVisualizeToggle(value, false)).toBe("logs");
+      expect(resolveLogsVisualizeToggle(value, true)).toBe("logs");
+    });
+
+    it("keeps every member of the shipped toggle set", () => {
+      for (const tab of ["logs", "visualize", "build", "drilldown"]) {
+        expect(resolveLogsVisualizeToggle(tab, true)).toBe(tab);
+      }
+    });
   });
 });

@@ -23,6 +23,7 @@ import OSplitter from "@/lib/core/Splitter/OSplitter.vue";
 import i18n from "@/locales";
 import store from "@/test/unit/helpers/store";
 import router from "@/test/unit/helpers/router";
+import config from "@/aws-exports";
 import * as useDurationPercentilesModule from "@/composables/useDurationPercentiles";
 import { buildViewTracesFilter } from "@/plugins/traces/viewTracesHandoff";
 import analytics from "@/services/product_analytics";
@@ -185,14 +186,14 @@ const mockSearchObj = {
     errorDetail: "",
     additionalErrorMsg: "",
     stream: {
-      streamLists: [],
+      streamLists: [] as any[],
       selectedStream: { label: "", value: "" },
       selectedStreamFields: [],
-      selectedFields: [],
+      selectedFields: [] as string[],
       functions: [],
     },
     streamResults: { list: [] },
-    queryResults: { hits: [] },
+    queryResults: { hits: [] as any[] },
     sortedQueryResults: [],
     histogram: {
       layout: {},
@@ -210,7 +211,7 @@ const mockSearchObj = {
       relativeTimePeriod: "15m",
       type: "relative",
     },
-    queryPayload: null,
+    queryPayload: null as any,
   },
   runQuery: false,
 };
@@ -603,7 +604,7 @@ describe("Index.vue (Main Traces Page)", () => {
         query: { tab: "traces" },
         name: "traces",
         path: "/traces",
-      }) as typeof router.currentRoute;
+      }) as unknown as typeof router.currentRoute;
       routerCurrentRouteSpy.mockReturnValue(currentRoute);
 
       wrapper = mount(Index, {
@@ -640,7 +641,7 @@ describe("Index.vue (Main Traces Page)", () => {
         query: { tab: "spans" },
         name: "traces",
         path: "/traces",
-      }) as typeof router.currentRoute;
+      }) as unknown as typeof router.currentRoute;
       routerCurrentRouteSpy.mockReturnValue(currentRoute);
 
       wrapper = mount(Index, {
@@ -797,7 +798,7 @@ describe("Index.vue (Main Traces Page)", () => {
           query: { filter: "" },
           name: "traces",
           path: "/traces",
-        }) as typeof router.currentRoute,
+        }) as unknown as typeof router.currentRoute,
       );
       mockSearchObj.data.editorValue = "service_name = 'stale'";
 
@@ -829,12 +830,12 @@ describe("Index.vue (Main Traces Page)", () => {
     beforeEach(() => localStorage.setItem("oo_toggle_auto_run", "false"));
 
     afterEach(() => {
-      delete store.state.zoConfig.auto_query_enabled;
+      delete (store.state.zoConfig as any).auto_query_enabled;
       localStorage.removeItem("oo_toggle_auto_run");
     });
 
     it("restores the last stream on page load without running a search", async () => {
-      store.state.zoConfig.auto_query_enabled = true;
+      (store.state.zoConfig as any).auto_query_enabled = true;
       mockSearchObj.meta.liveMode = false;
       mockRestoreTracesStream.mockReturnValue("default");
       wrapper = mountTraces();
@@ -846,7 +847,7 @@ describe("Index.vue (Main Traces Page)", () => {
     });
 
     it("does not run when the stream changes, and runs once Auto Run is on", async () => {
-      store.state.zoConfig.auto_query_enabled = true;
+      (store.state.zoConfig as any).auto_query_enabled = true;
       mockSearchObj.meta.liveMode = false;
       wrapper = mountTraces();
       await vi.waitFor(() => expect(mockSearchObj.loadingStream).toBe(false));
@@ -865,7 +866,7 @@ describe("Index.vue (Main Traces Page)", () => {
     });
 
     it("still loads a shared link's stream with Auto Run off", async () => {
-      store.state.zoConfig.auto_query_enabled = true;
+      (store.state.zoConfig as any).auto_query_enabled = true;
       mockSearchObj.meta.liveMode = false;
       routerCurrentRouteSpy.mockReturnValue({
         value: { query: { stream: "default" }, name: "traces", path: "/traces" },
@@ -1865,7 +1866,7 @@ describe("Index.vue (Main Traces Page)", () => {
       mockSearchObj.data.editorValue = "";
       mockSearchObj.meta.metricsRangeFilters.clear();
       // Reset auto_query_enabled to undefined for each test
-      delete store.state.zoConfig.auto_query_enabled;
+      delete (store.state.zoConfig as any).auto_query_enabled;
     });
 
     it("should render the drill-down target in the search tab", async () => {
@@ -1882,7 +1883,7 @@ describe("Index.vue (Main Traces Page)", () => {
       const openComparison = vi.fn();
       wrapper.vm.searchResultRef = { openComparison };
 
-      wrapper.findComponent('[data-test="logs-search-bar"]').vm.$emit("drill-down");
+      (wrapper.findComponent('[data-test="logs-search-bar"]') as any).vm.$emit("drill-down");
       await flushPromises();
 
       expect(openComparison).toHaveBeenCalledTimes(1);
@@ -1909,7 +1910,7 @@ describe("Index.vue (Main Traces Page)", () => {
 
       it("sets the editor text and runs exactly one search in live mode", async () => {
         mockSearchObj.meta.liveMode = true;
-        store.state.zoConfig.auto_query_enabled = true;
+        (store.state.zoConfig as any).auto_query_enabled = true;
         wrapper = mountWithSearchBarStub();
         await flushPromises();
         vi.mocked(analytics.track).mockClear();
@@ -1922,7 +1923,7 @@ describe("Index.vue (Main Traces Page)", () => {
       });
 
       it("sets the editor text and runs no search with live mode off", async () => {
-        store.state.zoConfig.auto_query_enabled = true;
+        (store.state.zoConfig as any).auto_query_enabled = true;
         wrapper = mountWithSearchBarStub();
         await flushPromises();
         // Mount derives liveMode from auto_query_enabled, so switch it off afterwards.
@@ -2881,7 +2882,7 @@ describe("Index.vue (Main Traces Page)", () => {
             return () =>
               h(KeepAlive, null, {
                 default: () =>
-                  show.value ? h(Index, null, null) : h("div", { key: "placeholder" }),
+                  show.value ? h(Index as any, null, undefined) : h("div", { key: "placeholder" }),
               });
           },
         });
@@ -3141,7 +3142,7 @@ describe("Index.vue (Main Traces Page)", () => {
       store.state.zoConfig = {
         ...store.state.zoConfig,
         auto_query_enabled: false,
-      };
+      } as any;
 
       routerCurrentRouteSpy.mockReturnValue({
         value: { query: {}, name: "traces", path: "/traces" },
@@ -3178,7 +3179,7 @@ describe("Index.vue (Main Traces Page)", () => {
       store.state.zoConfig = {
         ...store.state.zoConfig,
         auto_query_enabled: false,
-      };
+      } as any;
 
       routerCurrentRouteSpy.mockReturnValue({
         value: { query: {}, name: "traces", path: "/traces" },
@@ -3290,7 +3291,7 @@ describe("Index.vue (Main Traces Page)", () => {
       store.state.zoConfig = {
         ...store.state.zoConfig,
         auto_query_enabled: false,
-      };
+      } as any;
 
       routerCurrentRouteSpy.mockReturnValue({
         value: { query: {}, name: "traces", path: "/traces" },
@@ -3311,7 +3312,7 @@ describe("Index.vue (Main Traces Page)", () => {
       store.state.zoConfig = {
         ...store.state.zoConfig,
         auto_query_enabled: false,
-      };
+      } as any;
     });
   });
 
@@ -3720,6 +3721,36 @@ describe("Index.vue (Main Traces Page)", () => {
       expect(mockSearchObj.data.stream.selectedFields).toEqual([]);
       expect(mockSearchObj.data.editorValue).toBe("service_name = 'checkout'");
       expect(ownSearches()).toHaveLength(1);
+    });
+
+    // F-67: the saved-view payload used to assign meta.searchMode verbatim, so a
+    // non-enterprise apply landed on a blank region and wrote ?tab=service-graph
+    // back into the URL.
+    describe("gated tabs in the view payload (F-67)", () => {
+      afterEach(() => {
+        (config as any).isEnterprise = "true";
+      });
+
+      it("falls a service-graph view back to spans and canonicalizes the URL", async () => {
+        (config as any).isEnterprise = "false";
+        await mountPage();
+
+        await applyViewAndWaitForSearch(savedView({ searchMode: "service-graph" }));
+
+        expect(mockSearchObj.meta.searchMode).toBe("spans");
+        expect(mockUpdatedLocalLogFilterField).toHaveBeenCalledWith("spans");
+        const tabs = routerReplaceSpy.mock.calls.map((call: any[]) => (call[0] as any).query?.tab);
+        expect(tabs).toContain("spans");
+        expect(tabs).not.toContain("service-graph");
+      });
+
+      it("still honors the service-graph payload when the edition unlocks it", async () => {
+        await mountPage();
+
+        await applyView(savedView({ searchMode: "service-graph" }));
+
+        expect(mockSearchObj.meta.searchMode).toBe("service-graph");
+      });
     });
 
     it("toasts an error and leaves state unchanged for an unknown view version", async () => {
