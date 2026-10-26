@@ -22,11 +22,11 @@ import router from "@/test/unit/helpers/router";
 import { nextTick } from "vue";
 import config from "@/aws-exports";
 
-// Mock the useIsMetaOrg composable
+// Mock the useIsMetaOrg composable — hoisted so a test can flip the meta-org
+// flag without a factory-capture TDZ race.
+const metaOrg = vi.hoisted(() => ({ isMetaOrg: { value: false } }));
 vi.mock("@/composables/useIsMetaOrg", () => ({
-  default: () => ({
-    isMetaOrg: { value: false },
-  }),
+  default: () => metaOrg,
 }));
 
 /** Helper: collect all items from sectionGroups (flattened, excluding hidden ones) */
@@ -40,6 +40,11 @@ function visibleItems(sectionGroups: any[]): any[] {
 function allItems(sectionGroups: any[]): any[] {
   return sectionGroups.flatMap((g: any) => g.items ?? []);
 }
+
+// The helper store's `zoConfig` literal predates several of the flags these
+// specs flip; the specs read it through one widened view instead of fighting
+// the inferred type at every assignment.
+const zoConfig = () => store.state.zoConfig as unknown as Record<string, unknown>;
 
 const defaultStubs = {
   RouterView: { template: "<div>Router View</div>" },
@@ -56,10 +61,10 @@ describe("IdentityAccessManagement.vue Component", () => {
     store.state.zoConfig = {
       rbac_enabled: false,
       service_account_enabled: true,
-    };
+    } as unknown as typeof store.state.zoConfig;
     store.state.selectedOrganization = {
       identifier: "test-org",
-    };
+    } as typeof store.state.selectedOrganization;
 
     wrapper = mount(IdentityAccessManagement, {
       global: {
@@ -96,7 +101,7 @@ describe("IdentityAccessManagement.vue Component", () => {
     });
 
     it("should expose sectionGroups from setup", () => {
-      expect(wrapper.vm.sectionGroups).toBeDefined();
+      expect((wrapper.vm as any).sectionGroups).toBeDefined();
     });
 
     it("should expose activeSection from setup", () => {
@@ -131,33 +136,33 @@ describe("IdentityAccessManagement.vue Component", () => {
 
   describe("Section Groups Tests", () => {
     it("should initialize sectionGroups as an array", () => {
-      expect(Array.isArray(wrapper.vm.sectionGroups)).toBe(true);
+      expect(Array.isArray((wrapper.vm as any).sectionGroups)).toBe(true);
     });
 
     it("should have at least one section group", () => {
-      expect(wrapper.vm.sectionGroups.length).toBeGreaterThan(0);
+      expect((wrapper.vm as any).sectionGroups.length).toBeGreaterThan(0);
     });
 
     it("should always include users item", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       const hasUsers = items.some((item: any) => item.key === "users");
       expect(hasUsers).toBe(true);
     });
 
     it("should always include organizations item", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       const hasOrgs = items.some((item: any) => item.key === "organizations");
       expect(hasOrgs).toBe(true);
     });
 
     it("should always include ingestionTokens item", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       const hasTokens = items.some((item: any) => item.key === "ingestionTokens");
       expect(hasTokens).toBe(true);
     });
 
     it("each item should have required properties", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       items.forEach((item: any) => {
         expect(item).toHaveProperty("key");
         expect(item).toHaveProperty("label");
@@ -180,7 +185,7 @@ describe("IdentityAccessManagement.vue Component", () => {
       });
       await flushPromises();
 
-      const items = visibleItems(w.vm.sectionGroups);
+      const items = visibleItems((w.vm as any).sectionGroups);
       expect(items.some((i: any) => i.key === "serviceAccounts")).toBe(true);
       w.unmount();
     });
@@ -197,13 +202,13 @@ describe("IdentityAccessManagement.vue Component", () => {
       });
       await flushPromises();
 
-      const items = visibleItems(w.vm.sectionGroups);
+      const items = visibleItems((w.vm as any).sectionGroups);
       expect(items.some((i: any) => i.key === "serviceAccounts")).toBe(false);
       w.unmount();
     });
 
     it("should default to showing serviceAccounts when config is undefined", async () => {
-      store.state.zoConfig.service_account_enabled = undefined;
+      zoConfig().service_account_enabled = undefined;
 
       const w = mount(IdentityAccessManagement, {
         global: {
@@ -214,7 +219,7 @@ describe("IdentityAccessManagement.vue Component", () => {
       });
       await flushPromises();
 
-      const items = visibleItems(w.vm.sectionGroups);
+      const items = visibleItems((w.vm as any).sectionGroups);
       expect(items.some((i: any) => i.key === "serviceAccounts")).toBe(true);
       w.unmount();
     });
@@ -224,7 +229,7 @@ describe("IdentityAccessManagement.vue Component", () => {
     it("should show groups and roles when enterprise and rbac_enabled", async () => {
       vi.spyOn(config, "isEnterprise", "get").mockReturnValue("true");
       vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
-      store.state.zoConfig.rbac_enabled = true;
+      zoConfig().rbac_enabled = true;
 
       const w = mount(IdentityAccessManagement, {
         global: {
@@ -235,14 +240,14 @@ describe("IdentityAccessManagement.vue Component", () => {
       });
       await flushPromises();
 
-      const items = visibleItems(w.vm.sectionGroups);
+      const items = visibleItems((w.vm as any).sectionGroups);
       expect(items.some((i: any) => i.key === "groups")).toBe(true);
       expect(items.some((i: any) => i.key === "roles")).toBe(true);
       w.unmount();
     });
 
     it("should hide groups and roles when rbac_enabled is false", async () => {
-      store.state.zoConfig.rbac_enabled = false;
+      zoConfig().rbac_enabled = false;
 
       const w = mount(IdentityAccessManagement, {
         global: {
@@ -255,16 +260,68 @@ describe("IdentityAccessManagement.vue Component", () => {
 
       // PAID_FEATURE_POLICY is "hide": an unavailable capability is absent,
       // not a locked row the reader has to click through.
-      const items = visibleItems(w.vm.sectionGroups);
+      const items = visibleItems((w.vm as any).sectionGroups);
       expect(items.some((i: any) => i.key === "groups")).toBe(false);
       expect(items.some((i: any) => i.key === "roles")).toBe(false);
       w.unmount();
     });
 
+    // F-70: the quota tile used to read `visible: meta` alone, so an OSS meta
+    // org rendered a quota entry for a capability the edition does not have.
+    describe("quota tile gate (F-70)", () => {
+      afterEach(() => {
+        metaOrg.isMetaOrg.value = false;
+      });
+
+      const mountIam = async () => {
+        const w = mount(IdentityAccessManagement, {
+          global: { provide: { store }, plugins: [i18n, router], stubs: defaultStubs },
+        });
+        await flushPromises();
+        return w;
+      };
+
+      it("hides the quota tile on a meta org when rbac is off", async () => {
+        vi.spyOn(config, "isEnterprise", "get").mockReturnValue("false");
+        vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
+        zoConfig().rbac_enabled = false;
+        metaOrg.isMetaOrg.value = true;
+
+        const w = await mountIam();
+        const items = visibleItems((w.vm as any).sectionGroups);
+        expect(items.some((i: any) => i.key === "quota")).toBe(false);
+        w.unmount();
+      });
+
+      it("shows the quota tile on a meta org when rbac is on", async () => {
+        vi.spyOn(config, "isEnterprise", "get").mockReturnValue("true");
+        vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
+        zoConfig().rbac_enabled = true;
+        metaOrg.isMetaOrg.value = true;
+
+        const w = await mountIam();
+        const items = visibleItems((w.vm as any).sectionGroups);
+        expect(items.some((i: any) => i.key === "quota")).toBe(true);
+        w.unmount();
+      });
+
+      it("keeps the quota tile hidden for a non-meta org even with rbac on", async () => {
+        vi.spyOn(config, "isEnterprise", "get").mockReturnValue("true");
+        vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
+        zoConfig().rbac_enabled = true;
+        metaOrg.isMetaOrg.value = false;
+
+        const w = await mountIam();
+        const items = visibleItems((w.vm as any).sectionGroups);
+        expect(items.some((i: any) => i.key === "quota")).toBe(false);
+        w.unmount();
+      });
+    });
+
     it("hides the rows instead of showing a locked one when the edition supports RBAC but the toggle is off", async () => {
       vi.spyOn(config, "isEnterprise", "get").mockReturnValue("true");
       vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
-      store.state.zoConfig.rbac_enabled = false;
+      zoConfig().rbac_enabled = false;
 
       const w = mount(IdentityAccessManagement, {
         global: {
@@ -276,7 +333,7 @@ describe("IdentityAccessManagement.vue Component", () => {
       await flushPromises();
 
       // No locked row with a suppressed CTA either — the whole row is gone.
-      const items = visibleItems(w.vm.sectionGroups);
+      const items = visibleItems((w.vm as any).sectionGroups);
       expect(items.some((i: any) => i.key === "groups")).toBe(false);
       w.unmount();
     });
@@ -284,25 +341,25 @@ describe("IdentityAccessManagement.vue Component", () => {
 
   describe("Tab Configuration Tests - Enterprise vs Open Source", () => {
     it("should have correct sectionGroups structure for open source", () => {
-      expect(wrapper.vm.sectionGroups).toBeDefined();
-      expect(Array.isArray(wrapper.vm.sectionGroups)).toBe(true);
-      expect(wrapper.vm.sectionGroups.length).toBeGreaterThan(0);
+      expect((wrapper.vm as any).sectionGroups).toBeDefined();
+      expect(Array.isArray((wrapper.vm as any).sectionGroups)).toBe(true);
+      expect((wrapper.vm as any).sectionGroups.length).toBeGreaterThan(0);
     });
 
     it("should have group labels", () => {
-      wrapper.vm.sectionGroups.forEach((group: any) => {
+      (wrapper.vm as any).sectionGroups.forEach((group: any) => {
         expect(group).toHaveProperty("label");
         expect(group).toHaveProperty("items");
       });
     });
 
     it("should always include users item", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       expect(items.some((i: any) => i.key === "users")).toBe(true);
     });
 
     it("should always include organizations item", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       expect(items.some((i: any) => i.key === "organizations")).toBe(true);
     });
   });
@@ -344,7 +401,7 @@ describe("IdentityAccessManagement.vue Component", () => {
 
   describe("All Items Structure Tests", () => {
     it("should have expected item keys in sectionGroups", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       const keys = items.map((i: any) => i.key);
       // At minimum these are always defined (visibility aside)
       expect(keys).toContain("users");
@@ -353,14 +410,14 @@ describe("IdentityAccessManagement.vue Component", () => {
     });
 
     it("should have correct translation keys for item labels", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       const first = items[0];
       expect(first.label).toBeDefined();
       expect(typeof first.label).toBe("string");
     });
 
     it("should have correct route configuration for each item", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       items.forEach((item: any) => {
         expect(item.to).toBeDefined();
         expect(item.to.name).toBeDefined();
@@ -372,8 +429,8 @@ describe("IdentityAccessManagement.vue Component", () => {
 
   describe("setTabs() / sectionGroups Computation Tests", () => {
     it("should have non-empty sectionGroups on mount", () => {
-      expect(wrapper.vm.sectionGroups).toBeDefined();
-      expect(wrapper.vm.sectionGroups.length).toBeGreaterThan(0);
+      expect((wrapper.vm as any).sectionGroups).toBeDefined();
+      expect((wrapper.vm as any).sectionGroups.length).toBeGreaterThan(0);
     });
 
     describe("Enterprise Mode Tests", () => {
@@ -381,7 +438,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         vi.spyOn(config, "isEnterprise", "get").mockReturnValue("true");
         vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
         store.state.zoConfig.service_account_enabled = true;
-        store.state.zoConfig.rbac_enabled = false;
+        zoConfig().rbac_enabled = false;
 
         const w = mount(IdentityAccessManagement, {
           global: {
@@ -392,7 +449,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         });
         await flushPromises();
 
-        const items = visibleItems(w.vm.sectionGroups);
+        const items = visibleItems((w.vm as any).sectionGroups);
         const keys = items.map((i: any) => i.key);
         expect(keys).toContain("users");
         expect(keys).toContain("organizations");
@@ -404,7 +461,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         vi.spyOn(config, "isEnterprise", "get").mockReturnValue("true");
         vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
         store.state.zoConfig.service_account_enabled = false;
-        store.state.zoConfig.rbac_enabled = false;
+        zoConfig().rbac_enabled = false;
 
         const w = mount(IdentityAccessManagement, {
           global: {
@@ -415,7 +472,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         });
         await flushPromises();
 
-        const items = visibleItems(w.vm.sectionGroups);
+        const items = visibleItems((w.vm as any).sectionGroups);
         const keys = items.map((i: any) => i.key);
         expect(keys).toContain("users");
         expect(keys).toContain("organizations");
@@ -426,7 +483,7 @@ describe("IdentityAccessManagement.vue Component", () => {
       it("should include invitations in cloud mode", async () => {
         vi.spyOn(config, "isEnterprise", "get").mockReturnValue("true");
         vi.spyOn(config, "isCloud", "get").mockReturnValue("true");
-        store.state.zoConfig.rbac_enabled = false;
+        zoConfig().rbac_enabled = false;
 
         const w = mount(IdentityAccessManagement, {
           global: {
@@ -437,7 +494,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         });
         await flushPromises();
 
-        const items = visibleItems(w.vm.sectionGroups);
+        const items = visibleItems((w.vm as any).sectionGroups);
         expect(items.some((i: any) => i.key === "invitations")).toBe(true);
         w.unmount();
       });
@@ -445,7 +502,7 @@ describe("IdentityAccessManagement.vue Component", () => {
       it("should include groups and roles when rbac_enabled in enterprise", async () => {
         vi.spyOn(config, "isEnterprise", "get").mockReturnValue("true");
         vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
-        store.state.zoConfig.rbac_enabled = true;
+        zoConfig().rbac_enabled = true;
         store.state.zoConfig.service_account_enabled = true;
 
         const w = mount(IdentityAccessManagement, {
@@ -457,7 +514,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         });
         await flushPromises();
 
-        const items = visibleItems(w.vm.sectionGroups);
+        const items = visibleItems((w.vm as any).sectionGroups);
         const keys = items.map((i: any) => i.key);
         expect(keys).toContain("groups");
         expect(keys).toContain("roles");
@@ -467,7 +524,7 @@ describe("IdentityAccessManagement.vue Component", () => {
       it("should have quota defined in sectionGroups (visibility depends on isMetaOrg)", async () => {
         vi.spyOn(config, "isEnterprise", "get").mockReturnValue("true");
         vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
-        store.state.zoConfig.rbac_enabled = true;
+        zoConfig().rbac_enabled = true;
 
         const w = mount(IdentityAccessManagement, {
           global: {
@@ -479,7 +536,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         await flushPromises();
 
         // quota exists in allItems regardless of visibility
-        const items = allItems(w.vm.sectionGroups);
+        const items = allItems((w.vm as any).sectionGroups);
         expect(items.some((i: any) => i.key === "quota")).toBe(true);
         w.unmount();
       });
@@ -490,7 +547,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         vi.spyOn(config, "isEnterprise", "get").mockReturnValue("false");
         vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
         store.state.zoConfig.service_account_enabled = true;
-        store.state.zoConfig.rbac_enabled = false;
+        zoConfig().rbac_enabled = false;
 
         const w = mount(IdentityAccessManagement, {
           global: {
@@ -501,7 +558,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         });
         await flushPromises();
 
-        const items = visibleItems(w.vm.sectionGroups);
+        const items = visibleItems((w.vm as any).sectionGroups);
         const keys = items.map((i: any) => i.key);
         expect(keys).toContain("users");
         expect(keys).toContain("organizations");
@@ -522,7 +579,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         });
         await flushPromises();
 
-        const items = visibleItems(w.vm.sectionGroups);
+        const items = visibleItems((w.vm as any).sectionGroups);
         expect(items.some((i: any) => i.key === "serviceAccounts")).toBe(true);
         w.unmount();
       });
@@ -541,7 +598,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         });
         await flushPromises();
 
-        const items = visibleItems(w.vm.sectionGroups);
+        const items = visibleItems((w.vm as any).sectionGroups);
         expect(items.some((i: any) => i.key === "serviceAccounts")).toBe(false);
         w.unmount();
       });
@@ -549,7 +606,7 @@ describe("IdentityAccessManagement.vue Component", () => {
       it("should hide groups/roles in open source (non-enterprise)", async () => {
         vi.spyOn(config, "isEnterprise", "get").mockReturnValue("false");
         vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
-        store.state.zoConfig.rbac_enabled = true;
+        zoConfig().rbac_enabled = true;
 
         const w = mount(IdentityAccessManagement, {
           global: {
@@ -562,7 +619,7 @@ describe("IdentityAccessManagement.vue Component", () => {
 
         // Absent outright — OSS can't unlock RBAC regardless of the
         // backend's rbac_enabled flag, so there is nothing to offer here.
-        const items = visibleItems(w.vm.sectionGroups);
+        const items = visibleItems((w.vm as any).sectionGroups);
         expect(items.some((i: any) => i.key === "groups")).toBe(false);
         expect(items.some((i: any) => i.key === "roles")).toBe(false);
         w.unmount();
@@ -581,7 +638,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         });
         await flushPromises();
 
-        const items = visibleItems(w.vm.sectionGroups);
+        const items = visibleItems((w.vm as any).sectionGroups);
         expect(items.some((i: any) => i.key === "invitations")).toBe(false);
         w.unmount();
       });
@@ -591,7 +648,7 @@ describe("IdentityAccessManagement.vue Component", () => {
       it("should include mcpServer in open source with ai_enabled off", async () => {
         vi.spyOn(config, "isEnterprise", "get").mockReturnValue("false");
         vi.spyOn(config, "isCloud", "get").mockReturnValue("false");
-        store.state.zoConfig.ai_enabled = false;
+        zoConfig().ai_enabled = false;
 
         const w = mount(IdentityAccessManagement, {
           global: {
@@ -602,7 +659,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         });
         await flushPromises();
 
-        const items = visibleItems(w.vm.sectionGroups);
+        const items = visibleItems((w.vm as any).sectionGroups);
         expect(items.some((i: any) => i.key === "mcpServer")).toBe(true);
         w.unmount();
       });
@@ -614,7 +671,7 @@ describe("IdentityAccessManagement.vue Component", () => {
         await nextTick();
         await flushPromises();
 
-        const hasBefore = visibleItems(wrapper.vm.sectionGroups).some(
+        const hasBefore = visibleItems((wrapper.vm as any).sectionGroups).some(
           (i: any) => i.key === "serviceAccounts",
         );
         expect(hasBefore).toBe(true);
@@ -624,30 +681,30 @@ describe("IdentityAccessManagement.vue Component", () => {
         await flushPromises();
 
         // sectionGroups is a computed — it recalculates
-        expect(wrapper.vm.sectionGroups).toBeDefined();
+        expect((wrapper.vm as any).sectionGroups).toBeDefined();
       });
 
       it("should recalculate sectionGroups when rbac_enabled changes", async () => {
-        store.state.zoConfig.rbac_enabled = false;
+        zoConfig().rbac_enabled = false;
         await nextTick();
         await flushPromises();
 
-        store.state.zoConfig.rbac_enabled = true;
+        zoConfig().rbac_enabled = true;
         await nextTick();
         await flushPromises();
 
-        expect(wrapper.vm.sectionGroups).toBeDefined();
+        expect((wrapper.vm as any).sectionGroups).toBeDefined();
       });
     });
   });
 
   describe("Watchers Tests", () => {
     it("should reflect config change in sectionGroups", async () => {
-      store.state.zoConfig.rbac_enabled = true;
+      zoConfig().rbac_enabled = true;
       await nextTick();
       await flushPromises();
 
-      expect(wrapper.vm.sectionGroups).toBeDefined();
+      expect((wrapper.vm as any).sectionGroups).toBeDefined();
     });
   });
 
@@ -668,13 +725,13 @@ describe("IdentityAccessManagement.vue Component", () => {
         },
       });
 
-      expect(w.vm.sectionGroups).toBeDefined();
+      expect((w.vm as any).sectionGroups).toBeDefined();
       w.unmount();
     });
 
     it("should handle null zoConfig values", async () => {
-      store.state.zoConfig.rbac_enabled = null;
-      store.state.zoConfig.service_account_enabled = null;
+      zoConfig().rbac_enabled = null;
+      zoConfig().service_account_enabled = null;
 
       const w = mount(IdentityAccessManagement, {
         global: {
@@ -684,8 +741,8 @@ describe("IdentityAccessManagement.vue Component", () => {
         },
       });
 
-      expect(w.vm.sectionGroups).toBeDefined();
-      expect(w.vm.sectionGroups.length).toBeGreaterThan(0);
+      expect((w.vm as any).sectionGroups).toBeDefined();
+      expect((w.vm as any).sectionGroups.length).toBeGreaterThan(0);
       w.unmount();
     });
 
@@ -728,7 +785,7 @@ describe("IdentityAccessManagement.vue Component", () => {
 
       expect(wrappers.length).toBe(3);
       wrappers.forEach((w) => {
-        expect(Array.isArray(w.vm.sectionGroups)).toBe(true);
+        expect(Array.isArray((w.vm as any).sectionGroups)).toBe(true);
         w.unmount();
       });
     });
@@ -736,7 +793,7 @@ describe("IdentityAccessManagement.vue Component", () => {
 
   describe("Integration with Vue Composition API", () => {
     it("should use computed correctly for sectionGroups", () => {
-      expect(Array.isArray(wrapper.vm.sectionGroups)).toBe(true);
+      expect(Array.isArray((wrapper.vm as any).sectionGroups)).toBe(true);
     });
 
     it("should use computed correctly for activeSection", () => {
@@ -750,7 +807,7 @@ describe("IdentityAccessManagement.vue Component", () => {
 
   describe("Section Group Item Key Tests", () => {
     it("should have items with key, label, icon, to, dataTest", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       items.forEach((item: any) => {
         expect(item.key).toBeDefined();
         expect(item.label).toBeDefined();
@@ -760,7 +817,7 @@ describe("IdentityAccessManagement.vue Component", () => {
     });
 
     it("should include all expected item keys in allItems", () => {
-      const items = allItems(wrapper.vm.sectionGroups);
+      const items = allItems((wrapper.vm as any).sectionGroups);
       const keys = items.map((i: any) => i.key);
       const expectedKeys = [
         "users",
