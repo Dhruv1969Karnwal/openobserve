@@ -127,8 +127,8 @@ describe("useEnterpriseRoutes.ts", () => {
 
       // Compare structure without function instances
       expect(routes1.length).toBe(routes2.length);
-      expect(routes1.map((r) => ({ path: r.path, name: r.name }))).toEqual(
-        routes2.map((r) => ({ path: r.path, name: r.name })),
+      expect(routes1.map((r: any) => ({ path: r.path, name: r.name }))).toEqual(
+        routes2.map((r: any) => ({ path: r.path, name: r.name })),
       );
     });
   });
@@ -657,20 +657,49 @@ describe("useEnterpriseRoutes.ts", () => {
       expect(routeGuard).toHaveBeenCalledWith(mockTo, mockFrom, mockNext);
     });
 
-    it("redirects to the locked page when rbac_enabled is explicitly false", async () => {
+    // Shipped policy: `PAID_FEATURE_POLICY = "hide"` (enterpriseFeatures.ts:357) makes an
+    // admin-disabled RBAC surface invisible rather than locked, so the guard sends the visit to
+    // home — the F-40 consequence: `enterpriseFeature.rbacDisabled` is unreachable by design and the
+    // bounce drops `redirect: to.fullPath`, since a hidden feature has no in-app unlock path.
+    it("redirects to home when rbac_enabled is explicitly false under the shipped hide policy", async () => {
       store.state.zoConfig = { ...store.state.zoConfig, rbac_enabled: false };
+      const { routeGuard } = await import("@/utils/zincutils");
       const routes = useEnterpriseRoutes();
       const iamRoute = routes.find((route: any) => route.name === "iam");
       const groupsRoute = iamRoute.children.find((child: any) => child.name === "groups");
 
-      const mockTo = { query: {}, fullPath: "/iam/groups" };
+      const mockTo = { query: { org_identifier: "ox" }, fullPath: "/iam/groups" };
       const mockFrom = {};
       const mockNext = vi.fn();
 
       groupsRoute.beforeEnter(mockTo, mockFrom, mockNext);
-      expect(mockNext).toHaveBeenCalledWith(
+      expect(mockNext).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "ox" } });
+      expect(mockNext).not.toHaveBeenCalledWith(
         expect.objectContaining({ name: "enterpriseFeatureLocked" }),
       );
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    // The lock-era intent behind the test above, restated as the decision the guard reads. The
+    // `enterpriseFeatureLocked` branch of `withFeatureGate` (enterpriseFeatures.ts:445-449) cannot
+    // be exercised in place: `withFeatureGate` and `checkFeatureAccess` read the shipped constant
+    // from inside their own module, which is exactly the limitation `paidFeaturePolicy.ts:39-41`
+    // documents — `setPaidFeaturePolicy("lock")` would only change what CONSUMERS import, so a
+    // "lock mode" case here would be testing the helper's spread, not this guard.
+    it("reports admin-disabled rbac as hidden and not upgradable", async () => {
+      const { checkFeatureAccess } = await import("@/utils/enterpriseFeatures");
+      const access = checkFeatureAccess("rbac", {
+        isEnterprise: false,
+        isCloud: true,
+        rbac: false,
+      });
+
+      expect(access.allowed).toBe(false);
+      expect(access.visible).toBe(false);
+      expect(access.ctaRelevant).toBe(false);
+      expect(String(access.message)).toBe("");
+      // The explanation this policy can no longer show still ships, for whoever flips the constant.
+      expect(enMessage("enterpriseFeature.rbacDisabled")).toContain("RBAC is turned off");
     });
   });
 
