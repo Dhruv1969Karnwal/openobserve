@@ -1005,8 +1005,7 @@ import { templatesQuery } from "@/services/alert_templates.queries";
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import analytics from "@/services/product_analytics";
-import config from "@/aws-exports";
-import { hidesPaidFeatures } from "@/utils/enterpriseFeatures";
+import { useAnomalyLibraryAccess } from "@/composables/alerts/useAlertLibrary";
 import ImportAlert from "@/components/alerts/ImportAlert.vue";
 import { getImageURL, getUUID, verifyOrganizationStatus } from "@/utils/zincutils";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -1305,26 +1304,11 @@ export default defineComponent({
     // is not sufficient — an enterprise UI can be pointed at an OSS backend)
     // AND the runtime toggle the backend also exposes
     // (O2_ANOMALY_DETECTION_DISABLED, surfaced as anomaly_detection_enabled).
-    // Only the entitlement half is a lockable upsell; an entitled build whose
-    // admin has turned the runtime toggle off still never sees the tab at all
-    // — same reasoning as RBAC's own enabled/disabled split.
-    const anomalyDetectionEntitled = computed(
-      () => store.state.zoConfig.build_type !== "opensource" && config.isEnterprise === "true",
-    );
-    const isAnomalyDetectionEnabled = computed(
-      () =>
-        anomalyDetectionEntitled.value && store.state.zoConfig.anomaly_detection_enabled === true,
-    );
-    // Under "hide" the tab is the feature: no entitlement (or the toggle off)
-    // means no tab. Under "lock" an un-entitled build still shows it locked,
-    // while an entitled build with the toggle off still shows nothing.
-    const anomalyDetectionTabVisible = computed(
-      () =>
-        isAnomalyDetectionEnabled.value ||
-        (!hidesPaidFeatures &&
-          (!anomalyDetectionEntitled.value ||
-            store.state.zoConfig.anomaly_detection_enabled === true)),
-    );
+    // `useAnomalyLibraryAccess` is the shared enabled/locked/hidden state
+    // machine for exactly that pair; the tab renders on anything but hidden.
+    const anomalyLibraryAccess = useAnomalyLibraryAccess();
+    const isAnomalyDetectionEnabled = computed(() => anomalyLibraryAccess.value === "enabled");
+    const anomalyDetectionTabVisible = computed(() => anomalyLibraryAccess.value !== "hidden");
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 
     // Initialize activeTab from URL query parameter, default to "all".
@@ -4023,7 +4007,6 @@ export default defineComponent({
       bulkDeleteAlerts,
       confirmBulkDelete,
       bulkDeleteLoading,
-      config,
       isCompactToolbar,
       isAnomalyDetectionEnabled,
       refreshAlerts,

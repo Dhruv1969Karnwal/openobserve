@@ -992,6 +992,43 @@ describe("useRoutes (router.ts)", () => {
     });
   });
 
+  /**
+   * F-69b: the page guard and the SearchBar menu entry are the two doors to
+   * the same feature — they must answer the same editions. The raw
+   * `isEnterprise` check refused pure-Cloud visits while the registry rendered
+   * the menu entry allowed; both halves now read the `scheduledSearch` gate.
+   */
+  describe("homeChildRoutes — searchScheduler guard reads the registry", () => {
+    it("bounces the direct URL to logs on the shipped OSS build", () => {
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchScheduler").beforeEnter({ query: {} }, {}, next);
+      expect(next).toHaveBeenCalledWith({ name: "logs" });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    it("lets the page through on an enterprise build", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      config.isEnterprise = "true";
+      const { homeChildRoutes } = useRoutes();
+      const to = { query: {} };
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchScheduler").beforeEnter(to, {}, next);
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+
+    /** The drift fix: pure Cloud offers scheduled searches — the guard must agree. */
+    it("lets the page through on a pure-cloud build — same predicate as the menu entry", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      config.isCloud = "true";
+      const { homeChildRoutes } = useRoutes();
+      const to = { query: {} };
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchScheduler").beforeEnter(to, {}, next);
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+  });
+
   // =========================================================================
   // 9. homeChildRoutes — dashboards routes
   // =========================================================================

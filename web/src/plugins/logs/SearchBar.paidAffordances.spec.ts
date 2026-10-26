@@ -86,7 +86,16 @@ vi.mock("@/composables/useStreams", async () => {
 
 const router = createRouter({
   history: createMemoryHistory(),
-  routes: [{ path: "/logs", name: "logs", component: { template: "<div />" } }],
+  routes: [
+    { path: "/logs", name: "logs", component: { template: "<div />" } },
+    // The F-69a list click pushes this by name — a spy passes through to the
+    // real push, which throws "No match" unless the route is registered.
+    {
+      path: "/logs/search-scheduler",
+      name: "searchScheduler",
+      component: { template: "<div />" },
+    },
+  ],
 });
 
 describe("SearchBar — paid affordances derive from the registry (F-36)", () => {
@@ -191,6 +200,76 @@ describe("SearchBar — paid affordances derive from the registry (F-36)", () =>
       wrapper!.vm.onScheduleMenuSelect();
       expect(openUpgradeDialog).toHaveBeenCalledTimes(1);
       expect(wrapper!.vm.searchSchedulerJob).toBe(false);
+    });
+  });
+
+  // F-69a: the list item used to push `searchScheduler` unconditionally — a
+  // lock build rendered it allowed while the page's own guard bounced the
+  // visit. Same allowed-first guard as the create item now.
+  describe("scheduled-search list click (F-69a)", () => {
+    it("routes an un-entitled click to the upsell dialog instead of the bounce", async () => {
+      policy.lockSim = true;
+      const pushSpy = vi.spyOn(router, "push");
+      await mountSearchBar();
+      wrapper!.vm.onScheduleListMenuSelect();
+      await flushPromises();
+      expect(openUpgradeDialog).toHaveBeenCalledTimes(1);
+      expect(pushSpy).not.toHaveBeenCalled();
+      pushSpy.mockRestore();
+    });
+
+    it("opens the list route when the entitlement allows it", async () => {
+      policy.lockSim = true;
+      (config as any).isEnterprise = "true";
+      const pushSpy = vi.spyOn(router, "push");
+      await mountSearchBar();
+      wrapper!.vm.onScheduleListMenuSelect();
+      await flushPromises();
+      expect(pushSpy).toHaveBeenCalledWith(expect.objectContaining({ name: "searchScheduler" }));
+      expect(openUpgradeDialog).not.toHaveBeenCalled();
+      pushSpy.mockRestore();
+    });
+
+    it("bounces the dialog even on the shipped hide build as defense in depth", async () => {
+      const pushSpy = vi.spyOn(router, "push");
+      await mountSearchBar();
+      wrapper!.vm.onScheduleListMenuSelect();
+      expect(openUpgradeDialog).toHaveBeenCalledTimes(1);
+      expect(pushSpy).not.toHaveBeenCalled();
+      pushSpy.mockRestore();
+    });
+
+    /**
+     * Template-level wiring, proven through the rendered menu (its content is
+     * teleported, hence the document lookup) instead of the exposed method.
+     */
+    it("routes the rendered list item's click to the dialog, not to the bounce", async () => {
+      policy.lockSim = true;
+      const pushSpy = vi.spyOn(router, "push");
+      await mountSearchBar();
+      await wrapper!.get('[data-test="logs-search-bar-more-options-btn"]').trigger("click");
+      await flushPromises();
+      const item = document.querySelector<HTMLElement>('[data-test="search-scheduler-list-btn"]');
+      expect(item).not.toBeNull();
+      item!.click();
+      await flushPromises();
+      expect(openUpgradeDialog).toHaveBeenCalledTimes(1);
+      expect(pushSpy).not.toHaveBeenCalled();
+      pushSpy.mockRestore();
+    });
+
+    it("lets the rendered list item navigate once the entitlement allows it", async () => {
+      policy.lockSim = true;
+      (config as any).isEnterprise = "true";
+      const pushSpy = vi.spyOn(router, "push");
+      await mountSearchBar();
+      await wrapper!.get('[data-test="logs-search-bar-more-options-btn"]').trigger("click");
+      await flushPromises();
+      document.querySelector<HTMLElement>('[data-test="search-scheduler-list-btn"]')!.click();
+      await flushPromises();
+      expect(pushSpy).toHaveBeenCalledWith(expect.objectContaining({ name: "searchScheduler" }));
+      expect(openUpgradeDialog).not.toHaveBeenCalled();
+      pushSpy.mockRestore();
     });
   });
 });

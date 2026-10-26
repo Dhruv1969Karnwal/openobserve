@@ -46,7 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       v-for="section in sections"
       :key="section.key"
       :name="section.key"
-      :disable="section.disabled"
+      :disable="section.disabled && !showsLockedTabs"
       :data-test="`dbm-section-tab-${section.key}`"
     >
       <span>{{ section.label }}</span>
@@ -97,8 +97,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { computed } from "vue";
 import { useRoute, useRouter, type RouteLocationRaw } from "vue-router";
 
-import config from "@/aws-exports";
-import { hidesPaidFeatures } from "@/utils/enterpriseFeatures";
+import {
+  buildFeatureGateContext,
+  checkFeatureAccess,
+  type FeatureAccess,
+} from "@/utils/enterpriseFeatures";
+import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OTab from "@/lib/navigation/Tabs/OTab.vue";
 import OTabs from "@/lib/navigation/Tabs/OTabs.vue";
@@ -158,24 +162,31 @@ const router = useRouter();
 
 /**
  * Deadlocks, Blocked queries and Table health read endpoints an OSS build
- * answers 403 on, so the three tabs are locked rather than live there.
- *
- * `isEnterprise` is a STRING env value — compared against the literal `"true"`,
- * never coerced. `Boolean(config.isEnterprise)` is true for `"false"`, which
- * would unlock all three on every OSS build.
+ * answers 403 on, so the three tabs derive from the registry's generic
+ * `enterprise` gate instead of re-reading `config` here — under "hide" an
+ * un-entitled build drops them (visible=false), under "lock" it shows them
+ * locked and routes their click to the upsell dialog.
  *
  * Read inside a computed rather than once at module scope: `/config` and the
  * build flags are resolved during startup, and a module-scope snapshot would
  * freeze whatever was there when this file first loaded.
  */
-const isEnterprise = computed(() => config.isEnterprise === "true");
+const gatedTabsAccess = computed<FeatureAccess>(() =>
+  checkFeatureAccess("enterprise", buildFeatureGateContext()),
+);
+
+/** The lock-but-clickable state: a disabled trigger would swallow the dialog click. */
+const showsLockedTabs = computed(
+  () => gatedTabsAccess.value.visible && !gatedTabsAccess.value.allowed,
+);
+
+const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 
 /** The three tabs the OSS backend refuses. */
 const ENTERPRISE_ONLY_TABS = ["deadlocks", "blocked", "tableHealth"];
 
-// Under PAID_FEATURE_POLICY = "hide" a gated tab is dropped, not left inert on the strip; the route guard bounces a hand-typed URL anyway.
 const isSectionOffered = (key: string) =>
-  !ENTERPRISE_ONLY_TABS.includes(key) || isEnterprise.value || !hidesPaidFeatures;
+  !ENTERPRISE_ONLY_TABS.includes(key) || gatedTabsAccess.value.visible;
 
 /**
  * Route name → tab key. The detail route resolves to the tab it was opened
@@ -217,7 +228,7 @@ const DETAIL_ORIGIN_TABS = new Set<string>(DBM_QUERY_DETAIL_ORIGINS);
  * on Top queries, the detail page's natural parent.
  */
 const activeOriginTabs = computed(() =>
-  isEnterprise.value
+  gatedTabsAccess.value.allowed
     ? DETAIL_ORIGIN_TABS
     : new Set([...DETAIL_ORIGIN_TABS].filter((key) => !ENTERPRISE_ONLY_TABS.includes(key))),
 );
@@ -369,19 +380,21 @@ const offeredSections = computed<Section[]>(() => [
     // A locked tab has no count to badge — the read that produces it is the
     // one the OSS backend refuses — and its hint explains the lock rather
     // than the (absent) number.
-    count: isEnterprise.value ? badgeCount(props.deadlockCount) : null,
-    hint: isEnterprise.value
+    count: gatedTabsAccess.value.allowed ? badgeCount(props.deadlockCount) : null,
+    hint: gatedTabsAccess.value.allowed
       ? t("dbm.page.tabs.deadlocksHint")
       : t("dbm.page.tabs.deadlocksLocked"),
-    disabled: !isEnterprise.value,
+    disabled: !gatedTabsAccess.value.allowed,
   },
   {
     key: "blocked",
     label: t("dbm.page.tabs.blocked"),
     to: { name: "dbmBlocking", query: carriedQuery.value },
-    count: isEnterprise.value ? badgeCount(props.blockedCount) : null,
-    hint: isEnterprise.value ? t("dbm.page.tabs.blockedHint") : t("dbm.page.tabs.blockedLocked"),
-    disabled: !isEnterprise.value,
+    count: gatedTabsAccess.value.allowed ? badgeCount(props.blockedCount) : null,
+    hint: gatedTabsAccess.value.allowed
+      ? t("dbm.page.tabs.blockedHint")
+      : t("dbm.page.tabs.blockedLocked"),
+    disabled: !gatedTabsAccess.value.allowed,
   },
   {
     // LAST: schema health is the slow-moving background question, read after
@@ -389,11 +402,11 @@ const offeredSections = computed<Section[]>(() => [
     key: "tableHealth",
     label: t("dbm.page.tabs.tableHealth"),
     to: { name: "dbmTableHealth", query: carriedQuery.value },
-    count: isEnterprise.value ? badgeCount(props.tableHealthCount) : null,
-    hint: isEnterprise.value
+    count: gatedTabsAccess.value.allowed ? badgeCount(props.tableHealthCount) : null,
+    hint: gatedTabsAccess.value.allowed
       ? t("dbm.page.tabs.tableHealthHint")
       : t("dbm.page.tabs.tableHealthLocked"),
-    disabled: !isEnterprise.value,
+    disabled: !gatedTabsAccess.value.allowed,
   },
 ]);
 
@@ -407,7 +420,13 @@ const navigate = (key: string | number) => {
   if (!section) return;
   // A locked tab must not navigate even if `change` reaches here some other
   // way (keyboard, a future OTabs change) — the route would only bounce back.
-  if (section.disabled || !isSectionOffered(section.key)) return;
+  if (!isSectionOffered(section.key)) return;
+  // The `lock` contract: a visible-but-locked tab's click opens the upgrade
+  // dialog rather than dying silently (a hidden-policy build never renders it).
+  if (section.disabled) {
+    openUpgradeDialog();
+    return;
+  }
   router.push(section.to).catch(() => {});
 };
 </script>

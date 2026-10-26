@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { mount } from "@vue/test-utils";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import i18n from "@/locales";
 
@@ -41,6 +41,32 @@ vi.mock("vue-router", () => ({
 // plain const here is still in its TDZ when the factory runs.
 const mockConfig = vi.hoisted(() => ({ isEnterprise: "true" }));
 vi.mock("@/aws-exports", () => ({ default: mockConfig }));
+
+// Flip for the lock-simulated checkFeatureAccess below; the shipped constant is
+// fixed at module load, so a "lock" build is simulated at the consumer boundary
+// (same pattern as SearchBar.paidAffordances.spec.ts).
+const policy = vi.hoisted(() => ({ lockSim: false }));
+const { openUpgradeDialog } = vi.hoisted(() => ({ openUpgradeDialog: vi.fn() }));
+
+vi.mock("@/composables/useEnterpriseUpgradeDialog", () => ({
+  useEnterpriseUpgradeDialog: () => ({
+    isOpen: { value: false },
+    open: (...args: unknown[]) => openUpgradeDialog(...args),
+    close: () => undefined,
+  }),
+}));
+
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/enterpriseFeatures")>();
+  return {
+    ...actual,
+    checkFeatureAccess: (key: unknown, ctx: unknown) => {
+      const access = actual.checkFeatureAccess(key as never, ctx as never);
+      if (!policy.lockSim || access.allowed || key !== "enterprise") return access;
+      return { ...access, visible: true };
+    },
+  };
+});
 
 const mountAt = (name: string, query: Record<string, unknown> = {}) => {
   currentRoute = { name, query };
@@ -541,6 +567,85 @@ describe("DbmSectionTabs", () => {
       mockConfig.isEnterprise = "false";
       const wrapper = mountAt("dbmDatabases");
       await selectTab(wrapper, "deadlocks");
+      expect(push).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * EDGE-04: with the policy flipped to "lock", the gated tabs come back
+   * visible — and a DOM-disabled trigger swallows the click, which is exactly
+   * how the dead-click was born. A locked tab must therefore stay clickable
+   * and route its click to the upgrade dialog; the shipped hide build must
+   * keep omitting the tabs entirely.
+   */
+  describe("lock policy contract (EDGE-04)", () => {
+    const DESCENDANT_PREFIXES = [
+      "dbm-section-tab-badge-",
+      "dbm-section-tab-vantage-",
+      "dbm-section-tab-lock-",
+    ];
+
+    const tabsOf = (wrapper: ReturnType<typeof mountAt>) =>
+      wrapper.findAll("[data-test^='dbm-section-tab-']").filter((tab) => {
+        const name = tab.attributes("data-test") ?? "";
+        return !DESCENDANT_PREFIXES.some((prefix) => name.startsWith(prefix));
+      });
+
+    beforeEach(() => {
+      policy.lockSim = true;
+      mockConfig.isEnterprise = "false";
+      openUpgradeDialog.mockClear();
+    });
+
+    afterEach(() => {
+      policy.lockSim = false;
+    });
+
+    it("renders the gated tabs visible-but-locked instead of dropping them", () => {
+      const wrapper = mountAt("dbmDatabases");
+      expect(tabsOf(wrapper)).toHaveLength(8);
+      expect(wrapper.find("[data-test='dbm-section-tab-lock-deadlocks']").exists()).toBe(true);
+      expect(wrapper.find("[data-test='dbm-section-tab-lock-blocked']").exists()).toBe(true);
+      expect(wrapper.find("[data-test='dbm-section-tab-lock-tableHealth']").exists()).toBe(true);
+    });
+
+    /** A disabled trigger eats the click before any handler runs — so it must not be disabled. */
+    it("keeps the locked tabs clickable so their click can reach the dialog", () => {
+      const wrapper = mountAt("dbmDatabases");
+      expect(
+        wrapper.find("[data-test='dbm-section-tab-deadlocks']").attributes("aria-disabled"),
+      ).toBeUndefined();
+    });
+
+    it("opens the upgrade dialog when a locked tab is clicked, without navigating", async () => {
+      const wrapper = mountAt("dbmDatabases");
+      await selectTab(wrapper, "deadlocks");
+      expect(openUpgradeDialog).toHaveBeenCalledTimes(1);
+      expect(push).not.toHaveBeenCalled();
+    });
+
+    it("still navigates the ungated tabs under the lock build", async () => {
+      const wrapper = mountAt("dbmDatabases");
+      await selectTab(wrapper, "queries");
+      expect(push).toHaveBeenCalledWith({ name: "dbmQueries", query: {} });
+      expect(openUpgradeDialog).not.toHaveBeenCalled();
+    });
+
+    it("restores live navigation on an entitled lock build", async () => {
+      mockConfig.isEnterprise = "true";
+      const wrapper = mountAt("dbmQueries");
+      await selectTab(wrapper, "deadlocks");
+      expect(push).toHaveBeenCalledWith({ name: "dbmDeadlocks", query: {} });
+      expect(openUpgradeDialog).not.toHaveBeenCalled();
+    });
+
+    /** The shipped direction: hide omits, and the dialog never fires for a non-rendered tab. */
+    it("shows no locked tab and opens no dialog on the shipped hide build", async () => {
+      policy.lockSim = false;
+      const wrapper = mountAt("dbmDatabases");
+      expect(wrapper.find("[data-test='dbm-section-tab-deadlocks']").exists()).toBe(false);
+      await selectTab(wrapper, "deadlocks");
+      expect(openUpgradeDialog).not.toHaveBeenCalled();
       expect(push).not.toHaveBeenCalled();
     });
   });

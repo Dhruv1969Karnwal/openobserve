@@ -22,7 +22,11 @@ import {
 } from "@/utils/zincutils";
 import type { LocationQuery, LocationQueryRaw, RouteLocationRaw } from "vue-router";
 import config from "@/aws-exports";
-import { withFeatureGate } from "@/utils/enterpriseFeatures";
+import {
+  buildFeatureGateContext,
+  checkFeatureAccess,
+  withFeatureGate,
+} from "@/utils/enterpriseFeatures";
 import { resolveTraceSearchMode, type TraceSearchMode } from "@/ts/interfaces/traces/trace.types";
 import store from "@/stores";
 import { hasMetricsEditorParams } from "@/utils/metrics/metricsEditorParams";
@@ -114,12 +118,13 @@ const dbMonitoringEnabled = (): boolean => {
  * aimed at, rather than on a page that renders empty because every fetch was
  * refused. The scope travels so the window and filters survive the bounce.
  *
- * `isEnterprise` is a STRING — compared against the literal `"true"`, never
- * coerced, since `Boolean("false")` is true and would open the gate on OSS.
- * Same shape as the `serviceGraph` guard below.
+ * The edition truth is the registry's `enterprise` predicate, which compares
+ * the STRING `isEnterprise` against the literal `"true"` — never coerce it,
+ * since `Boolean("false")` is true and would open the gate on OSS.
  */
 const dbmEnterpriseGuard = (to: any, from: any, next: any) => {
-  if (config.isEnterprise !== "true") {
+  // Registry predicate (`enterprise`): same edition truth, no local drift.
+  if (!checkFeatureAccess("enterprise", buildFeatureGateContext()).allowed) {
     next({ name: "dbmDatabases", query: to.query });
     return;
   }
@@ -382,7 +387,9 @@ const useRoutes = () => {
         titleKey: "routeTitles.searchScheduler",
       },
       beforeEnter(to: any, from: any, next: any) {
-        if (config.isEnterprise !== "true") {
+        // Registry predicate for `scheduledSearch` (isEnterprise || isCloud) —
+        // the menu entry and this page must answer the same editions.
+        if (!checkFeatureAccess("scheduledSearch", buildFeatureGateContext()).allowed) {
           next({ name: "logs" });
           return;
         }

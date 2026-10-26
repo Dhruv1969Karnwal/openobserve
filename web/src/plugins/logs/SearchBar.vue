@@ -799,7 +799,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </span>
             </ODropdownItem>
 
-            <ODropdownItem data-test="search-scheduler-list-btn" @select="routeToSearchSchedule()">
+            <ODropdownItem data-test="search-scheduler-list-btn" @select="onScheduleListMenuSelect">
               <template #icon-left>
                 <span
                   class="rounded-default bg-section-header-bg text-text-secondary inline-flex h-7 w-7 shrink-0 items-center justify-center"
@@ -4749,6 +4749,16 @@ export default defineComponent({
       openUpgradeDialog();
     };
 
+    // Same guard as the create item — a lock build must open the dialog, not
+    // push a route the page's own guard would bounce back.
+    const onScheduleListMenuSelect = () => {
+      if (scheduledSearchAccess.value.allowed) {
+        routeToSearchSchedule();
+        return;
+      }
+      openUpgradeDialog();
+    };
+
     const openGuardSearchJob = (snapshot: any) => {
       guardJobSnapshot.value = snapshot;
       searchSchedulerJob.value = true;
@@ -5090,6 +5100,7 @@ export default defineComponent({
       routeToSearchSchedule,
       createScheduleJob,
       onScheduleMenuSelect,
+      onScheduleListMenuSelect,
       buildAlertPrefill,
       createAlertSource,
       createAlertDisabledReason,
