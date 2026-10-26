@@ -1789,7 +1789,7 @@ import type {
   PersistReasonCode,
 } from "@/composables/useLogs/useAutoRun";
 import { applySearchSnapshot, prepareSearchForSave } from "@/utils/logs/transientSearchKeys";
-import { resolveLogsVisualizeToggle } from "@/ts/interfaces/logs";
+import { sanitizeSearchSnapshotMeta } from "@/utils/logs/snapshotPaidState";
 import { useSearchStream } from "@/composables/useLogs/useSearchStream";
 import useStreamFields from "@/composables/useLogs/useStreamFields";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
@@ -3527,17 +3527,16 @@ export default defineComponent({
             store.dispatch("setSavedViewFlag", true);
             const extractedObj = res.data.data;
 
-            // A saved view is org-stored client-writable JSON, so its panel toggle
-            // re-enters through the same sanitizer the URL restore uses (F-43).
-            // TRANSIENT_SEARCH_KEYS is the wrong mechanism: views legitimately persist
-            // the toggle (build/visualize), only gated or unknown values may not
-            // survive the merge.
-            if (extractedObj?.meta && Object.hasOwn(extractedObj.meta, "logsVisualizeToggle")) {
-              extractedObj.meta.logsVisualizeToggle = resolveLogsVisualizeToggle(
-                extractedObj.meta.logsVisualizeToggle,
-                patternsAccess.value.allowed,
-              );
-            }
+            // A saved view is org-stored client-writable JSON, so everything it
+            // says about PAID state is sanitized here, before either merge below
+            // (both `applySearchSnapshot` sites live in this one function):
+            // `meta`'s shape, the gated panel toggle (F-43) and the paid-dialog
+            // keys of PAID_SNAPSHOT_META_KEYS (F-98). TRANSIENT_SEARCH_KEYS is the
+            // wrong mechanism for the toggle — views legitimately persist the free
+            // values — but the boundary is the same one for all three.
+            sanitizeSearchSnapshotMeta(extractedObj, {
+              patternsAllowed: patternsAccess.value.allowed,
+            });
 
             // A saved view's columns are an explicit user choice, not a system
             // FTS default, so they must persist and never be auto-overridden.

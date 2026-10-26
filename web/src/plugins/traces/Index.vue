@@ -1567,7 +1567,13 @@ const onErrorOnlyToggled = (value: boolean) => {
 
 // Handler for Search Mode toggle (Service Graph / Traces / Spans / Services Catalog)
 const onSearchModeChange = (mode: TraceSearchMode) => {
-  searchObj.meta.searchMode = mode;
+  // Defense in depth, mirroring logs/SearchBar.vue's onSearchModeChange: every
+  // caller resolves through `supportedTraceSearchMode` first (the URL restore, the
+  // route watcher, the tab control's locked-tab refusal), but THIS is the sink that
+  // writes the paid-capability field, so it resolves again rather than trusting its
+  // callers to have done so. Control flow below still branches on the requested
+  // mode, so an entitled `service-graph` switch behaves exactly as before.
+  searchObj.meta.searchMode = supportedTraceSearchMode(mode);
   if (mode === "service-graph" || mode === "services-catalog") return;
   if (
     mode === "traces" &&
@@ -2127,8 +2133,10 @@ watch(
 
 // Handler for service graph view traces event
 const handleServiceGraphViewTraces = (data: any) => {
-  // Switch to search tab
-  searchObj.meta.searchMode = data.mode;
+  // Switch to search tab. Same defense in depth as `onSearchModeChange`: this
+  // child emit is only reachable from the entitled Service Graph view, and the
+  // payload's own mode is not trusted by the sink that writes it (F-98 / EDGE-04).
+  searchObj.meta.searchMode = supportedTraceSearchMode(data.mode);
 
   // Set the selected stream in dropdown
   if (data.stream) {
