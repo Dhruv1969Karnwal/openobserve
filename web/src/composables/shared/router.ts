@@ -26,6 +26,7 @@ import {
   buildFeatureGateContext,
   checkFeatureAccess,
   withFeatureGate,
+  type FeatureGateContext,
 } from "@/utils/enterpriseFeatures";
 import { resolveTraceSearchMode, type TraceSearchMode } from "@/ts/interfaces/traces/trace.types";
 import store from "@/stores";
@@ -167,6 +168,38 @@ const profilesRouteGuard = (to: any, from: any, next: any) => {
     return;
   }
   routeGuard(to, from, next);
+};
+
+/**
+ * The Search Job Inspector's three entry points — the logs SearchBar "Inspect"
+ * menu group, the SearchHistory row action and the results-grid action — are
+ * each hidden behind the enterprise build, a self-hosted deploy AND the backend
+ * `search_inspector_enabled` flag. The route only ever carried `routeGuard`, so
+ * a pasted or bookmarked `/logs/inspector` rendered the paid page with its
+ * entries hidden: exactly what the F-68 wave closed for `alertInsights` and
+ * `pipelineBackfill` (both `withFeatureGate` now) and missed here.
+ *
+ * The EDITION half lives in the registry as `searchJobInspector` so the hide /
+ * lock split stays in the one place it is written (`withFeatureGate`). The
+ * runtime flag is the caller-side conjunct the registry doc leaves to call
+ * sites; it enters through the gate's `getContext` by folding into the single
+ * bit that predicate reads, rather than copying the policy branch here.
+ *
+ * Cold load: `/config` is fetched without await, so an unloaded `zoConfig`
+ * (still `{}`) must not bounce a real entitled user's refresh — same stance as
+ * `dbmMonitoringEnabled` above. Once the config HAS loaded, a missing flag is
+ * off, which is what the three entry points treat it as.
+ */
+const searchInspectorFlagAllows = (): boolean => {
+  const zoConfig = store?.state?.zoConfig;
+  const configLoaded = !!zoConfig && Object.keys(zoConfig).length > 0;
+  if (!configLoaded) return true;
+  return Boolean(zoConfig.search_inspector_enabled);
+};
+
+const searchJobInspectorGateContext = (): FeatureGateContext => {
+  const edition = buildFeatureGateContext(store?.state?.zoConfig);
+  return { ...edition, isEnterprise: edition.isEnterprise && searchInspectorFlagAllows() };
 };
 
 const ViewDashboard = () => import("@/views/Dashboards/ViewDashboard.vue");
@@ -356,9 +389,10 @@ const useRoutes = () => {
         keepAlive: false,
         titleKey: "logs.searchJobInspector.title",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        routeGuard(to, from, next);
-      },
+      // Registry gate + the `search_inspector_enabled` conjunct its entries use;
+      // see `searchJobInspectorGateContext`. Hide → home (org preserved), lock →
+      // the shared locked page with `redirect`; home is ungated, so no loop.
+      beforeEnter: withFeatureGate("searchJobInspector", routeGuard, searchJobInspectorGateContext),
     },
     {
       // Standalone page (was a `?action=history` overlay on /logs). Not

@@ -992,6 +992,128 @@ describe("useRoutes (router.ts)", () => {
     });
   });
 
+  // =========================================================================
+  // 8d. homeChildRoutes — searchJobInspector, the F-68 wave's missed sibling (F-97)
+  // =========================================================================
+  /**
+   * `/logs/inspector` is the paid Search Job Inspector. All three of its entry
+   * points (SearchBar "Inspect" group, SearchHistory row action, the results-grid
+   * action) hide behind `isEnterprise && !isCloud && search_inspector_enabled`,
+   * while the route itself carried only `routeGuard` — so a bookmarked URL opened
+   * the page with its entries hidden. It now runs through
+   * `withFeatureGate("searchJobInspector", …)` with that runtime flag conjuncted
+   * in the gate context, which is the one difference from the 8c routes: its
+   * entitlement has a `/config` half.
+   */
+  describe("homeChildRoutes — searchJobInspector route gate", () => {
+    let previousZoConfig: any;
+
+    beforeEach(() => {
+      previousZoConfig = store.state.zoConfig;
+      store.state.zoConfig = { ...(previousZoConfig ?? {}), search_inspector_enabled: true };
+    });
+
+    afterEach(() => {
+      store.state.zoConfig = previousZoConfig;
+    });
+
+    it("bounces the direct URL to home from a direct URL on the shipped OSS build", () => {
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(
+        { query: { org_identifier: "default" }, fullPath: "/default/logs/inspector" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "default" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /** `cloudOffers: false` — Cloud never sold this, so the URL bounces there too. */
+    it("bounces on a pure-cloud build", () => {
+      config.isCloud = "true";
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(
+        { query: {}, fullPath: "/logs/inspector" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: undefined } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    it("lets the page through on an entitled self-hosted build with the flag on", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      config.isEnterprise = "true";
+      const { homeChildRoutes } = useRoutes();
+      const to = { query: { org_identifier: "default" }, fullPath: "/default/logs/inspector" };
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(to, {}, next);
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+
+    /**
+     * Bidirectional proof for the flag conjunct: the SAME entitled build reaches
+     * the page above with the flag on and is bounced with it off — the entry
+     * points and the route answer the question the same way.
+     */
+    it("bounces an entitled build whose loaded /config turns the flag off", async () => {
+      config.isEnterprise = "true";
+      store.state.zoConfig = { ...store.state.zoConfig, search_inspector_enabled: false };
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(
+        { query: { org_identifier: "default" }, fullPath: "/default/logs/inspector" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "default" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /** A loaded config with no flag at all is "off" — that is what the entries read. */
+    it("bounces when a loaded /config carries no search_inspector_enabled key", async () => {
+      config.isEnterprise = "true";
+      store.state.zoConfig = { build_type: "opensource" };
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(
+        { query: {}, fullPath: "/logs/inspector" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: undefined } });
+    });
+
+    /**
+     * Cold-load counterpart (`=== false` stance, as for DBM / Downtimes): an
+     * un-awaited `/config` must not bounce a real entitled user's refresh.
+     */
+    it("lets an entitled cold load through while /config is still unloaded", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      config.isEnterprise = "true";
+      store.state.zoConfig = {};
+      const { homeChildRoutes } = useRoutes();
+      const to = { query: {}, fullPath: "/logs/inspector" };
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(to, {}, next);
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+
+    /** The route stays REGISTERED on OSS — a bounce is a redirect, not a 404. */
+    it("keeps the route registered on an OSS build", () => {
+      const { homeChildRoutes } = useRoutes();
+      expect(findRoute(homeChildRoutes, "searchJobInspector")).toBeDefined();
+    });
+
+    /** Loop guard: the hide target is ungated home, which has no gate of its own. */
+    it("lands the bounce on home, which has no beforeEnter gate", () => {
+      const { homeChildRoutes } = useRoutes();
+      expect(findRoute(homeChildRoutes, "home").beforeEnter).toBeUndefined();
+    });
+  });
+
   /**
    * F-69b: the page guard and the SearchBar menu entry are the two doors to
    * the same feature — they must answer the same editions. The raw
@@ -2193,16 +2315,30 @@ describe("useRoutes (router.ts)", () => {
   // 22. Route Guard Invocations — sampling across major routes
   // =========================================================================
   describe("Route Guard Invocations", () => {
+    /**
+     * This route used to reach the page with nothing but the auth guard, which is
+     * what this assertion pinned. It is a registry-gated paid route now (F-97), so
+     * the auth guard only runs once the edition AND the `search_inspector_enabled`
+     * flag say the page is sold; the bounce itself is specced in section 8d.
+     */
     it("should call routeGuard for searchJobInspector route beforeEnter", async () => {
       const { routeGuard } = await import("@/utils/zincutils");
-      const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "searchJobInspector");
+      const previousZoConfig = store.state.zoConfig;
+      config.isEnterprise = "true";
+      store.state.zoConfig = { ...(previousZoConfig ?? {}), search_inspector_enabled: true };
+      try {
+        const { homeChildRoutes } = useRoutes();
+        const route = findRoute(homeChildRoutes, "searchJobInspector");
 
-      const mockTo = {};
-      const mockFrom = {};
-      const mockNext = vi.fn();
-      route.beforeEnter(mockTo, mockFrom, mockNext);
-      expect(routeGuard).toHaveBeenCalledWith(mockTo, mockFrom, mockNext);
+        const mockTo = {};
+        const mockFrom = {};
+        const mockNext = vi.fn();
+        route.beforeEnter(mockTo, mockFrom, mockNext);
+        expect(routeGuard).toHaveBeenCalledWith(mockTo, mockFrom, mockNext);
+      } finally {
+        config.isEnterprise = "false";
+        store.state.zoConfig = previousZoConfig;
+      }
     });
 
     it("should call routeGuard for promqlBuilder route beforeEnter", async () => {
@@ -2595,7 +2731,15 @@ describe("useRoutes (router.ts)", () => {
       config.isEnterprise = "true";
       config.isCloud = "true";
       previousZoConfig = store.state.zoConfig;
-      store.state.zoConfig = { ...(store.state.zoConfig ?? {}), database_monitoring_enabled: true };
+      // `search_inspector_enabled` is the other entitlement this table reads at
+      // face value: /logs/inspector is gated on it (F-97), so an "entitled build"
+      // that leaves it unset bounces before routeGuard and the proxy below would
+      // compare a paywall mute against a chain that never ran.
+      store.state.zoConfig = {
+        ...(store.state.zoConfig ?? {}),
+        database_monitoring_enabled: true,
+        search_inspector_enabled: true,
+      };
     });
 
     afterEach(() => {

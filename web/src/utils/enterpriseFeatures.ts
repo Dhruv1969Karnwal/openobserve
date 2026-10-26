@@ -58,6 +58,7 @@ export type FeatureKey =
   | "remoteTasks"
   | "evaluations"
   | "scheduledSearch"
+  | "searchJobInspector"
   | "customBranding"
   | "slack";
 
@@ -313,6 +314,16 @@ const FEATURE_GATES: Record<FeatureKey, FeatureGateDefinition> = {
     predicate: (c) => c.isEnterprise || c.isCloud,
     labelKey: "search.createScheduledSearch",
     pitchKey: "enterpriseFeature.pitch.scheduledSearch",
+  },
+  // The Search Job Inspector (`/logs/inspector`). Self-hosted-only, like the
+  // other entries in this batch — Cloud never offered it. Its three entry
+  // points ALSO require the backend `search_inspector_enabled` flag; that
+  // runtime conjunct belongs to the callers (see the FeatureGateContext note),
+  // and the route guard applies it on top of this edition answer.
+  searchJobInspector: {
+    predicate: (c) => c.isEnterprise,
+    labelKey: "logs.searchJobInspector.title",
+    cloudOffers: false,
   },
   // Settings → General's white-label logo/text section. Self-hosted-only —
   // re-skinning a managed Cloud deployment per-org isn't offered there either.
