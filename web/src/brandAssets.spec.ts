@@ -17,7 +17,7 @@ import { describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
 import { readFileSync, readdirSync } from "node:fs";
 import { inflateSync } from "node:zlib";
-import { join } from "node:path";
+import { basename, extname, join, sep } from "node:path";
 
 // vitest runs specs with the `web/` package root as cwd; the assets under test are static
 // files outside the component tree, so they are read from disk rather than imported.
@@ -194,5 +194,85 @@ describe("shipped brand assets", () => {
   it("keeps the glyph legible at the smallest shipped size", () => {
     const smallest = icoEntries(ico).find((e) => e.w === 16)!;
     expect(dark(smallest).length).toBeGreaterThanOrEqual(8);
+  });
+});
+
+// Upstream-named files may only live under `src/assets` while real code still points at them;
+// the pricing/pipeline icons below are the ones that do (REV-BRD check 4), so they are named here
+// instead of the ratchet being loosened wholesale.
+const UPSTREAM_ASSET_ALLOWLIST = [
+  "src/assets/images/common/openobserve_favicon.png",
+  "src/assets/images/pipeline/openobserve.svg",
+  "src/assets/openobserve_favicon_dark.ico",
+];
+
+const TEXT_REF_EXTS = new Set([
+  ".vue",
+  ".ts",
+  ".tsx",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".cjs",
+  ".json",
+  ".html",
+  ".css",
+  ".scss",
+  ".md",
+]);
+
+function filesUnder(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(join(process.cwd(), dir), { withFileTypes: true })) {
+    const rel = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...filesUnder(rel));
+    else out.push(rel.split(sep).join("/"));
+  }
+  return out;
+}
+
+// Specs assert the absence of upstream marks, so they are not evidence that a file is used.
+const referrers = filesUnder("src")
+  .filter(
+    (f) =>
+      !f.startsWith("src/assets/") &&
+      !f.includes(".spec.") &&
+      TEXT_REF_EXTS.has(extname(f)) &&
+      !f.startsWith("src/locales/languages/"),
+  )
+  .concat(["index.html"]);
+
+function referencedBy(needle: string): string[] {
+  return referrers.filter((f) => readFileSync(join(process.cwd(), f), "utf8").includes(needle));
+}
+
+describe("upstream-named files under src/assets", () => {
+  const upstreamAssets = filesUnder("src/assets").filter((f) => /openobserve/i.test(basename(f)));
+
+  it("finds upstream-named files to judge at all", () => {
+    expect(upstreamAssets.length).toBeGreaterThan(0);
+  });
+
+  it("ships no unreferenced upstream wordmark or banner under src/assets", () => {
+    const dead = upstreamAssets.filter((f) => referencedBy(basename(f)).length === 0);
+    expect(dead).toEqual([]);
+  });
+
+  it("keeps exactly the allowlisted upstream marks, and only while they are referenced", () => {
+    expect(upstreamAssets.slice().sort()).toEqual(UPSTREAM_ASSET_ALLOWLIST);
+    for (const file of UPSTREAM_ASSET_ALLOWLIST) {
+      expect(referencedBy(basename(file)).length, file).toBeGreaterThan(0);
+    }
+  });
+
+  it("stays clear of the marks this product deleted", () => {
+    for (const gone of [
+      "src/assets/openobserve_logo_light.svg",
+      "src/assets/images/common/openobserve_logo_light.svg",
+      "src/assets/images/common/openobserve_banner_compreesed.png",
+      "src/assets/openobserve_favicon_light.ico",
+    ]) {
+      expect(upstreamAssets).not.toContain(gone);
+    }
   });
 });
