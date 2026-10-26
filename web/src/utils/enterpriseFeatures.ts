@@ -31,6 +31,7 @@ export type FeatureKey =
   | "domainManagement"
   | "passwordPolicy"
   | "pipelineDestinations"
+  | "pipelineBackfill"
   | "storageSettings"
   | "queryManagement"
   | "nodes"
@@ -160,6 +161,13 @@ const FEATURE_GATES: Record<FeatureKey, FeatureGateDefinition> = {
   pipelineDestinations: {
     predicate: (c) => c.isEnterprise,
     labelKey: "pipeline_destinations.header",
+    cloudOffers: false,
+  },
+  // Pipeline backfill jobs — the Pipelines page's Backfill entry and its
+  // route; same self-hosted-only edition predicate.
+  pipelineBackfill: {
+    predicate: (c) => c.isEnterprise,
+    labelKey: "pipeline.backfill",
     cloudOffers: false,
   },
   storageSettings: {

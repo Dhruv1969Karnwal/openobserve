@@ -916,6 +916,83 @@ describe("useRoutes (router.ts)", () => {
   });
 
   // =========================================================================
+  // 8c. homeChildRoutes — the registry-gated paid routes (F-68, F-69b)
+  // =========================================================================
+  /**
+   * `alertInsights` and `pipelineBackfill` used to carry only the auth guard,
+   * so a hand-typed URL rendered a paid page the entry points hide. They now
+   * run through `withFeatureGate`, whose hide branch bounces home and whose
+   * lock branch lands on the shared locked page — the bounce target must be
+   * ungated, so prove home never bounces back.
+   */
+  describe("homeChildRoutes — registry-gated paid routes", () => {
+    const PAID_ROUTES = ["alertInsights", "pipelineBackfill"] as const;
+
+    it.each(PAID_ROUTES)(
+      "bounces %s to home from a direct URL on the shipped OSS build",
+      (name) => {
+        const { homeChildRoutes } = useRoutes();
+        const next = vi.fn();
+        findRoute(homeChildRoutes, name).beforeEnter(
+          { query: { org_identifier: "default" }, fullPath: "/default/x" },
+          {},
+          next,
+        );
+        expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "default" } });
+        expect(routeGuard).not.toHaveBeenCalled();
+      },
+    );
+
+    /** Both keys are `cloudOffers: false` — Cloud sells neither, so the URL bounces there too. */
+    it.each(PAID_ROUTES)("bounces %s on a pure-cloud build", (name) => {
+      config.isCloud = "true";
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, name).beforeEnter({ query: {}, fullPath: "/x" }, {}, next);
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: undefined } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    it.each(PAID_ROUTES)("lets %s through on an entitled build", async (name) => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      config.isEnterprise = "true";
+      const { homeChildRoutes } = useRoutes();
+      const to = { query: { org_identifier: "default" }, fullPath: "/default/x" };
+      const next = vi.fn();
+      findRoute(homeChildRoutes, name).beforeEnter(to, {}, next);
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+
+    /** Only the literal string unlocks — a truthy-string check would fail open. */
+    it.each(["", "TRUE", "1", "yes"])(
+      "treats isEnterprise=%p as OSS for the gated routes",
+      (value) => {
+        config.isEnterprise = value;
+        const { homeChildRoutes } = useRoutes();
+        const next = vi.fn();
+        findRoute(homeChildRoutes, "alertInsights").beforeEnter(
+          { query: {}, fullPath: "/x" },
+          {},
+          next,
+        );
+        expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: undefined } });
+      },
+    );
+
+    /** The routes stay REGISTERED on OSS — a bounce is a redirect, not a 404. */
+    it.each(PAID_ROUTES)("keeps %s registered on an OSS build", (name) => {
+      const { homeChildRoutes } = useRoutes();
+      expect(findRoute(homeChildRoutes, name)).toBeDefined();
+    });
+
+    /** Redirect-loop guard: the bounce target carries no entitlement gate of its own. */
+    it("lands the bounce on home, which has no beforeEnter gate", () => {
+      const { homeChildRoutes } = useRoutes();
+      expect(findRoute(homeChildRoutes, "home").beforeEnter).toBeUndefined();
+    });
+  });
+
+  // =========================================================================
   // 9. homeChildRoutes — dashboards routes
   // =========================================================================
   describe("homeChildRoutes — dashboards routes", () => {
@@ -2240,6 +2317,8 @@ describe("useRoutes (router.ts)", () => {
       const { homeChildRoutes } = useRoutes();
       const route = findRoute(homeChildRoutes, "pipelineBackfill");
 
+      // F-68: the route is registry-gated — entitled builds reach the page.
+      config.isEnterprise = "true";
       const mockTo = {};
       const mockFrom = {};
       const mockNext = vi.fn();

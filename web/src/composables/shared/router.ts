@@ -22,6 +22,7 @@ import {
 } from "@/utils/zincutils";
 import type { LocationQuery, LocationQueryRaw, RouteLocationRaw } from "vue-router";
 import config from "@/aws-exports";
+import { withFeatureGate } from "@/utils/enterpriseFeatures";
 import { resolveTraceSearchMode, type TraceSearchMode } from "@/ts/interfaces/traces/trace.types";
 import store from "@/stores";
 import { hasMetricsEditorParams } from "@/utils/metrics/metricsEditorParams";
@@ -834,9 +835,9 @@ const useRoutes = () => {
               meta: {
                 titleKey: "routeTitles.pipelineBackfillJobs",
               },
-              beforeEnter(to: any, from: any, next: any) {
-                routeGuard(to, from, next);
-              },
+              // The Pipelines page hides its Backfill entry on un-entitled
+              // editions; the direct URL must not render the paid page.
+              beforeEnter: withFeatureGate("pipelineBackfill", routeGuard),
             },
           ],
         },
@@ -1139,9 +1140,9 @@ const useRoutes = () => {
       meta: {
         titleKey: "alerts.insights.title",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        routeGuard(to, from, next);
-      },
+      // The registry declares alertInsights enterprise-only; its tabs were the
+      // only gate, so a direct URL still rendered the paid shell on OSS.
+      beforeEnter: withFeatureGate("alertInsights", routeGuard),
     },
     {
       // Correlation engine is enterprise/cloud-only: bounce to Alerts on OSS — mirrors anomaly/alert-sources guards.

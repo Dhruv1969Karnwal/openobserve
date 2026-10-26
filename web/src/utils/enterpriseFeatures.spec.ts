@@ -99,7 +99,7 @@ describe("enterpriseFeatures", () => {
     // cipher-key/license management has no Cloud equivalent to "upgrade"
     // into, so pure Cloud must hide it entirely rather than show a false
     // upsell. Service Graph is the same shape, covered below via `cloudOffers`.
-    it.each(["cipherKeys", "enterprise", "nodes", "license"] as const)(
+    it.each(["cipherKeys", "enterprise", "nodes", "license", "pipelineBackfill"] as const)(
       "hides %s entirely (not locked) on a pure cloud build",
       (key) => {
         config.isCloud = "true";
@@ -109,6 +109,22 @@ describe("enterpriseFeatures", () => {
         expect(result.message).toBe("");
       },
     );
+
+    // F-68 added this key so the Pipelines Backfill entry and its route share
+    // one predicate; the pair is only as honest as the gate underneath it.
+    it("hides the pipelineBackfill entry the route is gated on in OSS", () => {
+      const result = checkFeatureAccess("pipelineBackfill", buildFeatureGateContext());
+      expect(result.allowed).toBe(false);
+      expect(result.visible).toBe(false);
+      expect(result.message).toBe("");
+    });
+
+    it("unlocks pipelineBackfill in the same self-hosted enterprise build the page gate allows", () => {
+      config.isEnterprise = "true";
+      const result = checkFeatureAccess("pipelineBackfill", buildFeatureGateContext());
+      expect(result.allowed).toBe(true);
+      expect(result.visible).toBe(true);
+    });
 
     it("hides an entitlement-gated feature on OSS, not merely locks it", () => {
       const result = checkFeatureAccess("cipherKeys", buildFeatureGateContext());
