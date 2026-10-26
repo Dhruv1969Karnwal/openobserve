@@ -240,6 +240,13 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     why: "SC 1.4.11 decorative: a container hairline, not information required to identify a component or its state",
   },
   {
+    fg: "--color-border-control",
+    bg: "--color-surface-overlay",
+    category: "non-text",
+    why: "the top elevation tier carries control edges as well: AnomalyAlerting.vue:20 paints its step panel with --color-surface-overlay and the OSelect inside it (line 32) outlines itself with this token — the page the default rule measures is two steps darker",
+    themes: ["dark"],
+  },
+  {
     fg: "--color-slider-thumb-border",
     bg: "--color-slider-track-fill",
     category: "non-text",
@@ -1433,5 +1440,26 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     bg: "--color-button-primary",
     category: "text",
     why: "the inverse foreground exists for filled controls, and the primary button is the fill it is sized against",
+  },
+  {
+    fg: "--color-text-label",
+    bg: "--color-surface-overlay",
+    category: "text",
+    why: "OTable's expansion row is the overlay tier in dark (--color-table-row-expanded-bg) and paints its field labels with this token (EvidenceEventDetail.vue:139) — the page the default rule measures is a step darker",
+    themes: ["dark"],
+  },
+  {
+    fg: "--color-text-muted",
+    bg: "--color-surface-overlay",
+    category: "text",
+    why: "the dark table-header band is the overlay tier (--color-table-header-bg) and carries this token's text, e.g. the license-id copy affordance in About.vue:311",
+    themes: ["dark"],
+  },
+  {
+    fg: "--color-text-placeholder",
+    bg: "--color-surface-overlay",
+    category: "text",
+    why: "the select dropdown content is the overlay tier (--color-select-content-bg) and paints the filter input's placeholder and the no-options row with this token (OSelect.vue:1497,1573)",
+    themes: ["dark"],
   },
 ];

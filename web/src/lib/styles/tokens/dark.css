@@ -57,7 +57,7 @@
   /* Borders & dividers: one step above the surface they outline; contrast.spec.ts holds -strong at 3:1. */
   --d-divider: #333840; /* subtle: row & section separators            */
   --d-border: #4a505a; /* default: card / input / table / rail edges  */
-  --d-border-strong: #6a717a; /* strong: checkbox / radio / file outlines    */
+  --d-border-strong: #727982; /* strong: checkbox / radio / file outlines    */
 
   /* Text — mapped straight to the registered --color-grey-* palette in the
        block below (mirrors light mode, where each tier = a grey step). No
@@ -74,12 +74,13 @@
   /* selected row — teal-tinted (brand signal)       */
   --d-zebra: #1a1d21; /* striped-row bg — one step off the base canvas    */
 
-  /* --- Text: label/muted/placeholder use grey-450; grey-500 is 3.79:1 here, under the AA floor. --- */
+  /* --- Text: label/muted/placeholder use grey-450, sized to clear 4.5:1 on the LIGHTEST tier
+         (--d-overlay, 4.76:1) and not just on the canvas; grey-500 is 3.79:1 there, under AA. --- */
   --color-text-heading: var(--color-grey-200); /* h1-h6, modal titles — brightest */
   --color-text-soft: var(--color-grey-200); /* feeds --color-select-text (OSelect trigger value) */
   --color-text-body: var(--color-grey-300); /* paragraphs, default body */
   --color-text-secondary: var(--color-grey-400); /* supporting text, descriptions */
-  --color-text-label: var(--color-grey-450); /* form labels, metadata — 5.65:1 on the canvas */
+  --color-text-label: var(--color-grey-450); /* form labels, metadata — 6.10:1 on the canvas */
   --color-text-muted: var(--color-grey-450); /* de-emphasized — AA-legible, unlike grey-500 */
   --color-text-disabled: var(--color-grey-600); /* dimmer than labels so disabled reads disabled */
   --color-text-placeholder: var(
@@ -160,9 +161,10 @@
   /* --- Borders (mapped — solid, clearly visible) --- */
   --color-border-default: var(--d-border);
   --color-border-strong: var(--d-border-strong);
-  /* Control edges. `--d-border-strong` (#6b6b6b) already clears ~3:1 against
-     the dark surfaces, so dark mode reuses it rather than inventing a value —
-     the light theme needs its own only because grey-400 falls short there. */
+  /* Control edges. `--d-border-strong` (#727982) clears 3:1 against EVERY dark surface —
+     4.08:1 on the canvas, 3.19:1 on the lightest tier (--d-overlay) — so dark mode reuses
+     it rather than inventing a value; the light theme needs its own only because grey-400
+     falls short there. */
   --color-border-control: var(--d-border-strong);
   /* Soft divider — one step quieter than border-default so row/section
        splits don't read as hard structural lines (but still visible). */
