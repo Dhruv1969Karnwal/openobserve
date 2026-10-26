@@ -1424,11 +1424,100 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     (config as any).isEnterprise = "false";
     (config as any).isCloud = "false";
 
+    // The query has to be in place BEFORE the mount: activeTab is initialised
+    // once, in setup, from `route.query.tab`. (Assigning it afterwards — which is
+    // what this test used to do — asserted nothing about the restore path.)
+    router.currentRoute.value.query = { tab: "anomalyDetection" } as any;
     const wrapper: any = await mountAlertList();
-    // Simulate URL query requesting anomalyDetection tab when feature is off
-    wrapper.vm.router.currentRoute.value.query = { tab: "anomalyDetection" } as any;
-    // The computed initialises activeTab to 'all' when the feature is disabled
-    expect(wrapper.vm.activeTab).not.toBe("anomalyDetection");
+
+    expect(wrapper.vm.activeTab).toBe("all");
+  });
+
+  /** Entitled mirror: with the feature on, the very same link opens that tab. */
+  it("restores the anomalyDetection tab from the URL when the feature is enabled", async () => {
+    (config as any).isEnterprise = "true";
+    (config as any).isCloud = "false";
+    (store.state as any).zoConfig.build_type = "enterprise";
+    (store.state as any).zoConfig.anomaly_detection_enabled = true;
+
+    router.currentRoute.value.query = { tab: "anomalyDetection" } as any;
+    const wrapper: any = await mountAlertList();
+
+    expect(wrapper.vm.activeTab).toBe("anomalyDetection");
+  });
+
+  /**
+   * F-101: the restore only ever refused `anomalyDetection`, so any other value
+   * was adopted as a tab. `?tab=incidents` (a branch whose toggle no longer
+   * exists) turned row filtering OFF with nothing lit, and garbage stuck in the
+   * URL — the `activeTab` watcher that re-writes `?tab=` fires on CHANGE only, and
+   * this page is keep-alive, so setup never ran again. Closed set now, exactly
+   * like resolveLogsVisualizeToggle / resolveTraceSearchMode.
+   */
+  it.each(["incidents", "all ", "ALL", "", "undefined-tab", "__proto__", "<script>"])(
+    "coerces the non-tab value %p in the URL to the all tab",
+    async (tab) => {
+      router.currentRoute.value.query = { tab } as any;
+      const wrapper: any = await mountAlertList();
+
+      expect(wrapper.vm.activeTab).toBe("all");
+      // Row filtering is back on: "all" is the branch that shows every alert.
+      expect(wrapper.vm.alertTabs.map((t: any) => t.value)).not.toContain(tab);
+    },
+  );
+
+  it.each([undefined, null, 0, true, {}, [], ["all", "scheduled"]])(
+    "coerces a non-string tab query shape (%#) to the all tab",
+    async (tab) => {
+      router.currentRoute.value.query = tab === undefined ? ({} as any) : ({ tab } as any);
+      const wrapper: any = await mountAlertList();
+
+      expect(wrapper.vm.activeTab).toBe("all");
+    },
+  );
+
+  /** Free tabs round-trip — the closed set is not a blanket reset to "all". */
+  it.each(["scheduled", "realTime", "composite"])(
+    "restores the %s tab from the URL",
+    async (tab) => {
+      router.currentRoute.value.query = { tab } as any;
+      const wrapper: any = await mountAlertList();
+
+      expect(wrapper.vm.activeTab).toBe(tab);
+    },
+  );
+
+  /**
+   * The coerced value has to reach the URL too (F-65's state/URL desync class), by
+   * REPLACE — a normalization must not add a history entry.
+   */
+  it("re-writes the URL with the coerced tab, with replace rather than push", async () => {
+    const replace = vi.spyOn(router, "replace").mockResolvedValue(undefined as any);
+    const push = vi.spyOn(router, "push").mockResolvedValue(undefined as any);
+    router.currentRoute.value.query = { tab: "incidents", org_identifier: "default" } as any;
+
+    const wrapper: any = await mountAlertList();
+    await wrapper.vm.$nextTick();
+
+    expect(replace).toHaveBeenCalledWith({
+      query: { org_identifier: "default", tab: "all" },
+    });
+    expect(push).not.toHaveBeenCalled();
+    replace.mockRestore();
+    push.mockRestore();
+  });
+
+  /** A valid deep link is left alone: no normalization hop, no extra history entry. */
+  it("does not touch the URL when the tab it restored is already canonical", async () => {
+    const replace = vi.spyOn(router, "replace").mockResolvedValue(undefined as any);
+    router.currentRoute.value.query = { tab: "scheduled" } as any;
+
+    const wrapper: any = await mountAlertList();
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.vm.activeTab).toBe("scheduled");
+    expect(replace).not.toHaveBeenCalled();
+    replace.mockRestore();
   });
 });
 

@@ -276,6 +276,7 @@ import { toast } from "@/lib/feedback/Toast/useToast";
 import type { ToastOptions } from "@/lib/feedback/Toast/OToast.types";
 import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
+import { resolveAlertInsightsTab, LOCKED_ALERT_INSIGHTS_TABS } from "@/utils/alerts/alertTabs";
 
 const router = useRouter();
 const route = useRoute();
@@ -289,7 +290,7 @@ const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 const insightsAccess = computed(() =>
   checkFeatureAccess("alertInsights", buildFeatureGateContext(store.state.zoConfig)),
 );
-const LOCKED_TAB_NAMES = ["frequency", "correlation"];
+const LOCKED_TAB_NAMES: string[] = [...LOCKED_ALERT_INSIGHTS_TABS];
 
 // Composable
 const {
@@ -736,12 +737,14 @@ onMounted(async () => {
   // Check if there's a tab in query params. Defense in depth: a locked tab
   // is disabled in the UI, but a direct link with ?tab=frequency/correlation
   // shouldn't be able to land on it while locked.
-  const queryTab = route.query.tab as string | undefined;
-  const isLockedTab =
-    (queryTab === "frequency" || queryTab === "correlation") && !insightsAccess.value.allowed;
-  if (queryTab && !isLockedTab) {
-    currentTab.value = queryTab;
-  }
+  //
+  // F-101: the restore is a CLOSED SET, not just the locked-tab check — anything
+  // that is not one of the four rendered tabs used to become `currentTab`, which
+  // matched no tab in the dashboard config and left the whole page empty under a
+  // URL that looked like a working deep link.
+  currentTab.value = resolveAlertInsightsTab(route.query.tab, {
+    insightsAllowed: insightsAccess.value.allowed,
+  });
 
   // Fetch alerts list once on mount
   await fetchAlerts();

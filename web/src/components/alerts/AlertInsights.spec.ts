@@ -20,9 +20,15 @@ import store from "@/test/unit/helpers/store";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
 
 const mockPush = vi.fn();
+// A SHARED route object so a spec can put a `?tab=` in place BEFORE the mount —
+// the restore under test happens once, in `onMounted`.
+const mockRoute: { params: Record<string, any>; query: Record<string, any> } = {
+  params: {},
+  query: {},
+};
 vi.mock("vue-router", () => ({
   useRouter: () => ({ push: mockPush, back: vi.fn() }),
-  useRoute: () => ({ params: {}, query: {} }),
+  useRoute: () => mockRoute,
 }));
 
 vi.mock("@/services/alerts", async (importOriginal) => {
@@ -148,6 +154,74 @@ describe("AlertInsights - rendering", () => {
     expect(w.find('[data-test="tab-frequency"]').exists()).toBe(false);
     expect(w.find('[data-test="tab-correlation"]').exists()).toBe(false);
   });
+
+  /**
+   * F-101: the `?tab=` restore used to accept any string the URL carried (it only
+   * refused the two locked tabs), so a deep link like `?tab=incidents` became
+   * `currentTab`, matched no tab in the insights config, and `loadDashboard` bailed
+   * into its no-match branch — an empty insights page under a URL that looked like
+   * a working deep link. It is a closed set now, like logs' panel toggle and
+   * traces' `?tab=`.
+   */
+  it.each(["incidents", "overview ", "OVERVIEW", "", "🙃", "__proto__", "toString"])(
+    "restores the overview tab instead of adopting the non-tab value %p",
+    async (tab) => {
+      mockRoute.query = { tab };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe("overview");
+      // The no-match branch of loadDashboard left EVERY tab in the payload.
+      expect((w.vm as any).dashboardData.tabs.map((t: any) => t.tabId)).toEqual(["overview"]);
+    },
+  );
+
+  it.each([undefined, null, 0, true, {}, [], ["overview"]])(
+    "restores the overview tab for a non-string query shape (%#)",
+    async (tab) => {
+      mockRoute.query = tab === undefined ? {} : { tab };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe("overview");
+    },
+  );
+
+  /** Free tabs round-trip — the closed set is not a blanket reset to overview. */
+  it.each(["overview", "quality"])("restores the free tab %s from the URL", async (tab) => {
+    mockRoute.query = { tab };
+    const w = await mountComp();
+    await flushPromises();
+
+    expect((w.vm as any).currentTab).toBe(tab);
+  });
+
+  /** Locked-tab defense in depth, now expressed by the same resolver. */
+  it.each(["frequency", "correlation"])(
+    "refuses the locked tab %s from the URL on the shipped build",
+    async (tab) => {
+      mockRoute.query = { tab };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe("overview");
+    },
+  );
+
+  /** Entitled mirror: the same links DO land on the paid tabs when unlocked. */
+  it.each(["frequency", "correlation"])(
+    "restores the paid tab %s from the URL when the feature is entitled",
+    async (tab) => {
+      const config = await import("@/aws-exports");
+      (config.default as any).isEnterprise = "true";
+      mockRoute.query = { tab };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe(tab);
+      (config.default as any).isEnterprise = "false";
+    },
+  );
 
   it("keeps the gated tab selected nowhere and opens no dialog when it is forced", async () => {
     const w = await mountComp();

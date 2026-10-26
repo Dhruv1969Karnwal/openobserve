@@ -1006,6 +1006,7 @@ import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import analytics from "@/services/product_analytics";
 import { useAnomalyLibraryAccess } from "@/composables/alerts/useAlertLibrary";
+import { resolveAlertListTab } from "@/utils/alerts/alertTabs";
 import ImportAlert from "@/components/alerts/ImportAlert.vue";
 import { getImageURL, getUUID, verifyOrganizationStatus } from "@/utils/zincutils";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -1313,10 +1314,25 @@ export default defineComponent({
 
     // Initialize activeTab from URL query parameter, default to "all".
     // Prevent forcing anomalyDetection tab when the feature is not available.
-    const rawTab = (router.currentRoute.value.query.tab as string) || "all";
+    // F-101: the restore is a CLOSED SET now, not a one-value special case —
+    // `?tab=incidents` (a retired tab) or any garbage used to be adopted
+    // verbatim, which switched row filtering off with no tab lit and then got
+    // re-persisted by the `activeTab` watcher below.
+    const rawTab = router.currentRoute.value.query.tab;
     const activeTab = ref(
-      rawTab === "anomalyDetection" && !isAnomalyDetectionEnabled.value ? "all" : rawTab,
+      resolveAlertListTab(rawTab, {
+        anomalyDetectionEnabled: isAnomalyDetectionEnabled.value,
+      }),
     );
+    if (rawTab !== undefined && rawTab !== activeTab.value) {
+      // The coercion has to reach the URL as well, or the garbage param sticks
+      // (that watcher fires on CHANGE only, and this component is keep-alive, so
+      // setup never re-runs on revisit). `replace`, never `push`: a normalization
+      // must not add a history entry the Back button has to step over twice.
+      void router.replace({
+        query: { ...router.currentRoute.value.query, tab: activeTab.value },
+      });
+    }
 
     const filteredResults: Ref<any[]> = ref([]);
 
