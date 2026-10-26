@@ -161,6 +161,29 @@ const alertCalibrationRouteGuard = (to: any, from: any, next: any) => {
   routeGuard(to, from, next);
 };
 
+/**
+ * The four enterprise/cloud-only alert surfaces that bounce to the Alerts list —
+ * Alert Sources, the two anomaly-detection editors and the semantic-group
+ * import. They carried byte-identical inline guards, each reading
+ * `(window as any).store`, which nothing in the app ever assigns (see the
+ * Database Monitoring note at the top of this file): `isOss` was a constant
+ * `false`, so the `/config` build_type half of the condition was inert and an
+ * enterprise UI pointed at an OSS backend rendered the paid editor page and ate
+ * 403s on every call. One helper now, reading the IMPORTED store singleton the
+ * way `downtimesRouteGuard` and `alertCalibrationRouteGuard` already do.
+ *
+ * `=== "opensource"`, not falsy: a cold load with `/config` still in flight must
+ * not bounce a real entitled user's bookmark — same stance as its neighbours.
+ */
+const alertSurfaceRouteGuard = (to: any, from: any, next: any) => {
+  const isOss = store?.state?.zoConfig?.build_type === "opensource";
+  if (isOss || (config.isEnterprise !== "true" && config.isCloud !== "true")) {
+    next({ name: "alertList", query: { org_identifier: to.query?.org_identifier } });
+    return;
+  }
+  routeGuard(to, from, next);
+};
+
 // `=== false`, as for Downtimes: a cold load with `/config` still in flight must not bounce.
 const profilesRouteGuard = (to: any, from: any, next: any) => {
   if (store.state.zoConfig?.profiling_enabled === false) {
@@ -1005,15 +1028,7 @@ const useRoutes = () => {
       meta: {
         titleKey: "alert_sources.header",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        const store = (window as any).store;
-        const isOss = store?.state?.zoConfig?.build_type === "opensource";
-        if (isOss || (config.isEnterprise !== "true" && config.isCloud !== "true")) {
-          next({ name: "alertList", query: { org_identifier: to.query.org_identifier } });
-          return;
-        }
-        routeGuard(to, from, next);
-      },
+      beforeEnter: alertSurfaceRouteGuard,
     },
     {
       path: "alert-calibration",
@@ -1136,15 +1151,7 @@ const useRoutes = () => {
       meta: {
         titleKey: "alerts.addAnomalyMode",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        const store = (window as any).store;
-        const isOss = store?.state?.zoConfig?.build_type === "opensource";
-        if (isOss || (config.isEnterprise !== "true" && config.isCloud !== "true")) {
-          next({ name: "alertList", query: { org_identifier: to.query.org_identifier } });
-          return;
-        }
-        routeGuard(to, from, next);
-      },
+      beforeEnter: alertSurfaceRouteGuard,
     },
     {
       path: "alerts/anomaly/edit/:anomaly_id",
@@ -1153,15 +1160,7 @@ const useRoutes = () => {
       meta: {
         titleKey: "alerts.editAnomalyMode",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        const store = (window as any).store;
-        const isOss = store?.state?.zoConfig?.build_type === "opensource";
-        if (isOss || (config.isEnterprise !== "true" && config.isCloud !== "true")) {
-          next({ name: "alertList", query: { org_identifier: to.query.org_identifier } });
-          return;
-        }
-        routeGuard(to, from, next);
-      },
+      beforeEnter: alertSurfaceRouteGuard,
     },
     {
       path: "alerts/history",
@@ -1193,15 +1192,7 @@ const useRoutes = () => {
       meta: {
         titleKey: "correlation.importSemanticGroups.title",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        const store = (window as any).store;
-        const isOss = store?.state?.zoConfig?.build_type === "opensource";
-        if (isOss || (config.isEnterprise !== "true" && config.isCloud !== "true")) {
-          next({ name: "alertList", query: { org_identifier: to.query.org_identifier } });
-          return;
-        }
-        routeGuard(to, from, next);
-      },
+      beforeEnter: alertSurfaceRouteGuard,
     },
     {
       path: "ai/shared/:token",

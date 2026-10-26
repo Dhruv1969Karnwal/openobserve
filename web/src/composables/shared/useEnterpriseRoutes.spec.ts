@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import useEnterpriseRoutes from "./useEnterpriseRoutes";
 import enLocale from "@/locales/languages/en-US.json";
 import store from "@/stores";
@@ -700,6 +700,104 @@ describe("useEnterpriseRoutes.ts", () => {
       expect(String(access.message)).toBe("");
       // The explanation this policy can no longer show still ships, for whoever flips the constant.
       expect(enMessage("enterpriseFeature.rbacDisabled")).toContain("RBAC is turned off");
+    });
+  });
+
+  // ==========================================================================
+  // F-99 — the serviceAccounts guard read a `window.store` nothing assigns
+  // ==========================================================================
+  /**
+   * `store?.state?.zoConfig?.service_account_enabled ?? true` on a permanently
+   * `undefined` read made this guard fail OPEN: an org that turns service
+   * accounts off keeps hiding the IAM tile — which reads the REAL store — while a
+   * bookmarked `/iam/serviceAccounts` still rendered the page. It now reads the
+   * store singleton this module already imports for the synthetics/workflow
+   * guards, and fails CLOSED when there is no config state to read at all.
+   */
+  describe("serviceAccounts guard reads the real store", () => {
+    let previousZoConfig: any;
+
+    beforeEach(() => {
+      previousZoConfig = store.state.zoConfig;
+    });
+
+    afterEach(() => {
+      store.state.zoConfig = previousZoConfig;
+    });
+
+    const serviceAccountsRoute = () => {
+      const iamRoute = useEnterpriseRoutes().find((route: any) => route.name === "iam");
+      return iamRoute.children.find((child: any) => child.name === "serviceAccounts");
+    };
+
+    /** The cell the dead read could never reach: the flag-off bounce is alive. */
+    it("bounces to users when the loaded /config turns service accounts off", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      store.state.zoConfig = { ...store.state.zoConfig, service_account_enabled: false };
+      const to = { query: { org_identifier: "ox" } };
+      const next = vi.fn();
+
+      serviceAccountsRoute().beforeEnter(to, {}, next);
+
+      expect(next).toHaveBeenCalledWith({ name: "users", query: { org_identifier: "ox" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /** Bidirectional mirror: the same config with the flag on reaches the page. */
+    it("lets the page through when the loaded /config keeps service accounts on", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      store.state.zoConfig = { ...store.state.zoConfig, service_account_enabled: true };
+      const to = { query: { org_identifier: "ox" } };
+      const next = vi.fn();
+
+      serviceAccountsRoute().beforeEnter(to, {}, next);
+
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+      expect(next).not.toHaveBeenCalledWith(expect.objectContaining({ name: "users" }));
+    });
+
+    /** Fail-closed negative: "no state to read" is not evidence the flag is on. */
+    it("denies the page when the store carries no zoConfig at all", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      store.state.zoConfig = null as any;
+      const to = { query: { org_identifier: "ox" } };
+      const next = vi.fn();
+
+      serviceAccountsRoute().beforeEnter(to, {}, next);
+
+      expect(next).toHaveBeenCalledWith({ name: "users", query: { org_identifier: "ox" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Cold-load counterpart, and the one case the old guard got right by
+     * accident: an un-awaited `/config` is `{}`, and both `/config` itself and
+     * `useNavGateContext` read an absent flag as on — bouncing here would break a
+     * real user's refresh of a page they are entitled to.
+     */
+    it("lets an entitled cold load through while /config is still unloaded", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      store.state.zoConfig = {};
+      const to = { query: { org_identifier: "ox" } };
+      const next = vi.fn();
+
+      serviceAccountsRoute().beforeEnter(to, {}, next);
+
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+
+    /** The read is the store singleton, not a global: deleting one changes nothing. */
+    it("ignores a window.store global entirely", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      (window as any).store = { state: { zoConfig: { service_account_enabled: true } } };
+      store.state.zoConfig = { service_account_enabled: false };
+      const next = vi.fn();
+
+      serviceAccountsRoute().beforeEnter({ query: {} }, {}, next);
+
+      expect(next).toHaveBeenCalledWith({ name: "users", query: {} });
+      expect(routeGuard).not.toHaveBeenCalled();
+      delete (window as any).store;
     });
   });
 

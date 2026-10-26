@@ -1525,7 +1525,37 @@ describe("useRoutes (router.ts)", () => {
   // =========================================================================
   // 14. homeChildRoutes — anomaly detection guard logic
   // =========================================================================
-  describe("homeChildRoutes — anomaly detection guard", () => {
+  /**
+   * The four paid alert surfaces (`alertSources`, `addAnomalyDetection`,
+   * `editAnomalyDetection`, `importSemanticGroups`) shared one inline guard that
+   * read `(window as any).store` — an assignment nothing in this app ever makes —
+   * so their `build_type === "opensource"` clause was a constant `false` and an
+   * enterprise UI pointed at an OSS backend rendered the paid editor page while
+   * every call 403'd. F-99 routes them through one helper reading the store
+   * singleton the module imports, the way `downtimesRouteGuard` already did.
+   *
+   * These specs used to fake `window.store`, which pinned the dead read instead
+   * of the behavior: passing while the production guard could never see a flag.
+   * They now drive the SAME singleton a browser has at navigation time.
+   */
+  describe("homeChildRoutes — alert-surface guards read the real store (F-99)", () => {
+    const ALERT_SURFACE_ROUTES = [
+      "alertSources",
+      "addAnomalyDetection",
+      "editAnomalyDetection",
+      "importSemanticGroups",
+    ] as const;
+
+    let previousZoConfig: any;
+
+    beforeEach(() => {
+      previousZoConfig = store.state.zoConfig;
+    });
+
+    afterEach(() => {
+      store.state.zoConfig = previousZoConfig;
+    });
+
     it("should include addAnomalyDetection route", () => {
       const { homeChildRoutes } = useRoutes();
       const route = findRoute(homeChildRoutes, "addAnomalyDetection");
@@ -1550,140 +1580,106 @@ describe("useRoutes (router.ts)", () => {
       expect(route.path).toBe("alerts/anomaly/edit/:anomaly_id");
     });
 
-    it("should redirect addAnomalyDetection to alertList when build_type is opensource", () => {
-      (window as any).store = {
-        state: { zoConfig: { build_type: "opensource" } },
-      };
+    /**
+     * The cell the dead read could never reach: an entitled BUILD pointing at an
+     * OSS BACKEND (both Cloud and Enterprise flags on, so only the `/config`
+     * clause can save the page). Bounce carries the org.
+     */
+    it.each(ALERT_SURFACE_ROUTES)(
+      "bounces %s when the loaded /config reports an OSS backend, even on an entitled build",
+      (name) => {
+        config.isCloud = "true";
+        config.isEnterprise = "true";
+        store.state.zoConfig = { build_type: "opensource" };
+        const { homeChildRoutes } = useRoutes();
+        const next = vi.fn();
+        findRoute(homeChildRoutes, name).beforeEnter(
+          { query: { org_identifier: "test_org" } },
+          {},
+          next,
+        );
+        expect(next).toHaveBeenCalledWith({
+          name: "alertList",
+          query: { org_identifier: "test_org" },
+        });
+        expect(routeGuard).not.toHaveBeenCalled();
+      },
+    );
 
-      config.isCloud = "true";
-      config.isEnterprise = "true";
-
+    it.each(ALERT_SURFACE_ROUTES)("bounces %s on the shipped OSS build", (name) => {
       const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "addAnomalyDetection");
-
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "test_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith({
+      const next = vi.fn();
+      findRoute(homeChildRoutes, name).beforeEnter(
+        { query: { org_identifier: "test_org" } },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({
         name: "alertList",
         query: { org_identifier: "test_org" },
       });
-
-      delete (window as any).store;
+      expect(routeGuard).not.toHaveBeenCalled();
     });
 
-    it("should redirect addAnomalyDetection to alertList when not enterprise and not cloud", () => {
-      (window as any).store = {
-        state: { zoConfig: { build_type: "enterprise" } },
-      };
+    it.each(ALERT_SURFACE_ROUTES)(
+      "lets %s through on an enterprise build with an enterprise backend",
+      async (name) => {
+        const { routeGuard } = await import("@/utils/zincutils");
+        config.isCloud = "false";
+        config.isEnterprise = "true";
+        store.state.zoConfig = { build_type: "enterprise" };
+        const to = { query: { org_identifier: "test_org" } };
+        const next = vi.fn();
+        const { homeChildRoutes } = useRoutes();
+        findRoute(homeChildRoutes, name).beforeEnter(to, {}, next);
+        expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+        expect(next).not.toHaveBeenCalledWith(expect.objectContaining({ name: "alertList" }));
+      },
+    );
 
-      config.isCloud = "false";
-      config.isEnterprise = "false";
+    it.each(ALERT_SURFACE_ROUTES)(
+      "lets %s through on a cloud build with a cloud backend",
+      async (name) => {
+        const { routeGuard } = await import("@/utils/zincutils");
+        config.isCloud = "true";
+        config.isEnterprise = "false";
+        store.state.zoConfig = { build_type: "cloud" };
+        const to = { query: { org_identifier: "test_org" } };
+        const next = vi.fn();
+        const { homeChildRoutes } = useRoutes();
+        findRoute(homeChildRoutes, name).beforeEnter(to, {}, next);
+        expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+      },
+    );
 
-      const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "addAnomalyDetection");
+    /** Cold load: `/config` still in flight (`{}`) is not "opensource". */
+    it.each(ALERT_SURFACE_ROUTES)(
+      "lets %s through on an entitled cold load while /config is still unloaded",
+      async (name) => {
+        const { routeGuard } = await import("@/utils/zincutils");
+        config.isEnterprise = "true";
+        store.state.zoConfig = {};
+        const to = { query: { org_identifier: "test_org" } };
+        const next = vi.fn();
+        const { homeChildRoutes } = useRoutes();
+        findRoute(homeChildRoutes, name).beforeEnter(to, {}, next);
+        expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+      },
+    );
 
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "test_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith({
-        name: "alertList",
-        query: { org_identifier: "test_org" },
-      });
-
+    /** The guards no longer touch `window.store` — nothing assigns it. */
+    it("does not depend on a window.store global", () => {
       delete (window as any).store;
-    });
-
-    it("should call routeGuard for addAnomalyDetection when enterprise and not OSS", async () => {
-      const { routeGuard } = await import("@/utils/zincutils");
-
-      (window as any).store = {
-        state: { zoConfig: { build_type: "enterprise" } },
-      };
-
-      config.isCloud = "false";
-      config.isEnterprise = "true";
-
-      const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "addAnomalyDetection");
-
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "test_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(routeGuard).toHaveBeenCalled();
-
-      delete (window as any).store;
-    });
-
-    it("should call routeGuard for addAnomalyDetection when cloud and not OSS", async () => {
-      const { routeGuard } = await import("@/utils/zincutils");
-
-      (window as any).store = {
-        state: { zoConfig: { build_type: "cloud" } },
-      };
-
-      config.isCloud = "true";
-      config.isEnterprise = "false";
-
-      const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "addAnomalyDetection");
-
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "test_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(routeGuard).toHaveBeenCalled();
-
-      delete (window as any).store;
-    });
-
-    it("should redirect editAnomalyDetection to alertList when build_type is opensource", () => {
-      (window as any).store = {
-        state: { zoConfig: { build_type: "opensource" } },
-      };
-
       config.isCloud = "true";
       config.isEnterprise = "true";
-
+      store.state.zoConfig = { build_type: "opensource" };
       const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "editAnomalyDetection");
-
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "my_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith({
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "alertSources").beforeEnter({ query: {} }, {}, next);
+      expect(next).toHaveBeenCalledWith({
         name: "alertList",
-        query: { org_identifier: "my_org" },
+        query: { org_identifier: undefined },
       });
-
-      delete (window as any).store;
-    });
-
-    it("should redirect editAnomalyDetection to alertList when not enterprise and not cloud", () => {
-      (window as any).store = {
-        state: { zoConfig: { build_type: "enterprise" } },
-      };
-
-      config.isCloud = "false";
-      config.isEnterprise = "false";
-
-      const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "editAnomalyDetection");
-
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "my_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith({
-        name: "alertList",
-        query: { org_identifier: "my_org" },
-      });
-
-      delete (window as any).store;
     });
   });
 

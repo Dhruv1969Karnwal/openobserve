@@ -162,10 +162,24 @@ const useEnterpriseRoutes = () => {
           },
           component: ServiceAccountsList,
           beforeEnter(to: any, from: any, next: any) {
-            // Check if service accounts are enabled
-            // Note: Using window.store here because useStore() doesn't work in route guards
-            const store = (window as any).store;
-            const serviceAccountEnabled = store?.state?.zoConfig?.service_account_enabled ?? true;
+            // Service accounts ride the backend `/config` flag
+            // `service_account_enabled`. The `(window as any).store` read here was
+            // permanently `undefined` — nothing ever assigns `window.store` — so
+            // `?? true` made this guard fail OPEN: an org that turned service
+            // accounts off kept hiding the IAM tile while a bookmarked
+            // /iam/serviceAccounts still rendered the page.
+            //
+            // It reads the store this module already imports (the same fix the
+            // Database Monitoring gate documents in router.ts) and FAILS CLOSED:
+            // with no `zoConfig` to read at all there is no evidence the flag is
+            // on, so the page is denied rather than waved through. "Loaded but
+            // silent" (`{}`, or a config without the key) stays enabled — the
+            // `/config` default and `useNavGateContext` both treat absent as on,
+            // and an un-awaited cold `/config` must not bounce a real user.
+            const zoConfig = store?.state?.zoConfig;
+            const serviceAccountEnabled = zoConfig
+              ? (zoConfig.service_account_enabled ?? true)
+              : false;
 
             if (!serviceAccountEnabled) {
               // Redirect to users page if service accounts are disabled
