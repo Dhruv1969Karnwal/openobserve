@@ -144,6 +144,7 @@ import EmptyStateIngestionCard from "@/lib/core/EmptyState/EmptyStateIngestionCa
 import EmptyStateIngestionChip from "@/lib/core/EmptyState/EmptyStateIngestionChip.vue";
 import { useAiIcon } from "@/composables/useAiIcon";
 import { getImageURL } from "@/utils/zincutils";
+import DOMPurify from "dompurify";
 
 const props = defineProps<{
   aiEnabled: boolean;
@@ -177,7 +178,7 @@ const shell = computed(() =>
 );
 
 // Uses v-html — fully i18n-controlled, no user input.
-const description = computed(() => t("logs.noData.description"));
+const description = computed(() => DOMPurify.sanitize(t("logs.noData.description")));
 
 const go = (routeName: string) => {
   router.push({ name: routeName, query: orgQuery.value });

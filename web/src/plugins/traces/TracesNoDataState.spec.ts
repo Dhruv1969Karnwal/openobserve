@@ -84,4 +84,26 @@ describe("TracesNoDataState", () => {
     expect(wrapper.find('[data-test="traces-no-data-kubernetes-btn"]').exists()).toBe(true);
     expect(wrapper.find('[data-test="traces-no-data-ask-ai-btn"]').exists()).toBe(true);
   });
+
+  it("strips markup out of the i18n description before it reaches v-html", () => {
+    const locale = "en-us";
+    const original = i18n.global.getLocaleMessage(locale);
+    i18n.global.mergeLocaleMessage(locale, {
+      traces: {
+        noData: {
+          description:
+            'Waiting <img src=x onerror="window.__probe = 1"><script>window.__probe = 1</script>',
+        },
+      },
+    } as never);
+    try {
+      mountState();
+      expect(wrapper.text()).toContain("Waiting");
+      expect(html()).not.toMatch(/onerror/i);
+      expect(wrapper.find("script").exists()).toBe(false);
+      expect((window as unknown as Record<string, unknown>).__probe).toBeUndefined();
+    } finally {
+      i18n.global.setLocaleMessage(locale, original as never);
+    }
+  });
 });

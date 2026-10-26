@@ -119,6 +119,7 @@ import EmptyStateIngestionCard from "@/lib/core/EmptyState/EmptyStateIngestionCa
 import EmptyStateIngestionChip from "@/lib/core/EmptyState/EmptyStateIngestionChip.vue";
 import { useAiIcon } from "@/composables/useAiIcon";
 import { getImageURL } from "@/utils/zincutils";
+import DOMPurify from "dompurify";
 
 const props = defineProps<{
   aiEnabled: boolean;
@@ -148,7 +149,7 @@ const shell = computed(() =>
     : { size: "hero" as const, illustration: "trace" as const },
 );
 
-const description = computed(() => t("traces.noData.description"));
+const description = computed(() => DOMPurify.sanitize(t("traces.noData.description")));
 
 const go = (routeName: string) => {
   router.push({ name: routeName, query: orgQuery.value });
