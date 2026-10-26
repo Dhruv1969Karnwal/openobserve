@@ -567,9 +567,9 @@ describe("ImportFunction", () => {
       expect(wrapper.vm.bodyLanguage(0)).toBe("vrl");
     });
 
-    // OSS builds cannot run JavaScript, so the option is shown locked (not
-    // hidden) but still selectable — picking it opens the upgrade dialog
-    // instead of trading this validation error for a server-side one.
+    // OSS builds cannot run JavaScript, so the option is absent under the shipped
+    // "hide" policy (offering a dead option only moves the error server-side); under
+    // "lock" it is listed and picking it opens the upgrade dialog instead of selecting.
     it("offers no JavaScript option on OSS under the shipped hide policy", async () => {
       setPaidFeaturePolicy("hide");
       (config as any).isEnterprise = "false";

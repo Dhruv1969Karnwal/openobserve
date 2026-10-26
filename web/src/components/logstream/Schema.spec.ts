@@ -1461,10 +1461,11 @@ describe("Schema Component Tests", () => {
     const originalIsEnterprise = (config as any).isEnterprise;
 
     beforeEach(async () => {
-      // The pattern-association drawer's trigger is shown locked (not
-      // hidden) in builds that don't unlock it — `columns` reads this once
-      // at setup, so it must be set before mount, not inside an individual
-      // `it`. These tests exercise opening the drawer itself.
+      // The pattern-association drawer's trigger is absent under the shipped "hide"
+      // policy in builds that don't unlock it; under "lock" it shows and its click
+      // opens the upgrade dialog. `columns` reads this once at setup, so it must be
+      // set before mount, not inside an individual `it`. These tests exercise opening
+      // the drawer itself.
       (config as any).isEnterprise = "true";
       w = mount(LogStream, {
         props: buildProps(true),
