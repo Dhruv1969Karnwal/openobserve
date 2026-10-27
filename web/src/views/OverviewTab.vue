@@ -247,7 +247,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 }}</span>
                 <span
                   class="text-text-body text-sm font-medium"
-                  :class="svc.errorFlag ? 'text-error-600' : ''"
+                  :class="svc.errorFlag ? 'text-status-error-text' : ''"
                 >
                   {{ svc.error_rate != null ? svc.error_rate.toFixed(1) + "%" : "—" }}
                 </span>
@@ -258,7 +258,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 }}</span>
                 <span
                   class="text-text-body text-sm font-medium"
-                  :class="svc.latencyFlag ? 'text-warning-700' : ''"
+                  :class="svc.latencyFlag ? 'text-status-warning-text' : ''"
                 >
                   {{ svc.latencyMultiplier ? raw(svc.latencyMultiplier + "x") : raw("—") }}
                 </span>

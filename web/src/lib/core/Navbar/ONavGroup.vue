@@ -736,7 +736,7 @@ function onChildMouseenter(event: MouseEvent) {
                 name="lock"
                 size="xs"
                 class="ms-auto shrink-0"
-                :class="child.locked ? 'text-warning-600' : 'text-text-secondary'"
+                :class="child.locked ? 'text-status-warning-text' : 'text-text-secondary'"
                 :data-test="`${childDataTest(child)}-lock`"
                 aria-hidden="true"
               />
@@ -787,7 +787,7 @@ function onChildMouseenter(event: MouseEvent) {
               name="lock"
               size="xs"
               class="ms-auto shrink-0"
-              :class="block.child.locked ? 'text-warning-600' : 'text-text-secondary'"
+              :class="block.child.locked ? 'text-status-warning-text' : 'text-text-secondary'"
               :data-test="`${childDataTest(block.child)}-lock`"
               aria-hidden="true"
             />
@@ -897,7 +897,7 @@ function onChildMouseenter(event: MouseEvent) {
                   name="lock"
                   size="xs"
                   class="ms-auto shrink-0"
-                  :class="child.locked ? 'text-warning-600' : 'text-text-secondary'"
+                  :class="child.locked ? 'text-status-warning-text' : 'text-text-secondary'"
                   :data-test="`${childDataTest(child)}-lock`"
                   aria-hidden="true"
                 />
@@ -953,7 +953,7 @@ function onChildMouseenter(event: MouseEvent) {
                 name="lock"
                 size="xs"
                 class="ms-auto shrink-0"
-                :class="block.child.locked ? 'text-warning-600' : 'text-text-secondary'"
+                :class="block.child.locked ? 'text-status-warning-text' : 'text-text-secondary'"
                 :data-test="`${childDataTest(block.child)}-lock`"
                 aria-hidden="true"
               />

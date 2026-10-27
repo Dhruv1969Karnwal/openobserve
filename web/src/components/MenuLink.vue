@@ -40,7 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             v-if="locked"
             class="bg-surface-base absolute -top-1 -right-1 z-1 flex h-3.5 w-3.5 items-center justify-center rounded-full"
           >
-            <OIcon name="lock" size="xs" class="text-warning-600" />
+            <OIcon name="lock" size="xs" class="text-status-warning-text" />
           </div>
           <div
             v-if="badge && badge > 0"

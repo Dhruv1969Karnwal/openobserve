@@ -135,4 +135,18 @@ describe("DbmInsightStrip", () => {
       );
     });
   });
+
+  /**
+   * The affordance rides the same held accent-active ground as the sentence, where
+   * --color-text-link measures 3.03:1 (light O2 Lens) / 3.77:1 (dark O2 Pulse); the
+   * per-theme picked accent label is the AA ink on that ground (5.24–12.19).
+   */
+  describe("the affordance ink survives the runtime accent ground", () => {
+    it("binds the picked accent label, never the ramp link token", () => {
+      const wrapper = mountStrip([insight()], "new-expensive");
+      const classes = wrapper.get('[data-test="dbm-insight-affordance"]').classes();
+      expect(classes).toContain("text-button-ghost-primary-text");
+      expect(classes).not.toContain("text-text-link");
+    });
+  });
 });

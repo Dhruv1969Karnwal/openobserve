@@ -594,9 +594,13 @@
   --color-datepicker-selected-fg: var(--color-grey-100);
   --color-datepicker-day-today-border: var(--color-primary-400);
   /* An outside-month day cell is still a clickable button — no disabled-state
-     exemption: it rides the raised placeholder tier above (grey-450,
-     4.76:1 on the popup) instead of the disabled step it folded to at 1.79:1. */
-  --color-datepicker-day-outside-text: var(--color-datepicker-placeholder);
+     exemption: it left the disabled step it folded to at 1.79:1 for the raised
+     placeholder tier (grey-450, 4.76:1 on the popup), and that tier is raised one
+     step further here because hovering the cell moves it onto the runtime accent
+     wash (--color-surface-accent-hover #2f343d), where grey-450 measures 4.25:1
+     and grey-400 holds 4.96:1 (5.56:1 on the popup, still a clear step under the
+     9.93:1 in-month day tier). */
+  --color-datepicker-day-outside-text: var(--color-grey-400);
   --color-datepicker-nav-hover-bg: var(--color-surface-accent-hover);
   --color-datepicker-day-range-bg: var(--color-primary-900);
   --color-datepicker-day-range-text: var(--color-primary-200);

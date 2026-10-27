@@ -239,7 +239,7 @@ const heightClasses = computed<string>(() => {
           :name="suffixIcon as any"
           size="xs"
           class="ms-auto shrink-0"
-          :class="suffixIcon === 'lock' ? 'text-warning-600' : ''"
+          :class="suffixIcon === 'lock' ? 'text-status-warning-text' : ''"
         />
       </template>
       <slot v-else />

@@ -58,6 +58,16 @@
  *     (FILL_INK_HOSTS), everything else on the popup/trigger tiers — so a fill
  *     token used as text, or a role dropping under AA on any predefined ramp,
  *     goes red naming the file.
+ *  5. THE RUNTIME-GROUND SWEEP (F-133). A ground whose paint is injected
+ *     (`--color-primary-*` tints and fills, the runtime washes under table rows,
+ *     the accent chip/selection tiers) moves every text utility drawn on it, so
+ *     each enumerated pair is measured under all twelve scopes, translucent
+ *     grounds are composited before the ratio is taken, and the accent-as-text
+ *     roles whose sheet step is a ramp shade are locked twice over: the injected
+ *     ink must clear AA on its real ground, and the sheet shade must still be
+ *     the failure that justifies the pick (ACCENT_TINT_PICKS). What cannot be
+ *     fixed without a palette-owner decision is booked number-locked in
+ *     RUNTIME_GROUND_RESIDUALS, next to the button-label ledger.
  */
 
 import { readFileSync } from "node:fs";
@@ -69,7 +79,14 @@ import { describe, expect, it } from "vitest";
 import { PREDEFINED_THEMES } from "@/constants/themes";
 import { generatePrimaryPalette, libraryForegroundTokens } from "@/utils/theme";
 
-import { contrastRatio, relativeLuminance, resolveColor, resolveTokens } from "./colorMath";
+import {
+  composite,
+  contrastRatio,
+  parseColor,
+  relativeLuminance,
+  resolveColor,
+  resolveTokens,
+} from "./colorMath";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -163,10 +180,27 @@ const hexOf = (name: string, scope: Map<string, string>): string => {
     .join("")}`;
 };
 
+/** What a translucent ground is composited over before it is measured. */
+const PAIR_UNDER: Record<string, string> = {
+  "--color-icon-chip-primary-bg": "--color-surface-base",
+};
+
+/** A token name, or a literal hex the gate computes itself (a sheet shade). */
+const side = (value: string, scope: Map<string, string>) =>
+  resolveColor(value, scope) ?? parseColor(value);
+
 const ratio = (fg: string, bg: string, scope: Map<string, string>): number => {
-  const fgColor = resolveColor(fg, scope);
-  const bgColor = resolveColor(bg, scope);
+  let fgColor = side(fg, scope);
+  let bgColor = side(bg, scope);
   if (!fgColor || !bgColor) throw new Error(`unresolved pair ${fg} on ${bg}`);
+  // WCAG needs composited pixels: a translucent ground (the dark icon-chip
+  // tints) is measured over the surface the component actually paints it on.
+  if (fgColor.a < 1 || bgColor.a < 1) {
+    const under = resolveColor(PAIR_UNDER[bg] ?? "--color-surface-base", scope);
+    if (!under) throw new Error(`no ground-under for ${bg}`);
+    if (bgColor.a < 1) bgColor = composite(bgColor, under);
+    if (fgColor.a < 1) fgColor = composite(fgColor, bgColor);
+  }
   return contrastRatio(fgColor, bgColor);
 };
 
@@ -299,6 +333,98 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-surface-accent-active",
     where: "applied-insight evidence sentence (DbmInsightStrip.vue)",
   },
+  // ── F-133: the rest of the runtime-accent-ground sweep. Every text/utility
+  // class binding that lands on an accent wash, a selected fill or a runtime
+  // tint, read out of the consumer source (see fixer notes for the matrix).
+  // The reported pair was `text-text-link` here (3.03 light O2 Lens / 3.77 dark
+  // O2 Pulse); the affordance now binds the per-theme accent label instead.
+  {
+    fg: "--color-button-ghost-primary-text",
+    bg: "--color-surface-accent-active",
+    where:
+      "applied-insight affordance + copied-org flash (DbmInsightStrip.vue, OrganizationSelector.vue)",
+  },
+  {
+    fg: "--color-button-ghost-primary-text",
+    bg: "--color-tabs-hover-bg",
+    where: "filters chip label while a filter count is live (QueryConfig.vue)",
+  },
+  {
+    fg: "--color-button-ghost-primary-text",
+    bg: "--color-button-ghost-primary-hover-bg",
+    where: "confirm-dialog action labels over the accent wash (O2AIConfirmDialog.vue)",
+  },
+  {
+    fg: "--color-text-secondary",
+    bg: "--color-surface-tint-accent",
+    where: "service-card metrics on the selected card wash (OverviewTab.vue)",
+  },
+  {
+    fg: "--color-text-heading",
+    bg: "--color-surface-tint-accent",
+    where: "service-card title on the selected card wash (OverviewTab.vue)",
+  },
+  {
+    fg: "--color-status-error-text",
+    bg: "--color-table-row-hover-bg",
+    where: "routed error-rate cell on a hovered row (OverviewTab.vue)",
+  },
+  {
+    fg: "--color-collapsible-icon-open",
+    bg: "--color-collapsible-trigger-hover-bg",
+    where: "open section label + icons under the cursor (OCollapsible.vue)",
+  },
+  {
+    fg: "--color-collapsible-icon-open",
+    bg: "--color-collapsible-trigger-open-bg",
+    where: "open section label, unhovered (OCollapsible.vue)",
+  },
+  {
+    fg: "--color-icon-chip-primary-text",
+    bg: "--color-icon-chip-primary-bg",
+    where: "primary icon chip glyph and step numbers (UsageTab.vue, HowItWorksDrawer.vue)",
+  },
+  {
+    fg: "--color-badge-primary-soft-text",
+    bg: "--color-badge-primary-soft-bg",
+    where: "OBadge primary tone (utils/dbm/tones.ts, alert_calibration/format.ts)",
+  },
+  {
+    fg: "--color-file-chip-text",
+    bg: "--color-file-chip-bg",
+    where: "chosen-file chip name (OFile.vue)",
+  },
+  {
+    fg: "--color-file-chip-remove",
+    bg: "--color-file-chip-bg",
+    where: "remove affordance inside the same chip (OFile.vue)",
+  },
+  {
+    fg: "--color-datepicker-day-range-text",
+    bg: "--color-datepicker-day-range-bg",
+    where: "day inside the dragged range band (ODateRangeCalendar.vue, ODateTimeRange.vue)",
+  },
+  {
+    fg: "--color-toggle-item-active-text",
+    bg: "--color-toggle-item-active-bg",
+    where: "on-state item label (OToggleGroupItem.vue)",
+  },
+  {
+    fg: "--color-datepicker-day-outside-text",
+    bg: "--color-datepicker-day-hover-bg",
+    where:
+      "outside-month day under the cursor (ODate.vue, ODateRangeCalendar.vue, ODateTimeRange.vue)",
+  },
+  {
+    fg: "--color-text-secondary",
+    bg: "--color-surface-accent-hover",
+    where: "locked-step body copy on the active checklist card (OnCallSetupChecklist.vue)",
+  },
+  {
+    fg: "--color-text-body",
+    bg: "--color-badge-primary-soft-bg",
+    where: "progress line inside the running-replay banner (BrowserJourney.vue)",
+  },
   // Active / selected fills.
   {
     fg: "--color-checkbox-checked-fg",
@@ -428,6 +554,44 @@ const NON_TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-datepicker-popup-bg",
     where: "the active step-dot pill and segment underline drawn with it (OTime.vue)",
   },
+  // Icons carry a state, so they ride the 3:1 (SC 1.4.11) bar rather than the
+  // text bar — measured here so a runtime ground can never move them silently.
+  {
+    fg: "--color-text-secondary",
+    bg: "--color-select-item-selected-bg",
+    where: "paywall/copy glyph inside a selected row (ONavGroup.vue, OrganizationSelector.vue)",
+  },
+  {
+    fg: "--color-status-warning-text",
+    bg: "--color-select-item-selected-bg",
+    where: "lock glyph on a selected nav item (ONavGroup.vue)",
+  },
+  {
+    fg: "--color-status-warning-text",
+    bg: "--color-tabs-active-bg",
+    where: "lock glyph on the active rail item (MenuLink.vue, OTab.vue)",
+  },
+  {
+    fg: "--color-collapsible-open-accent",
+    bg: "--color-collapsible-trigger-hover-bg",
+    where: "the leading edge an open section paints (OCollapsible.vue)",
+  },
+  {
+    fg: "--color-accent",
+    bg: "--color-tabs-hover-bg",
+    where:
+      "hovered section-hub tile glyph and card chevrons (SectionHub.vue, QuickStartCard.vue, OverviewTab.vue)",
+  },
+  {
+    fg: "--color-accent",
+    bg: "--color-tabs-active-bg",
+    where: "chevron over an active empty-state tile (EmptyStateActionCard.vue)",
+  },
+  {
+    fg: "--color-accent",
+    bg: "--color-badge-primary-soft-bg",
+    where: "spinner inside the running-replay banner (BrowserJourney.vue)",
+  },
 ];
 
 const TEXT_MIN = 4.5;
@@ -490,6 +654,140 @@ const BUTTON_LABEL_RESIDUALS: Record<string, { at: number; note: string }> = {
 };
 
 const BUTTON_STATE_NAMES = ["rest", "hover", "active"] as const;
+
+/**
+ * F-133 — the accent-as-text roles whose SHEET value is a primary-ramp step and
+ * whose ground is a runtime accent tint. Each entry names the ground the consumer
+ * really paints it on and the themes where the sheet step is under AA there:
+ * the pick (`libraryForegroundTokens`) is only justified while those numbers
+ * hold, so this ledger is bidirectional like the others — a theme that stops
+ * failing must be deleted from `booked`, a new one must be added, and a role
+ * whose sheet step no longer names a primary shade fails the lookup outright.
+ */
+const ACCENT_TINT_PICKS: {
+  fg: string;
+  host: string;
+  where: string;
+  booked: Record<string, string>;
+}[] = [
+  {
+    fg: "--color-collapsible-icon-open",
+    host: "--color-collapsible-trigger-hover-bg",
+    where: "open section label + icons under the cursor (OCollapsible.vue)",
+    booked: {
+      "O2 Pulse": "3.97",
+      "O2 Horizon": "4.17",
+      "O2 Beacon": "4.16",
+      "O2 Lens": "3.03",
+      "O2 Crimson Ink": "3.71",
+    },
+  },
+  {
+    fg: "--color-icon-chip-primary-text",
+    host: "--color-icon-chip-primary-bg",
+    where: "primary icon chip glyph / step numbers (UsageTab.vue, HowItWorksDrawer.vue)",
+    booked: { "O2 Lens": "3.41", "O2 Crimson Ink": "4.36" },
+  },
+  {
+    fg: "--color-badge-primary-soft-text",
+    host: "--color-badge-primary-soft-bg",
+    where: "OBadge primary tone (utils/dbm/tones.ts, alert_calibration/format.ts)",
+    booked: { "O2 Lens": "4.44" },
+  },
+  {
+    fg: "--color-file-chip-text",
+    host: "--color-file-chip-bg",
+    where: "chosen-file chip name (OFile.vue)",
+    booked: { "O2 Lens": "4.44" },
+  },
+  {
+    fg: "--color-file-chip-remove",
+    host: "--color-file-chip-bg",
+    where: "remove affordance inside the same chip (OFile.vue)",
+    booked: { "O2 Lens": "4.44" },
+  },
+  {
+    fg: "--color-datepicker-day-range-text",
+    host: "--color-datepicker-day-range-bg",
+    where: "day inside the dragged range band (ODateRangeCalendar.vue)",
+    booked: { "O2 Lens": "4.44" },
+  },
+  {
+    fg: "--color-toggle-item-active-text",
+    host: "--color-toggle-item-active-bg",
+    where: "on-state item label (OToggleGroupItem.vue)",
+    booked: { "O2 Lens": "4.44" },
+  },
+];
+
+/** The ramp step a light-sheet role names for itself (`var(--color-primary-700)`). */
+const sheetShade = (token: string): string => {
+  const match = /--color-primary-(\d+)/.exec((SHEET_LIGHT.get(token) ?? "").trim());
+  if (!match) throw new Error(`${token} is not an accent shade in the light sheet`);
+  return match[1];
+};
+
+/**
+ * Real pairs on a runtime ground that CANNOT be fixed without a palette-owner
+ * decision, booked exactly like BUTTON_LABEL_RESIDUALS: the set of scopes below
+ * AA and their measured numbers are equality-locked, and the gate still holds
+ * the 3:1 floor on every one of them. `--color-text-link` itself is not here —
+ * the reported failure was the ink on an accent GROUND, which is now carried by
+ * the per-theme accent label; what remains open is the global light link tier
+ * (3.60 on the plain page under O2 Lens), a palette question named in the
+ * constants/themes.ts DECISION RECORD.
+ */
+const BOOKED_GROUND_PAIRS: { fg: string; bg: string; where: string }[] = [
+  {
+    fg: "--color-status-warning-text",
+    bg: "--color-table-row-hover-bg",
+    where: "routed warning cell on a hovered row (OverviewTab.vue)",
+  },
+];
+
+const RUNTIME_GROUND_RESIDUALS: Record<string, { at: number; note: string }> = {
+  "light O2 Signature --color-status-warning-text on --color-table-row-hover-bg": {
+    at: 4.1,
+    note: "warning ink #be5a13 on the runtime primary-50 wash: the raw palette step it replaced measured 4.48 but 3.44 in dark, so the routed tier trades a dark AA miss for a light one — palette-decision: see PR decision record",
+  },
+  "light O2 Pulse --color-status-warning-text on --color-table-row-hover-bg": {
+    at: 4.22,
+    note: "same tier on the Pulse wash (#f5f8fa) — palette-decision: see PR decision record",
+  },
+  "light O2 Horizon --color-status-warning-text on --color-table-row-hover-bg": {
+    at: 4.21,
+    note: "same tier on the Horizon wash (#f3f8f9) — palette-decision: see PR decision record",
+  },
+  "light O2 Beacon --color-status-warning-text on --color-table-row-hover-bg": {
+    at: 4.23,
+    note: "same tier on the Beacon wash (#f5f8fd) — palette-decision: see PR decision record",
+  },
+  "light O2 Lens --color-status-warning-text on --color-table-row-hover-bg": {
+    at: 4.27,
+    note: "same tier on the Lens wash (#f6f9ff), the lightest of the six — palette-decision: see PR decision record",
+  },
+  "light O2 Crimson Ink --color-status-warning-text on --color-table-row-hover-bg": {
+    at: 4.18,
+    note: "same tier on the Crimson wash (#fef4f6); dark measures 10.40 on #1a1d21 — palette-decision: see PR decision record",
+  },
+};
+
+const runtimeGroundFailures = (): Map<string, string> => {
+  const failing = new Map<string, string>();
+  for (const [mode, scopes] of [
+    ["dark", RUNTIME_SCOPES],
+    ["light", LIGHT_RUNTIME_SCOPES],
+  ] as const) {
+    for (const { name, scope } of scopes) {
+      for (const pair of BOOKED_GROUND_PAIRS) {
+        const value = ratio(pair.fg, pair.bg, scope);
+        if (value < TEXT_MIN)
+          failing.set(`${mode} ${name} ${pair.fg} on ${pair.bg}`, value.toFixed(2));
+      }
+    }
+  }
+  return failing;
+};
 
 const buttonLabelFailures = (): Map<string, string> => {
   const failing = new Map<string, string>();
@@ -782,6 +1080,62 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
         measured,
         `${key} measures ${measured}:1, booked at ${booking.at.toFixed(2)}:1 — ${booking.note}`,
       ).toBe(booking.at.toFixed(2));
+    }
+  });
+
+  it("picks every accent ink that paints on a runtime accent tint, for the booked reason only", () => {
+    // Two directions: the injected ink must clear AA on the ground the consumer
+    // really paints it on (all twelve scopes), AND the sheet shade the role names
+    // must still be the failure that justifies the pick — the booked set and each
+    // of its numbers are equality-locked, so a tier that heals must shed its entry.
+    for (const pick of ACCENT_TINT_PICKS) {
+      const shade = sheetShade(pick.fg);
+      const offenders: string[] = [];
+      const booked = new Map<string, string>();
+      for (const [mode, scopes] of [
+        ["dark", RUNTIME_SCOPES],
+        ["light", LIGHT_RUNTIME_SCOPES],
+      ] as const) {
+        for (const { name, scope, themeColor } of scopes) {
+          const injected = ratio(pick.fg, pick.host, scope);
+          if (injected < TEXT_MIN) {
+            offenders.push(
+              `${mode} ${name}: ${pick.fg} = ${hexOf(pick.fg, scope)} on ${hexOf(pick.host, scope)} = ${injected.toFixed(2)}:1`,
+            );
+          }
+          if (mode !== "light") continue;
+          // The value the sheet would paint without libraryForegroundTokens.
+          const sheetInk = generatePrimaryPalette(themeColor)[shade];
+          const unpicked = ratio(sheetInk, pick.host, scope);
+          if (unpicked < TEXT_MIN) booked.set(name, unpicked.toFixed(2));
+        }
+      }
+      expect(offenders, `${pick.fg} on ${pick.host} (${pick.where})`).toEqual([]);
+      expect(
+        Object.fromEntries(booked),
+        `${pick.fg} sheet shade primary-${shade} on ${pick.host} (${pick.where})`,
+      ).toEqual(pick.booked);
+    }
+  });
+
+  it("books every sub-AA runtime-ground pair at its measured number (palette-decision ledger)", () => {
+    // Same shape as the button-label ledger: an improvement that retires an entry,
+    // a worsening, and a new sub-AA scope all fail here. Nothing booked is exempt
+    // from the 3:1 floor either — the pairs below ride the TEXT_PAIRS bar only
+    // because this ledger is what makes the shortfall explicit.
+    const failing = runtimeGroundFailures();
+    expect([...failing.keys()].sort()).toEqual(Object.keys(RUNTIME_GROUND_RESIDUALS).sort());
+    for (const [key, measured] of failing) {
+      const booking = RUNTIME_GROUND_RESIDUALS[key];
+      expect(
+        measured,
+        `${key} measures ${measured}:1, booked at ${booking.at.toFixed(2)}:1 — ${booking.note}`,
+      ).toBe(booking.at.toFixed(2));
+    }
+    for (const booking of Object.values(RUNTIME_GROUND_RESIDUALS)) {
+      expect(booking.note, "a booked runtime-ground pair has no palette-decision marker").toContain(
+        "palette-decision",
+      );
     }
   });
 

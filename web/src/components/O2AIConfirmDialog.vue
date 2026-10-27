@@ -26,10 +26,10 @@
             ref="yesButtonRef"
             variant="outline"
             :block="true"
-            class="confirmation-btn rounded-default text-theme-accent border-border-default bg-surface-base hover:bg-button-ghost-primary-hover-bg hover:border-theme-accent w-full border-2 text-sm font-semibold tracking-normal normal-case transition-all duration-200"
+            class="confirmation-btn rounded-default text-button-ghost-primary-text border-border-default bg-surface-base hover:bg-button-ghost-primary-hover-bg hover:border-theme-accent w-full border-2 text-sm font-semibold tracking-normal normal-case transition-all duration-200"
             :class="
               isFocusedYes
-                ? 'bg-theme-accent! border-theme-accent! ring-theme-accent/40 text-white! ring-3'
+                ? 'bg-theme-accent! border-theme-accent! ring-theme-accent/40 text-button-primary-foreground! ring-3'
                 : ''
             "
             tabindex="0"
@@ -78,10 +78,10 @@
             ref="yesButtonRef"
             variant="outline"
             :block="true"
-            class="confirmation-btn rounded-default text-theme-accent border-border-default bg-surface-base hover:bg-button-ghost-primary-hover-bg hover:border-theme-accent w-full border-2 text-sm font-semibold tracking-normal normal-case transition-all duration-200"
+            class="confirmation-btn rounded-default text-button-ghost-primary-text border-border-default bg-surface-base hover:bg-button-ghost-primary-hover-bg hover:border-theme-accent w-full border-2 text-sm font-semibold tracking-normal normal-case transition-all duration-200"
             :class="
               isFocusedYes
-                ? 'bg-theme-accent! border-theme-accent! ring-theme-accent/40 text-white! ring-3'
+                ? 'bg-theme-accent! border-theme-accent! ring-theme-accent/40 text-button-primary-foreground! ring-3'
                 : ''
             "
             tabindex="0"

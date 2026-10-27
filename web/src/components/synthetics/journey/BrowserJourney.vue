@@ -1940,7 +1940,8 @@ function handleStepReplace(row: BrowserStep, next: BrowserStep) {
       <span class="text-text-body text-sm" data-test="synthetics-journey-replay-banner-text">
         {{ t("synthetics.journey.replaying") }}
       </span>
-      <span class="text-text-secondary text-sm">
+      <!-- The banner's ground is the runtime primary tint, where the secondary tier sinks to 2.65:1 (dark O2 Signature). -->
+      <span class="text-text-body text-sm">
         {{
           t("synthetics.journey.replayProgress", {
             current: stepResults?.size ?? 0,

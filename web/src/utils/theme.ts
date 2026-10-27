@@ -191,6 +191,17 @@ export const pickReadableForeground = (bgHex: string): string => {
 const pickSelectedFillForeground = (bgHex: string): string =>
   contrastRatio("#FFFFFF", bgHex) >= 4.5 ? "#FFFFFF" : pickReadableForeground(bgHex);
 
+/** Accent shades used AS TEXT on a runtime accent tint, whose sheet step
+ *  (700) sinks under AA on the tint for some themes (4.44:1 O2 Lens light)
+ *  and so is re-picked per theme. Dark pins these roles in dark.css instead. */
+const ACCENT_SOFT_INK_TOKENS = [
+  "--color-badge-primary-soft-text",
+  "--color-file-chip-text",
+  "--color-file-chip-remove",
+  "--color-datepicker-day-range-text",
+  "--color-toggle-item-active-text",
+];
+
 /** Light fills whose ink must be picked from the injected ramp. Dark
  *  pins the same roles to ladder literals with white ink instead (dark.css). */
 const SELECTED_FILL_INK_TOKENS = [
@@ -227,6 +238,15 @@ export const libraryForegroundTokens = (
     tokens["--color-button-ghost-muted-hover-text"] = pickReadableShade(palette, palette["100"]);
     tokens["--color-button-ghost-primary-text"] = pickReadableShade(palette, palette["100"]);
     tokens["--color-datepicker-selected-fg"] = pickReadableShade(palette, "#FFFFFF");
+    // F-133: the rest of the accent-as-text roles that land on a runtime accent
+    // tint. Each sheet names a ramp step whose contrast depends on the theme
+    // colour (primary-600 on primary-100 is 3.03:1 under O2 Lens light), so the
+    // shade is walked against the tint the role actually paints on.
+    tokens["--color-collapsible-icon-open"] = pickReadableShade(palette, palette["100"]);
+    tokens["--color-icon-chip-primary-text"] = pickReadableShade(palette, palette["50"]);
+    for (const name of ACCENT_SOFT_INK_TOKENS) {
+      tokens[name] = pickReadableShade(palette, palette["100"], "700");
+    }
   }
   return tokens;
 };
@@ -235,6 +255,7 @@ export const libraryForegroundTokens = (
  *  keys never depend on the colors, only the values do). */
 const libraryForegroundTokenNames = (): string[] => {
   const probe = {
+    "50": "#e5e5e5",
     "100": "#cccccc",
     "500": "#888888",
     "600": "#888888",

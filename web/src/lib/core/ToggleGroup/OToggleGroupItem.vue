@@ -194,7 +194,7 @@ const iconSize: Record<NonNullable<ToggleGroupItemProps["size"]>, "xs" | "sm" | 
         v-else-if="props.iconRight"
         :name="props.iconRight"
         :size="iconSize[props.size]"
-        :class="props.iconRight === 'lock' ? 'text-warning-600' : ''"
+        :class="props.iconRight === 'lock' ? 'text-status-warning-text' : ''"
       />
     </ToggleGroupItem>
     <span v-if="unavailable && props.tooltip" :id="reasonId" aria-hidden="true" class="sr-only">{{

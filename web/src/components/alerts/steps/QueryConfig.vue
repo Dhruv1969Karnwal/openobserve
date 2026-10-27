@@ -896,11 +896,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       <OIcon
                         name="filter-alt"
                         size="xs"
-                        :class="filterCount > 0 ? 'text-theme-accent' : 'text-text-secondary'"
+                        :class="
+                          filterCount > 0 ? 'text-button-ghost-primary-text' : 'text-text-secondary'
+                        "
                       />
                       <span
                         class="text-xs font-semibold"
-                        :class="filterCount > 0 ? 'text-theme-accent' : 'text-text-body'"
+                        :class="
+                          filterCount > 0 ? 'text-button-ghost-primary-text' : 'text-text-body'
+                        "
                       >
                         {{ t("alerts.queryConfig.filters") }}
                       </span>
@@ -988,11 +992,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <OIcon
                     name="filter-alt"
                     size="xs"
-                    :class="filterCount > 0 ? 'text-theme-accent' : 'text-text-secondary'"
+                    :class="
+                      filterCount > 0 ? 'text-button-ghost-primary-text' : 'text-text-secondary'
+                    "
                   />
                   <span
                     class="text-xs font-semibold"
-                    :class="filterCount > 0 ? 'text-theme-accent' : 'text-text-body'"
+                    :class="filterCount > 0 ? 'text-button-ghost-primary-text' : 'text-text-body'"
                   >
                     {{ t("alerts.queryConfig.filters") }}
                   </span>

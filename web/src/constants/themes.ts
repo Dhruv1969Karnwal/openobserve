@@ -88,6 +88,26 @@ export const THEME_STORAGE_KEYS = {
  * a brand/palette-owner decision — darker saturated 600 steps (Horizon dark,
  * both Lens) or a formal deviation record; per-state ink flips were rejected
  * by design. This is an OPEN DECISION SURFACE, not hidden debt.
+ *
+ * ── LINK / ACCENT-ON-TINT RESIDUALS (F-133) ──
+ * The same two-sided problem exists one tier lighter: an accent shade used AS
+ * TEXT on the runtime accent tints. `--color-text-link` (light = themeColor,
+ * dark = primary-400) measured 3.03:1 on `--color-surface-accent-active` under
+ * O2 Lens light and 3.77:1 under O2 Pulse dark; the primary-ramp label roles
+ * that fold onto the same steps (open-collapsible ink, primary icon chips, the
+ * primary soft badge, file chips, the range-band day, the on-state toggle) sat
+ * at 4.44:1 under O2 Lens light. Those pairs are FIXED by the machinery, not by
+ * a palette move: utils/theme.ts re-picks each ink against the tint it actually
+ * paints on and tokens/themeRuntimeContrast.spec.ts locks the pick twice over —
+ * AA under all twelve scopes, plus the sheet shade that justifies the pick
+ * (ACCENT_TINT_PICKS). What is BOOKED, number-locked and still open: the routed
+ * `--color-status-warning-text` tier on the runtime row wash (4.10–4.27 in the
+ * six light ramps, 10.40 in dark) — darkening the warning ink is a decision for
+ * every warning label in the product, not for this gate — and the global link
+ * tier itself, which remains the themeColor on the PLAIN page (3.03–4.50 on the
+ * six light page grounds): a global link move repaints every `<a>` in the app,
+ * so the accent-ground consumers were routed to the picked accent label instead
+ * and the page tier stays the palette owner's call.
  */
 /** Predefined themes with both light and dark mode colors. */
 export const PREDEFINED_THEMES: PredefinedTheme[] = [
