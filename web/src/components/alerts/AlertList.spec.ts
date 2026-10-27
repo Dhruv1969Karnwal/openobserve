@@ -156,6 +156,7 @@ type AlertV2 = {
   stream_type: string;
   enabled: boolean;
   condition: any;
+  alert_type?: string;
   child_count?: number;
   referenced_by_composite_count?: number;
   expression_summary?: string;
@@ -409,7 +410,7 @@ const waitData = async (wrapper: any) => {
       conditions = JSON.stringify(alert.condition.conditions);
     }
 
-    let frequency = "";
+    let frequency: string | number | undefined = "";
     if (alert.trigger_condition?.frequency_type == "cron") {
       frequency = alert.trigger_condition.cron;
     } else {
@@ -817,7 +818,9 @@ describe("AlertList - row actions", () => {
     expect(alertsSvc.listByFolderId).not.toHaveBeenCalled();
     // The store cache backs a folder revisit, so the row must leave it too or it
     // reappears the moment the user navigates away and back.
-    const cached = store.state.organizationData.allAlertsListByFolderId[wrapper.vm.activeFolderId];
+    const cached = (store.state.organizationData.allAlertsListByFolderId as Record<string, any>)[
+      wrapper.vm.activeFolderId
+    ];
     if (Array.isArray(cached)) {
       expect(cached.find((r: any) => r.alert_id === row.alert_id)).toBeUndefined();
     }
@@ -932,7 +935,7 @@ describe("AlertList - router query behaviors", () => {
     const spy = vi.spyOn(router, "push");
     await wrapper.vm.hideForm();
 
-    const pushedQuery = spy.mock.calls[0][0].query;
+    const pushedQuery = (spy.mock.calls[0][0] as { query: Record<string, unknown> }).query;
     expect(pushedQuery.page).toBe("3");
     expect(pushedQuery.action).toBeUndefined();
     expect(pushedQuery.alert_id).toBeUndefined();
@@ -986,7 +989,7 @@ describe("AlertList - pagination restoration", () => {
     await flushPromises();
 
     expect(wrapper.vm.currentPage).toBe(1);
-    expect(useListViewState("alerts", {}).currentPage).toBe(1);
+    expect((useListViewState("alerts", {}) as { currentPage: number }).currentPage).toBe(1);
   });
 });
 
@@ -1226,7 +1229,7 @@ describe("AlertList - micro validations", () => {
     await flushPromises();
     expect(wrapper.vm.showImportAlertDialog).toBe(true);
     expect(spy).toHaveBeenCalled();
-    expect(spy.mock.calls[0][0].query.page).toBe("3");
+    expect((spy.mock.calls[0][0] as { query: { page: string } }).query.page).toBe("3");
   });
 
   it("updateFolderIdToBeCloned updates state", async () => {
@@ -1711,7 +1714,8 @@ describe("AlertList - ODialog/ODrawer migration", () => {
   });
 
   it("duplicateAlert still fetches the alert to clone when the stream list fails to load", async () => {
-    global.server.use(
+    // `server` is stubbed onto the global by setupTests.ts via vi.stubGlobal
+    (global as any).server.use(
       http.get(
         `${store.state.API_ENDPOINT}/api/${store.state.selectedOrganization.identifier}/streams`,
         () => HttpResponse.error(),
