@@ -16,56 +16,135 @@
 import { resolveLogsVisualizeToggle, type LogsVisualizeToggle } from "@/ts/interfaces/logs";
 import type { PlainObject } from "./transientSearchKeys";
 
+/** What the call site knows about this build's entitlements, resolved once. */
+export interface SnapshotPaidAccess {
+  /** `checkFeatureAccess("logPatterns", …).allowed` at the call site. */
+  patternsAllowed: boolean;
+  /**
+   * Whether the Ask-AI bar is legitimately available here: the `aiAssistant`
+   * entitlement AND the `ai_enabled` runtime toggle — the exact conjunct
+   * QueryEditor applies to its own AI affordances.
+   */
+  aiAssistantAllowed: boolean;
+}
+
 /**
- * `meta` keys whose NON-DEFAULT value opens or renders a PAID surface, and the
- * free-edition value they must land on instead. This is the enumerated answer to
- * "what can a snapshot say that costs money to hear" — grepping every watcher /
- * dialog-opener that reads `searchObj.meta.*` across the logs plugin:
+ * `meta` keys whose NON-DEFAULT value opens or renders a PAID surface, plus the
+ * free-edition value such a key must land on instead.
  *
- *  - `showSearchScheduler` — the `immediate` watcher in logs/SearchBar.vue turns
- *    a truthy value into `searchSchedulerJob = true`, which opens the Create
- *    Scheduled Search dialog (the `scheduledSearch` feature). It is not in
- *    `TRANSIENT_SEARCH_KEYS`, so before this file existed it survived the
- *    saved-view merge and popped the paid dialog on an OSS build under the
- *    "hide" policy (F-98). Nothing in the shipped app ever writes `true` — the
- *    only way in was the payload.
- *  - `logsVisualizeToggle` — the panel toggle. It is handled by
- *    `resolveLogsVisualizeToggle` below rather than by this table, because a
- *    saved view legitimately persists four of its five values: only `patterns`
- *    is gated, so this key is COERCED, not reset. It is listed here so the set of
- *    paid-bearing meta keys has exactly one source of truth.
+ * The enumeration is over the READERS of the logs `searchObj` — every
+ * `immediate` watcher, `v-if` / prop binding and `v-model:open` dialog opener in
+ * `plugins/logs/**`, `components/QueryEditor.vue` and `composables/useLogs/**` —
+ * crossed with the registry keys in `utils/enterpriseFeatures.ts`. A field joins
+ * this table only if a PAYLOAD value can make a gated surface appear; a field
+ * whose surface is additionally gated on `store.state.zoConfig` or
+ * `config.isEnterprise` is not snapshot-writable, so the payload cannot open it
+ * (class CONFIG-GATED).
  *
- * Deliberately NOT in this set, with the reason:
- *  - `showTransformEditor`, `showHistogram`, `showDetailTab`, `showFields`,
- *    `showQuery`, `sqlMode`, `quickMode`, `nlpMode`, `liveMode`, `pageType`,
- *    `regions` / `clusters`, `resultGrid.*`, `scrollInfo` — free surfaces; a
- *    snapshot is entitled to restore them.
- *  - `showPatterns` — declared in `utils/logs/constants.ts` and read nowhere
- *    (the Patterns panel keys off `logsVisualizeToggle`), so coercing it would be
- *    documenting a surface that does not exist.
- *  - `jobId` / `jobRecords` — scheduled-search EXECUTION state, not an affordance:
- *    a non-empty `jobId` re-points the results pipeline at the job endpoint (which
- *    403s on OSS) and is written only by the route-gated SearchSchedulersList.
- *    Stripping it would change query semantics at this boundary; the paid door it
- *    sits behind is the one F-103 gated. Revisit here if a visible affordance ever
- *    keys off it.
+ *  PAID — in this table:
+ *   `logsVisualizeToggle`  "patterns" renders the Log Patterns panel
+ *                          (logs/SearchResult.vue, `v-if` on the toggle). Handled
+ *                          by `resolveLogsVisualizeToggle` below, NOT by the
+ *                          reset loop: a saved view legitimately persists four of
+ *                          its five values, so this key is COERCED. It is named
+ *                          here so the paid set has one source of truth.
+ *   `showSearchScheduler`  the `immediate` watcher in logs/SearchBar.vue turns a
+ *                          truthy value into `searchSchedulerJob = true`, which
+ *                          opens the Create Scheduled Search dialog. No entitled
+ *                          exception: it is a one-shot DIALOG TRIGGER, not
+ *                          persisted state, and nothing in the shipped app
+ *                          restores it — the only way in was ever the payload.
+ *   `nlpMode`              logs/SearchBar.vue binds it to the query editor as its
+ *                          EXTERNAL control (`:nlp-mode`), and QueryEditor's
+ *                          `isAIMode` returns that prop alone under external
+ *                          control — with no entitlement conjunct, unlike the
+ *                          internal-control branch — so the paid Ask-AI bar
+ *                          (`v-if="isAIMode"`) renders. Entitled exception: an
+ *                          org that actually has the assistant may legitimately
+ *                          have saved the bar open, hence `restoreWhen`.
+ *
+ *  EXECUTION — no affordance renders off them, so stripping would only change
+ *  query semantics at this boundary:
+ *   `jobId` / `jobRecords`  re-point the request at `get_scheduled_search_result`
+ *                          (useLogs/usePagination.ts) and cap pagination
+ *                          (logs/SearchResult.vue) + informational toasts
+ *                          (SearchBar watchers); the only non-empty writer is the
+ *                          route-gated logs/SearchSchedulersList.vue. Revisit here
+ *                          the moment a visible affordance keys off them.
+ *   `clearCache`            a `skip_cache` request flag (logs/Index.vue), free.
+ *
+ *  CONFIG-GATED — the surface needs a server flag the payload cannot write:
+ *   `regions` / `clusters`                   super-cluster selector needs
+ *                                            `config.isEnterprise` and
+ *                                            `zoConfig.super_cluster_enabled`
+ *   `useUserDefinedSchemas` /
+ *   `hasUserDefinedSchemas`                  the toggle needs
+ *                                            `zoConfig.user_defined_schemas_enabled`
+ *                                            (logs/IndexList.vue); the values only
+ *                                            pick which free list is shown
+ *   `showDetailTab`                          the row drawer is free
+ *                                            (logs/SearchResult.vue) and its paid
+ *                                            members gate themselves on
+ *                                            `correlation` / `ai_enabled`
+ *                                            (logs/DetailTable.vue);
+ *                                            `TRANSIENT_SEARCH_KEYS` resets it too
+ *
+ *  TRANSIENT — `TRANSIENT_SEARCH_KEYS` (transientSearchKeys.ts) deletes or resets
+ *  them before the merge, so a payload cannot carry them at all: `executed`,
+ *  `pendingExecution`, `lastRunAttempt`, `executedPatterns` (an auto-run bookkeeping
+ *  slot, NOT the paid Patterns panel), `executedPanel`, `autoRunBlocked`,
+ *  `consentedScope`, `runPending`, `runOutcome`, `runCancelled`, `editorDirty`,
+ *  `liveMode`, `freeTextScan`, `showDetailTab`, `resultGrid.navigation.*`.
+ *
+ *  FREE — a snapshot is entitled to restore these: `showTransformEditor`,
+ *  `showHistogram`, `showFields`, `showQuery`, `sqlMode` (+ `sqlModeManualTrigger`,
+ *  `sqlModeEditTransition`), `quickMode`, `pageType`, `scrollInfo`, `resultGrid.*`,
+ *  `savedBuildConfig`, `buildModeQueryEditorDisabled`, `refreshInterval`,
+ *  `refreshIntervalLabel`, `refreshHistogram`, `searchApplied`, `toggleSourceWrap`,
+ *  `histogramDirtyFlag`, `logsVisualizeDirtyFlag`, `pendingUrlQueryRestore`,
+ *  `isFtsDefaultColumn`, `queryEditorPlaceholderFlag`,
+ *  `functionEditorPlaceholderFlag`, `selectedTraceStream`, `resetPlotChart`,
+ *  `toggleFunction` (deprecated alias of `showTransformEditor`) and `lastRunAt`
+ *  (the refresh button's "last ran" label, which is not even in the default shape).
+ *
+ *  DEAD — `showPatterns` is declared in `utils/logs/constants.ts` and read
+ *  nowhere (the panel keys off `logsVisualizeToggle`); coercing it would document
+ *  a surface that does not exist.
+ *
+ * The same merge also carries `searchObj`-level paths, so those were walked too:
+ * `data.stream.functions` / `transformType` / `selectedTransform` open the free VRL
+ * editor (the transform-type menu offers only `function`), `data.patterns.*` is
+ * inert content behind the coerced toggle, `data.datetime.queryRangeRestriction*`
+ * is re-derived from stream settings and `zoConfig.max_query_range` on every stream
+ * load (useLogs/useStreamFields.ts), `communicationMethod` / `runQuery` are request
+ * and page-count branches (logs/SearchResult.vue) with no affordance on them, and
+ * `data.searchAround`, `data.visualizationData`, `data.resultGrid.*` and
+ * `config.splitter*` are free query/layout state. A payload may also invent keys
+ * under `meta`; undeclared keys are read by nothing, which is why completeness here
+ * means completeness over READERS, not over the stored shape.
  */
-export const PAID_SNAPSHOT_META_KEYS = ["showSearchScheduler"] as const;
+export const PAID_SNAPSHOT_META_KEYS = ["showSearchScheduler", "nlpMode"] as const;
 
 export type PaidSnapshotMetaKey = (typeof PAID_SNAPSHOT_META_KEYS)[number];
 
-/** What each key looks like when the paid surface is closed. */
-export const PAID_SNAPSHOT_META_DEFAULTS: Record<PaidSnapshotMetaKey, unknown> = {
-  showSearchScheduler: false,
+/**
+ * `hidden` is the free-edition value the key is forced to. `restoreWhen` marks the
+ * keys whose stored value IS legitimate for an org that has the surface — those
+ * pass through when it answers true, so the boundary normalises entitlement and
+ * nothing else.
+ */
+export interface PaidSnapshotMetaRule {
+  hidden: unknown;
+  restoreWhen?: (access: SnapshotPaidAccess) => boolean;
+}
+
+export const PAID_SNAPSHOT_META_RULES: Record<PaidSnapshotMetaKey, PaidSnapshotMetaRule> = {
+  showSearchScheduler: { hidden: false },
+  nlpMode: { hidden: false, restoreWhen: ({ aiAssistantAllowed }) => aiAssistantAllowed },
 };
 
 const isPlainObject = (value: unknown): value is PlainObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
-
-export interface SnapshotPaidAccess {
-  /** `checkFeatureAccess("logPatterns", …).allowed` at the call site. */
-  patternsAllowed: boolean;
-}
 
 /**
  * Sanitizes the paid state of an untrusted search snapshot (an org-stored,
@@ -82,15 +161,17 @@ export interface SnapshotPaidAccess {
  *     sanitizer the URL restore uses (F-43 / F-66), so `patterns` cannot be
  *     restored by payload on a build that does not sell it.
  *  3. Every key in `PAID_SNAPSHOT_META_KEYS` that could open a paid surface is
- *     coerced to its closed value. Set-driven, not per-key whack-a-mole: a new
- *     paid `meta` affordance only has to join the table above to be covered here.
+ *     written from its `PAID_SNAPSHOT_META_RULES` entry: forced to `hidden`, or left
+ *     alone when `restoreWhen` says this org legitimately has the surface.
+ *     Set-driven, not per-key whack-a-mole: a new paid `meta` affordance only has to
+ *     join the table above to be covered here.
  *
  * Everything else in `meta` passes through untouched — saved views legitimately
  * persist their query, fields, layout and panel.
  */
 export function sanitizeSearchSnapshotMeta<T extends PlainObject>(
   snapshot: T,
-  { patternsAllowed }: SnapshotPaidAccess,
+  access: SnapshotPaidAccess,
 ): T {
   if (!isPlainObject(snapshot)) return snapshot;
 
@@ -106,12 +187,14 @@ export function sanitizeSearchSnapshotMeta<T extends PlainObject>(
   if (Object.hasOwn(meta, "logsVisualizeToggle")) {
     meta.logsVisualizeToggle = resolveLogsVisualizeToggle(
       meta.logsVisualizeToggle,
-      patternsAllowed,
+      access.patternsAllowed,
     ) as LogsVisualizeToggle;
   }
 
   for (const key of PAID_SNAPSHOT_META_KEYS) {
-    if (Object.hasOwn(meta, key)) meta[key] = PAID_SNAPSHOT_META_DEFAULTS[key];
+    const rule = PAID_SNAPSHOT_META_RULES[key];
+    if (!Object.hasOwn(meta, key) || rule.restoreWhen?.(access)) continue;
+    meta[key] = rule.hidden;
   }
 
   return snapshot;

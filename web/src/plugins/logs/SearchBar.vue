@@ -2044,6 +2044,14 @@ export default defineComponent({
     const scheduledSearchAccess = computed(() =>
       checkFeatureAccess("scheduledSearch", buildFeatureGateContext(store.state.zoConfig)),
     );
+    // Whether the Ask-AI bar may legitimately be ON here: the `aiAssistant`
+    // entitlement AND the `ai_enabled` runtime toggle, i.e. the conjunct
+    // QueryEditor applies to its own AI affordances.
+    const aiAssistantAllowed = computed(
+      () =>
+        checkFeatureAccess("aiAssistant", buildFeatureGateContext(store.state.zoConfig)).allowed &&
+        Boolean(store.state.zoConfig.ai_enabled),
+    );
     // The Search Job Inspector's route carries the same `searchJobInspector` key;
     // the backend `search_inspector_enabled` flag is the caller-side conjunct.
     const inspectorVisible = computed(
@@ -3530,12 +3538,14 @@ export default defineComponent({
             // A saved view is org-stored client-writable JSON, so everything it
             // says about PAID state is sanitized here, before either merge below
             // (both `applySearchSnapshot` sites live in this one function):
-            // `meta`'s shape, the gated panel toggle (F-43) and the paid-dialog
-            // keys of PAID_SNAPSHOT_META_KEYS (F-98). TRANSIENT_SEARCH_KEYS is the
+            // `meta`'s shape, the gated panel toggle (F-43) and every key of
+            // PAID_SNAPSHOT_META_KEYS — the paid-dialog trigger and the Ask-AI bar's
+            // external control (F-98). TRANSIENT_SEARCH_KEYS is the
             // wrong mechanism for the toggle — views legitimately persist the free
             // values — but the boundary is the same one for all three.
             sanitizeSearchSnapshotMeta(extractedObj, {
               patternsAllowed: patternsAccess.value.allowed,
+              aiAssistantAllowed: aiAssistantAllowed.value,
             });
 
             // A saved view's columns are an explicit user choice, not a system

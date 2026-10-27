@@ -16,12 +16,21 @@
 import { describe, it, expect } from "vitest";
 import {
   PAID_SNAPSHOT_META_KEYS,
-  PAID_SNAPSHOT_META_DEFAULTS,
+  PAID_SNAPSHOT_META_RULES,
   sanitizeSearchSnapshotMeta,
+  type PaidSnapshotMetaKey,
 } from "./snapshotPaidState";
+import { DEFAULT_LOGS_CONFIG } from "./constants";
 
-const OSS = { patternsAllowed: false };
-const ENTITLED = { patternsAllowed: true };
+/**
+ * The two entitlement axes are named separately on purpose: `patternsAllowed`
+ * gates the panel toggle and `aiAssistantAllowed` gates the Ask-AI bar, so a cell
+ * that means "entitled" says WHICH entitlement it means.
+ */
+const OSS = { patternsAllowed: false, aiAssistantAllowed: false };
+const ENTITLED = { patternsAllowed: true, aiAssistantAllowed: true };
+const PATTERNS_ONLY = { patternsAllowed: true, aiAssistantAllowed: false };
+const AI_ONLY = { patternsAllowed: false, aiAssistantAllowed: true };
 
 /** A snapshot with the given meta, shaped like the JSON a saved view stores. */
 const snapshotWith = (meta: unknown): any => ({
@@ -59,6 +68,89 @@ describe("sanitizeSearchSnapshotMeta (F-98)", () => {
     sanitizeSearchSnapshotMeta(snapshot, OSS);
 
     expect(Object.hasOwn(snapshot.meta, "showSearchScheduler")).toBe(false);
+  });
+
+  // ---------------------------------------------------------------------------
+  // The Ask-AI bar's external control (F-115) — a prop binding, not a watcher, so
+  // the `immediate`-watcher grep that produced the first version of the table
+  // missed it: logs/SearchBar.vue binds meta.nlpMode to the query editor, whose
+  // `isAIMode` returns that prop alone under external control and drives the paid
+  // bar's `v-if`.
+  // ---------------------------------------------------------------------------
+  it("coerces the Ask-AI bar's external control on an un-entitled build", () => {
+    const snapshot = snapshotWith({ nlpMode: true });
+
+    sanitizeSearchSnapshotMeta(snapshot, OSS);
+
+    expect(snapshot.meta.nlpMode).toBe(false);
+  });
+
+  it.each([true, 1, "yes", {}, [], "on"])(
+    "coerces every truthy shape of nlpMode ( %# )",
+    (value) => {
+      const snapshot = snapshotWith({ nlpMode: value });
+
+      sanitizeSearchSnapshotMeta(snapshot, OSS);
+
+      expect(snapshot.meta.nlpMode).toBe(false);
+    },
+  );
+
+  /** Bidirectional control: an org that really has the assistant keeps its state. */
+  it("preserves the Ask-AI bar for an org that has the assistant", () => {
+    const snapshot = snapshotWith({ nlpMode: true });
+
+    sanitizeSearchSnapshotMeta(snapshot, ENTITLED);
+
+    expect(snapshot.meta.nlpMode).toBe(true);
+  });
+
+  /**
+   * The entitlement is the assistant's own, not "any paid feature at all", and the
+   * two axes are independent: patterns-only does not unlock the bar, and the
+   * assistant does not unlock the patterns panel.
+   */
+  it("treats the two entitlements independently", () => {
+    const patternsOnly = snapshotWith({ nlpMode: true, logsVisualizeToggle: "patterns" });
+    const assistantOnly = snapshotWith({ nlpMode: true, logsVisualizeToggle: "patterns" });
+
+    sanitizeSearchSnapshotMeta(patternsOnly, PATTERNS_ONLY);
+    sanitizeSearchSnapshotMeta(assistantOnly, AI_ONLY);
+
+    expect(patternsOnly.meta).toEqual({ nlpMode: false, logsVisualizeToggle: "patterns" });
+    expect(assistantOnly.meta).toEqual({ nlpMode: true, logsVisualizeToggle: "logs" });
+  });
+
+  it("does not invent nlpMode for a snapshot that never carried it", () => {
+    const snapshot = snapshotWith({ sqlMode: true });
+
+    sanitizeSearchSnapshotMeta(snapshot, ENTITLED);
+
+    expect(Object.hasOwn(snapshot.meta, "nlpMode")).toBe(false);
+  });
+
+  it("rewrites only the paid keys of a legacy or shared view", () => {
+    const snapshot = snapshotWith({
+      nlpMode: true,
+      showSearchScheduler: true,
+      logsVisualizeToggle: "patterns",
+      sqlMode: true,
+      quickMode: true,
+      showHistogram: false,
+      rowsPerPage: 100,
+    });
+
+    sanitizeSearchSnapshotMeta(snapshot, OSS);
+
+    expect(snapshot.meta).toEqual({
+      nlpMode: false,
+      showSearchScheduler: false,
+      logsVisualizeToggle: "logs",
+      sqlMode: true,
+      quickMode: true,
+      showHistogram: false,
+      rowsPerPage: 100,
+    });
   });
 
   it("keeps every legitimate (non-paid) field of the snapshot", () => {
@@ -183,14 +275,33 @@ describe("sanitizeSearchSnapshotMeta (F-98)", () => {
     expect(({} as any).paid).toBeUndefined();
   });
 
-  it("is driven by the PAID_SNAPSHOT_META_KEYS table, which is the audit trail", () => {
-    // Every key in the table has a default, so adding a key cannot silently
-    // leave it undefined-ish; the defaults are the free-edition values.
+  /**
+   * The "set-driven, not whack-a-mole" contract is only as strong as the set, so
+   * the guard is anti-vacuous: an empty table, a renamed field, or a dropped entry
+   * all fail here. (`nlpMode` escaped the first enumeration precisely because
+   * nothing pinned what the table has to CONTAIN.)
+   */
+  it("is a NON-EMPTY table of real, currently-declared meta fields", () => {
+    expect(PAID_SNAPSHOT_META_KEYS.length).toBeGreaterThan(0);
+    expect([...PAID_SNAPSHOT_META_KEYS].sort()).toEqual(["nlpMode", "showSearchScheduler"]);
+    // Derived from the very shape the merge writes into: a key that is renamed or
+    // removed upstream stops being covered here rather than silently passing.
+    const declaredMeta = Object.keys(DEFAULT_LOGS_CONFIG.meta);
     for (const key of PAID_SNAPSHOT_META_KEYS) {
-      expect(PAID_SNAPSHOT_META_DEFAULTS).toHaveProperty(key);
+      expect(declaredMeta, `meta.${key} is not a declared logs meta field`).toContain(key);
+    }
+  });
+
+  it("gives every key of the table a rule, and applies it", () => {
+    expect(Object.keys(PAID_SNAPSHOT_META_RULES).sort()).toEqual(
+      [...PAID_SNAPSHOT_META_KEYS].sort(),
+    );
+    for (const key of PAID_SNAPSHOT_META_KEYS) {
+      const rule = PAID_SNAPSHOT_META_RULES[key as PaidSnapshotMetaKey];
       const snapshot = snapshotWith({ [key]: true });
       sanitizeSearchSnapshotMeta(snapshot, OSS);
-      expect(snapshot.meta[key]).toBe(PAID_SNAPSHOT_META_DEFAULTS[key]);
+      expect(snapshot.meta[key]).toStrictEqual(rule.hidden);
+      expect(snapshot.meta[key]).not.toBe(true);
     }
   });
 });
