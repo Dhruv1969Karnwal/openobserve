@@ -11,8 +11,12 @@
 // so a heap failure retries in shrinking chunks instead of reporting "fail".
 //
 // HEAP: default 6144 MiB suits machines with >=8 GiB; inside a 6 GiB cgroup the
-// slice OOM-kills that before V8 self-limits, so pass `--heap=4608` there. Only
-// an external SIGKILL can still leave tsconfig.changes.tmp.json (gitignored).
+// slice OOM-kills that before V8 self-limits, so pass `--heap=4608` there. A
+// SIGTERM/SIGKILL from outside (a `systemctl stop`, a `timeout`, the OOM killer)
+// skips the `finally` below and leaves tsconfig.changes.tmp.json behind — it is
+// gitignored, so `git status` will not show it. That is handled, not prevented:
+// every run deletes the residue as its first act (see STALE_CONFIG), so a killed
+// run can never hand the next one a program built from the PREVIOUS diff.
 
 import { execFileSync } from "node:child_process";
 import { writeFileSync, rmSync, existsSync } from "node:fs";
@@ -21,6 +25,19 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = join(__dirname, "..");
+
+// The generated program lives at a fixed path, and `extends`/`include` resolve
+// relative to it — so it has to sit in web/ next to tsconfig.app.json.
+const CFG = join(WEB_ROOT, "tsconfig.changes.tmp.json");
+
+// Startup cleanup, before any exit below. The `finally` at the end of the run
+// handles normal exits (including a normal exit on type errors), but an external
+// SIGTERM/SIGKILL never runs it: a `timeout`, a `systemctl stop`, or the cgroup
+// OOM killer all leave the file behind, and it is gitignored, so a clean
+// `git status` proves nothing about it. Deleting here makes the run idempotent —
+// the residue can never be mistaken for this run's program, and the next
+// invocation always regenerates it from ITS OWN diff.
+rmSync(CFG, { force: true });
 
 // Local bin, never `npx`: an npx miss resolves vue-tsc through the registry.
 const VUE_TSC = join(WEB_ROOT, "node_modules", ".bin", "vue-tsc");
@@ -89,9 +106,6 @@ const program = (subset) => ({
   exclude: ["node_modules", "dist"],
   compilerOptions: { composite: false },
 });
-
-// The config lives in web/ because `extends` and `include` resolve relative to it.
-const CFG = join(WEB_ROOT, "tsconfig.changes.tmp.json");
 
 function runProgram(subset) {
   writeFileSync(CFG, JSON.stringify(program(subset), null, 2) + "\n");

@@ -2,19 +2,25 @@
 // CI guard: ZERO occurrences of any design-token bypass category from
 // O2_TOKEN_MIGRATION_PLAN.md §3 (A–R). One violation fails the build.
 //
-//   node scripts/check-design-consistency.mjs           # fail on any violation
-//   node scripts/check-design-consistency.mjs --list    # show every violation
+//   node scripts/check-design-consistency.mjs            # fail on any violation
+//   node scripts/check-design-consistency.mjs --strict   # + guard-self-check
+//   node scripts/check-design-consistency.mjs --list     # show every violation
 //
 // Replaced a ratchet against design-debt-baseline.json, which allowed debt to
 // persist as long as it never grew — every non-zero entry was headroom a future
-// bypass could refill silently. `--strict` is accepted and ignored; zero
-// tolerance subsumes it. px is owned by eslint's local/no-hardcoded-px.
+// bypass could refill silently. Zero tolerance already covers the bypass
+// categories in both modes, so `--strict` adds the one class the default scan is
+// blind to by construction: THIS guard's own pins. A MOTION_LEDGER entry whose file
+// was deleted is never re-counted (the scan only walks files that exist), and an
+// allowlist entry whose path is gone silently widens the exemption for whatever
+// lands at that suffix next. Both drift states fail under `--strict`; CI runs
+// `lint:design:strict`. px is owned by eslint's local/no-hardcoded-px.
 //
 // If this failed: do not add an exemption. Reach the token through its
 // registered utility (register one in tokens/semantic.css or component.css if
 // none exists), or move the rule to base-elements.css / utilities.css. The
 // allowlists below are only for cases a utility physically CANNOT express.
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, extname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
@@ -49,7 +55,6 @@ const TS_HEX_ALLOWLIST = [
   "composables/useServiceGraphTree.ts",
   "composables/useMetricsExplorer.ts",
   // Monaco editor language/theme definitions (colour strings the editor lib reads)
-  "utils/query/vrlLanguage.ts",
   "utils/query/vrlLanguageDefinition.ts",
   // JS that builds styled HTML/canvas from a fixed status→colour map
   "utils/logs/convertLogData.ts",
@@ -58,7 +63,6 @@ const TS_HEX_ALLOWLIST = [
   // LLM / metric / latency chart-panel series palettes (ECharts, no var())
   "plugins/traces/llmTrendPanel.utils.ts",
   "plugins/traces/config/",
-  "enterprise/components/billings/usageDailyPanelSchema.ts",
   "composables/useLatencyInsightsDashboard.ts",
   "composables/useMetricsCorrelationDashboard.ts",
   "utils/metrics/metricPalette.ts",
@@ -393,7 +397,7 @@ function countUnjustifiedBlocks(text) {
   return n;
 }
 
-// ── motionNoCompanion (F-74) ───────────────────────────────────────────────
+// ── motionNoCompanion ───────────────────────────────────────────────
 // Hover motion needs an escape hatch: a class string that translates / rotates /
 // scales on an interaction variant — or transitions those properties — must carry
 // a `motion-reduce:` companion in the SAME string (or make the motion itself
@@ -671,6 +675,39 @@ function countFile(file, rel) {
 // file -> violations, for the failure message (file + line, per the rule's brief)
 const motionDetails = new Map();
 
+// ── --strict: the guard's OWN pins ──────────────────────────────────────────
+// The categories above can only be evaluated over files the walk finds, so two
+// drift classes are invisible to them by construction: a MOTION_LEDGER entry whose
+// file has been deleted is never re-counted (its allowance outlives the file, and
+// whatever lands on that path next is exempt until someone notices), and an
+// allowlist entry whose path is gone stops exempting anything while still reading
+// as a live exemption. Both are `--strict` failures, so the ledger and the
+// allowlists stay the truth instead of an archive of what used to need excusing.
+const GUARD_PINS = [
+  ["MOTION_LEDGER", Object.keys(MOTION_LEDGER)],
+  ["TS_HEX_ALLOWLIST", TS_HEX_ALLOWLIST],
+  ["DARK_SEAM_ALLOWLIST", DARK_SEAM_ALLOWLIST],
+  ["UNSCOPED_STYLE_ALLOWLIST", UNSCOPED_STYLE_ALLOWLIST],
+  ["FONT_ALLOWLIST", FONT_ALLOWLIST],
+  ["SHADOW_LITERAL_ALLOWLIST", SHADOW_LITERAL_ALLOWLIST],
+];
+
+function stalePins() {
+  const problems = [];
+  for (const [name, entries] of GUARD_PINS) {
+    for (const entry of entries) {
+      if (name === "MOTION_LEDGER" && !/\.(vue|ts)$/.test(entry)) {
+        problems.push(name + " names a file this scan never reads: " + entry);
+        continue;
+      }
+      if (!existsSync(join(SRC_DIR, entry.replace(/\/$/, "")))) {
+        problems.push(name + " points at a path that no longer exists: " + entry);
+      }
+    }
+  }
+  return problems;
+}
+
 const files = walk(SRC_DIR);
 
 // Dev aid: print the exact per-file motion ledger to paste over MOTION_LEDGER.
@@ -708,6 +745,9 @@ violations.sort((a, b) => b.n - a.n || a.rel.localeCompare(b.rel));
 const total = violations.reduce((sum, v) => sum + v.n, 0);
 const fileCount = Object.keys(current).length;
 
+const STRICT = process.argv.includes("--strict");
+const pinProblems = STRICT ? stalePins() : [];
+
 const detail = ({ rel, k, n }) => {
   if (k === "motionNoCompanion")
     return [
@@ -727,6 +767,7 @@ if (process.argv.includes("--list")) {
     console.log(`  ${v.rel}  [${v.k}]  ${v.n}`);
     for (const d of detail(v)) console.log(d);
   }
+  for (const p of pinProblems) console.log("  [guard-pin]  " + p);
   console.log(`\n${total} violation(s) across ${fileCount} file(s).`);
   process.exit(0);
 }
@@ -750,4 +791,23 @@ if (violations.length) {
   process.exit(1);
 }
 
-console.log(`OK — no design-token bypasses (${files.length} files scanned).`);
+if (pinProblems.length) {
+  console.error(
+    "\ncheck-design-consistency --strict: " +
+      pinProblems.length +
+      " stale pin(s) in the guard itself:\n",
+  );
+  for (const p of pinProblems) console.error("  " + p);
+  console.error(
+    "\nDelete the entry: the file it justified is gone, and leaving it named would let\n" +
+      "whatever lands there next inherit an exemption no review ever granted.\n",
+  );
+  process.exit(1);
+}
+
+const pinned = GUARD_PINS.reduce((n, [, entries]) => n + entries.length, 0);
+console.log(
+  `OK — no design-token bypasses (${files.length} files scanned` +
+    (STRICT ? ", " + pinned + " guard pins verified" : "") +
+    ").",
+);
