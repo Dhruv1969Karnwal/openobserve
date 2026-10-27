@@ -232,7 +232,10 @@ describe("SearchBar — paid affordances derive from the registry (F-36)", () =>
       expect(openUpgradeDialog).not.toHaveBeenCalled();
     });
 
-    it("bounces the dialog even on the shipped hide build as defense in depth", async () => {
+    // Handler-level defense, same caveat as the list-item case: the create item
+    // lives inside `v-if="scheduledSearchAccess.visible"` (SearchBar.vue:776,784),
+    // so under "hide" no DOM click reaches it either.
+    it("bounces the dialog from the create handler where hide makes it DOM-unreachable", async () => {
       await mountSearchBar();
       wrapper!.vm.onScheduleMenuSelect();
       expect(openUpgradeDialog).toHaveBeenCalledTimes(1);
