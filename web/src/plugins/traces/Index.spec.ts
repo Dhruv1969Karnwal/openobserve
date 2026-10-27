@@ -3723,10 +3723,10 @@ describe("Index.vue (Main Traces Page)", () => {
       expect(ownSearches()).toHaveLength(1);
     });
 
-    // F-67: the saved-view payload used to assign meta.searchMode verbatim, so a
+    // The saved-view payload used to assign meta.searchMode verbatim, so a
     // non-enterprise apply landed on a blank region and wrote ?tab=service-graph
     // back into the URL.
-    describe("gated tabs in the view payload (F-67)", () => {
+    describe("gated tabs in the view payload", () => {
       afterEach(() => {
         (config as any).isEnterprise = "true";
       });

@@ -1450,7 +1450,7 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
   });
 
   /**
-   * F-101: the restore only ever refused `anomalyDetection`, so any other value
+   * The restore used to refuse `anomalyDetection` and nothing else, so any other value
    * was adopted as a tab. `?tab=incidents` (a branch whose toggle no longer
    * exists) turned row filtering OFF with nothing lit, and garbage stuck in the
    * URL — the `activeTab` watcher that re-writes `?tab=` fires on CHANGE only, and
@@ -1465,7 +1465,7 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
 
       expect(wrapper.vm.activeTab).toBe("all");
       // Row filtering is back on: "all" is the branch that shows every alert.
-      // F-112 pins this harder than a value check: the incidents early-return
+      // Pinned harder than a value check would: the incidents early-return
       // that the coercion made unreachable is gone, so whatever the URL
       // claimed, filterAlertsByTab filters instead of skipping.
       await waitData(wrapper);
@@ -1499,7 +1499,7 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
   );
 
   /**
-   * The coerced value has to reach the URL too (F-65's state/URL desync class), by
+   * The coerced value has to reach the URL too — the state/URL desync class — by
    * REPLACE — a normalization must not add a history entry.
    */
   it("re-writes the URL with the coerced tab, with replace rather than push", async () => {

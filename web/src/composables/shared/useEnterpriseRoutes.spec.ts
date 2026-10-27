@@ -657,10 +657,11 @@ describe("useEnterpriseRoutes.ts", () => {
       expect(routeGuard).toHaveBeenCalledWith(mockTo, mockFrom, mockNext);
     });
 
-    // Shipped policy: `PAID_FEATURE_POLICY = "hide"` (enterpriseFeatures.ts:357) makes an
+    // Shipped policy: `PAID_FEATURE_POLICY = "hide"` in utils/enterpriseFeatures.ts makes an
     // admin-disabled RBAC surface invisible rather than locked, so the guard sends the visit to
-    // home — the F-40 consequence: `enterpriseFeature.rbacDisabled` is unreachable by design and the
-    // bounce drops `redirect: to.fullPath`, since a hidden feature has no in-app unlock path.
+    // home — the consequence of shipping "hide": `enterpriseFeature.rbacDisabled` is unreachable
+    // by design, and the bounce drops `redirect: to.fullPath`, since a hidden feature has no
+    // in-app unlock path to return from.
     it("redirects to home when rbac_enabled is explicitly false under the shipped hide policy", async () => {
       store.state.zoConfig = { ...store.state.zoConfig, rbac_enabled: false };
       const { routeGuard } = await import("@/utils/zincutils");
@@ -681,9 +682,9 @@ describe("useEnterpriseRoutes.ts", () => {
     });
 
     // The lock-era intent behind the test above, restated as the decision the guard reads. The
-    // `enterpriseFeatureLocked` branch of `withFeatureGate` (enterpriseFeatures.ts:445-449) cannot
+    // `enterpriseFeatureLocked` branch of `withFeatureGate` cannot
     // be exercised in place: `withFeatureGate` and `checkFeatureAccess` read the shipped constant
-    // from inside their own module, which is exactly the limitation `paidFeaturePolicy.ts:39-41`
+    // from inside their own module, which is exactly the limitation the helper file
     // documents — `setPaidFeaturePolicy("lock")` would only change what CONSUMERS import, so a
     // "lock mode" case here would be testing the helper's spread, not this guard.
     it("reports admin-disabled rbac as hidden and not upgradable", async () => {
@@ -704,7 +705,7 @@ describe("useEnterpriseRoutes.ts", () => {
   });
 
   // ==========================================================================
-  // F-99 — the serviceAccounts guard read a `window.store` nothing assigns
+  // The serviceAccounts guard used to read a `window.store` nothing assigns
   // ==========================================================================
   /**
    * `store?.state?.zoConfig?.service_account_enabled ?? true` on a permanently

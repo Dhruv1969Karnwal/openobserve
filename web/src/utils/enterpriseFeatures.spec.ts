@@ -50,9 +50,9 @@ describe("enterpriseFeatures", () => {
       expect(buildFeatureGateContext({}).rbac).toBe(true);
     });
 
-    // F-104: no argument is not a cold load, it is a gate that never said where
+    // No argument is not a cold load; it is a gate that never said where
     // its state came from. The fail-open default was the latent half of SEC-1.
-    it("fails rbac CLOSED for a caller that passes no config at all (F-104)", () => {
+    it("fails rbac CLOSED for a caller that passes no config at all", () => {
       expect(buildFeatureGateContext().rbac).toBe(false);
       expect(buildFeatureGateContext(undefined).rbac).toBe(false);
       expect(buildFeatureGateContext(null).rbac).toBe(false);
@@ -120,7 +120,7 @@ describe("enterpriseFeatures", () => {
       },
     );
 
-    // F-68 added this key so the Pipelines Backfill entry and its route share
+    // This key exists so the Pipelines Backfill entry and its route share
     // one predicate; the pair is only as honest as the gate underneath it.
     it("hides the pipelineBackfill entry the route is gated on in OSS", () => {
       const result = checkFeatureAccess("pipelineBackfill", buildFeatureGateContext());
@@ -203,7 +203,7 @@ describe("enterpriseFeatures", () => {
     it("unlocks rbac in an enterprise build when the loaded flag hasn't loaded yet", () => {
       config.isEnterprise = "true";
       // The store seeds `zoConfig` to `{}` (stores/index.ts), so this is every
-      // real cold load; the no-config case stays closed (F-104, above).
+      // real cold load; the no-config case above stays closed either way.
       expect(checkFeatureAccess("rbac", buildFeatureGateContext({})).allowed).toBe(true);
     });
 
@@ -249,7 +249,7 @@ describe("enterpriseFeatures", () => {
 
     // The hole SEC-1 named: an RBAC-dependent key gated without a context used to
     // read `rbac: true` and let the navigation through on a flag-off org.
-    it("refuses an rbac route whose gate passes no context, even entitled (F-104)", () => {
+    it("refuses an rbac route whose gate passes no context, even entitled", () => {
       config.isEnterprise = "true";
       const guard = vi.fn();
       const next = vi.fn();
@@ -263,7 +263,7 @@ describe("enterpriseFeatures", () => {
       config.isEnterprise = "false";
     });
 
-    it("still serves an rbac route through the context the guards inject (F-104 mirror)", () => {
+    it("still serves an rbac route through the context the guards inject (mirror)", () => {
       config.isEnterprise = "true";
       const guard = vi.fn();
       const next = vi.fn();

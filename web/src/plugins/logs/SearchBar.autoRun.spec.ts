@@ -700,7 +700,7 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
       return view;
     };
 
-    // F-64: the saved-view payload is org-stored client-writable JSON and merges
+    // The saved-view payload is org-stored client-writable JSON and merges
     // into searchObj wholesale, so the gated toggle must pass the URL sanitizer.
     it("a view payload cannot open the gated patterns panel on the shipped build", async () => {
       await router.replace({ name: "logs", query: {} });
@@ -743,7 +743,7 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
     });
 
     /**
-     * F-98: the saved-view boundary sanitized the panel toggle (F-64) but let the
+     * The saved-view boundary sanitized the panel toggle but let the
      * rest of `meta` merge unfiltered, and `meta.showSearchScheduler` has an
      * `immediate` watcher that turns a truthy value straight into
      * `searchSchedulerJob = true` — the Create Scheduled Search dialog, a paid
@@ -801,7 +801,7 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
     });
 
     /**
-     * EDGE-03: a payload whose `meta` is not an object used to be stopped only by
+     * A payload whose `meta` is not an object used to be stopped only by
      * an unrelated strict-mode write throwing before the merge. The boundary now
      * type-guards it, so the shape lands safe BY DESIGN and the watcher never sees
      * a paid key.

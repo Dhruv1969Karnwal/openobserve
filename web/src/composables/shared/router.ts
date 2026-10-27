@@ -204,7 +204,7 @@ const profilesRouteGuard = (to: any, from: any, next: any) => {
  * each hidden behind the enterprise build, a self-hosted deploy AND the backend
  * `search_inspector_enabled` flag. The route only ever carried `routeGuard`, so
  * a pasted or bookmarked `/logs/inspector` rendered the paid page with its
- * entries hidden: exactly what the F-68 wave closed for `alertInsights` and
+ * entries hidden: exactly what the registry wave closed for `alertInsights` and
  * `pipelineBackfill` (both `withFeatureGate` now) and missed here.
  *
  * The EDITION half lives in the registry as `searchJobInspector` (enterprise AND

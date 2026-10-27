@@ -33,8 +33,10 @@ export type AlertListTab = (typeof ALERT_LIST_TABS)[number];
 
 export const DEFAULT_ALERT_LIST_TAB: AlertListTab = "all";
 
-/** The gated tab: rendered but locked unless the anomaly feature is enabled. */
-export const GATED_ALERT_LIST_TAB: AlertListTab = "anomalyDetection";
+/** The gated tab: rendered but locked unless the anomaly feature is enabled.
+ *  Module-internal on purpose — callers pass the ENABLED answer, never this name,
+ *  so the set and its gated member cannot be re-assembled wrongly elsewhere. */
+const GATED_ALERT_LIST_TAB: AlertListTab = "anomalyDetection";
 
 export const isAlertListTab = (value: unknown): value is AlertListTab =>
   typeof value === "string" && ALERT_LIST_TABS.some((tab) => tab === value);

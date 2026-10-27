@@ -110,7 +110,7 @@ describe("brand ownership in locale strings", () => {
 const atPath = (locale: Locale, dotted: string) =>
   dotted.split(".").reduce((node: any, part) => (node == null ? undefined : node[part]), locale);
 
-// Keys whose referent is the product the user is looking at (iteration-6 F-76 sweep). They name this
+// Keys whose referent is the product the user is looking at — the product-referent sweep. They name this
 // deployment, so naming upstream in them is a missed rename; none of them is a wire value.
 const PRODUCT_REFERENT_KEYS = [
   "emptyState.noRemoteTasks.actionDesc",
@@ -369,7 +369,7 @@ describe("raw product-name slots in components", () => {
   });
 
   // Credit, not a miss: the built-in model catalog, the enterprise-edition CTA, the Slack workspace
-  // and the npm/`@openobserve` MCP surface all belong to upstream (F-27, F-33, F-44).
+  // and the npm/`@openobserve` MCP surface all belong to upstream.
   it("leaves the slots that credit upstream standing as upstream", () => {
     const keeps: [string, string][] = [
       ["src/components/settings/ModelPricingList.vue", `raw('${UPSTREAM}')`],

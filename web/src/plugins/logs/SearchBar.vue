@@ -1287,7 +1287,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :debounce-time="100"
                 :nlp-mode="searchObj.meta.nlpMode"
                 :has-expand-button="!showFunctionEditor"
-                :show-ai-icon="config.isEnterprise == 'true' && store.state.zoConfig.ai_enabled"
                 :disable-ai="!searchObj.data.stream.selectedStream.length || isSqlModeDisabled"
                 :disable-ai-reason="
                   !searchObj.data.stream.selectedStream.length
@@ -3538,9 +3537,9 @@ export default defineComponent({
             // A saved view is org-stored client-writable JSON, so everything it
             // says about PAID state is sanitized here, before either merge below
             // (both `applySearchSnapshot` sites live in this one function):
-            // `meta`'s shape, the gated panel toggle (F-43) and every key of
+            // `meta`'s shape, the gated panel toggle and every key of
             // PAID_SNAPSHOT_META_KEYS — the paid-dialog trigger and the Ask-AI bar's
-            // external control (F-98). TRANSIENT_SEARCH_KEYS is the
+            // external control. TRANSIENT_SEARCH_KEYS is the
             // wrong mechanism for the toggle — views legitimately persist the free
             // values — but the boundary is the same one for all three.
             sanitizeSearchSnapshotMeta(extractedObj, {

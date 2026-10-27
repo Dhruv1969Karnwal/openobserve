@@ -38,7 +38,7 @@ const snapshotWith = (meta: unknown): any => ({
   data: { stream: { selectedStream: ["app_logs"] } },
 });
 
-describe("sanitizeSearchSnapshotMeta (F-98)", () => {
+describe("sanitizeSearchSnapshotMeta", () => {
   it("coerces the paid scheduler flag the merge used to carry through", () => {
     const snapshot = snapshotWith({ showSearchScheduler: true });
 
@@ -71,7 +71,7 @@ describe("sanitizeSearchSnapshotMeta (F-98)", () => {
   });
 
   // ---------------------------------------------------------------------------
-  // The Ask-AI bar's external control (F-115) — a prop binding, not a watcher, so
+  // The Ask-AI bar's external control — a prop binding, not a watcher, so
   // the `immediate`-watcher grep that produced the first version of the table
   // missed it: logs/SearchBar.vue binds meta.nlpMode to the query editor, whose
   // `isAIMode` returns that prop alone under external control and drives the paid
@@ -183,7 +183,7 @@ describe("sanitizeSearchSnapshotMeta (F-98)", () => {
   });
 
   // ---------------------------------------------------------------------------
-  // The gated panel toggle keeps its own entitlement-aware coercion (F-43/F-66)
+  // The gated panel toggle keeps its own entitlement-aware coercion
   // ---------------------------------------------------------------------------
   it("resolves a gated panel toggle to the free default when un-entitled", () => {
     const snapshot = snapshotWith({ logsVisualizeToggle: "patterns" });
@@ -225,9 +225,9 @@ describe("sanitizeSearchSnapshotMeta (F-98)", () => {
   });
 
   // ---------------------------------------------------------------------------
-  // EDGE-03: `meta` itself is type-guarded, not incidentally saved by a throw
+  // The `meta` field itself is type-guarded, not incidentally saved by a throw
   // ---------------------------------------------------------------------------
-  describe("non-object meta shapes (EDGE-03)", () => {
+  describe("non-object meta shapes", () => {
     it.each([
       ["string", "abc"],
       ["number", 42],

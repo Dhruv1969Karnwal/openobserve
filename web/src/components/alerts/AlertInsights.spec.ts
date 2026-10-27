@@ -170,12 +170,11 @@ describe("AlertInsights - rendering", () => {
   });
 
   /**
-   * F-101: the `?tab=` restore used to accept any string the URL carried (it only
-   * refused the two locked tabs), so a deep link like `?tab=incidents` became
-   * `currentTab`, matched no tab in the insights config, and `loadDashboard` bailed
-   * into its no-match branch — an empty insights page under a URL that looked like
-   * a working deep link. It is a closed set now, like logs' panel toggle and
-   * traces' `?tab=`.
+   * The `?tab=` restore used to accept any string the URL carried (it only refused
+   * the two locked tabs), so a deep link like `?tab=incidents` became `currentTab`,
+   * matched no tab in the insights config, and `loadDashboard` bailed into its
+   * no-match branch — an empty insights page under a URL that looked like a working
+   * deep link. It is a closed set now, like logs' panel toggle and traces' `?tab=`.
    */
   it.each(["incidents", "overview ", "OVERVIEW", "", "🙃", "__proto__", "toString"])(
     "restores the overview tab instead of adopting the non-tab value %p",

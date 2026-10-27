@@ -35,7 +35,7 @@ const UNLOCKED = { anomalyDetectionEnabled: true };
 const LOCKED_INSIGHTS = { insightsAllowed: false };
 const ALLOWED_INSIGHTS = { insightsAllowed: true };
 
-describe("resolveAlertListTab (F-101)", () => {
+describe("resolveAlertListTab", () => {
   /**
    * Every value the toggle group actually renders round-trips — including the
    * anomaly tab, whose cell with `anomalyDetectionEnabled: true` is the mirror
@@ -103,7 +103,7 @@ describe("resolveAlertListTab (F-101)", () => {
   });
 });
 
-describe("resolveAlertInsightsTab (F-101)", () => {
+describe("resolveAlertInsightsTab", () => {
   /** Both free tabs round-trip; garbage never reaches `currentTab`. */
   it.each(["overview", "quality"])("keeps the free tab %s", (tab) => {
     expect(resolveAlertInsightsTab(tab, LOCKED_INSIGHTS)).toBe(tab);

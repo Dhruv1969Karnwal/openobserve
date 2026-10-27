@@ -320,13 +320,13 @@ describe("PipelinesList", () => {
       expect(wrapper.vm.backfillDialog.show).toBe(false);
     });
 
-    // F-100: the row action reads the `pipelineBackfill` key that Functions.vue's
+    // The row action reads the `pipelineBackfill` key that Functions.vue's
     // header entry and the route share, not a private `config` read.
-    it("keeps the backfill action hidden on the shipped OSS build (F-100)", () => {
+    it("keeps the backfill action hidden on the shipped OSS build", () => {
       expect(wrapper.vm.backfillAccess.visible).toBe(false);
     });
 
-    it("shows the backfill action on the enterprise build the route allows (F-100)", () => {
+    it("shows the backfill action on the enterprise build the route allows", () => {
       const edition = config.isEnterprise;
       (config as any).isEnterprise = "true";
       try {

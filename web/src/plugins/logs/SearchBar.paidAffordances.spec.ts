@@ -96,7 +96,7 @@ const router = createRouter({
   history: createMemoryHistory(),
   routes: [
     { path: "/logs", name: "logs", component: { template: "<div />" } },
-    // The F-69a list click pushes this by name — a spy passes through to the
+    // The scheduled-search list click pushes this by name — a spy passes through to the
     // real push, which throws "No match" unless the route is registered.
     {
       path: "/logs/search-scheduler",
@@ -106,7 +106,7 @@ const router = createRouter({
   ],
 });
 
-describe("SearchBar — paid affordances derive from the registry (F-36)", () => {
+describe("SearchBar — paid affordances derive from the registry", () => {
   let wrapper: VueWrapper<any> | undefined;
   const originalIsEnterprise = config.isEnterprise;
   const originalIsCloud = config.isCloud;
@@ -156,11 +156,11 @@ describe("SearchBar — paid affordances derive from the registry (F-36)", () =>
     store.state.zoConfig = originalZoConfig;
   });
 
-  // F-100: the Inspect group now reads the `searchJobInspector` key its route is
+  // The Inspect group now reads the `searchJobInspector` key its route is
   // gated on instead of re-deriving the edition from `config`; the backend
   // `search_inspector_enabled` flag stays the caller-side conjunct. The four cells
   // are the truth table of the raw triple this replaces.
-  describe("Search Job Inspector entry reads the registry (F-100)", () => {
+  describe("Search Job Inspector entry reads the registry", () => {
     it.each([
       { label: "OSS with the flag on", ent: "false", cloud: "false", flag: true, want: false },
       {
@@ -191,7 +191,7 @@ describe("SearchBar — paid affordances derive from the registry (F-36)", () =>
     );
   });
 
-  describe("narrow-viewport view-mode menu (F-36b)", () => {
+  describe("narrow-viewport view-mode menu", () => {
     it("omits patterns on the shipped hide build (OSS)", async () => {
       await mountSearchBar();
       expect(viewModeValues()).not.toContain("patterns");
@@ -219,7 +219,7 @@ describe("SearchBar — paid affordances derive from the registry (F-36)", () =>
     });
   });
 
-  describe("scheduled-search create click (F-36a)", () => {
+  describe("scheduled-search create click", () => {
     it("routes an un-entitled click to the upsell dialog instead of the create flow", async () => {
       policy.lockSim = true;
       await mountSearchBar();
@@ -241,7 +241,7 @@ describe("SearchBar — paid affordances derive from the registry (F-36)", () =>
     });
 
     // Handler-level defense, same caveat as the list-item case: the create item
-    // lives inside `v-if="scheduledSearchAccess.visible"` (SearchBar.vue:776,784),
+    // lives inside the `v-if="scheduledSearchAccess.visible"` group it belongs to,
     // so under "hide" no DOM click reaches it either.
     it("bounces the dialog from the create handler where hide makes it DOM-unreachable", async () => {
       await mountSearchBar();
@@ -251,10 +251,10 @@ describe("SearchBar — paid affordances derive from the registry (F-36)", () =>
     });
   });
 
-  // F-69a: the list item used to push `searchScheduler` unconditionally — a
+  // The list item used to push `searchScheduler` unconditionally — a
   // lock build rendered it allowed while the page's own guard bounced the
   // visit. Same allowed-first guard as the create item now.
-  describe("scheduled-search list click (F-69a)", () => {
+  describe("scheduled-search list click", () => {
     it("routes an un-entitled click to the upsell dialog instead of the bounce", async () => {
       policy.lockSim = true;
       const pushSpy = vi.spyOn(router, "push");

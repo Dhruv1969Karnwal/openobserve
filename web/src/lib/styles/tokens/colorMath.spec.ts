@@ -390,7 +390,7 @@ describe("the real token sheets", () => {
 
   describe.each([
     // -2 per theme vs the previous pin: the dead --color-badge-primary-solid-bg
-    // and -text pair (zero consumers web-wide; F-126 ledger honesty) left the
+    // and -text pair (zero consumers web-wide; ledger honesty) left the
     // sheets with this wave.
     ["light", 1073, 1061],
     ["dark", 1074, 1062],

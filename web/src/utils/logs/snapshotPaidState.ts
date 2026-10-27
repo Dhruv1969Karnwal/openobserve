@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { resolveLogsVisualizeToggle, type LogsVisualizeToggle } from "@/ts/interfaces/logs";
+import { resolveLogsVisualizeToggle } from "@/ts/interfaces/logs";
 import type { PlainObject } from "./transientSearchKeys";
 
 /** What the call site knows about this build's entitlements, resolved once. */
@@ -155,10 +155,10 @@ const isPlainObject = (value: unknown): value is PlainObject =>
  *  1. `meta` is a plain object. A payload carrying a scalar or array `meta` used
  *     to reach `mergeDeep`, which overwrites the live object's primitives with it,
  *     and the only thing that saved the app was an unrelated strict-mode write
- *     throwing first. The shape is now checked explicitly (F-98 / EDGE-03) —
+ *     throwing first. The shape is now checked explicitly —
  *     nothing legible can be stored on a non-object, so there is nothing to keep.
  *  2. The panel toggle is resolved through the same closed-set, entitlement-aware
- *     sanitizer the URL restore uses (F-43 / F-66), so `patterns` cannot be
+ *     sanitizer the URL restore uses, so `patterns` cannot be
  *     restored by payload on a build that does not sell it.
  *  3. Every key in `PAID_SNAPSHOT_META_KEYS` that could open a paid surface is
  *     written from its `PAID_SNAPSHOT_META_RULES` entry: forced to `hidden`, or left
@@ -188,7 +188,7 @@ export function sanitizeSearchSnapshotMeta<T extends PlainObject>(
     meta.logsVisualizeToggle = resolveLogsVisualizeToggle(
       meta.logsVisualizeToggle,
       access.patternsAllowed,
-    ) as LogsVisualizeToggle;
+    );
   }
 
   for (const key of PAID_SNAPSHOT_META_KEYS) {

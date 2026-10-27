@@ -80,11 +80,10 @@
   /* Row / item states on the content surface — neutral ladder literals, NEVER
        var(--color-primary-*): utils/theme.ts injects its generated ramp as inline
        styles on <html>, and inline beats this sheet. The default dark themeColor
-       is #E6E6E6 (near-white), so its "800/900" shades land on mid-greys
-       (measured live: --d-hover #5c5c5c, --d-selected #5b5d61, accent-active
-       #8a8a8a) and every grey-tier label on a hovered/selected row sank to
-       2.24–2.65:1. The washes are also measured ON THEM by
-       themeRuntimeContrast.spec.ts, per predefined theme.
+       is #E6E6E6 (near-white), so its "800/900" shades land on mid-greys rather
+       than on anything dark, and while these washes resolved through that ramp
+       every grey-tier label on a hovered/selected row sank to 2.24–2.65:1 — the
+       readings themeRuntimeContrast.spec.ts now pins as must-not-be, per theme.
        Ladder placement: base → hover 1.062:1 (below the 1.112:1 base→panel
        elevation step — a transient never outranks a tier), hover → selected
        1.114:1 (selection is a persistent state, it may equal the elevation
@@ -159,7 +158,7 @@
   --color-syntax-deletion-fg: #ffdcd7;
   --color-syntax-deletion-bg: #67060c;
   /* Colorized queries — the query editor's vs-dark hues, lifted to clear 4.5:1 on
-       surface-subtle: measured 5.01–8.80 on the F-73-moved well (L .02022), manifest-paired */
+       surface-subtle: measured 5.01–8.80 on the repositioned well (L .02022), manifest-paired */
   --color-query-syntax-keyword: #569cd6;
   --color-query-syntax-function: #ff2bff;
   --color-query-syntax-string: #ce9178;
@@ -235,7 +234,7 @@
   --color-border-strong: var(--d-border-strong);
   /* Control edges. `--d-border-strong` (#727982) clears 3:1 against every tier that
      carries control edges TODAY — chrome 4.42, base (canvas) 4.08, panel 3.67, well 3.40,
-     overlay 3.19 (binding; the pair contrast.spec.ts judges) — measured after the F-73
+     overlay 3.19 (binding; the pair contrast.spec.ts judges) — measured after the
      ladder move. Re-measure the five before extending the claim to another surface; dark
      reuses the value rather than inventing one; the light theme needs its own only
      because grey-400 falls short there. */
@@ -590,12 +589,12 @@
   --color-datepicker-day-hover-bg: var(--color-surface-accent-hover);
   --color-datepicker-day-selected-bg: var(--color-surface-accent-active);
   /* Selected segment/tab ink: a light neutral, NOT the selection fill — the
-     fill as text measured 1.34:1 on this popup (F-107). grey-100 = 12.86:1 on
+     fill as text measured 1.34:1 on this popup. grey-100 = 12.86:1 on
      overlay, 14.81 on panel; the step-dot/underline markers clear 3:1 by it. */
   --color-datepicker-selected-fg: var(--color-grey-100);
   --color-datepicker-day-today-border: var(--color-primary-400);
   /* An outside-month day cell is still a clickable button — no disabled-state
-     exemption (F-111): it rides the raised placeholder tier above (grey-450,
+     exemption: it rides the raised placeholder tier above (grey-450,
      4.76:1 on the popup) instead of the disabled step it folded to at 1.79:1. */
   --color-datepicker-day-outside-text: var(--color-datepicker-placeholder);
   --color-datepicker-nav-hover-bg: var(--color-surface-accent-hover);

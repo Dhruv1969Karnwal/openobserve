@@ -916,7 +916,7 @@ describe("useRoutes (router.ts)", () => {
   });
 
   // =========================================================================
-  // 8c. homeChildRoutes — the registry-gated paid routes (F-68, F-69b)
+  // 8c. homeChildRoutes — the registry-gated paid routes
   // =========================================================================
   /**
    * `alertInsights` and `pipelineBackfill` used to carry only the auth guard,
@@ -993,7 +993,7 @@ describe("useRoutes (router.ts)", () => {
   });
 
   // =========================================================================
-  // 8d. homeChildRoutes — searchJobInspector, the F-68 wave's missed sibling (F-97)
+  // 8d. homeChildRoutes — searchJobInspector, the sibling that wave missed
   // =========================================================================
   /**
    * `/logs/inspector` is the paid Search Job Inspector. All three of its entry
@@ -1135,20 +1135,20 @@ describe("useRoutes (router.ts)", () => {
   });
 
   /**
-   * F-69b: the page guard and the SearchBar menu entry are the two doors to
+   * The page guard and the SearchBar menu entry are the two doors to
    * the same feature — they must answer the same editions. The raw
    * `isEnterprise` check refused pure-Cloud visits while the registry rendered
    * the menu entry allowed; both halves now read the `scheduledSearch` gate.
    *
-   * F-103 took the next step: the guard was an inline `checkFeatureAccess` +
+   * The next step closed the rest of the shape: the guard was an inline `checkFeatureAccess` +
    * `next({ name: "logs" })`, which dropped `org_identifier` (a shared link
    * silently switched org) and could never reach the locked page a `"lock"`
    * build promises. It is now `withFeatureGate("scheduledSearch", routeGuard)`,
    * the same helper `alertInsights` / `pipelineBackfill` use. The locked-page
    * half of that contract is not reachable from a spec: `hidesPaidFeatures` is a
-   * module const fixed by `PAID_FEATURE_POLICY` (see the flip proof in
-   * iter-7/fixer-notes-11.md — a source-flipped copy lands
-   * `enterpriseFeatureLocked` with `feature` + `redirect`).
+   * module const fixed by `PAID_FEATURE_POLICY`; a source-flipped copy of the tree
+   * lands `enterpriseFeatureLocked` with `feature` + `redirect`, which is the proof
+   * this describe cannot provide from inside a spec.
    */
   describe("homeChildRoutes — searchScheduler guard reads the registry", () => {
     it("bounces the direct URL to home on the shipped OSS build, org preserved", () => {
@@ -1577,14 +1577,14 @@ describe("useRoutes (router.ts)", () => {
    * read `(window as any).store` — an assignment nothing in this app ever makes —
    * so their `build_type === "opensource"` clause was a constant `false` and an
    * enterprise UI pointed at an OSS backend rendered the paid editor page while
-   * every call 403'd. F-99 routes them through one helper reading the store
+   * every call 403'd. They now go through one helper reading the store
    * singleton the module imports, the way `downtimesRouteGuard` already did.
    *
    * These specs used to fake `window.store`, which pinned the dead read instead
    * of the behavior: passing while the production guard could never see a flag.
    * They now drive the SAME singleton a browser has at navigation time.
    */
-  describe("homeChildRoutes — alert-surface guards read the real store (F-99)", () => {
+  describe("homeChildRoutes — alert-surface guards read the real store", () => {
     const ALERT_SURFACE_ROUTES = [
       "alertSources",
       "addAnomalyDetection",
@@ -2359,7 +2359,7 @@ describe("useRoutes (router.ts)", () => {
   describe("Route Guard Invocations", () => {
     /**
      * This route used to reach the page with nothing but the auth guard, which is
-     * what this assertion pinned. It is a registry-gated paid route now (F-97), so
+     * what this assertion pinned. It is a registry-gated paid route now, so
      * the auth guard only runs once the edition AND the `search_inspector_enabled`
      * flag say the page is sold; the bounce itself is specced in section 8d.
      */
@@ -2532,7 +2532,7 @@ describe("useRoutes (router.ts)", () => {
       const { homeChildRoutes } = useRoutes();
       const route = findRoute(homeChildRoutes, "pipelineBackfill");
 
-      // F-68: the route is registry-gated — entitled builds reach the page.
+      // The route is registry-gated — entitled builds reach the page.
       config.isEnterprise = "true";
       const mockTo = {};
       const mockFrom = {};
@@ -2772,14 +2772,14 @@ describe("useRoutes (router.ts)", () => {
     beforeEach(() => {
       // A truly entitled SELF-HOSTED build: with `isCloud = "true"` two of the
       // gated routes would refuse the visit on edition alone (Search Job Inspector
-      // refuses Cloud outright, exactly like its entries do — F-97), and the proxy
+      // refuses Cloud outright, exactly like its entries do), and the proxy
       // below would compare a paywall mute against a chain that never reached
       // `routeGuard`. Every other key here answers on `isEnterprise` alone.
       config.isEnterprise = "true";
       config.isCloud = "false";
       previousZoConfig = store.state.zoConfig;
       // `search_inspector_enabled` is the other entitlement this table reads at
-      // face value: /logs/inspector is gated on it (F-97), so an "entitled build"
+      // face value: /logs/inspector is gated on it, so an "entitled build"
       // that leaves it unset bounces before routeGuard and the proxy below would
       // compare a paywall mute against a chain that never ran.
       store.state.zoConfig = {

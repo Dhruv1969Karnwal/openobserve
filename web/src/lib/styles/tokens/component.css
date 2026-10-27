@@ -713,7 +713,7 @@
   --color-datepicker-disabled-bg: var(--color-surface-subtle);
   --color-datepicker-disabled-border: var(--color-border-default);
   --color-datepicker-text: var(--color-text-heading);
-  /* Light twin of the F-109 dark split: this role paints ACTIVE controls — the
+  /* Light twin of the dark split above: this role paints ACTIVE controls — the
      ODateTimeRange trigger label, the ODate separators and empty segments, the
      popup timezone inputs — so it cannot fold into the disabled step it aliased
      (grey-400: 2.52:1 on the white popup/trigger hosts). grey-600 is the minimal
@@ -739,7 +739,7 @@
      Light deliberately equals the old fill value, so light paints unchanged. */
   --color-datepicker-selected-fg: var(--color-primary-600);
   --color-datepicker-day-today-border: var(--color-primary-600);
-  /* Outside-month days are clickable buttons (F-111), so light mirrors the dark
+  /* Outside-month days are clickable buttons, so light mirrors the dark
      tier here: they ride the raised placeholder step, not the disabled alias. */
   --color-datepicker-day-outside-text: var(--color-datepicker-placeholder);
   --color-datepicker-day-disabled-text: var(--color-text-disabled);

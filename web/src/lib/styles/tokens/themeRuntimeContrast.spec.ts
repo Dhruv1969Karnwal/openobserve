@@ -44,7 +44,7 @@
  *     above the overlay tier in order — subtle, monotonic, never bright.
  *  3. THE PAIR MATRIX, BOTH MODES. Every text role an enumerated consumer
  *     paints on these surfaces clears 4.5:1 under every injected ramp — dark AND
- *     light. F-A11Y-02/03/05 proved the light mirror of the original seam
+ *     light. The measurement pass proved the light mirror of the original seam
  *     (white on the runtime primary-600 fills at 3.60, the active-tab accent ink
  *     at 3.03, the wash roles at 3.49–4.45); the fills' inks and the accent-text
  *     roles are now picked per theme by utils/theme.ts and the wash roles name
@@ -53,7 +53,7 @@
  *     inactive roles), each entry carrying its measured number and pinned by an
  *     equality assertion in both directions — a skip that stops being needed
  *     fails the suite, and a new failure cannot hide behind a pattern.
- *  4. THE CONSUMER SCAN (F-107): the components' own class bindings are
+ *  4. THE CONSUMER SCAN: the components' own class bindings are
  *     measured on the surfaces they actually paint — fill inks on their fills
  *     (FILL_INK_HOSTS), everything else on the popup/trigger tiers — so a fill
  *     token used as text, or a role dropping under AA on any predefined ramp,
@@ -73,7 +73,7 @@ import { contrastRatio, relativeLuminance, resolveColor, resolveTokens } from ".
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-/** Same cascade as contrast.spec.ts — the dark scope was the seam, the light one is F-A11Y-02's. */
+/** Same cascade as contrast.spec.ts — the dark scope was the seam; so was the light one. */
 const TOKEN_FILES = ["base.css", "semantic.css", "component.css", "dark.css"];
 const SHEETS = TOKEN_FILES.map((file) => readFileSync(join(here, file), "utf8"));
 const SHEET_DARK = resolveTokens(SHEETS).dark;
@@ -131,7 +131,7 @@ const RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => ({
   ),
 }));
 
-/** The LIGHT mirror (F-114/F-116): the light sheet under each theme's light ramp. */
+/** The LIGHT mirror: the light sheet under each theme's light ramp. */
 const LIGHT_RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => ({
   name: String(theme.name),
   themeColor: theme.light.themeColor,
@@ -201,8 +201,8 @@ const THEME_INVARIANT_SURFACES = [
  * `text-checkbox-checked-fg`; status chips/diff tables: `text-status-*-text`).
  */
 const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
-  // Row washes (OTableBodyCell.vue:462/511, AutoObserveActivityTab.vue:121,
-  // DiscoveredServices.vue:209, UsageTrends.vue:748, Quota.vue:176).
+  // Row washes (OTableBodyCell's hover/selected cells, AutoObserveActivityTab,
+  // DiscoveredServices, UsageTrends, Quota).
   ...(
     [
       "--color-text-heading",
@@ -305,7 +305,7 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
   {
     fg: "--color-pagination-item-text",
     bg: "--color-pagination-item-hover-bg",
-    where: "page number under the cursor (F-94 pair)",
+    where: "page number under the cursor",
   },
   {
     fg: "--color-datepicker-day-selected-text",
@@ -332,7 +332,7 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-datepicker-clock-selected-bg",
     where: "selected clock number (dark inverts: ink on the light disc)",
   },
-  // F-107: the selected/tab ink the time-range controls actually paint, and
+  // The selected/tab ink the time-range controls actually paint, and
   // the one-text-token ghost labels in their PRESSED (accent-active) state.
   {
     fg: "--color-datepicker-selected-fg",
@@ -354,7 +354,7 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-button-ghost-muted-active-bg",
     where: "muted ghost accent label when pressed while hovered",
   },
-  // F-126: the stable status inks — routed at every text consumer because
+  // The stable status inks — routed at every text consumer because
   // status-positive/-negative are the slots a theme's semantics repaint
   // (O2 Crimson Ink light put 2.80:1 orange under status-negative as text).
   {
@@ -430,7 +430,7 @@ const LIGHT_PAIR_DEFERRALS: Record<string, string> = {
   "--color-text-muted on --color-table-row-selected-bg":
     "grey-300: 1.09 on the runtime wash — booked light-pending text-muted row",
   "--color-text-placeholder on --color-table-row-hover-bg":
-    "grey-400: 2.29 on the runtime wash — booked light-pending text-placeholder row (the DATEPICKER placeholder role was fixed to grey-600 in F-114; the global role still folds here)",
+    "grey-400: 2.29 on the runtime wash — booked light-pending text-placeholder row (the DATEPICKER placeholder role was fixed to grey-600; the global role still folds here)",
 };
 
 const pairKey = (pair: { fg: string; bg: string }): string => `${pair.fg} on ${pair.bg}`;
@@ -445,7 +445,7 @@ const failingLightPairs = (pairs: { fg: string; bg: string }[]): Set<string> =>
   );
 
 /**
- * F-107 tripwire: the state fills this file governs are BACKGROUNDS, and the
+ * Tripwire: the state fills this file governs are BACKGROUNDS, and the
  * components were caught painting `--color-datepicker-day-selected-bg` (a fill)
  * through `text-`/`border-` utilities — 1.34:1 the moment the fill re-anchored
  * dark. Rather than transcribing pairs, this scans the actual consumer sources
@@ -454,7 +454,7 @@ const failingLightPairs = (pairs: { fg: string; bg: string }[]): Set<string> =>
  * 4.5:1 on the surface it is really drawn on — FILL_INK_ROLES maps the five
  * selected/focus glyph tokens onto their own runtime fill (measuring a
  * picked-on-white ink against the white popup would be vacuous, which is why
- * the pre-F-116 scan wrongly skipped them by NAME); everything else rides the
+ * the first version of this scan wrongly skipped them by NAME); everything else
  * calendar popup (overlay tier) and the trigger/field (panel tier), plus
  * --color-surface-subtle for chains on the placeholder tier.
  * Nothing is skipped by name pattern. The only roles not measured are the
@@ -487,7 +487,7 @@ const CONSUMER_UTILITIES = CONSUMER_COMPONENTS.map(({ file, path }) => {
 });
 
 /** Scanned text utilities that are drawn on their own runtime fill, not on the
- *  popup/trigger hosts (the picker inks of F-116/F-120 and their dark twins). */
+ *  popup/trigger hosts (the picker inks and their dark twins). */
 const FILL_INK_ROLES: Record<string, string> = {
   "--color-datepicker-day-selected-text": "--color-datepicker-day-selected-bg",
   "--color-datepicker-segment-focus-text": "--color-datepicker-segment-focus-bg",
@@ -515,7 +515,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     expect(RUNTIME_SCOPES.length).toBe(PREDEFINED_THEMES.length);
     expect(RUNTIME_SCOPES.length).toBeGreaterThanOrEqual(6);
     expect(LIGHT_RUNTIME_SCOPES.length).toBe(PREDEFINED_THEMES.length);
-    // The Crimson Ink semantics overlay must ride the scopes (F-126), or the
+    // The Crimson Ink semantics overlay must ride the scopes, or the
     // status pairs below re-join the sheet-fiction this file exists to kill.
     const crimson = LIGHT_RUNTIME_SCOPES.find((theme) => theme.name.includes("Crimson"))!;
     expect(hexOf("--color-status-negative", crimson.scope).toLowerCase()).toBe("#f97316");
@@ -634,7 +634,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     // OButton's primary variant paints ONE label token over rest/hover/active
     // (primary-600/700/800 of the injected ramp). pickButtonForeground must
     // survive the worst of the three states — checking the resting shade alone
-    // shipped a 2.78:1 pressed label under O2 Crimson Ink dark (F-118). The
+    // shipped a 2.78:1 pressed label under O2 Crimson Ink dark. The
     // floor is the 3:1 compromise documented on that function (white on a
     // saturated brand color at rest: O2 Lens light lands at 3.60); after the
     // worst-of-states pick the measured minimum across the twelve scopes is
@@ -662,8 +662,8 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("measures the reviewer-cited regressions at their fixed values (O2 Signature)", () => {
-    // F-A11Y-01 live capture: secondary/label on the row washes were 2.24–2.65,
+  it("measures the live-captured row-wash and ink regressions at their fixed values (O2 Signature)", () => {
+    // Browser capture of the shipped themes: secondary/label on the row washes were 2.24–2.65,
     // white-on-active 3.25–3.45, the checked tick 1.20. Pinned as floors here.
     const signature = RUNTIME_SCOPES.find((theme) => theme.name === "O2 Signature")!;
     const floor = (fg: string, bg: string) => ratio(fg, bg, signature.scope);
@@ -691,7 +691,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
   });
 
   it("keeps the light selected fills off the white-on-themeColor failure (O2 Lens)", () => {
-    // F-A11Y-02/EDGE-8-02: white on O2 Lens light primary-600 is 3.60:1. The
+    // White on O2 Lens light primary-600 is 3.60:1. The
     // picker must flip the ink for exactly the themes where white cannot clear
     // AA — every other light theme keeps white (the shipped look).
     const lens = LIGHT_RUNTIME_SCOPES.find((theme) => theme.name === "O2 Lens")!;
@@ -714,7 +714,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     }
   });
 
-  it("never paints a governed fill token as component foreground (F-107)", () => {
+  it("never paints a governed fill token as component foreground", () => {
     const offenders = CONSUMER_UTILITIES.flatMap(({ file, utilities }) =>
       utilities
         .filter(

@@ -223,9 +223,11 @@ const FEATURE_GATES: Record<FeatureKey, FeatureGateDefinition> = {
     labelKey: "menu.onCall",
     pitchKey: "enterpriseFeature.pitch.oncall",
   },
-  // Log-pattern mining — the Logs search "Patterns" toggle AND the stream
-  // Schema page's per-field pattern-association picker are the same
-  // capability surfaced in two places, so they share this one gate.
+  // Log-pattern mining — the Logs search "Patterns" toggle. This key gates that
+  // panel ONLY: the stream Schema page's per-field pattern-association picker (and
+  // its SDR column/dialog) reads the separate `regexPatterns` key, which happens to
+  // carry the same predicate today. Two keys, two surfaces — renaming a predicate
+  // here does not move the Schema page, and vice versa.
   logPatterns: {
     predicate: (c) => c.isEnterprise,
     labelKey: "search.showPatternsLabel",

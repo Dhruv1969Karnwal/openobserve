@@ -1314,7 +1314,7 @@ export default defineComponent({
 
     // Initialize activeTab from URL query parameter, default to "all".
     // Prevent forcing anomalyDetection tab when the feature is not available.
-    // F-101: the restore is a CLOSED SET now, not a one-value special case —
+    // The restore is a CLOSED SET now, not a one-value special case —
     // `?tab=incidents` (a retired tab) or any garbage used to be adopted
     // verbatim, which switched row filtering off with no tab lit and then got
     // re-persisted by the `activeTab` watcher below.

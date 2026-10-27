@@ -816,10 +816,16 @@ export default defineComponent({
 
     // The edition is the entry's gate: `access.visible` carries the policy half
     // (false under `PAID_FEATURE_POLICY = "hide"` for an edition that does not
-    // unlock `featureKey`, so no locked tile is inserted at all), and an entitled
-    // edition keeps the entry even when the admin's runtime flag is off — which is
-    // what the matching route guard does too. The flag only ever refuses a build
-    // that SHOWS locked affordances, i.e. a `"lock"` build of an un-entitled edition.
+    // unlock `featureKey`, so no locked tile is inserted at all) and an entitled
+    // edition keeps the entry whenever the runtime flag is on OR the build is
+    // entitled. That is deliberately NOT the same rule as the route's:
+    // `workflowsRouteGuard` refuses on `workflows_enabled === false` while this
+    // entry only ever requires the edition, so an entitled build with the flag off
+    // lists Workflows and sends the click to `/` — the split its own comment
+    // declares ("the two are not meant to match", useEnterpriseRoutes.ts). Chosen
+    // because the entry must not flash in before `/config` lands, while a guard may
+    // not bounce a bookmark whose config is still loading. `incidents` reads no
+    // flag on either side, so it has no such gap.
     const syncGatedMenuEntry = (
       name: string,
       featureKey: "incidents" | "workflows",

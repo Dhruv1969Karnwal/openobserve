@@ -16,7 +16,7 @@
 import { describe, expect, it } from "vitest";
 import { resolveLogsVisualizeToggle } from "./logs";
 
-describe("resolveLogsVisualizeToggle — patterns deep-link restore (F-43)", () => {
+describe("resolveLogsVisualizeToggle — patterns deep-link restore", () => {
   it("coerces patterns to logs when the build does not unlock log patterns", () => {
     expect(resolveLogsVisualizeToggle("patterns", false)).toBe("logs");
   });
@@ -32,9 +32,9 @@ describe("resolveLogsVisualizeToggle — patterns deep-link restore (F-43)", () 
     }
   });
 
-  // F-66: the results grid and every panel v-if match only the known toggle set,
+  // The results grid and every panel v-if match only the known toggle set,
   // so any other restored value used to blank the content area.
-  describe("coerces every value outside the known set to logs (F-66)", () => {
+  describe("coerces every value outside the known set to logs", () => {
     it.each([
       ["an unknown word", "foo"],
       ["a near-miss tab name", "metrics"],

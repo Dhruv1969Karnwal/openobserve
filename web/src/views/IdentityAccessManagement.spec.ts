@@ -266,9 +266,9 @@ describe("IdentityAccessManagement.vue Component", () => {
       w.unmount();
     });
 
-    // F-70: the quota tile used to read `visible: meta` alone, so an OSS meta
+    // The quota tile used to read `visible: meta` alone, so an OSS meta
     // org rendered a quota entry for a capability the edition does not have.
-    describe("quota tile gate (F-70)", () => {
+    describe("quota tile gate", () => {
       afterEach(() => {
         metaOrg.isMetaOrg.value = false;
       });

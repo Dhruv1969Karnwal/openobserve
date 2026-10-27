@@ -140,11 +140,11 @@ describe("AddFunction.vue Branch Coverage", () => {
     });
   const getForm = (wrapper: any) => (wrapper.findComponent(OForm).vm as any).form;
 
-  // F-100: the NL→VRL bar used to read `zoConfig.ai_enabled` ALONE, with no edition
+  // The NL→VRL bar used to read `zoConfig.ai_enabled` ALONE, with no edition
   // half at all — inert only because the OSS backend never emits that flag. It now
   // takes the edition from the `aiAssistant` registry key and treats ai_enabled as
   // the admin preference on top (QueryEditor.vue's documented split).
-  describe("NL→VRL AI bar entitlement (F-100)", () => {
+  describe("NL→VRL AI bar entitlement", () => {
     // A probe stub for the real editor: the props are what the gate renders, so
     // asserting them keeps the proof on the template rather than on the computed.
     const AiBarProbe = {

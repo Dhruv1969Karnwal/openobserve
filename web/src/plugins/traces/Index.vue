@@ -2142,7 +2142,7 @@ watch(
 const handleServiceGraphViewTraces = (data: any) => {
   // Switch to search tab. Same defense in depth as `onSearchModeChange`: this
   // child emit is only reachable from the entitled Service Graph view, and the
-  // payload's own mode is not trusted by the sink that writes it (F-98 / EDGE-04).
+  // payload's own mode is not trusted by the sink that writes it.
   searchObj.meta.searchMode = supportedTraceSearchMode(data.mode);
 
   // Set the selected stream in dropdown

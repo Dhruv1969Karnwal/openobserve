@@ -278,7 +278,7 @@ describe("Functions.vue", () => {
     });
   });
 
-  describe("Backfill entry gate (F-68)", () => {
+  describe("Backfill entry gate", () => {
     const originalIsEnterprise = (config as any).isEnterprise;
     const originalIsCloud = (config as any).isCloud;
     const originalInnerWidth = window.innerWidth;

@@ -572,13 +572,13 @@ describe("DbmSectionTabs", () => {
   });
 
   /**
-   * EDGE-04: with the policy flipped to "lock", the gated tabs come back
+   * With the policy flipped to "lock", the gated tabs come back
    * visible — and a DOM-disabled trigger swallows the click, which is exactly
    * how the dead-click was born. A locked tab must therefore stay clickable
    * and route its click to the upgrade dialog; the shipped hide build must
    * keep omitting the tabs entirely.
    */
-  describe("lock policy contract (EDGE-04)", () => {
+  describe("lock policy contract", () => {
     const DESCENDANT_PREFIXES = [
       "dbm-section-tab-badge-",
       "dbm-section-tab-vantage-",

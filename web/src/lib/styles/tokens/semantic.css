@@ -16,7 +16,7 @@
   --color-text-body: var(--color-grey-700); /* paragraphs, default body */
   --color-text-secondary: var(
     --color-grey-600
-  ); /* supporting text, descriptions, captions — grey-500 (4.74) sank to 3.49-4.45 on the runtime primary-50/100 washes (F-119); grey-600 holds 5.76+ on every ramp's tint */
+  ); /* supporting text, descriptions, captions — grey-500 (4.74) sank to 3.49-4.45 on the runtime primary-50/100 washes; grey-600 holds 5.76+ on every ramp's tint */
   --color-text-label: var(--color-grey-400); /* form labels, metadata, badges */
   --color-text-muted: var(--color-grey-300); /* disabled, placeholder, de-emphasized */
   /* label / disabled / placeholder (+ border-strong, scrollbar-thumb-hover) are

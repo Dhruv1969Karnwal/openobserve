@@ -354,10 +354,10 @@ describe("Logs Index — first landing and URL loads (item 2)", { timeout: 30000
     });
   });
 
-  // F-43: ?logs_visualize_toggle=patterns is a paid deep link; the shipped
+  // ?logs_visualize_toggle=patterns is a paid deep link; the shipped
   // hide policy must sanitize it on restore, exactly like the toggle and the
   // click path are gated.
-  describe("patterns deep-link restore vs the logPatterns entitlement (F-43)", () => {
+  describe("patterns deep-link restore vs the logPatterns entitlement", () => {
     const patternsUrl = {
       stream: "k8s_json",
       stream_type: "logs",

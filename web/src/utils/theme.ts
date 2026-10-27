@@ -140,7 +140,7 @@ const contrastRatio = (hexA: string, hexB: string): number => {
  * already ships with white just under it, and the bar move would flip text
  * across the app for a fractional shortfall. What is NOT a compromise: the
  * chosen ink must survive the darkest state too — checking the resting shade
- * alone shipped a 2.78:1 pressed label under O2 Crimson Ink dark (F-118).
+ * alone shipped a 2.78:1 pressed label under O2 Crimson Ink dark.
  * Pure black joins the candidates because mid-tone brand fills (Crimson's
  * pressed #974450) leave neither white nor grey-900 at 3:1.
  */
@@ -159,7 +159,7 @@ const pickButtonForeground = (palette: Record<string, string>): string => {
 /** First primary-ramp shade (walking 600→900, so the brand color keeps its
  *  lightest legible voice) that clears AA text on an explicit host. Accent
  *  used AS TEXT on the theme's own tints cannot ride the raw ramp: the light
- *  active-tab ink on its primary-100 pill measured 3.03:1 under O2 Lens (F-117). */
+ *  active-tab ink on its primary-100 pill measured 3.03:1 under O2 Lens. */
 const pickReadableShade = (
   palette: Record<string, string>,
   hostHex: string,
@@ -183,11 +183,11 @@ export const pickReadableForeground = (bgHex: string): string => {
 };
 
 /** White stays on a selected fill whenever it already clears AA; the fill only
- *  flips ink when it cannot (F-116: white on O2 Lens light is 3.60:1). */
+ *  flips ink when it cannot (white on O2 Lens light is 3.60:1). */
 const pickSelectedFillForeground = (bgHex: string): string =>
   contrastRatio("#FFFFFF", bgHex) >= 4.5 ? "#FFFFFF" : pickReadableForeground(bgHex);
 
-/** Light fills whose ink must be picked from the injected ramp (F-116). Dark
+/** Light fills whose ink must be picked from the injected ramp. Dark
  *  pins the same roles to ladder literals with white ink instead (dark.css). */
 const SELECTED_FILL_INK_TOKENS = [
   "--color-datepicker-day-selected-text",
@@ -216,7 +216,7 @@ export const libraryForegroundTokens = (
     const fillFg = pickSelectedFillForeground(palette["600"]);
     for (const name of SELECTED_FILL_INK_TOKENS) tokens[name] = fillFg;
     // Accent-as-text roles: their light sheets point at ramp shades whose
-    // contrast depends on the theme color (3.03-4.44 worst-case, F-117/F-119).
+    // contrast depends on the theme color (3.03-4.44 worst-case).
     // Dark pins all five to ladder-invariant sheet values instead (dark.css).
     tokens["--color-tabs-active-text"] = pickReadableShade(palette, palette["100"]);
     tokens["--color-select-item-selected-text"] = pickReadableShade(palette, palette["100"], "700");
