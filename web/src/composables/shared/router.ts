@@ -202,11 +202,12 @@ const profilesRouteGuard = (to: any, from: any, next: any) => {
  * entries hidden: exactly what the F-68 wave closed for `alertInsights` and
  * `pipelineBackfill` (both `withFeatureGate` now) and missed here.
  *
- * The EDITION half lives in the registry as `searchJobInspector` so the hide /
- * lock split stays in the one place it is written (`withFeatureGate`). The
- * runtime flag is the caller-side conjunct the registry doc leaves to call
- * sites; it enters through the gate's `getContext` by folding into the single
- * bit that predicate reads, rather than copying the policy branch here.
+ * The EDITION half lives in the registry as `searchJobInspector` (enterprise AND
+ * not-cloud — the same edition answer the three entries give) so the hide / lock
+ * split stays in the one place it is written (`withFeatureGate`). The runtime
+ * flag is the caller-side conjunct the registry doc leaves to call sites; it
+ * enters through the gate's `getContext` by folding into the single bit that
+ * predicate reads, rather than copying the policy branch here.
  *
  * Cold load: `/config` is fetched without await, so an unloaded `zoConfig`
  * (still `{}`) must not bounce a real entitled user's refresh — same stance as

@@ -315,13 +315,16 @@ const FEATURE_GATES: Record<FeatureKey, FeatureGateDefinition> = {
     labelKey: "search.createScheduledSearch",
     pitchKey: "enterpriseFeature.pitch.scheduledSearch",
   },
-  // The Search Job Inspector (`/logs/inspector`). Self-hosted-only, like the
-  // other entries in this batch — Cloud never offered it. Its three entry
-  // points ALSO require the backend `search_inspector_enabled` flag; that
-  // runtime conjunct belongs to the callers (see the FeatureGateContext note),
-  // and the route guard applies it on top of this edition answer.
+  // The Search Job Inspector (`/logs/inspector`). Self-hosted-only: unlike the
+  // batch above, whose `isEnterprise` predicate accepts a Cloud build (Cloud
+  // ships `isEnterprise=true` as well — see `aiAssistant`), this feature's three
+  // entry points each refuse Cloud outright (`config.isCloud == 'false'`), so the
+  // predicate does too — the route gate and the affordances have to answer the
+  // same question. The backend `search_inspector_enabled` flag is the runtime
+  // conjunct the registry leaves to callers (see the FeatureGateContext note);
+  // the route guard applies it on top of this edition answer.
   searchJobInspector: {
-    predicate: (c) => c.isEnterprise,
+    predicate: (c) => c.isEnterprise && !c.isCloud,
     labelKey: "logs.searchJobInspector.title",
     cloudOffers: false,
   },

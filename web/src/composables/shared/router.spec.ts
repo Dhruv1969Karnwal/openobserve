@@ -1029,6 +1029,26 @@ describe("useRoutes (router.ts)", () => {
       expect(routeGuard).not.toHaveBeenCalled();
     });
 
+    /**
+     * The cloud shape that actually ships: Cloud builds set `isEnterprise=true` as
+     * well, so only the `!isCloud` half of the predicate can refuse them. All three
+     * entry points require `config.isCloud == 'false'`, so the route must too, or a
+     * cloud user could bookmark their way into a page the product hides there.
+     */
+    it("bounces a Cloud deploy that also reports isEnterprise=true", () => {
+      config.isEnterprise = "true";
+      config.isCloud = "true";
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(
+        { query: { org_identifier: "default" }, fullPath: "/default/logs/inspector" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "default" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
     /** `cloudOffers: false` — Cloud never sold this, so the URL bounces there too. */
     it("bounces on a pure-cloud build", () => {
       config.isCloud = "true";
@@ -2750,8 +2770,13 @@ describe("useRoutes (router.ts)", () => {
     let previousZoConfig: any;
 
     beforeEach(() => {
+      // A truly entitled SELF-HOSTED build: with `isCloud = "true"` two of the
+      // gated routes would refuse the visit on edition alone (Search Job Inspector
+      // refuses Cloud outright, exactly like its entries do — F-97), and the proxy
+      // below would compare a paywall mute against a chain that never reached
+      // `routeGuard`. Every other key here answers on `isEnterprise` alone.
       config.isEnterprise = "true";
-      config.isCloud = "true";
+      config.isCloud = "false";
       previousZoConfig = store.state.zoConfig;
       // `search_inspector_enabled` is the other entitlement this table reads at
       // face value: /logs/inspector is gated on it (F-97), so an "entitled build"
