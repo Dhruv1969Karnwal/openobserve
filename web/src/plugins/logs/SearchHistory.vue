@@ -22,7 +22,7 @@
         class="border-card-glass-border! rounded-default! m-0 flex! h-6! min-h-6! w-[1.45rem]! items-center! justify-center! border-[0.0626rem]! border-solid! p-0! backdrop-blur-[0.625rem]! [transition:all_0.2s_ease]"
         :class="
           wrapText
-            ? 'bg-theme-accent! text-white hover:opacity-85'
+            ? 'bg-theme-accent! text-button-primary-foreground! hover:opacity-85'
             : 'bg-white/10! hover:bg-white/15!'
         "
         @click="wrapText = !wrapText"

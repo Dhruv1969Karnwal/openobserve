@@ -108,6 +108,33 @@ export const THEME_STORAGE_KEYS = {
  * six light page grounds): a global link move repaints every `<a>` in the app,
  * so the accent-ground consumers were routed to the picked accent label instead
  * and the page tier stays the palette owner's call.
+ *
+ * ── THE ACCENT FILL ITSELF (F-134) ──
+ * One tier heavier sits the raw brand fill: applyThemeColors paints
+ * `--color-theme-accent` with the theme colour at alpha 1 in BOTH modes, so
+ * `bg-theme-accent` is the same pixel as the ramp's 600 step (asserted) and every
+ * label on it rides the button ground with none of the button's ink. A static ink
+ * cannot hold that ground: `--color-text-inverse` measures 3.73:1 (O2 Pulse dark)
+ * and 3.60:1 (O2 Lens light), and the plain-white variant the toggle buttons carried
+ * falls to 1.25:1 on the shipped dark default #E6E6E6 — an invisible glyph. No site of
+ * the enumerated seven keeps a static ink: the four real-text ones (AI integration
+ * initials, the field-count pill, the selected chart-type row) moved onto the accent
+ * TINT pairs the picker already re-inks per theme (4.50–15.04 across the twelve
+ * scopes), and the five filled-control ones bind the picked
+ * `--color-button-primary-foreground`, whose three sub-AA scopes are the booked
+ * `rest` states above — two of them are the confirm dialog's own branch (F-133), and
+ * the three wrap toggles that remain are glyph-sized, i.e. the SC 1.4.11 3:1 bar,
+ * which all twelve scopes clear. Two options were measured and rejected: routing every accent-fill label through the worst-of-states
+ * button pick alone would have dropped the dark Horizon/Lens labels from 5.52/5.58 to
+ * 3.25/3.22, and an AA-everywhere single ink (white-if-AA else readable, 4.70 worst)
+ * needs a label token computed in both modes — the existing selected-fill picks are
+ * light-only because their dark grounds are ladder literals. That token is a second
+ * answer to "what ink goes on the brand fill" and moves the pinned sheet counts, so
+ * it is the palette owner's call, not a micro-fix's. Still white-by-design: the two
+ * enterprise hero panels, whose fill is a gradient whose stops sit on opposite sides
+ * of any one ink (white 1.25–3.60 at the light stop, near-black inks 1.03–1.21 at the
+ * dark ones), and which hardcode white on three nested elements plus translucent-white
+ * plates — that is a repaint decision, booked in the same ledger.
  */
 /** Predefined themes with both light and dark mode colors. */
 export const PREDEFINED_THEMES: PredefinedTheme[] = [

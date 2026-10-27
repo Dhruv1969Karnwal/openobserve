@@ -68,9 +68,15 @@
  *     the failure that justifies the pick (ACCENT_TINT_PICKS). What cannot be
  *     fixed without a palette-owner decision is booked number-locked in
  *     RUNTIME_GROUND_RESIDUALS, next to the button-label ledger.
+ *  6. THE ACCENT FILL (F-134). `bg-theme-accent` is not a ramp token — the runtime
+ *     writes the raw theme colour into --color-theme-accent at alpha 1 in both modes,
+ *     so it is the same painted pixel as the button's rest fill. That ground is now in
+ *     the injected map, its two ground/ink invariants are locked, and a template scan
+ *     keeps any static white/near-black label off it (the two gradient heroes excepted
+ *     by documented decision).
  */
 
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -125,6 +131,11 @@ const runtimeScope = (
   for (const shade of PALETTE_SHADES) {
     scope.set(`--color-primary-${shade}`, palette[shade]);
   }
+  // applyThemeColors writes --color-theme-accent with the raw theme colour at alpha 1
+  // (hexToRgba(themeColor, 10)) in BOTH modes, so `bg-theme-accent` paints themeColor
+  // — the sheet value below it is only the pre-injection default the gate would
+  // otherwise keep measuring. It is the same pixel as the ramp's 600 step.
+  scope.set("--color-theme-accent", themeColor);
   // The gate measures production's own injected map, not a transcription of it.
   for (const [token, hex] of Object.entries(libraryForegroundTokens(mode, palette))) {
     scope.set(token, hex);
@@ -382,12 +393,14 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
   {
     fg: "--color-icon-chip-primary-text",
     bg: "--color-icon-chip-primary-bg",
-    where: "primary icon chip glyph and step numbers (UsageTab.vue, HowItWorksDrawer.vue)",
+    where:
+      "primary icon chip glyph, step numbers, logo-fallback initials (UsageTab.vue, HowItWorksDrawer.vue, AIIntegrations.vue)",
   },
   {
     fg: "--color-badge-primary-soft-text",
     bg: "--color-badge-primary-soft-bg",
-    where: "OBadge primary tone (utils/dbm/tones.ts, alert_calibration/format.ts)",
+    where:
+      "OBadge primary tone + the field-count pill (utils/dbm/tones.ts, alert_calibration/format.ts, EnrichmentSchema.vue)",
   },
   {
     fg: "--color-file-chip-text",
@@ -439,7 +452,8 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
   {
     fg: "--color-select-item-selected-text",
     bg: "--color-select-item-selected-bg",
-    where: "the highlighted option in an open list",
+    where:
+      "the highlighted option in an open list + the selected chart-type row (CustomChartTypeSelector.vue)",
   },
   {
     fg: "--color-button-ghost-primary-text",
@@ -743,6 +757,15 @@ const BOOKED_GROUND_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-table-row-hover-bg",
     where: "routed warning cell on a hovered row (OverviewTab.vue)",
   },
+  {
+    // bg-theme-accent is the raw theme colour at alpha 1 (utils/theme.ts
+    // hexToRgba(themeColor, 10)), i.e. the same painted pixel as --color-button-primary,
+    // so this row also governs the F-134 accent-fill consumers named below.
+    fg: "--color-button-primary-foreground",
+    bg: "--color-theme-accent",
+    where:
+      "label/glyph of a control filled with the raw accent (O2AIConfirmDialog.vue focused branch, CorrelatedLogsTable.vue + SearchHistory.vue wrap toggles)",
+  },
 ];
 
 const RUNTIME_GROUND_RESIDUALS: Record<string, { at: number; note: string }> = {
@@ -769,6 +792,22 @@ const RUNTIME_GROUND_RESIDUALS: Record<string, { at: number; note: string }> = {
   "light O2 Crimson Ink --color-status-warning-text on --color-table-row-hover-bg": {
     at: 4.18,
     note: "same tier on the Crimson wash (#fef4f6); dark measures 10.40 on #1a1d21 — palette-decision: see PR decision record",
+  },
+  // F-134: the accent FILL ground. bg-theme-accent is the raw theme colour at alpha 1
+  // in both modes, so the ink on it is the button label and the three failing scopes
+  // are numerically the booked `rest` states of BUTTON_LABEL_RESIDUALS (same ink, same
+  // painted pixel — the tripwire test below asserts the two grounds resolve identically).
+  "dark O2 Horizon --color-button-primary-foreground on --color-theme-accent": {
+    at: 3.25,
+    note: "white on #588CF3 = --color-button-primary rest 3.25: the accent fill IS the ramp's 600 step, so no ink of this family reaches AA here (grey-900 5.52 on this ground alone, but it caps at 2.42 on the button's active step) — palette-decision: see PR decision record",
+  },
+  "dark O2 Lens --color-button-primary-foreground on --color-theme-accent": {
+    at: 3.22,
+    note: "white on #E56D17 = --color-button-primary rest 3.22: the same two-sided squeeze as the booked dark Lens rest row — palette-decision: see PR decision record",
+  },
+  "light O2 Lens --color-button-primary-foreground on --color-theme-accent": {
+    at: 3.6,
+    note: "white on #4682FA = --color-button-primary rest 3.60: grey-900 would read 4.98 on this fill but fails the button's hover/active states (3.40/2.24), and one label token cannot carry two inks — palette-decision: see PR decision record",
   },
 };
 
@@ -885,6 +924,72 @@ const CONSUMER_LEDGERS: Record<"dark" | "light", Record<string, string>> = {
       "folds to --color-text-label (grey-400, booked light-PENDING row of contrast-manifest): 2.52 on popup and trigger — the remediation PR owns the tier, not this gate",
   },
 };
+
+/**
+ * F-134 — the accent FILL ground, which the runtime ramp injection does not reach.
+ * `bg-theme-accent` is neither a ramp tint nor a ladder wash: applyThemeColors writes
+ * the raw theme colour into --color-theme-accent (hexToRgba(themeColor, 10) = alpha 1)
+ * in BOTH modes, so the ground is theme-variant and no static ink survives it —
+ * --color-text-inverse measures 3.73 (O2 Pulse dark) and 3.60 (O2 Lens light), and the
+ * `text-white` variant these sites also carried drops to 1.25 under the shipped dark
+ * default (#E6E6E6). Every enumerated label now binds either the picked accent-fill
+ * label (--color-button-primary-foreground, booked below) or a per-theme accent pair
+ * this file already gates; only the two brand heroes keep white labels, by design.
+ */
+const ACCENT_FILL_WHITE_BY_DESIGN: Record<string, string> = {
+  "components/EnterpriseUpgradeDialog.vue":
+    "the hero fill is a two-stop gradient (theme-accent → color-mix(theme-accent 85%, black)) and the panel hardcodes white on three nested elements plus rgba(255,255,255,.1-.2) plates that assume a dark ground: white caps at 1.25–3.60 at the light stop in 6 of 12 scopes while every dark ink inverts to 1.03–1.21 on the light themes' stops — the fill (or a per-stop ink) is the owner's call, not a class swap — palette-decision: see PR decision record",
+  "views/EnterpriseFeatures.vue":
+    "same two-stop hero gradient and white label as EnterpriseUpgradeDialog.vue — palette-decision: see PR decision record",
+};
+
+const SRC_ROOT = join(here, "../../..");
+
+const walkVue = (dir: string, found: string[] = []): string[] => {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) walkVue(path, found);
+    else if (entry.name.endsWith(".vue")) found.push(path);
+  }
+  return found;
+};
+
+const CLS_ATTR_RE = /(?::?class)\s*=\s*"([^"]*)"/g;
+const SOLID_ACCENT_RE = /(?<![\w-])bg-theme-accent!?(?![\w/-])/;
+const GRADIENT_ACCENT_RE = /(?<![\w-])bg-\[[^\]]*--color-theme-accent[^\]]*\]/;
+const INK_UTILITY_RE = /(?<![\w-])((?:[\w-]+:)*text-([a-z0-9-]+))(?:\/\d+)?!?(?![\w-])/g;
+
+/** `text-<name>` utilities whose name is an actual colour token (text-sm, text-bold
+ *  and friends resolve to nothing in the token sheets and are skipped). */
+const inkTokensIn = (value: string): string[] =>
+  [...new Set([...value.matchAll(INK_UTILITY_RE)].map((ink) => `--color-${ink[2]}`))].filter(
+    (token) =>
+      resolveColor(token, SHEET_LIGHT) !== null || resolveColor(token, SHEET_DARK) !== null,
+  );
+
+type AccentFillSite = {
+  file: string;
+  line: number;
+  ground: "solid" | "gradient";
+  inks: string[];
+};
+
+/** Every class binding that paints a label on the raw theme accent, read from source. */
+const accentFillSites = (): AccentFillSite[] =>
+  walkVue(SRC_ROOT).flatMap((path) => {
+    const source = readFileSync(path, "utf8");
+    const file = path.slice(SRC_ROOT.length + 1);
+    return [...source.matchAll(CLS_ATTR_RE)].flatMap((match) => {
+      const value = (match[1] ?? "").replace(/\s+/g, " ");
+      const solid = SOLID_ACCENT_RE.test(value);
+      const gradient = GRADIENT_ACCENT_RE.test(value);
+      if (!solid && !gradient) return [];
+      const inks = inkTokensIn(value);
+      if (inks.length === 0) return [];
+      const line = source.slice(0, match.index ?? 0).split("\n").length;
+      return [{ file, line, ground: solid ? ("solid" as const) : ("gradient" as const), inks }];
+    });
+  });
 
 describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
   it("measures at least the shipped default theme plus its five siblings, both modes", () => {
@@ -1137,6 +1242,144 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
         "palette-decision",
       );
     }
+    // The sweep above runs at the text bar; the 3:1 floor underneath it is asserted
+    // here, so no booked pair — the accent fill's glyph labels included — can sink.
+    const underFloor: string[] = [];
+    for (const [mode, scopes] of [
+      ["dark", RUNTIME_SCOPES],
+      ["light", LIGHT_RUNTIME_SCOPES],
+    ] as const) {
+      for (const { name, scope } of scopes) {
+        for (const pair of BOOKED_GROUND_PAIRS) {
+          const value = ratio(pair.fg, pair.bg, scope);
+          if (value < NON_TEXT_MIN) {
+            underFloor.push(`${mode} ${name} ${pair.fg} on ${pair.bg}: ${value.toFixed(2)}:1`);
+          }
+        }
+      }
+    }
+    expect(underFloor).toEqual([]);
+  });
+
+  // ── F-134: the accent FILL ground (bg-theme-accent), which the ramp injection
+  // above does not reach because it is written straight into --color-theme-accent.
+  it("measures the raw accent fill as the primary button's rest state, both modes", () => {
+    const offenders: string[] = [];
+    for (const [mode, scopes] of [
+      ["dark", RUNTIME_SCOPES],
+      ["light", LIGHT_RUNTIME_SCOPES],
+    ] as const) {
+      for (const { name, themeColor, scope } of scopes) {
+        const accent = hexOf("--color-theme-accent", scope);
+        // applyThemeColors paints hexToRgba(themeColor, 10) → the raw theme colour,
+        // which is what utils/theme.ts anchors --color-primary-600 (and therefore
+        // --color-button-primary) to. Re-point the fill at another step, or stop
+        // painting the theme colour into it, and this names the scope.
+        if (accent !== themeColor.toLowerCase()) {
+          offenders.push(
+            `${mode} ${name}: accent fill ${accent} ≠ themeColor ${themeColor.toLowerCase()}`,
+          );
+        }
+        if (hexOf("--color-button-primary", scope) !== accent) {
+          offenders.push(`${mode} ${name}: --color-button-primary is not the accent fill`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("locks the static inks that moved off the accent fill at their measured failures", () => {
+    // Bidirectional like ACCENT_TINT_PICKS: the picked label must clear the floor in
+    // every scope, and the inks the enumerated sites used to carry must STILL be the
+    // failures that justify the move — a healed palette sheds its numbers here.
+    for (const [mode, scopes] of [
+      ["dark", RUNTIME_SCOPES],
+      ["light", LIGHT_RUNTIME_SCOPES],
+    ] as const) {
+      for (const { name, scope } of scopes) {
+        const picked = ratio("--color-button-primary-foreground", "--color-theme-accent", scope);
+        if (picked < NON_TEXT_MIN) {
+          throw new Error(
+            `${mode} ${name}: picked accent-fill label measures ${picked.toFixed(2)}:1`,
+          );
+        }
+      }
+    }
+    const textInverse: Record<string, string> = {};
+    const white: Record<string, string> = {};
+    for (const [mode, scopes] of [
+      ["dark", RUNTIME_SCOPES],
+      ["light", LIGHT_RUNTIME_SCOPES],
+    ] as const) {
+      for (const { name, scope } of scopes) {
+        const inverse = ratio("--color-text-inverse", "--color-theme-accent", scope);
+        if (inverse < TEXT_MIN) textInverse[`${mode} ${name}`] = inverse.toFixed(2);
+        const plain = ratio("#FFFFFF", "--color-theme-accent", scope);
+        if (plain < TEXT_MIN) white[`${mode} ${name}`] = plain.toFixed(2);
+      }
+    }
+    expect(textInverse).toEqual({ "dark O2 Pulse": "3.73", "light O2 Lens": "3.60" });
+    expect(white).toEqual({
+      "dark O2 Signature": "1.25",
+      "dark O2 Beacon": "2.42",
+      "dark O2 Crimson Ink": "2.69",
+      "dark O2 Horizon": "3.25",
+      "dark O2 Lens": "3.22",
+      "light O2 Lens": "3.60",
+    });
+  });
+
+  it("measures every template label painted on the raw accent fill, both modes", () => {
+    const sites = accentFillSites();
+    // Anti-vacuity: the F-134 enumeration (two focused confirm branches, three wrap
+    // toggles, two gradient heroes) must still be there for this to mean anything.
+    expect(sites.length, `only ${sites.length} accent-fill labels scanned`).toBeGreaterThanOrEqual(
+      7,
+    );
+    const booked = new Set(
+      BOOKED_GROUND_PAIRS.filter((pair) => pair.bg === "--color-theme-accent").map((p) => p.fg),
+    );
+    const offenders: string[] = [];
+    for (const site of sites) {
+      // The two gradient heroes are the only exemption, and only because their fill has
+      // two stops that sit on opposite sides of any single ink (see the ledger notes).
+      // Every other accent label — solid fill or gradient — is measured at the accent's
+      // light stop, which is the worst of the two for a light ink.
+      if (site.ground === "gradient" && site.file in ACCENT_FILL_WHITE_BY_DESIGN) continue;
+      for (const [mode, scopes] of [
+        ["dark", RUNTIME_SCOPES],
+        ["light", LIGHT_RUNTIME_SCOPES],
+      ] as const) {
+        for (const { name, scope } of scopes) {
+          for (const token of site.inks) {
+            const bar = booked.has(token) ? NON_TEXT_MIN : TEXT_MIN;
+            const value = ratio(token, "--color-theme-accent", scope);
+            if (value < bar) {
+              offenders.push(
+                `${site.file}:${site.line} ${token} = ${value.toFixed(2)}:1 on the accent fill (${mode} ${name})`,
+              );
+            }
+          }
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+    const unbooked = sites
+      .filter((site) => site.ground === "solid")
+      .flatMap((site) => site.inks)
+      .filter((token) => !booked.has(token));
+    expect(
+      [...new Set(unbooked)],
+      "a solid accent fill carries an ink the booked ledger does not name",
+    ).toEqual([]);
+    const misplaced = Object.keys(ACCENT_FILL_WHITE_BY_DESIGN).filter(
+      (file) => !sites.some((site) => site.file === file && site.ground === "gradient"),
+    );
+    expect(misplaced, "a white-by-design entry no longer paints a gradient accent").toEqual([]);
+    const stale = Object.keys(ACCENT_FILL_WHITE_BY_DESIGN).filter(
+      (file) => !sites.some((site) => site.file === file),
+    );
+    expect(stale, "the accent-fill white-by-design ledger has a dead entry").toEqual([]);
   });
 
   it("measures the live-captured row-wash and ink regressions at their fixed values (O2 Signature)", () => {

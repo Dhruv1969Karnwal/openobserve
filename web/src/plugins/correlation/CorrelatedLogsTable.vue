@@ -45,7 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <OButton
             variant="ghost"
             size="icon"
-            :class="{ 'bg-theme-accent! text-white!': wrapTableCells }"
+            :class="{ 'bg-theme-accent! text-button-primary-foreground!': wrapTableCells }"
             data-test="correlated-logs-table-wrap-content-btn"
             @click="wrapTableCells = !wrapTableCells"
           >
@@ -174,7 +174,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           variant="ghost"
           size="icon"
           class="h-5!"
-          :class="{ 'bg-theme-accent! text-white! hover:opacity-80': wrapTableCells }"
+          :class="{
+            'bg-theme-accent! text-button-primary-foreground! hover:opacity-80': wrapTableCells,
+          }"
           data-test="correlated-logs-table-wrap-content-btn"
           @click="wrapTableCells = !wrapTableCells"
         >
