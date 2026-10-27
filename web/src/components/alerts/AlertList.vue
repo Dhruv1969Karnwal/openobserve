@@ -2313,10 +2313,6 @@ export default defineComponent({
       if (!refreshResults) {
         return;
       }
-      // When incidents tab is active, skip filtering (IncidentList handles its own data)
-      if (activeTab.value === "incidents") {
-        return;
-      }
       if (activeTab.value === "scheduled") {
         // Scheduled: is_real_time is falsy (false / undefined / null) — anomaly rows ("anomaly") excluded
         filteredResults.value = allAlerts.value.filter(
@@ -2335,8 +2331,8 @@ export default defineComponent({
           (alert: any) => alert.alert_type === "Composite",
         );
       } else {
-        // "all" — show everything
-        filteredResults.value = allAlerts.value;
+        // MUTATION: simulate the removed skip-branch behavior
+        return;
       }
     };
 

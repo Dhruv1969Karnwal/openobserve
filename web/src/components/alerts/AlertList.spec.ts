@@ -1465,6 +1465,14 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
 
       expect(wrapper.vm.activeTab).toBe("all");
       // Row filtering is back on: "all" is the branch that shows every alert.
+      // F-112 pins this harder than a value check: the incidents early-return
+      // that the coercion made unreachable is gone, so whatever the URL
+      // claimed, filterAlertsByTab filters instead of skipping.
+      await waitData(wrapper);
+      expect(wrapper.vm.allAlerts.length).toBeGreaterThan(0);
+      wrapper.vm.filteredResults = [];
+      wrapper.vm.filterAlertsByTab(true);
+      expect(wrapper.vm.filteredResults.length).toBe(wrapper.vm.allAlerts.length);
       expect(wrapper.vm.alertTabs.map((t: any) => t.value)).not.toContain(tab);
     },
   );
