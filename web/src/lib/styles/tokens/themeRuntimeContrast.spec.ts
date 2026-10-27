@@ -262,6 +262,21 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-datepicker-popup-bg",
     where: "selected time segment + active Relative/Absolute tab (OTime.vue, ODateTimeRange.vue)",
   },
+  {
+    fg: "--color-button-ghost-subtle-text",
+    bg: "--color-button-ghost-subtle-active-bg",
+    where: "subtle ghost label while held (one text token across rest/hover/active)",
+  },
+  {
+    fg: "--color-button-ghost-muted-text",
+    bg: "--color-button-ghost-muted-active-bg",
+    where: "muted ghost label while held, before the hover-text swap applies",
+  },
+  {
+    fg: "--color-button-ghost-muted-hover-text",
+    bg: "--color-button-ghost-muted-active-bg",
+    where: "muted ghost accent label when pressed while hovered",
+  },
 ];
 
 const NON_TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [

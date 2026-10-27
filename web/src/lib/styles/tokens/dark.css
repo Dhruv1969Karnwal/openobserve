@@ -182,21 +182,37 @@
   --color-surface-subtle-hover: var(
     --d-overlay
   ); /* hover on a recessed fill — one step UP:
-                                                     well L .02022 → overlay .02491 (1.067:1
-                                                     lighter). The old value (--d-panel) sat
-                                                     1.198:1 DARKER than the well it hovered,
-                                                     contradicting this comment. Contrast-
-                                                     relevant consumers only: pagination hover
-                                                     (component.css:556,561) and the
-                                                     ScheduledDashboards rum-tab
-                                                     (ScheduledDashboards.vue:461); its text
-                                                     --color-pagination-item-text (grey-400)
-                                                     reads 5.56:1 here — now a manifest pair
-                                                     in both themes (light moved grey-500
-                                                     3.76:1 → grey-600 6.20:1).
-                                                     The other 22 consumers (component.css:273
-                                                     and :900, dark.css:561, 19 .vue hover
-                                                     utilities) carry brighter text on it. */
+                                        well L .02022 → overlay .02491 (1.067:1
+                                        lighter). The old value (--d-panel) sat
+                                        1.198:1 DARKER than the well it hovered.
+                                        Citations are token names, never line
+                                        numbers (they drifted once already).
+                                        Measured text pair: --color-pagination-item-text
+                                        grey-400 = 5.56:1 here (manifest, both
+                                        themes; light moved grey-500 3.76 →
+                                        grey-600 6.20) painted through
+                                        --color-pagination-item-hover-bg /
+                                        --color-pagination-nav-hover-bg
+                                        (component.css) and the ScheduledDashboards
+                                        rum-tab rule. The rest take this tier as
+                                        a hover/active fill: --color-dialog-close-active-bg
+                                        and --color-code-copy-hover-bg
+                                        (component.css), --color-stepper-trigger-hover
+                                        (below) and 19 .vue hover:bg utilities.
+                                        In dark any of those rows that carries
+                                        ROLE text clears AA by construction: no
+                                        text-role token sinks below grey-450
+                                        (4.76:1 here — see the text-ladder note).
+                                        Two LIGHT-side consumers are grey-500
+                                        and are honest NON-TEXT, not "brighter
+                                        text": the SVG-only close-X glyph
+                                        --color-dialog-close-text (3.76:1 on
+                                        this surface light; dark overrides to
+                                        text-muted grey-450 = 4.76) and the
+                                        SVG-only pagination prev/next arrows
+                                        --color-pagination-nav-text (3.76 light;
+                                        grey-400 5.56 dark). Icons follow WCAG
+                                        1.4.11's 3:1 bar; 3.76 clears it. */
   /* Accent-tinted interaction surfaces — names keep the historical "accent"
        prefix (every component maps onto them), but the dark values are neutral
        ladder literals for the same injected-ramp reason as --d-hover above:
@@ -275,12 +291,21 @@
   --color-button-ghost-success-hover-bg: var(--color-surface-overlay);
   --color-button-ghost-success-active-bg: var(--color-surface-overlay);
 
-  /* ghost-muted */
-  --color-button-ghost-muted-hover-text: var(--color-primary-400);
+  /* ghost-muted / ghost-subtle — pressed labels ride ONE text token through
+     rest/hover/active (OButton.vue ghost-muted/ghost-subtle recipes), so the
+     value must clear 4.5:1 on the lightest state, the accent-active fill:
+     grey-400 was 4.15:1
+     there (and grey-400@60% only 3.36:1 at rest on the canvas). grey-300 =
+     7.06 pressed, 8.44 hover, 4.80–5.08 at rest through opacity-60. The
+     hover accent keeps primary-300 for the same reason: primary-400 sank to
+     3.77:1 (Pulse ramp) once pressed onto accent-active. */
+  --color-button-ghost-muted-text: var(--color-grey-300);
+  --color-button-ghost-muted-hover-text: var(--color-primary-300);
   --color-button-ghost-muted-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-muted-active-bg: var(--color-surface-accent-active);
 
   /* ghost-subtle */
+  --color-button-ghost-subtle-text: var(--color-grey-300);
   --color-button-ghost-subtle-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-subtle-active-bg: var(--color-surface-accent-active);
 
@@ -560,7 +585,7 @@
   --color-datepicker-day-range-text: var(--color-primary-200);
   --color-datepicker-clock-face-bg: var(--color-surface-panel);
   --color-datepicker-clock-header-bg: var(--color-surface-accent-active);
-  /* Selected clock number: the disc IS the state marker (WCAG 1.4.11 >=3:1 vs
+  /* Selected clock number: the disc IS the state marker (WCAG 1.4.11 ≥3:1 vs
      the face). accent-active scored 1.54:1 on --d-panel, so the disc flips to
      a light-neutral fill and the digits to canvas ink — 12.82 / 14.26. */
   --color-datepicker-clock-selected-bg: var(--color-grey-200);
