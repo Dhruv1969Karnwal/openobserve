@@ -204,8 +204,12 @@ export interface SemanticColors {
  * Generate a full primary color palette from a single base hex color.
  * The base color is treated as the 600 shade; lighter shades are mixed
  * towards white, darker shades towards black.
+ *
+ * Exported for tokens/themeRuntimeContrast.spec.ts: the gate measures what this
+ * function injects at runtime over the token sheets — the sheet is not what the
+ * page paints, and a contrast suite that only reads the sheet misses it.
  */
-const generatePrimaryPalette = (baseHex: string): Record<string, string> => {
+export const generatePrimaryPalette = (baseHex: string): Record<string, string> => {
   return {
     "50": mixColors(baseHex, "#ffffff", 5),
     "100": mixColors(baseHex, "#ffffff", 15),

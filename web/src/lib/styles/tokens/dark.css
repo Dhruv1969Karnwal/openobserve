@@ -42,7 +42,13 @@
            close to its background is invisible.
 
        Accents stay on the teal brand palette (--color-primary-*), theme-driven
-       at runtime (utils/theme.ts). Surfaces are a neutral slate; nudge the hex
+       at runtime (utils/theme.ts). But the palette is injected as INLINE styles
+       on <html>, which beats this sheet: under the default dark themeColor
+       #E6E6E6 its "800/900" shades are mid-greys (#8a8a8a/#5c5c5c), so nothing
+       that carries grey-tier text may route through --color-primary-* — the
+       state washes and selected fills below are ladder literals instead, and
+       themeRuntimeContrast.spec.ts measures the injected ramp over the whole
+       sheet to keep that seam shut. Surfaces are a neutral slate; nudge the hex
        below to go warmer/cooler. */
 
   /* Surfaces — role of each elevation step:
@@ -71,13 +77,24 @@
        grey shades, which flattened the hierarchy (body==secondary, and
        label==muted==disabled==placeholder all landed on one value). */
 
-  /* Row / item states on the content surface */
-  --d-hover: var(
-    --color-primary-900
-  ); /* row & list-item hover — MATCHES
-                             the dashboard-folder hover (theme-tinted, not grey) */
-  --d-selected: color-mix(in srgb, var(--color-primary-500) 30%, var(--d-panel));
-  /* selected row — teal-tinted (brand signal)       */
+  /* Row / item states on the content surface — neutral ladder literals, NEVER
+       var(--color-primary-*): utils/theme.ts injects its generated ramp as inline
+       styles on <html>, and inline beats this sheet. The default dark themeColor
+       is #E6E6E6 (near-white), so its "800/900" shades land on mid-greys
+       (measured live: --d-hover #5c5c5c, --d-selected #5b5d61, accent-active
+       #8a8a8a) and every grey-tier label on a hovered/selected row sank to
+       2.24–2.65:1. The washes are also measured ON THEM by
+       themeRuntimeContrast.spec.ts, per predefined theme.
+       Ladder placement: base → hover 1.062:1 (below the 1.112:1 base→panel
+       elevation step — a transient never outranks a tier), hover → selected
+       1.114:1 (selection is a persistent state, it may equal the elevation
+       step), and --d-selected stays UNDER the well (L .01916 between panel
+       .01504 and well .02022). Text on --d-hover: body 11.41, secondary 6.70, label 5.74.
+       Text on --d-selected: body 10.24, secondary 6.02, label 5.16.
+       border-strong clears 3:1 on both (3.84 / 3.45). */
+  --d-hover: #1a1d21; /* row & list-item hover — a step up off the base canvas */
+  --d-selected: #22262d; /* selected row — one step above --d-hover, below the
+                              well (L .01916 between panel .01504 and well .02022) */
   --d-zebra: #101215; /* striped-row bg — OUTSIDE the elevation band, a hair BELOW
                              the base canvas (L .00597: chrome .00400 < zebra < base
                              .00847) so a stripe reads as a row rule, never a tier.
@@ -173,13 +190,27 @@
                                                      (component.css:556,561) and the
                                                      ScheduledDashboards rum-tab
                                                      (ScheduledDashboards.vue:461); its text
-                                                     --color-text-secondary reads 5.56:1 here.
+                                                     --color-pagination-item-text (grey-400)
+                                                     reads 5.56:1 here — now a manifest pair
+                                                     in both themes (light moved grey-500
+                                                     3.76:1 → grey-600 6.20:1).
                                                      The other 22 consumers (component.css:273
                                                      and :900, dark.css:561, 19 .vue hover
                                                      utilities) carry brighter text on it. */
-  /* Accent-tinted interaction surfaces — dark accent hover/active values. */
-  --color-surface-accent-hover: var(--color-primary-900);
-  --color-surface-accent-active: var(--color-primary-800);
+  /* Accent-tinted interaction surfaces — names keep the historical "accent"
+       prefix (every component maps onto them), but the dark values are neutral
+       ladder literals for the same injected-ramp reason as --d-hover above:
+       primary-800/900 under the default themeColor painted white-on-active
+       select/tab labels at 3.25–3.45:1. Placement: the wash floats on the
+       overlay tier (menus, select content) — overlay → hover 1.121:1,
+       hover → active 1.195:1 — monotonic, inside the ladder's step band, and
+       far below the lightest text-sinking mid-grey (#8a8a8a) that broke it.
+       Text measured on
+       accent-hover: heading 9.93, body 8.44, secondary 4.96; on accent-active:
+       white 10.47, heading 8.31, body 7.06, and every predefined theme's
+       --color-select-item-selected-text (primary-200) ≥ 7.06. */
+  --color-surface-accent-hover: #2f343d;
+  --color-surface-accent-active: #39404a;
   --color-surface-chrome: var(--d-chrome); /* top bar + left rail */
   --color-surface-chrome-deeper: var(--d-chrome); /* gutter behind card (same frame) */
 
@@ -220,7 +251,7 @@
   /* outline */
   --color-button-outline-text: var(--color-text-heading);
   --color-button-outline-border: var(--color-border-control);
-  --color-button-outline-hover-bg: var(--color-primary-900);
+  --color-button-outline-hover-bg: var(--color-surface-accent-hover);
   --color-button-outline-hover-border: var(--color-border-strong);
   --color-button-outline-active-bg: var(--color-surface-accent-active);
 
@@ -230,7 +261,7 @@
   --color-button-ghost-active-bg: var(--color-surface-accent-active);
 
   /* ghost-primary */
-  --color-button-ghost-primary-text: var(--color-primary-400);
+  --color-button-ghost-primary-text: var(--color-primary-300);
   --color-button-ghost-primary-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-primary-active-bg: var(--color-surface-accent-active);
 
@@ -275,19 +306,19 @@
   /* Tabs */
   --color-tabs-active-bg: var(--color-surface-accent-active);
   --color-tabs-active-text: var(--color-white);
-  --color-tabs-hover-bg: var(--color-primary-900);
+  --color-tabs-hover-bg: var(--color-surface-accent-hover);
   --color-tabs-bar-border: var(--color-grey-700);
   --color-nav-label-accent: var(--color-accent);
 
   /* Collapsible */
-  --color-collapsible-trigger-hover-bg: var(--color-primary-900);
+  --color-collapsible-trigger-hover-bg: var(--color-surface-accent-hover);
   --color-collapsible-trigger-active-bg: var(--color-surface-accent-active);
-  --color-collapsible-trigger-open-bg: var(--color-primary-900);
+  --color-collapsible-trigger-open-bg: var(--color-surface-accent-hover);
   --color-collapsible-open-accent: var(--color-primary-400);
   --color-collapsible-icon-open: var(--color-primary-400);
 
   /* OFieldList / OFieldRow / OFieldLabel */
-  --color-field-list-row-hover-bg: var(--color-primary-900);
+  --color-field-list-row-hover-bg: var(--d-hover);
   --color-field-list-actions-bg: var(--color-surface-subtle);
   --color-field-list-expansion-bg: var(--color-surface-subtle);
 
@@ -508,24 +539,24 @@
   --color-datepicker-disabled-bg: var(--color-surface-subtle);
   --color-datepicker-disabled-border: var(--color-border-default);
   --color-datepicker-error-border: var(--color-error-400);
-  --color-datepicker-segment-focus-bg: var(--color-primary-500);
+  --color-datepicker-segment-focus-bg: var(--color-surface-accent-active);
   --color-datepicker-segment-focus-text: var(--color-white);
   /* DatePicker calendar popup */
   --color-datepicker-popup-bg: var(--color-surface-overlay);
   --color-datepicker-popup-border: var(--color-border-default);
   --color-datepicker-day-hover-bg: var(--color-surface-accent-hover);
-  --color-datepicker-day-selected-bg: var(--color-primary-500);
+  --color-datepicker-day-selected-bg: var(--color-surface-accent-active);
   --color-datepicker-day-today-border: var(--color-primary-400);
   --color-datepicker-day-outside-text: var(--color-text-disabled);
   --color-datepicker-nav-hover-bg: var(--color-surface-accent-hover);
   --color-datepicker-day-range-bg: var(--color-primary-900);
   --color-datepicker-day-range-text: var(--color-primary-200);
   --color-datepicker-clock-face-bg: var(--color-surface-panel);
-  --color-datepicker-clock-header-bg: var(--color-primary-800);
-  --color-datepicker-clock-selected-bg: var(--color-primary-500);
+  --color-datepicker-clock-header-bg: var(--color-surface-accent-active);
+  --color-datepicker-clock-selected-bg: var(--color-surface-accent-active);
   --color-datepicker-clock-hover-bg: var(--color-surface-accent-hover);
   --color-datepicker-relative-btn-bg: var(--color-surface-panel);
-  --color-datepicker-relative-btn-selected-bg: var(--color-primary-500);
+  --color-datepicker-relative-btn-selected-bg: var(--color-surface-accent-active);
   --color-datepicker-relative-btn-hover-bg: var(--color-surface-accent-hover);
 
   /* Color picker */
@@ -550,7 +581,12 @@
   --color-dialog-close-active-bg: var(--d-border);
 
   /* Pagination */
-  --color-pagination-item-active-bg: var(--color-primary-500);
+  /* Item text is a direct grey, not --color-text-secondary: the token must
+       stand as its own root so contrast.spec's manifest can judge it on the
+       hover tier (light grey-600/grey-200, dark grey-400/overlay 5.56:1)
+       instead of folding into the role token's page judgment. */
+  --color-pagination-item-text: var(--color-grey-400);
+  --color-pagination-item-active-bg: var(--color-surface-accent-active);
 
   /* Timeline */
   --color-timeline-dot-primary: var(--color-primary-500);
@@ -834,7 +870,7 @@
   /* OTable (dark) */
   --color-table-header-bg: var(--d-overlay); /* header band lifts off rows */
   --color-table-row-hover-bg: var(--d-hover); /* neutral hover (not teal-washed) */
-  --color-table-row-selected-bg: var(--d-selected); /* teal-tinted selection */
+  --color-table-row-selected-bg: var(--d-selected); /* neutral selection, one step above hover */
   --color-table-row-striped-bg: var(--d-zebra); /* stripe BELOW the canvas — sub-tier row rule */
   --color-table-row-divider: var(--d-divider); /* solid, visible row separators */
   --color-table-highlight-bg: color-mix(in srgb, var(--color-warning-700) 40%, transparent);
