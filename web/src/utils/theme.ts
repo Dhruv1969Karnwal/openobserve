@@ -238,7 +238,7 @@ export const libraryForegroundTokens = (
     tokens["--color-button-ghost-muted-hover-text"] = pickReadableShade(palette, palette["100"]);
     tokens["--color-button-ghost-primary-text"] = pickReadableShade(palette, palette["100"]);
     tokens["--color-datepicker-selected-fg"] = pickReadableShade(palette, "#FFFFFF");
-    // F-133: the rest of the accent-as-text roles that land on a runtime accent
+    // The rest of the accent-as-text roles that land on a runtime accent
     // tint. Each sheet names a ramp step whose contrast depends on the theme
     // colour (primary-600 on primary-100 is 3.03:1 under O2 Lens light), so the
     // shade is walked against the tint the role actually paints on.
@@ -254,6 +254,8 @@ export const libraryForegroundTokens = (
 /** Names libraryForegroundTokens may write in either mode (probe palette —
  *  keys never depend on the colors, only the values do). */
 const libraryForegroundTokenNames = (): string[] => {
+  // Every shade the pickers walk (pickReadableShade reads up to "900"), or the probe
+  // hands them undefined and contrastRatio() throws inside the theme paint.
   const probe = {
     "50": "#e5e5e5",
     "100": "#cccccc",
@@ -261,6 +263,7 @@ const libraryForegroundTokenNames = (): string[] => {
     "600": "#888888",
     "700": "#444444",
     "800": "#333333",
+    "900": "#222222",
   };
   return [
     ...new Set([
