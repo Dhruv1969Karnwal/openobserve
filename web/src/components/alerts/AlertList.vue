@@ -2331,8 +2331,8 @@ export default defineComponent({
           (alert: any) => alert.alert_type === "Composite",
         );
       } else {
-        // MUTATION: simulate the removed skip-branch behavior
-        return;
+        // "all" — show everything
+        filteredResults.value = allAlerts.value;
       }
     };
 
