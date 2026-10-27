@@ -729,6 +729,11 @@
   --color-datepicker-day-hover-bg: var(--color-surface-accent-hover);
   --color-datepicker-day-selected-bg: var(--color-primary-600);
   --color-datepicker-day-selected-text: var(--color-white);
+  /* Selected-segment/tab FOREGROUND (OTime digits + underline + step dots,
+     ODateTimeRange active tab): its own token because a FILL cannot double as
+     text — dark paints it light-neutral while day-selected-bg stays a fill.
+     Light deliberately equals the old fill value, so light paints unchanged. */
+  --color-datepicker-selected-fg: var(--color-primary-600);
   --color-datepicker-day-today-border: var(--color-primary-400);
   --color-datepicker-day-outside-text: var(--color-text-disabled);
   --color-datepicker-day-disabled-text: var(--color-text-disabled);
@@ -1644,6 +1649,7 @@
   --color-datepicker-day-hover-bg: var(--color-datepicker-day-hover-bg);
   --color-datepicker-day-selected-bg: var(--color-datepicker-day-selected-bg);
   --color-datepicker-day-selected-text: var(--color-datepicker-day-selected-text);
+  --color-datepicker-selected-fg: var(--color-datepicker-selected-fg);
   --color-datepicker-day-today-border: var(--color-datepicker-day-today-border);
   --color-datepicker-day-outside-text: var(--color-datepicker-day-outside-text);
   --color-datepicker-day-disabled-text: var(--color-datepicker-day-disabled-text);

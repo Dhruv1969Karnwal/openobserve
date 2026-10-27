@@ -30,7 +30,8 @@
  * replays `generatePrimaryPalette` for EVERY predefined theme, injects the
  * result over the parsed dark sheet the same way `syncO2LibraryTokens` does, and
  * measures the same fg×bg pairs against what the browser would actually paint.
- * Two invariants plus one matrix:
+ * Two invariants, one matrix, and one consumer scan (F-107: a fill token used
+ * as component text — measured from the components' own class bindings):
  *
  *  1. THEME-INVARIANT WASHES. The state surfaces that carry grey-tier text are
  *     ladder literals in dark.css — the same hex under every theme's injected
@@ -115,6 +116,8 @@ const THEME_INVARIANT_SURFACES = [
   "--color-pagination-item-active-bg",
   "--color-datepicker-day-selected-bg",
   "--color-datepicker-clock-header-bg",
+  "--color-datepicker-clock-selected-bg",
+  "--color-datepicker-selected-fg",
 ];
 
 /**
@@ -250,7 +253,14 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
   {
     fg: "--color-datepicker-clock-selected-text",
     bg: "--color-datepicker-clock-selected-bg",
-    where: "selected clock number",
+    where: "selected clock number (dark inverts: ink on the light disc)",
+  },
+  // F-107: the selected/tab ink the time-range controls actually paint, and
+  // the one-text-token ghost labels in their PRESSED (accent-active) state.
+  {
+    fg: "--color-datepicker-selected-fg",
+    bg: "--color-datepicker-popup-bg",
+    where: "selected time segment + active Relative/Absolute tab (OTime.vue, ODateTimeRange.vue)",
   },
 ];
 
@@ -270,10 +280,58 @@ const NON_TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-tabs-active-bg",
     where: "the accent edge of the active nav pill (MenuLink border-accent)",
   },
+  {
+    fg: "--color-datepicker-clock-selected-bg",
+    bg: "--color-datepicker-clock-face-bg",
+    where: "the selected clock disc IS the state marker (OTime.vue SVG fill)",
+  },
+  {
+    fg: "--color-datepicker-selected-fg",
+    bg: "--color-datepicker-popup-bg",
+    where: "the active step-dot pill and segment underline drawn with it (OTime.vue)",
+  },
 ];
 
 const TEXT_MIN = 4.5;
 const NON_TEXT_MIN = 3;
+
+/**
+ * F-107 tripwire: the state fills this file governs are BACKGROUNDS, and the
+ * components were caught painting `--color-datepicker-day-selected-bg` (a fill)
+ * through `text-`/`border-` utilities — 1.34:1 the moment the fill re-anchored
+ * dark. Rather than transcribing pairs, this scans the actual consumer sources
+ * and measures what they reference: no `text-`/`border-` utility may name a
+ * `-bg` token, and every text utility the time-range controls paint must clear
+ * 4.5:1 on the calendar popup — the brightest surface in those files, so the
+ * darker panel/base follow. Reverting a component class or re-darkening the
+ * fg token turns this red on its own.
+ * `disabled` / `outside` roles are exempt by name (WCAG 1.4.3 excludes inactive
+ * text). `placeholder` is exempt as a RECORDED pre-existing debt, not a pass:
+ * `--color-datepicker-placeholder` folds to the disabled step in dark and is
+ * filed as a new observation in fixer-notes-14, deliberately not widened here.
+ */
+const CONSUMER_COMPONENTS: { file: string; path: string }[] = [
+  { file: "OTime.vue", path: "../../forms/Time/OTime.vue" },
+  { file: "ODateTimeRange.vue", path: "../../forms/DateTimeRange/ODateTimeRange.vue" },
+  { file: "ODate.vue", path: "../../forms/Date/ODate.vue" },
+  { file: "ODateRangeCalendar.vue", path: "../../forms/DateTimeRange/ODateRangeCalendar.vue" },
+  { file: "OPagination.vue", path: "../../navigation/Pagination/OPagination.vue" },
+];
+
+const UTILITY_RE =
+  /(?:^|[\s'"`])((?:[a-z-]+:)*)(text|border|fill|bg)-((?:datepicker|pagination|surface)-[a-z0-9-]+)(?=$|[\s'"`])/g;
+
+const CONSUMER_UTILITIES = CONSUMER_COMPONENTS.map(({ file, path }) => {
+  const source = readFileSync(join(here, path), "utf8");
+  return {
+    file,
+    utilities: [...source.matchAll(UTILITY_RE)].map(([, state, prefix, name]) => ({
+      state,
+      prefix,
+      token: `--color-${name}`,
+    })),
+  };
+});
 
 describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
   it("measures at least the shipped default theme plus its five siblings", () => {
@@ -395,5 +453,46 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     // The mid-grey the injected ramp used to paint through, now unreachable.
     expect(hexOf("--d-hover", signature.scope)).not.toBe("#5c5c5c");
     expect(hexOf("--color-surface-accent-active", signature.scope)).not.toBe("#8a8a8a");
+  });
+
+  it("never paints a governed fill token as component foreground (F-107)", () => {
+    const offenders = CONSUMER_UTILITIES.flatMap(({ file, utilities }) =>
+      utilities
+        .filter(
+          ({ prefix, token }) =>
+            (prefix === "text" || prefix === "border") && token.endsWith("-bg"),
+        )
+        .map(
+          ({ state, prefix, token }) =>
+            `${file}: ${state}${prefix}-${token.slice("--color-".length)} — a -bg fill painted as a foreground`,
+        ),
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it("clears 4.5:1 on every text utility the time-range controls paint", () => {
+    const offenders: string[] = [];
+    for (const file of ["OTime.vue", "ODateTimeRange.vue"]) {
+      const { utilities } = CONSUMER_UTILITIES.find((entry) => entry.file === file)!;
+      const seen = new Set<string>();
+      for (const { prefix, token } of utilities) {
+        if (prefix !== "text" || seen.has(token)) continue;
+        seen.add(token);
+        if (/disabled|outside|placeholder/.test(token)) continue; // see the F-107 note
+        for (const theme of RUNTIME_SCOPES) {
+          const value = ratio(
+            token,
+            "--color-datepicker-popup-bg",
+            theme.scope as Map<string, string>,
+          );
+          if (value < TEXT_MIN) {
+            offenders.push(`${file}: ${token} on popup = ${value.toFixed(2)}:1 (${theme.name})`);
+          }
+        }
+      }
+      // Anti-vacuity: a moved/renamed class vocabulary must not silent-pass the scan.
+      expect(seen.size, `${file} parsed only ${seen.size} text utilities`).toBeGreaterThan(4);
+    }
+    expect(offenders).toEqual([]);
   });
 });

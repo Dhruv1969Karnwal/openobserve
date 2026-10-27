@@ -538,6 +538,9 @@
   --color-datepicker-border: var(--color-border-strong);
   --color-datepicker-disabled-bg: var(--color-surface-subtle);
   --color-datepicker-disabled-border: var(--color-border-default);
+  --color-datepicker-error-text: var(
+    --color-error-400
+  ); /* was the un-overridden light error-600 (2.90:1, manifest-pending) — same fix input/select/file roles already carry */
   --color-datepicker-error-border: var(--color-error-400);
   --color-datepicker-segment-focus-bg: var(--color-surface-accent-active);
   --color-datepicker-segment-focus-text: var(--color-white);
@@ -546,6 +549,10 @@
   --color-datepicker-popup-border: var(--color-border-default);
   --color-datepicker-day-hover-bg: var(--color-surface-accent-hover);
   --color-datepicker-day-selected-bg: var(--color-surface-accent-active);
+  /* Selected segment/tab ink: a light neutral, NOT the selection fill — the
+     fill as text measured 1.34:1 on this popup (F-107). grey-100 = 12.86:1 on
+     overlay, 14.81 on panel; the step-dot/underline markers clear 3:1 by it. */
+  --color-datepicker-selected-fg: var(--color-grey-100);
   --color-datepicker-day-today-border: var(--color-primary-400);
   --color-datepicker-day-outside-text: var(--color-text-disabled);
   --color-datepicker-nav-hover-bg: var(--color-surface-accent-hover);
@@ -553,7 +560,11 @@
   --color-datepicker-day-range-text: var(--color-primary-200);
   --color-datepicker-clock-face-bg: var(--color-surface-panel);
   --color-datepicker-clock-header-bg: var(--color-surface-accent-active);
-  --color-datepicker-clock-selected-bg: var(--color-surface-accent-active);
+  /* Selected clock number: the disc IS the state marker (WCAG 1.4.11 >=3:1 vs
+     the face). accent-active scored 1.54:1 on --d-panel, so the disc flips to
+     a light-neutral fill and the digits to canvas ink — 12.82 / 14.26. */
+  --color-datepicker-clock-selected-bg: var(--color-grey-200);
+  --color-datepicker-clock-selected-text: var(--d-base);
   --color-datepicker-clock-hover-bg: var(--color-surface-accent-hover);
   --color-datepicker-relative-btn-bg: var(--color-surface-panel);
   --color-datepicker-relative-btn-selected-bg: var(--color-surface-accent-active);

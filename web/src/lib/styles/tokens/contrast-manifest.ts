@@ -563,13 +563,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     themes: ["light"],
   },
   {
-    fg: "--color-datepicker-error-text",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["dark"],
-  },
-  {
     fg: "--color-datepicker-focus-border",
     category: "pending",
     why: "fails the threshold against the page surface it is painted on",
@@ -1169,6 +1162,12 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     bg: "--color-datepicker-segment-focus-bg",
     category: "text",
     why: "a focused date segment is highlighted behind the digits",
+  },
+  {
+    fg: "--color-datepicker-selected-fg",
+    bg: "--color-datepicker-popup-bg",
+    category: "text",
+    why: "the selected time-segment / active-tab ink is painted on the calendar popup, not on a fill — light primary-600 4.80:1, dark grey-100 12.86:1",
   },
   {
     fg: "--color-error-tag-text",
