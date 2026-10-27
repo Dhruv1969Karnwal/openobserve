@@ -22,10 +22,11 @@ import config from "@/aws-exports";
 import SearchBar from "@/plugins/logs/SearchBar.vue";
 import { resetLogsAutoRunForTests } from "@/composables/useLogs/logsAutoRun";
 
-const { openUpgradeDialog, toastMock, scheduleSearch } = vi.hoisted(() => ({
+const { openUpgradeDialog, toastMock, scheduleSearch, getViewDetail } = vi.hoisted(() => ({
   openUpgradeDialog: vi.fn(),
   toastMock: vi.fn(),
   scheduleSearch: vi.fn(),
+  getViewDetail: vi.fn(),
 }));
 
 // Flip for the lock-simulated checkFeatureAccess below; the shipped constant is
@@ -57,6 +58,13 @@ vi.mock("@/utils/enterpriseFeatures", async (importOriginal) => {
 vi.mock("@/services/search", async () => {
   const actual = await vi.importActual<any>("@/services/search");
   return { default: { ...actual.default, schedule_search: scheduleSearch } };
+});
+
+// The saved view a test "applies" is whatever this returns: an org-stored,
+// client-writable payload, which is exactly what the boundary exists to police.
+vi.mock("@/services/saved_views", async () => {
+  const actual = await vi.importActual<any>("@/services/saved_views");
+  return { default: { ...actual.default, getViewDetail } };
 });
 
 vi.mock("@/lib/feedback/Toast/useToast", async () => {
@@ -315,5 +323,149 @@ describe("SearchBar — paid affordances derive from the registry (F-36)", () =>
       expect(openUpgradeDialog).not.toHaveBeenCalled();
       pushSpy.mockRestore();
     });
+  });
+});
+
+/**
+ * The saved-view boundary WITH ITS WIRING: these cells drive the only production
+ * caller of `sanitizeSearchSnapshotMeta` (`SearchBar.applySavedView`) through a
+ * mounted SearchBar and assert on the paid UI that caller feeds. Deleting the
+ * sanitizer call at the call site goes red HERE, not just in the unit spec — the
+ * unit spec proves the function, this proves the app calls it.
+ */
+describe("SearchBar — a stored view cannot open paid UI through the apply path", () => {
+  let wrapper: VueWrapper<any> | undefined;
+  const originalIsEnterprise = config.isEnterprise;
+  const originalIsCloud = config.isCloud;
+  const originalZoConfig = { ...store.state.zoConfig };
+
+  // NO QueryEditor stub on purpose: the claim under test is that the paid Ask-AI
+  // bar is absent from the DOM, which needs the real component's `v-if`.
+  const mountOnLogsRoute = async (extraZoConfig: Record<string, unknown> = {}) => {
+    await router.push({ name: "logs" });
+    const zoCfg: Record<string, unknown> = {
+      auto_query_enabled: false,
+      query_on_stream_selection: false,
+      ...extraZoConfig,
+    };
+    store.state.zoConfig = { ...originalZoConfig, ...zoCfg };
+    wrapper = mount(SearchBar, {
+      global: { provide: { store }, plugins: [i18n, router] },
+    });
+    const { searchObj } = wrapper.vm;
+    searchObj.meta.logsVisualizeToggle = "logs";
+    searchObj.meta.sqlMode = false;
+    searchObj.data.query = "";
+    searchObj.data.editorValue = "";
+    searchObj.data.stream.selectedStream = ["app_logs"];
+    searchObj.data.stream.streamLists = [{ label: "app_logs", value: "app_logs" }];
+    wrapper.vm.autoRun.setExecutors({ logs: vi.fn(), patterns: vi.fn(), histogram: vi.fn() });
+    await flushPromises();
+    await vi.waitFor(() => expect(wrapper!.html()).toContain("logs-search-bar-query-editor"), {
+      timeout: 5000,
+    });
+    return wrapper;
+  };
+
+  /**
+   * What an entitled build used to store (a legacy view), or what anyone who can
+   * write to the org's saved views can store today. A fresh object per call: the
+   * sanitizer mutates the payload it is handed.
+   */
+  const paidStateView = () => ({
+    meta: {
+      nlpMode: true,
+      showSearchScheduler: true,
+      logsVisualizeToggle: "patterns",
+      jobId: "job-of-another-session",
+      sqlMode: true,
+    },
+    data: {
+      stream: { selectedStream: ["app_logs"], selectedFields: [] },
+      resultGrid: { columns: [] },
+      query: "SELECT * FROM app_logs",
+      editorValue: "SELECT * FROM app_logs",
+      tempFunctionContent: "",
+      datetime: { type: "relative", relativeTimePeriod: "15m" },
+    },
+  });
+
+  const applyView = async () => {
+    getViewDetail.mockResolvedValueOnce({ status: 200, data: { data: paidStateView() } });
+    wrapper!.vm.dateTimeRef = { setSavedDate: vi.fn() };
+    await wrapper!.vm.applySavedView({ view_id: "v1", view_name: "legacy view" });
+    await flushPromises();
+  };
+
+  beforeEach(() => {
+    resetLogsAutoRunForTests();
+    policy.lockSim = false;
+    getViewDetail.mockReset();
+    toastMock.mockClear();
+    localStorage.clear();
+  });
+
+  afterEach(async () => {
+    wrapper?.unmount();
+    wrapper = undefined;
+    policy.lockSim = false;
+    (config as any).isEnterprise = originalIsEnterprise;
+    (config as any).isCloud = originalIsCloud;
+    store.state.zoConfig = originalZoConfig;
+    // The editor region is `v-if`-ed on the logs route; leave it un-satisfied so a
+    // later cell cannot measure a DOM it did not ask for.
+    await router.push({ name: "searchScheduler" });
+  });
+
+  it("renders no Ask-AI bar when a stored view claims nlpMode on a hide build", async () => {
+    const w = await mountOnLogsRoute();
+    await applyView();
+
+    // The editor is on screen (the cell is not measuring an unmounted subtree)…
+    expect(w.html()).toContain("logs-search-bar-query-editor");
+    // …and the paid bar its `nlpMode` prop drives is not.
+    expect(w.html()).not.toContain("logs-search-bar-ai-input-bar");
+    expect(w.vm.searchObj.meta.nlpMode).toBe(false);
+  });
+
+  /** The refusal above is a coercion, not an unmount: entitled keeps what it saved. */
+  it("renders the Ask-AI bar for an org that has the assistant", async () => {
+    (config as any).isEnterprise = "true";
+    const w = await mountOnLogsRoute({ ai_enabled: true });
+    await applyView();
+
+    await vi.waitFor(() => expect(w.html()).toContain("ai-input-bar"), { timeout: 5000 });
+    expect(w.vm.searchObj.meta.nlpMode).toBe(true);
+  });
+
+  /** The entitled mirror is the assistant's OWN conjunct: edition without the
+   * `ai_enabled` runtime toggle is a build where the bar is not offered at all. */
+  it("renders no Ask-AI bar for an entitled org that has the assistant switched off", async () => {
+    (config as any).isEnterprise = "true";
+    const w = await mountOnLogsRoute();
+    await applyView();
+
+    expect(w.html()).not.toContain("logs-search-bar-ai-input-bar");
+    expect(w.vm.searchObj.meta.nlpMode).toBe(false);
+  });
+
+  it("opens no scheduled-search dialog and no patterns panel from a stored flag", async () => {
+    const w = await mountOnLogsRoute();
+    await applyView();
+
+    expect(w.vm.searchSchedulerJob).toBe(false);
+    expect(w.vm.searchObj.meta.showSearchScheduler).toBe(false);
+    expect(w.vm.searchObj.meta.logsVisualizeToggle).toBe("logs");
+  });
+
+  it("still restores what the view is entitled to persist, execution state included", async () => {
+    const w = await mountOnLogsRoute();
+    await applyView();
+
+    expect(w.vm.searchObj.meta.sqlMode).toBe(true);
+    expect(w.vm.searchObj.data.query).toBe("SELECT * FROM app_logs");
+    // jobId/jobRecords are documented pass-through: execution state behind a gate
+    // the route already answers for, not an affordance (see the table's EXECUTION row).
+    expect(w.vm.searchObj.meta.jobId).toBe("job-of-another-session");
   });
 });

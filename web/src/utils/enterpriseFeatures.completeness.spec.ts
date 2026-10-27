@@ -31,6 +31,12 @@ import { ALL_FEATURE_KEYS } from "./enterpriseFeatures";
 const SRC_ROOT = resolve(__dirname, "..");
 const SKIP_DIRS = new Set(["node_modules", "dist", ".git"]);
 const SOURCE_EXTENSIONS = [".ts", ".vue"];
+/**
+ * A key that is only ever named by a TEST is exactly the orphan this guard exists
+ * to catch — an assertion about `withFeatureGate("x")` is not a surface that
+ * spends the key — so spec files are out of the scanned set entirely.
+ */
+const SPEC_FILE = /\.spec\.[cm][jt]s$|\.spec\.vue$|\.stories\.[cm][jt]s$/;
 
 function walk(dir: string, files: string[] = []): string[] {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -39,6 +45,7 @@ function walk(dir: string, files: string[] = []): string[] {
     if (entry.isDirectory()) {
       walk(full, files);
     } else if (SOURCE_EXTENSIONS.some((ext) => entry.name.endsWith(ext))) {
+      if (SPEC_FILE.test(entry.name)) continue;
       files.push(full);
     }
   }
@@ -75,12 +82,6 @@ describe("FEATURE_GATES completeness", () => {
     for (const key of ALL_FEATURE_KEYS) {
       const patterns = callSitePatterns(key);
       const hasCallSite = SOURCE_FILES.some((file) => {
-        // The registry file itself only ever *defines* keys (object property
-        // syntax), never calls `checkFeatureAccess`/`withFeatureGate` with a
-        // literal of its own keys, so it's safe to include — but excluding
-        // this spec file matters, since its own patterns-as-strings above
-        // would otherwise "use" every key trivially.
-        if (file.endsWith("enterpriseFeatures.completeness.spec.ts")) return false;
         const text = SOURCE_TEXT.get(file)!;
         return patterns.some((p) => p.test(text));
       });

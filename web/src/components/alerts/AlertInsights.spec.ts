@@ -26,6 +26,16 @@ const mockRoute: { params: Record<string, any>; query: Record<string, any> } = {
   params: {},
   query: {},
 };
+/**
+ * `vi.clearAllMocks()` clears CALL RECORDS, not the object a previous cell
+ * installed, so a `?tab=` set by one test is still in place when the next one
+ * mounts — which made "starts on overview tab" measure a coerced `?tab=correlation`
+ * rather than a clean URL. Every mount has to start from an empty query.
+ */
+const resetMockRoute = () => {
+  mockRoute.params = {};
+  mockRoute.query = {};
+};
 vi.mock("vue-router", () => ({
   useRouter: () => ({ push: mockPush, back: vi.fn() }),
   useRoute: () => mockRoute,
@@ -121,7 +131,10 @@ async function mountComp(props: Record<string, any> = {}) {
 }
 
 describe("AlertInsights - rendering", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("renders without errors", async () => {
     const w = await mountComp();
@@ -239,7 +252,10 @@ describe("AlertInsights - rendering", () => {
 });
 
 describe("AlertInsights - initial state", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("starts on overview tab", async () => {
     const w = await mountComp();
@@ -265,7 +281,10 @@ describe("AlertInsights - initial state", () => {
 });
 
 describe("AlertInsights - fetchAlerts on mount", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("calls alertsService.listByFolderId on mount", async () => {
     await mountComp();
@@ -281,7 +300,10 @@ describe("AlertInsights - fetchAlerts on mount", () => {
 });
 
 describe("AlertInsights - goBack", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("calls router.push with alertList", async () => {
     const w = await mountComp();
@@ -355,7 +377,10 @@ describe("AlertInsights - updateDateTime", () => {
 });
 
 describe("AlertInsights - handleViewHistory", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("pushes to alertHistory route with alert_name", async () => {
     const w = await mountComp();
@@ -368,7 +393,10 @@ describe("AlertInsights - handleViewHistory", () => {
 });
 
 describe("AlertInsights - handleEditAlert", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("navigates to alertList with update action when alert found", async () => {
     const w = await mountComp();
