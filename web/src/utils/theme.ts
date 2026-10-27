@@ -157,6 +157,21 @@ export const pickReadableForeground = (bgHex: string): string => {
   return contrastRatio(best, bgHex) >= 4.5 ? best : "#000000";
 };
 
+/** White stays on a selected fill whenever it already clears AA; the fill only
+ *  flips ink when it cannot (F-116: white on O2 Lens light is 3.60:1). */
+const pickSelectedFillForeground = (bgHex: string): string =>
+  contrastRatio("#FFFFFF", bgHex) >= 4.5 ? "#FFFFFF" : pickReadableForeground(bgHex);
+
+/** Light fills whose ink must be picked from the injected ramp (F-116). Dark
+ *  pins the same roles to ladder literals with white ink instead (dark.css). */
+const SELECTED_FILL_INK_TOKENS = [
+  "--color-datepicker-day-selected-text",
+  "--color-datepicker-segment-focus-text",
+  "--color-datepicker-clock-selected-text",
+  "--color-datepicker-relative-btn-selected-text",
+  "--color-pagination-item-active-text",
+];
+
 /**
  * Inks the runtime injects alongside the primary ramp, computed against the
  * ramp the page will actually paint (the token sheets cannot know it). Pure so
@@ -168,9 +183,26 @@ export const libraryForegroundTokens = (
 ): Record<string, string> => {
   // The dark checkbox fill rides primary-500 (dark.css), the light fill primary-600.
   const checkboxFill = mode === "dark" ? palette["500"] : palette["600"];
-  return {
+  const tokens: Record<string, string> = {
     "--color-checkbox-checked-fg": pickReadableForeground(checkboxFill),
   };
+  if (mode === "light") {
+    const fillFg = pickSelectedFillForeground(palette["600"]);
+    for (const name of SELECTED_FILL_INK_TOKENS) tokens[name] = fillFg;
+  }
+  return tokens;
+};
+
+/** Names libraryForegroundTokens may write in either mode (probe palette —
+ *  keys never depend on the colors, only the values do). */
+const libraryForegroundTokenNames = (): string[] => {
+  const probe = { "500": "#888888", "600": "#888888" };
+  return [
+    ...new Set([
+      ...Object.keys(libraryForegroundTokens("light", probe)),
+      ...Object.keys(libraryForegroundTokens("dark", probe)),
+    ]),
+  ];
 };
 
 /**
@@ -258,8 +290,13 @@ const syncO2LibraryTokens = (themeColor: string, mode: "light" | "dark"): void =
   // resting background (the 600 shade) — see pickButtonForeground for why this
   // can't be hardcoded to white.
   root.style.setProperty("--color-button-primary-foreground", pickButtonForeground(palette["600"]));
-  for (const [token, hex] of Object.entries(libraryForegroundTokens(mode, palette))) {
-    root.style.setProperty(token, hex);
+  const active = libraryForegroundTokens(mode, palette);
+  for (const name of libraryForegroundTokenNames()) {
+    // A name the current mode does not compute belongs to the other mode's
+    // sheet — inline styles beat stylesheets, so a stale light pick would
+    // otherwise keep painting over the dark ladder pins after a mode switch.
+    if (name in active) root.style.setProperty(name, active[name]);
+    else root.style.removeProperty(name);
   }
 };
 
@@ -292,12 +329,8 @@ export const applyThemeColors = (
       },
     );
     root.style.removeProperty("--color-button-primary-foreground");
-    const palette = generatePrimaryPalette(themeColor);
-    for (const token of new Set([
-      ...Object.keys(libraryForegroundTokens("light", palette)),
-      ...Object.keys(libraryForegroundTokens("dark", palette)),
-    ])) {
-      root.style.removeProperty(token);
+    for (const name of libraryForegroundTokenNames()) {
+      root.style.removeProperty(name);
     }
   } else {
     syncO2LibraryTokens(themeColor, mode);
@@ -313,8 +346,8 @@ export const applyThemeColors = (
     document.body.style.setProperty("--color-theme-table-header-bg", tableHeaderBg);
 
     // Apply tab background colors for dark mode
-    // --color-theme-tab-bg: 20% white + 80% theme color (inverted from light mode)
-    const tabBg = hexToRgba(themeColor, 3); // 0.8 alpha (80% theme color)
+    // --color-theme-tab-bg: 0.3 alpha theme color over the dark surface
+    const tabBg = hexToRgba(themeColor, 3); // 0.3 alpha (30% theme color)
     document.body.style.setProperty("--color-theme-tab-bg", tabBg);
 
     // --color-theme-tab-bg-inactive: 10% theme color mixed with dark background
