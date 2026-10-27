@@ -147,7 +147,6 @@ describe("OButton", () => {
         "enabled:hover:border-button-pending-hover-bg",
         "enabled:active:bg-button-pending-active-bg",
         "enabled:active:border-button-pending-active-bg",
-        "focus-visible:ring-button-pending-focus-ring",
         "rounded-default",
       ]),
     );
@@ -338,19 +337,34 @@ describe("OButton", () => {
     expect(classes).toContain("outline-none");
   });
 
-  it("applies a focus-visible ring on the default primary variant", () => {
-    const wrapper = mount(OButton);
-    expect(wrapper.classes().join(" ")).toContain("focus-visible:ring-button-primary-hover");
-  });
-
-  it("applies a focus-visible ring on the secondary variant", () => {
-    const wrapper = mount(OButton, { props: { variant: "secondary" } });
-    expect(wrapper.classes().join(" ")).toContain("focus-visible:ring-button-secondary-focus-ring");
-  });
-
-  it("applies focus-visible:ring-3 on every styled variant", () => {
-    const wrapper = mount(OButton, { props: { variant: "destructive" } });
-    expect(wrapper.classes().join(" ")).toContain("focus-visible:ring-3");
+  /**
+   * Every button paints ONE ring. The base class declares it `!`important, so the
+   * per-variant `focus-visible:ring-3 focus-visible:ring-*` entries this map used to carry
+   * could never render — they pinned contrast work to classes that paint nothing (the ring
+   * that does paint is --color-focus-ring-accent: 4.40–6.47 measured live on the dark
+   * Pulse-class surfaces). The dead declarations are gone; this cell is what keeps them gone.
+   */
+  it.each([
+    "primary",
+    "secondary",
+    "outline",
+    "ghost",
+    "ghost-primary",
+    "destructive",
+    "filter-exclude",
+    "pending",
+    "cancel-query",
+    "ai-gradient",
+    "on-dark-primary",
+    "on-dark-ghost",
+  ] as const)("declares exactly the unified focus ring on the %s variant", (variant) => {
+    const rings = mount(OButton, { props: { variant } })
+      .classes()
+      .filter((value) => value.startsWith("focus-visible:ring-"));
+    expect(rings, variant).toEqual([
+      "focus-visible:ring-[0.125rem]!",
+      "focus-visible:ring-focus-ring-accent!",
+    ]);
   });
 
   // --- Loading ---
