@@ -361,18 +361,39 @@ export type PaidFeaturePolicy = "hide" | "lock";
 /**
  * Retrace.ai ships one edition, so an entitlement-gated feature is not sold in
  * the UI: `"hide"` renders nothing at all instead of a locked affordance.
- * Setting `"lock"` restores BEHAVIOR and VISIBILITY through TWO different
- * mechanisms, because every surface reads the policy through
- * {@link checkFeatureAccess} or {@link showsLockedAffordances}: an affordance-level
- * gate (a button, tab or menu item wrapped in {@link useLockedAffordance}) becomes
- * visible-but-locked again and its click opens the upsell dialog, while a
- * route-level gate ({@link withFeatureGate}) shows whatever entry the surface has
- * and the click or deep link lands on the shared `enterpriseFeatureLocked` PAGE —
- * a gated route can never hand back the page its guard refused. It does NOT restore the lock-icon GLYPHS
- * deleted during the hide rollout (10 icons across Header, QueryEditor,
- * ServiceAccountsList, PipelineEditor, JsonPreview, logs/SearchBar and
- * traces/TraceDetails): a `"lock"` build shows those affordances unlocked-
- * looking while still routing their clicks to the dialog.
+ * `"lock"` restores visibility and behavior — but NOT uniformly, and the
+ * difference is per CLASS OF SURFACE, not per policy. Every surface that refuses
+ * a feature belongs to exactly one of these; "what does `"lock"` do?" is only
+ * answerable together with "to which surface?":
+ *
+ * | class | where it is decided | `"lock"` outcome | `"hide"` outcome |
+ * |---|---|---|---|
+ * | in-page affordance wrapped in {@link useLockedAffordance} / {@link checkFeatureAccess} | the component's own `v-if` + click branch | visible-but-locked; the click opens the upsell dialog | omitted entirely |
+ * | route wrapped in {@link withFeatureGate} with no bounce target of its own | {@link withFeatureGate} | lands on the shared `enterpriseFeatureLocked` PAGE (with `feature` + `redirect`) | org home |
+ * | route with a composed section guard: DBM tabs (`dbmEnterpriseGuard`), the alert surfaces / Downtimes / Alert calibration, Settings › Slack | that guard, which has NO policy branch | section home instead of the refused page: `dbmDatabases`, `alertList`, `general` — never the lock page | the same bounce |
+ * | route whose guard ALSO reads a runtime `/config` flag (Workflows, Synthetics, private locations, Profiles, service accounts) | the flag half, after the edition half | home (`users` for service accounts) whenever the flag says off, in EITHER policy | same |
+ * | surface registered only when the build says enterprise/cloud (AutoObserve, Fleet, Announcements, org management) | `config.isEnterprise` / `isCloud` at registration time | 404 — the route does not exist, so no gate ever runs | same |
+ * | left-rail / menu tile carrying `locked` (`ONavGroup`, `MenuLink`) | the tile's click handler | `router.push({name:"enterpriseFeatures"})` — the COMPARISON page, not the lock page and not the dialog | tile is dropped (`visible` false) |
+ * | `AiScopeBar`'s Stream/Agent toggle | the callers: `visible && allowed` as `show-agent-toggle`, and the pitch behind `.visible` as `agentToggleLockedMessage` | the Agent item stays in the bar carrying a lock suffix and its click opens the upsell dialog | the toggle group is omitted (`visible` false ⇒ no message passed either) |
+ *
+ * So the shared lock page is ONE of four refusal destinations (lock page, section
+ * home, comparison page, 404) and each guard/entry's own comment is normative for
+ * its class; {@link withFeatureGate} alone does not promise a lock-page landing.
+ * Both upsell surfaces are themselves policy-gated (`hideUpsellPage`), which is what
+ * keeps `"hide"` free of any path back to a paid page.
+ *
+ * This does NOT restore the lock-icon GLYPHS deleted during the hide rollout (10
+ * icons across Header, QueryEditor, ServiceAccountsList, PipelineEditor, JsonPreview,
+ * logs/SearchBar and traces/TraceDetails): a `"lock"` build shows those affordances
+ * unlocked-looking while still routing their clicks to the dialog.
+ *
+ * Known `"lock"`-only wart, kept visible on purpose: the Search Job Inspector route
+ * folds its runtime flag into the EDITION bit (see `searchJobInspectorGateContext` in
+ * composables/shared/router.ts), so a `"lock"` build of an entitled self-hosted deploy
+ * with the flag off lands on the upsell page — an "upgrade" CTA for a feature the
+ * edition already includes, i.e. the false CTA the `rbac` branch of
+ * {@link checkFeatureAccess} exists to suppress. Unreachable while the policy is
+ * `"hide"`; fix it by giving that key a runtime half of its own if `"lock"` ships.
  */
 export const PAID_FEATURE_POLICY: PaidFeaturePolicy = "hide";
 

@@ -212,11 +212,17 @@ const props = withDefaults(
         and the parent must never set filterMode to "agent" in that case.
         Defaults to true. */
     showAgentToggle?: boolean;
-    /** Pitch message for the Agent toggle when `showAgentToggle` is false —
-        renders the toggle anyway with the Agent item disabled + a lock
-        suffix, plus this tooltip, instead of omitting it outright. Leave
-        unset for a caller with truly no Agent concept to advertise (there is
-        none today; every `showAgentToggle: false` caller passes this). */
+    /** Pitch message for the Agent toggle when `showAgentToggle` is false.
+        Passing it is the RENDER SWITCH for the locked affordance: the toggle
+        group stays in the bar with the Agent item carrying a lock suffix, and a
+        click on it opens the upgrade dialog (see `onFilterModeChange`) instead of
+        switching mode. NOTE: this component has no consumer that displays the
+        message TEXT — the value's presence is what matters, its content is not
+        rendered. Leave it unset for a caller with truly no Agent concept to
+        advertise: the whole toggle is then omitted, which is what the shipped
+        "hide" policy needs, so callers pass it behind `.visible`, never
+        unconditionally (an empty message under "hide" is still a truthy object and
+        would put a locked affordance on a free build). */
     agentToggleLockedMessage?: I18nText;
   }>(),
   {
