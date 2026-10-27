@@ -228,7 +228,10 @@ describe("AiScopeBar", () => {
       const agent = w.find('[data-value="agent"]');
       expect(agent.exists()).toBe(true);
       expect(agent.attributes("data-icon-right")).toBe("lock");
+      // Announced as unavailable but still activatable: the click IS the refusal path.
+      expect(agent.attributes("aria-disabled")).toBe("true");
       expect(w.find('[data-value="stream"]').attributes("data-icon-right")).toBeUndefined();
+      expect(w.find('[data-value="stream"]').attributes("aria-disabled")).toBeUndefined();
 
       // Locked means locked: the bar never emits its way into Agent mode.
       w.findComponent(OToggleGroup).vm.$emit("update:modelValue", "agent");

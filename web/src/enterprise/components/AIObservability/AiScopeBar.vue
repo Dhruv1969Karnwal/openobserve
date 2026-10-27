@@ -50,12 +50,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         :data-test="`${dataTest}-filter-mode`"
         @update:model-value="onFilterModeChange"
       >
-        <!-- Locked case: rendered disabled with a lock suffix rather than
-             omitted, so an OSS caller still advertises Agent mode exists
-             (see `agentToggleLockedMessage`) instead of just disappearing. -->
+        <!-- Locked case (a "lock" build only — "hide" omits this whole group): rendered
+             with the lock suffix and aria-disabled rather than omitted, so an OSS caller
+             still advertises that Agent mode exists (see `agentToggleLockedMessage`).
+             Not `disabled`: a disabled item cannot emit, and the refusal IS the click —
+             onFilterModeChange opens the upgrade dialog. -->
         <OToggleGroupItem
           value="agent"
           size="sm"
+          :aria-disabled="!showAgentToggle || undefined"
           :icon-right="!showAgentToggle ? 'lock' : undefined"
         >
           {{ labels.agent }}
