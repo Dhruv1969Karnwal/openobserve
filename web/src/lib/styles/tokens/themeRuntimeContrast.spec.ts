@@ -28,31 +28,36 @@
  *
  * So this file closes the seam statically (the theme registry is plain TS): it
  * replays `generatePrimaryPalette` for EVERY predefined theme, injects the
- * result over the parsed dark sheet the same way `syncO2LibraryTokens` does, and
- * measures the same fg×bg pairs against what the browser would actually paint.
- * Two invariants, one matrix, and one consumer scan (F-107: a fill token used
- * as component text — measured from the components' own class bindings):
+ * result — plus the inks `libraryForegroundTokens` computes and, where the
+ * registry carries them, the theme's `semanticColors` overlay, exactly as
+ * `applyThemeColors` writes them — over BOTH parsed sheets, and measures the
+ * pairs against what the browser would actually paint. Four invariants, one
+ * matrix run over all twelve scopes, and one consumer scan per mode:
  *
- *  1. THEME-INVARIANT WASHES. The state surfaces that carry grey-tier text are
- *     ladder literals in dark.css — the same hex under every theme's injected
- *     ramp and the bare sheet. If anyone re-points one at `--color-primary-*`,
- *     the resolved value moves per theme and this test goes red — which is the
- *     bidirectional tripwire, not a formality.
+ *  1. THEME-INVARIANT WASHES. The dark state surfaces that carry grey-tier text
+ *     are ladder literals in dark.css — the same hex under every theme's
+ *     injected ramp and the bare sheet. If anyone re-points one at
+ *     `--color-primary-*`, the resolved value moves per theme and this test goes
+ *     red — which is the bidirectional tripwire, not a formality.
  *  2. LADDER ORDER. hover steps off the canvas below the panel elevation step,
  *     selected sits above hover and below the well, the accent wash/active sit
  *     above the overlay tier in order — subtle, monotonic, never bright.
- *  3. THE PAIR MATRIX. Every text role an enumerated consumer paints on these
- *     surfaces clears 4.5:1 under every injected ramp (the reviewer-cited pairs
- *     plus the ones found by grepping `hover:bg-*`/selected-state consumers);
- *     edges that carry a control state clear 3:1.
- *
- * Light was the original seam's blind spot: F-114 added the consumer-scan's
- * light twin (same utilities, same hosts, all six light ramps) for the
- * datepicker-control roles, whose placeholder class folded to grey-400 at
- * 2.52:1 on the near-white light hosts. The light washes themselves stay
- * judged by contrast.spec's sheet (they mix near-white on near-white by
- * intent); light roles folding into a manifest-recorded PENDING root are
- * deferred by the light pass — that debt is on the books, not news.
+ *  3. THE PAIR MATRIX, BOTH MODES. Every text role an enumerated consumer
+ *     paints on these surfaces clears 4.5:1 under every injected ramp — dark AND
+ *     light. F-A11Y-02/03/05 proved the light mirror of the original seam
+ *     (white on the runtime primary-600 fills at 3.60, the active-tab accent ink
+ *     at 3.03, the wash roles at 3.49–4.45); the fills' inks and the accent-text
+ *     roles are now picked per theme by utils/theme.ts and the wash roles name
+ *     AA-dark sheet tiers, so nothing here is exempted by NAME any more. The
+ *     only skips are the two explicit ledgers below (booked debt + SC 1.4.3
+ *     inactive roles), each entry carrying its measured number and pinned by an
+ *     equality assertion in both directions — a skip that stops being needed
+ *     fails the suite, and a new failure cannot hide behind a pattern.
+ *  4. THE CONSUMER SCAN (F-107): the components' own class bindings are
+ *     measured on the surfaces they actually paint — fill inks on their fills
+ *     (FILL_INK_HOSTS), everything else on the popup/trigger tiers — so a fill
+ *     token used as text, or a role dropping under AA on any predefined ramp,
+ *     goes red naming the file.
  */
 
 import { readFileSync } from "node:fs";
@@ -65,11 +70,10 @@ import { PREDEFINED_THEMES } from "@/constants/themes";
 import { generatePrimaryPalette, libraryForegroundTokens } from "@/utils/theme";
 
 import { contrastRatio, relativeLuminance, resolveColor, resolveTokens } from "./colorMath";
-import { CONTRAST_PAIRS } from "./contrast-manifest";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-/** Same cascade as contrast.spec.ts — the dark scope is the one with the seam. */
+/** Same cascade as contrast.spec.ts — the dark scope was the seam, the light one is F-A11Y-02's. */
 const TOKEN_FILES = ["base.css", "semantic.css", "component.css", "dark.css"];
 const SHEETS = TOKEN_FILES.map((file) => readFileSync(join(here, file), "utf8"));
 const SHEET_DARK = resolveTokens(SHEETS).dark;
@@ -77,58 +81,67 @@ const SHEET_LIGHT = resolveTokens(SHEETS).light;
 
 const PALETTE_SHADES = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"];
 
-/**
- * One entry per predefined theme: the dark scope with that theme's runtime ramp
- * injected exactly as syncO2LibraryTokens() writes it (`--color-primary-<shade>`
- * on the root element, overriding the sheet).
- */
-const RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => {
-  const scope = new Map(SHEET_DARK);
-  const palette = generatePrimaryPalette(theme.dark.themeColor);
+/** The `semanticColors` overlay, keyed as applyThemeColors() writes it. */
+const SEMANTIC_TOKEN_MAP: Record<string, string> = {
+  error: "--color-status-negative",
+  errorText: "--color-status-error-text",
+  errorBg: "--color-status-error-bg",
+  success: "--color-status-positive",
+  successText: "--color-status-success-text",
+  successBg: "--color-status-success-bg",
+  secondaryBtnBg: "--color-button-secondary",
+  secondaryBtnText: "--color-button-secondary-foreground",
+  secondaryBtnBorder: "--color-button-secondary-border",
+  outlineText: "--color-button-outline-text",
+  outlineBorder: "--color-button-outline-border",
+  ghostText: "--color-button-ghost-text",
+};
+
+const runtimeScope = (
+  sheet: Map<string, string>,
+  mode: "light" | "dark",
+  themeColor: string,
+  semanticColors?: Record<string, string>,
+): Map<string, string> => {
+  const scope = new Map(sheet);
+  const palette = generatePrimaryPalette(themeColor);
   for (const shade of PALETTE_SHADES) {
     scope.set(`--color-primary-${shade}`, palette[shade]);
   }
-  // F-120: syncO2LibraryTokens also writes the computed fg tokens inline; the
-  // gate measures production's own map, not a transcription of it.
-  for (const [token, hex] of Object.entries(libraryForegroundTokens("dark", palette))) {
+  // The gate measures production's own injected map, not a transcription of it.
+  for (const [token, hex] of Object.entries(libraryForegroundTokens(mode, palette))) {
     scope.set(token, hex);
   }
-  return { name: String(theme.name), themeColor: theme.dark.themeColor, scope };
-});
-
-/**
- * F-114: the LIGHT mirror of RUNTIME_SCOPES — the light sheet with each theme's
- * light runtime ramp injected. The placeholder role folded to grey-400 here
- * (2.52:1 on the white popup / 2.31:1 on the grey-100 trigger tier) exactly as
- * it did in dark, and the dark-only scan could not see it.
- */
-const LIGHT_RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => {
-  const scope = new Map(SHEET_LIGHT);
-  const palette = generatePrimaryPalette(theme.light.themeColor);
-  for (const shade of PALETTE_SHADES) {
-    scope.set(`--color-primary-${shade}`, palette[shade]);
+  for (const [key, hex] of Object.entries(semanticColors ?? {})) {
+    const token = SEMANTIC_TOKEN_MAP[key];
+    if (token) scope.set(token, hex);
   }
-  for (const [token, hex] of Object.entries(libraryForegroundTokens("light", palette))) {
-    scope.set(token, hex);
-  }
-  return { name: String(theme.name), themeColor: theme.light.themeColor, scope };
-});
+  return scope;
+};
 
-/**
- * The manifest's light-scope recorded PENDING debt, as the exact fg names the
- * books carry. F-114's light consumer scan measures every datepicker text
- * utility the ACTIVE controls paint; a role that folds through bare var()
- * aliases into booked debt (e.g. `--color-datepicker-label → --color-text-label`,
- * light-pending) is not new news here, so the scan defers to contrast.spec
- * instead of re-judging booked debt as a fresh offender. Exempt roots are NOT
- * deferred — folding a live control into the disabled exemption is the exact
- * hole F-109 closed; only the `/disabled/` NAME filter reaches inactive roles.
- */
-const LIGHT_BOOKED_FGS = new Set(
-  CONTRAST_PAIRS.filter(
-    (pair) => (pair.themes ?? ["light", "dark"]).includes("light") && pair.category === "pending",
-  ).map((pair) => pair.fg),
-);
+/** One entry per predefined theme: the dark scope, injected as syncO2LibraryTokens writes it. */
+const RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => ({
+  name: String(theme.name),
+  themeColor: theme.dark.themeColor,
+  scope: runtimeScope(
+    SHEET_DARK,
+    "dark",
+    theme.dark.themeColor,
+    theme.dark.semanticColors as unknown as Record<string, string> | undefined,
+  ),
+}));
+
+/** The LIGHT mirror (F-114/F-116): the light sheet under each theme's light ramp. */
+const LIGHT_RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => ({
+  name: String(theme.name),
+  themeColor: theme.light.themeColor,
+  scope: runtimeScope(
+    SHEET_LIGHT,
+    "light",
+    theme.light.themeColor,
+    theme.light.semanticColors as unknown as Record<string, string> | undefined,
+  ),
+}));
 
 /** Bare-var()-alias chain a role token folds through in `scope` (self first). */
 const aliasChain = (name: string, scope: Map<string, string>): string[] => {
@@ -178,12 +191,14 @@ const THEME_INVARIANT_SURFACES = [
 ];
 
 /**
- * The measured matrix. Every entry names the consumer that paints the pair —
- * text roles are what ACTUALLY lands on the surface, per grep of the class
- * bindings (tables: OTableBodyCell.vue default `text-text-body` + per-cell
- * roles; menus: component.css dropdown/select item text; active pills:
- * MenuLink/ONavbar `text-tabs-active-text`, OSelect
- * `select-item-selected-text`, fills consumed via *-hover-bg/*-active-bg).
+ * The measured matrix, run under BOTH modes (six dark + six light scopes).
+ * Every entry names the consumer that paints the pair — text roles are what
+ * ACTUALLY lands on the surface, per grep of the class bindings (tables:
+ * OTableBodyCell.vue default `text-text-body` + per-cell roles; menus:
+ * component.css dropdown/select item text; active pills: MenuLink `text-
+ * tabs-active-text`, OSelect `select-item-selected-text`, fills consumed via
+ * *-hover-bg/*-active-bg; the checked tick: OCheckbox/OSelect
+ * `text-checkbox-checked-fg`; status chips/diff tables: `text-status-*-text`).
  */
 const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
   // Row washes (OTableBodyCell.vue:462/511, AutoObserveActivityTab.vue:121,
@@ -244,12 +259,12 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
   {
     fg: "--color-button-secondary-foreground",
     bg: "--color-button-secondary-hover",
-    where: "secondary button label while hovered",
+    where: "secondary button label while hovered (Crimson Ink injects this pair)",
   },
   {
     fg: "--color-button-outline-text",
     bg: "--color-button-outline-hover-bg",
-    where: "outline button label",
+    where: "outline button label (Crimson Ink injects this pair)",
   },
   {
     fg: "--color-button-ghost-muted-hover-text",
@@ -270,7 +285,7 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
   {
     fg: "--color-tabs-active-text",
     bg: "--color-tabs-active-bg",
-    where: "active nav pill (MenuLink/ONavbar)",
+    where: "active nav pill (MenuLink/ONavbar) and the dashboard tab row",
   },
   {
     fg: "--color-select-item-selected-text",
@@ -290,7 +305,7 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
   {
     fg: "--color-pagination-item-text",
     bg: "--color-pagination-item-hover-bg",
-    where: "page number under the cursor (F-94 pair, dark side)",
+    where: "page number under the cursor (F-94 pair)",
   },
   {
     fg: "--color-datepicker-day-selected-text",
@@ -339,6 +354,29 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-button-ghost-muted-active-bg",
     where: "muted ghost accent label when pressed while hovered",
   },
+  // F-126: the stable status inks — routed at every text consumer because
+  // status-positive/-negative are the slots a theme's semantics repaint
+  // (O2 Crimson Ink light put 2.80:1 orange under status-negative as text).
+  {
+    fg: "--color-status-success-text",
+    bg: "--color-status-success-bg",
+    where: "success label inside the success wash (diff tables, checklists)",
+  },
+  {
+    fg: "--color-status-error-text",
+    bg: "--color-status-error-bg",
+    where: "error label inside the error wash (import results, RCA)",
+  },
+  {
+    fg: "--color-status-success-text",
+    bg: "--color-surface-base",
+    where: "success label on the page (routed status-positive text sites)",
+  },
+  {
+    fg: "--color-status-error-text",
+    bg: "--color-surface-base",
+    where: "error label on the page (routed status-negative text sites)",
+  },
 ];
 
 const NON_TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
@@ -373,30 +411,56 @@ const TEXT_MIN = 4.5;
 const NON_TEXT_MIN = 3;
 
 /**
+ * The ONLY pairs the light matrix defers, each with its measured number. Not
+ * name patterns — an exact pair list, pinned by the equality check below: a
+ * pair that stops failing must be deleted from this ledger (or the debt it
+ * describes is still open), and no unbooked pair may fail. The booked text
+ * tiers (--color-text-label/-muted/-placeholder on light — grey-400/300
+ * booked PENDING rows of contrast-manifest, "WCAG-AA colour remediation
+ * (follow-up PR)") ride surfaces this wave did not re-ink; the numbers below
+ * are the live measurements under the six injected light ramps.
+ */
+const LIGHT_PAIR_DEFERRALS: Record<string, string> = {
+  "--color-text-label on --color-table-row-hover-bg":
+    "grey-400: 2.29 on the runtime primary-50 wash, 2.52 on the page — booked light-pending text-label row in contrast-manifest",
+  "--color-text-label on --color-table-row-selected-bg":
+    "grey-400: 1.86 on the runtime primary-100 wash — same booked row",
+  "--color-text-muted on --color-table-row-hover-bg":
+    "grey-300: 1.35 on the runtime wash — booked light-pending text-muted row",
+  "--color-text-muted on --color-table-row-selected-bg":
+    "grey-300: 1.09 on the runtime wash — booked light-pending text-muted row",
+  "--color-text-placeholder on --color-table-row-hover-bg":
+    "grey-400: 2.29 on the runtime wash — booked light-pending text-placeholder row (the DATEPICKER placeholder role was fixed to grey-600 in F-114; the global role still folds here)",
+};
+
+const pairKey = (pair: { fg: string; bg: string }): string => `${pair.fg} on ${pair.bg}`;
+
+const failingLightPairs = (pairs: { fg: string; bg: string }[]): Set<string> =>
+  new Set(
+    pairs
+      .filter((pair) =>
+        LIGHT_RUNTIME_SCOPES.some((theme) => ratio(pair.fg, pair.bg, theme.scope) < TEXT_MIN),
+      )
+      .map(pairKey),
+  );
+
+/**
  * F-107 tripwire: the state fills this file governs are BACKGROUNDS, and the
  * components were caught painting `--color-datepicker-day-selected-bg` (a fill)
  * through `text-`/`border-` utilities — 1.34:1 the moment the fill re-anchored
  * dark. Rather than transcribing pairs, this scans the actual consumer sources
  * and measures what they reference: no `text-`/`border-` utility may name a
  * `-bg` token, and every text utility the time-range controls paint must clear
- * 4.5:1 on BOTH host surfaces those controls draw on — the calendar popup
- * (--color-datepicker-popup-bg, the overlay tier) and the trigger/field
- * (--color-datepicker-bg, the panel tier); the overlay is the lighter host, so
- * base follows both. Reverting a component class or re-darkening the
- * fg token turns this red on its own.
- * Exemptions are exactly the NON-INTERACTIVE roles: `disabled` — the
- * `data-unavailable`/`data-disabled` day cell, which the libraries render with
- * pointer-events:none / cursor:not-allowed — is WCAG 1.4.3 inactive text, and
- * nothing else rides the name filter. `outside` is NOT exempt (F-111): an
- * outside-month cell is still a clickable button. `placeholder` is NOT exempt
- * (F-109): it paints the value of ACTIVE controls — the ODateTimeRange trigger
- * label (ODateTimeRange.vue:351) and the ODate separators / empty segments
- * (ODate.vue:206-207) — where disabled-state language does not apply. Both
- * roles now ride the raised placeholder tier (grey-450: 4.76:1 popup /
- * 5.48:1 trigger) and the scan measures them. F-114 adds the light twin of
- * this pass — same utilities on the near-white light hosts across the six
- * light ramps, where the placeholder tier rides grey-600 (7.81:1 popup /
- * 7.81:1 trigger / 7.17:1 surface-subtle).
+ * 4.5:1 on the surface it is really drawn on — FILL_INK_ROLES maps the five
+ * selected/focus glyph tokens onto their own runtime fill (measuring a
+ * picked-on-white ink against the white popup would be vacuous, which is why
+ * the pre-F-116 scan wrongly skipped them by NAME); everything else rides the
+ * calendar popup (overlay tier) and the trigger/field (panel tier), plus
+ * --color-surface-subtle for chains on the placeholder tier.
+ * Nothing is skipped by name pattern. The only roles not measured are the
+ * explicit CONSUMER_LEDGERS below — each an inactive (SC 1.4.3) or already
+ * booked-pending role with its measured number — pinned by an equality
+ * assertion: stale entries fail, and a new offender cannot hide.
  */
 const CONSUMER_COMPONENTS: { file: string; path: string }[] = [
   { file: "OTime.vue", path: "../../forms/Time/OTime.vue" },
@@ -422,11 +486,40 @@ const CONSUMER_UTILITIES = CONSUMER_COMPONENTS.map(({ file, path }) => {
   };
 });
 
+/** Scanned text utilities that are drawn on their own runtime fill, not on the
+ *  popup/trigger hosts (the picker inks of F-116/F-120 and their dark twins). */
+const FILL_INK_ROLES: Record<string, string> = {
+  "--color-datepicker-day-selected-text": "--color-datepicker-day-selected-bg",
+  "--color-datepicker-segment-focus-text": "--color-datepicker-segment-focus-bg",
+  "--color-datepicker-clock-selected-text": "--color-datepicker-clock-selected-bg",
+  "--color-datepicker-relative-btn-selected-text": "--color-datepicker-relative-btn-selected-bg",
+  "--color-pagination-item-active-text": "--color-pagination-item-active-bg",
+};
+
+const CONSUMER_LEDGERS: Record<"dark" | "light", Record<string, string>> = {
+  dark: {
+    "--color-datepicker-day-disabled-text":
+      "SC 1.4.3 inactive day cells (data-disabled/unavailable render cursor:not-allowed / pointer-events:none): grey-600 measures 2.07 on the popup, 1.79–2.07 across hosts — the disabled step the manifest books as an exempt role",
+  },
+  light: {
+    "--color-datepicker-day-disabled-text":
+      "SC 1.4.3 inactive day cells: grey-400 measures 2.52 on both light hosts — same exempt disabled step as dark",
+    "--color-datepicker-label":
+      "folds to --color-text-label (grey-400, booked light-PENDING row of contrast-manifest): 2.52 on popup and trigger — the remediation PR owns the tier, not this gate",
+  },
+};
+
 describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
-  it("measures at least the shipped default theme plus its five siblings", () => {
+  it("measures at least the shipped default theme plus its five siblings, both modes", () => {
     // Guard against the matrix silently passing over an empty theme registry.
     expect(RUNTIME_SCOPES.length).toBe(PREDEFINED_THEMES.length);
     expect(RUNTIME_SCOPES.length).toBeGreaterThanOrEqual(6);
+    expect(LIGHT_RUNTIME_SCOPES.length).toBe(PREDEFINED_THEMES.length);
+    // The Crimson Ink semantics overlay must ride the scopes (F-126), or the
+    // status pairs below re-join the sheet-fiction this file exists to kill.
+    const crimson = LIGHT_RUNTIME_SCOPES.find((theme) => theme.name.includes("Crimson"))!;
+    expect(hexOf("--color-status-negative", crimson.scope).toLowerCase()).toBe("#f97316");
+    expect(hexOf("--color-status-success-text", crimson.scope).toLowerCase()).toBe("#3730a3");
   });
 
   it("keeps the grey-text-bearing state surfaces theme-invariant literals", () => {
@@ -495,14 +588,32 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     }
   });
 
-  describe.each(
-    RUNTIME_SCOPES.map(({ name, themeColor, scope }) => [`${name} (${themeColor})`, scope]),
-  )("%s dark ramp injected", (_label, scope) => {
+  it("defers exactly the booked light-debt pairs, nothing more", () => {
+    // Bidirectional lock on the deferral ledger: every deferral must describe
+    // a pair that genuinely fails under some light ramp (a fixed debt must
+    // delete its entry), and no failing pair may be absent from the ledger
+    // (a new offender cannot hide).
+    const failing = failingLightPairs(TEXT_PAIRS);
+    const deferred = new Set(Object.keys(LIGHT_PAIR_DEFERRALS));
+    expect([...failing].sort()).toEqual([...deferred].sort());
+  });
+
+  describe.each([
+    ...RUNTIME_SCOPES.map(({ name, themeColor, scope }) => [`dark ${name} (${themeColor})`, scope]),
+    ...LIGHT_RUNTIME_SCOPES.map(({ name, themeColor, scope }) => [
+      `light ${name} (${themeColor})`,
+      scope,
+    ]),
+  ])("%s ramp injected", (_label, scope) => {
+    const light = _label.startsWith("light");
     it("clears 4.5:1 on every enumerated text pair painted on a state surface", () => {
-      const offenders = TEXT_PAIRS.map((pair) => {
-        const value = ratio(pair.fg, pair.bg, scope as Map<string, string>);
-        return { ...pair, value };
-      })
+      const offenders = TEXT_PAIRS.filter(
+        (pair) => !(light && pairKey(pair) in LIGHT_PAIR_DEFERRALS),
+      )
+        .map((pair) => {
+          const value = ratio(pair.fg, pair.bg, scope as Map<string, string>);
+          return { ...pair, value };
+        })
         .filter((pair) => pair.value < TEXT_MIN)
         .map((pair) => `${pair.fg} on ${pair.bg} (${pair.where}): ${pair.value.toFixed(2)}:1`);
       expect(offenders).toEqual([]);
@@ -519,9 +630,41 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     });
   });
 
+  it("keeps the primary button label on its documented floor across all three fills", () => {
+    // OButton's primary variant paints ONE label token over rest/hover/active
+    // (primary-600/700/800 of the injected ramp). pickButtonForeground must
+    // survive the worst of the three states — checking the resting shade alone
+    // shipped a 2.78:1 pressed label under O2 Crimson Ink dark (F-118). The
+    // floor is the 3:1 compromise documented on that function (white on a
+    // saturated brand color at rest: O2 Lens light lands at 3.60); after the
+    // worst-of-states pick the measured minimum across the twelve scopes is
+    // 3.03 (Beacon dark active, grey-900) with Crimson dark's pressed state at
+    // 3.26 on the black ink.
+    const states = [
+      "--color-button-primary",
+      "--color-button-primary-hover",
+      "--color-button-primary-active",
+    ];
+    const offenders: string[] = [];
+    for (const [mode, scopes] of [
+      ["dark", RUNTIME_SCOPES],
+      ["light", LIGHT_RUNTIME_SCOPES],
+    ] as const) {
+      for (const { name, scope } of scopes) {
+        for (const bg of states) {
+          const value = ratio("--color-button-primary-foreground", bg, scope);
+          if (value < NON_TEXT_MIN) {
+            offenders.push(`${mode} ${name} on ${bg}: ${value.toFixed(2)}:1`);
+          }
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it("measures the reviewer-cited regressions at their fixed values (O2 Signature)", () => {
     // F-A11Y-01 live capture: secondary/label on the row washes were 2.24–2.65,
-    // white-on-active 3.25–3.45. Pinned here as the floor, to the sheet truth.
+    // white-on-active 3.25–3.45, the checked tick 1.20. Pinned as floors here.
     const signature = RUNTIME_SCOPES.find((theme) => theme.name === "O2 Signature")!;
     const floor = (fg: string, bg: string) => ratio(fg, bg, signature.scope);
     expect(floor("--color-text-secondary", "--color-table-row-hover-bg")).toBeGreaterThanOrEqual(
@@ -539,9 +682,36 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     expect(
       floor("--color-select-item-selected-text", "--color-select-item-selected-bg"),
     ).toBeGreaterThanOrEqual(TEXT_MIN);
+    expect(
+      floor("--color-checkbox-checked-fg", "--color-checkbox-checked-bg"),
+    ).toBeGreaterThanOrEqual(TEXT_MIN);
     // The mid-grey the injected ramp used to paint through, now unreachable.
     expect(hexOf("--d-hover", signature.scope)).not.toBe("#5c5c5c");
     expect(hexOf("--color-surface-accent-active", signature.scope)).not.toBe("#8a8a8a");
+  });
+
+  it("keeps the light selected fills off the white-on-themeColor failure (O2 Lens)", () => {
+    // F-A11Y-02/EDGE-8-02: white on O2 Lens light primary-600 is 3.60:1. The
+    // picker must flip the ink for exactly the themes where white cannot clear
+    // AA — every other light theme keeps white (the shipped look).
+    const lens = LIGHT_RUNTIME_SCOPES.find((theme) => theme.name === "O2 Lens")!;
+    const pulse = LIGHT_RUNTIME_SCOPES.find((theme) => theme.name === "O2 Pulse")!;
+    const pairs = [
+      ["--color-datepicker-day-selected-text", "--color-datepicker-day-selected-bg"],
+      ["--color-datepicker-segment-focus-text", "--color-datepicker-segment-focus-bg"],
+      ["--color-datepicker-clock-selected-text", "--color-datepicker-clock-selected-bg"],
+      [
+        "--color-datepicker-relative-btn-selected-text",
+        "--color-datepicker-relative-btn-selected-bg",
+      ],
+      ["--color-pagination-item-active-text", "--color-pagination-item-active-bg"],
+      ["--color-checkbox-checked-fg", "--color-checkbox-checked-bg"],
+    ];
+    for (const [fg, bg] of pairs) {
+      expect(ratio(fg, bg, lens.scope), `lens ${fg}`).toBeGreaterThanOrEqual(TEXT_MIN);
+      expect(hexOf(fg, lens.scope), `lens ${fg} must not stay white`).not.toBe("#ffffff");
+      expect(hexOf(fg, pulse.scope), `pulse ${fg} keeps white`).toBe("#ffffff");
+    }
   });
 
   it("never paints a governed fill token as component foreground (F-107)", () => {
@@ -559,8 +729,12 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("clears 4.5:1 on every text utility the time-range controls paint", () => {
+  it("clears 4.5:1 on every text utility the time-range controls paint, both modes", () => {
     const offenders: string[] = [];
+    const failing: Record<"dark" | "light", Set<string>> = {
+      dark: new Set(),
+      light: new Set(),
+    };
     for (const file of [
       "OTime.vue",
       "ODateTimeRange.vue",
@@ -573,15 +747,30 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
       for (const { prefix, token } of utilities) {
         if (prefix !== "text" || seen.has(token)) continue;
         seen.add(token);
-        if (/disabled/.test(token)) continue; // inactive-cell roles only, see the note
-        for (const theme of RUNTIME_SCOPES) {
-          for (const bg of [
-            "--color-datepicker-popup-bg", // calendar popup (overlay tier)
-            "--color-datepicker-bg", // trigger / field / input (panel tier)
-          ]) {
-            const value = ratio(token, bg, theme.scope as Map<string, string>);
-            if (value < TEXT_MIN) {
-              offenders.push(`${file}: ${token} on ${bg} = ${value.toFixed(2)}:1 (${theme.name})`);
+        const hosts = FILL_INK_ROLES[token]
+          ? [FILL_INK_ROLES[token]]
+          : ["--color-datepicker-popup-bg", "--color-datepicker-bg"];
+        for (const [mode, scopes] of [
+          ["dark", RUNTIME_SCOPES],
+          ["light", LIGHT_RUNTIME_SCOPES],
+        ] as const) {
+          for (const theme of scopes) {
+            const scope = theme.scope as Map<string, string>;
+            const extraHosts =
+              mode === "light" &&
+              aliasChain(token, SHEET_LIGHT).includes("--color-datepicker-placeholder")
+                ? ["--color-surface-subtle"] // the worst light panel the placeholder tier lands on (7.17)
+                : [];
+            for (const bg of [...hosts, ...extraHosts]) {
+              const value = ratio(token, bg, scope);
+              if (value < TEXT_MIN) {
+                failing[mode].add(token);
+                if (!CONSUMER_LEDGERS[mode][token]) {
+                  offenders.push(
+                    `${file}: ${token} on ${bg} = ${value.toFixed(2)}:1 (${mode} ${theme.name})`,
+                  );
+                }
+              }
             }
           }
         }
@@ -589,75 +778,13 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
       // Anti-vacuity: a moved/renamed class vocabulary must not silent-pass the scan.
       expect(seen.size, `${file} parsed only ${seen.size} text utilities`).toBeGreaterThan(4);
     }
-    expect(offenders).toEqual([]);
-  });
-
-  it("clears 4.5:1 on every light-scope text utility the time-range controls paint (F-114)", () => {
-    // The dark twin above proved the seam; F-114 flagged its light mirror — the
-    // placeholder role folded to grey-400 and measured 2.52:1 on both near-white
-    // light hosts (2.31:1 on the surface-subtle trigger tier). Same utilities,
-    // same host tokens, all six light ramps. Skips, each booked elsewhere:
-    // `/disabled/` (inactive roles); `/selected|segment-focus/` (the white-on-
-    // fill day/preset/segment glyphs, whose manifest fg×fill pairs judge them —
-    // white on the near-white hosts is vacuous there — plus the brand selected-
-    // fg, whose light value rides the themeColor wash this file keeps out of
-    // light scope); and alias chains reaching booked light-pending debt
-    // (datepicker-label → text-label). Placeholder-tier roles additionally
-    // ride --color-surface-subtle, the worst light panel they can land on:
-    // grey-500 passes the whites at 4.74 and fails there at 4.35; the shipped
-    // grey-600 measures 7.81 / 7.81 / 7.17.
-    const offenders: string[] = [];
-    for (const file of [
-      "OTime.vue",
-      "ODateTimeRange.vue",
-      "ODate.vue",
-      "ODateRangeCalendar.vue",
-      "OColor.vue",
-    ]) {
-      const { utilities } = CONSUMER_UTILITIES.find((entry) => entry.file === file)!;
-      const seen = new Set<string>();
-      for (const { prefix, token } of utilities) {
-        if (prefix !== "text" || seen.has(token)) continue;
-        seen.add(token);
-        if (/disabled/.test(token)) continue; // inactive-cell roles only, see the note
-        if (/selected|segment-focus/.test(token)) continue; // fill-painted glyphs, manifest pairs
-        const chain = aliasChain(token, SHEET_LIGHT);
-        if (chain.some((step) => LIGHT_BOOKED_FGS.has(step))) continue;
-        const hosts = ["--color-datepicker-popup-bg", "--color-datepicker-bg"];
-        if (chain.includes("--color-datepicker-placeholder")) hosts.push("--color-surface-subtle");
-        for (const theme of LIGHT_RUNTIME_SCOPES) {
-          for (const bg of hosts) {
-            const value = ratio(token, bg, theme.scope as Map<string, string>);
-            if (value < TEXT_MIN) {
-              offenders.push(`${file}: ${token} on ${bg} = ${value.toFixed(2)}:1 (${theme.name})`);
-            }
-          }
-        }
-      }
+    // Bidirectional lock on the consumer ledgers: stale entries (roles fixed
+    // since) and unbooked offenders both fail.
+    for (const mode of ["dark", "light"] as const) {
       expect(
-        seen.size,
-        `${file} parsed only ${seen.size} text utilities (light pass)`,
-      ).toBeGreaterThan(4);
-    }
-    expect(offenders).toEqual([]);
-  });
-
-  it("keeps the checkbox tick AA on every runtime fill in both modes (F-120)", () => {
-    // The tick conveys state; the fill it sits on is the theme's own accent
-    // (primary-500 in dark.css, primary-600 in the light sheet), so the ink is
-    // picked from the injected ramp by libraryForegroundTokens — the exact map
-    // production writes, measured here under all twelve runtime scopes.
-    const offenders: string[] = [];
-    for (const [mode, scopes] of [
-      ["dark", RUNTIME_SCOPES],
-      ["light", LIGHT_RUNTIME_SCOPES],
-    ] as const) {
-      for (const { name, scope } of scopes) {
-        const value = ratio("--color-checkbox-checked-fg", "--color-checkbox-checked-bg", scope);
-        if (value < TEXT_MIN) {
-          offenders.push(`${mode} ${name}: ${value.toFixed(2)}:1`);
-        }
-      }
+        [...failing[mode]].sort(),
+        `${mode} consumer ledger is stale: ledger=[${Object.keys(CONSUMER_LEDGERS[mode]).join(", ")}]`,
+      ).toEqual([...Object.keys(CONSUMER_LEDGERS[mode])].sort());
     }
     expect(offenders).toEqual([]);
   });

@@ -170,7 +170,7 @@ const pickReadableShade = (
   const firstPassing = shades
     .slice(shades.indexOf(start))
     .find((shade) => contrastRatio(palette[shade], hostHex) >= 4.5);
-  return firstPassing ?? darkText;
+  return firstPassing ? palette[firstPassing] : darkText;
 };
 
 /** Text for an arbitrary user-chosen background, always at least WCAG AA (4.5:1). */
