@@ -54,7 +54,7 @@ import {
 } from "@/composables/useLogs/useLogsUrl";
 import { columnsFromUrl } from "@/composables/useLogs/useLogPermalink";
 import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
-import { resolveLogsVisualizeToggle } from "@/ts/interfaces/logs";
+import { DEFAULT_LOGS_VISUALIZE_TOGGLE, resolveLogsVisualizeToggle } from "@/ts/interfaces/logs";
 
 const useLogs = (t: TranslateFn) => {
   const store = useStore();
@@ -529,14 +529,20 @@ const useLogs = (t: TranslateFn) => {
     }
 
     initShownSearchFromUrl(queryParams);
-    void writeLogsUrl("replace", {
+    const restoredQuery: Record<string, any> = {
       ...queryParams,
-      // The raw param may carry a gated or unknown toggle the sanitizer rewrote;
-      // the re-persisted URL must describe the restored state, not the incoming string.
-      logs_visualize_toggle: searchObj.meta.logsVisualizeToggle,
       sql_mode: searchObj.meta.sqlMode,
       defined_schemas: searchObj.meta.useUserDefinedSchemas,
-    });
+    };
+    // The raw param may carry a gated or unknown toggle the sanitizer rewrote, so the URL is
+    // rewritten to the RESTORED state; the default tab is written by absence rather than as a
+    // value, so a link that never chose a panel keeps its byte-shape (F-91).
+    if (searchObj.meta.logsVisualizeToggle === DEFAULT_LOGS_VISUALIZE_TOGGLE) {
+      delete restoredQuery.logs_visualize_toggle;
+    } else {
+      restoredQuery.logs_visualize_toggle = searchObj.meta.logsVisualizeToggle;
+    }
+    void writeLogsUrl("replace", restoredQuery);
   };
 
   const enableRefreshInterval = (value: number) => {

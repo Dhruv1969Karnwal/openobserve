@@ -32,6 +32,7 @@ import { searchState } from "../composables/useLogs/searchState";
 import useNotifications from "../composables/useNotifications";
 
 import store from "../test/unit/helpers/store";
+import config from "@/aws-exports";
 import i18nInstance from "@/locales";
 import {
   bindLogsUrlRouter,
@@ -666,7 +667,7 @@ describe("Use Logs Composable", () => {
         wrapper.vm.searchObj.meta.logsVisualizeToggle = "logs";
       });
 
-      it("re-persists the sanitized toggle, not the raw gated param (F-65)", async () => {
+      it("re-persists the sanitized toggle, not the raw gated param (F-65, F-91)", async () => {
         resetLogsUrlForTests();
         bindLogsUrlRouter(wrapper.vm.router);
         wrapper.vm.router.replace = vi.fn();
@@ -680,7 +681,11 @@ describe("Use Logs Composable", () => {
 
         expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("logs");
         expect(wrapper.vm.router.replace).toHaveBeenCalledTimes(1);
-        expect(wrapper.vm.router.replace.mock.calls[0][0].query.logs_visualize_toggle).toBe("logs");
+        // F-91 re-pin: the coerced default is carried by ABSENCE, so the gated
+        // param is gone rather than rewritten to `logs`.
+        expect(wrapper.vm.router.replace.mock.calls[0][0].query).not.toHaveProperty(
+          "logs_visualize_toggle",
+        );
       });
 
       it("re-persists an unknown toggle as the default in state and URL alike (F-65, F-66)", async () => {
@@ -697,7 +702,11 @@ describe("Use Logs Composable", () => {
 
         expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("logs");
         expect(wrapper.vm.router.replace).toHaveBeenCalledTimes(1);
-        expect(wrapper.vm.router.replace.mock.calls[0][0].query.logs_visualize_toggle).toBe("logs");
+        // F-91 re-pin: same shape as the gated case — the raw `foo` is gone and
+        // the default it coerced to is what absence already says.
+        expect(wrapper.vm.router.replace.mock.calls[0][0].query).not.toHaveProperty(
+          "logs_visualize_toggle",
+        );
       });
 
       it("keeps the entitlement-unlocked patterns param in the re-persisted URL", async () => {
@@ -717,6 +726,61 @@ describe("Use Logs Composable", () => {
         expect(wrapper.vm.router.replace.mock.calls[0][0].query.logs_visualize_toggle).toBe(
           "visualize",
         );
+      });
+
+      // F-91: the F-65 override wrote the key unconditionally, so a link that never
+      // named a tab gained `logs_visualize_toggle=logs` on every restore. Design
+      // choice: the default tab is carried by ABSENCE, so a value is only written
+      // when the restored state is not the default — a gated or garbage param
+      // therefore collapses to absence, which already means `logs`.
+      const writtenQueryAfterRestore = async (query: Record<string, any>) => {
+        resetLogsUrlForTests();
+        bindLogsUrlRouter(wrapper.vm.router);
+        wrapper.vm.router.replace = vi.fn();
+        wrapper.vm.router.push = vi.fn();
+        wrapper.vm.router.currentRoute.value.query = { stream: "app", period: "15m", ...query };
+
+        await wrapper.vm.restoreUrlQueryParams();
+
+        expect(wrapper.vm.router.push).not.toHaveBeenCalled();
+        expect(wrapper.vm.router.replace).toHaveBeenCalledTimes(1);
+        return wrapper.vm.router.replace.mock.calls[0][0].query as Record<string, any>;
+      };
+
+      it("adds no toggle param to a URL that never named a tab (F-91)", async () => {
+        const written = await writtenQueryAfterRestore({});
+
+        expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("logs");
+        expect(written).not.toHaveProperty("logs_visualize_toggle");
+        expect(new URLSearchParams(written).toString()).not.toContain("logs_visualize_toggle");
+      });
+
+      it("replaces an explicitly-default param with absence instead of rewriting it (F-91)", async () => {
+        const written = await writtenQueryAfterRestore({ logs_visualize_toggle: "logs" });
+
+        expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("logs");
+        expect(written).not.toHaveProperty("logs_visualize_toggle");
+      });
+
+      it("drops a garbage param instead of writing the default it coerces to (F-91)", async () => {
+        const written = await writtenQueryAfterRestore({ logs_visualize_toggle: "incidents" });
+
+        expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("logs");
+        expect(written).not.toHaveProperty("logs_visualize_toggle");
+      });
+
+      it("re-persists the patterns param when the edition unlocks patterns (F-91)", async () => {
+        const edition = (config as any).isEnterprise;
+        (config as any).isEnterprise = "true";
+        try {
+          const written = await writtenQueryAfterRestore({ logs_visualize_toggle: "patterns" });
+
+          expect(wrapper.vm.searchObj.meta.logsVisualizeToggle).toBe("patterns");
+          expect(written.logs_visualize_toggle).toBe("patterns");
+        } finally {
+          wrapper.vm.searchObj.meta.logsVisualizeToggle = "logs";
+          (config as any).isEnterprise = edition;
+        }
       });
     });
 

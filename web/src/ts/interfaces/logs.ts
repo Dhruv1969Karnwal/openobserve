@@ -113,12 +113,17 @@ export type LogsVisualizeToggle = (typeof LOGS_VISUALIZE_TOGGLES)[number];
 export const isLogsVisualizeToggle = (value: unknown): value is LogsVisualizeToggle =>
   typeof value === "string" && LOGS_VISUALIZE_TOGGLES.some((toggle) => toggle === value);
 
+/** The panel a logs URL implies when `logs_visualize_toggle` is absent (utils/logs/constants.ts seeds it). */
+export const DEFAULT_LOGS_VISUALIZE_TOGGLE: LogsVisualizeToggle = "logs";
+
 /**
  * Sanitizes a restored logs panel toggle (URL `?logs_visualize_toggle=` or a
  * saved-view snapshot): `patterns` is entitlement-gated so un-entitled builds
  * fall back to `logs`, and values outside the known set coerce to `logs` as
- * well (mirrors resolveTraceSearchMode for the traces `?tab=` deep link).
- * `patternsAllowed` comes from checkFeatureAccess("logPatterns", …).
+ * well. Mirrors resolveTraceSearchMode for the traces `?tab=` deep link in both
+ * the failure behavior and the entitlement source: `patternsAllowed` comes from
+ * checkFeatureAccess("logPatterns", …) and the traces side from
+ * checkFeatureAccess("enterprise", …).
  */
 export const resolveLogsVisualizeToggle = (
   value: unknown,
