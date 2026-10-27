@@ -67,6 +67,28 @@ export const THEME_STORAGE_KEYS = {
   },
 } as const;
 
+/**
+ * ── DECISION RECORD: single-ink button labels vs the 4.5:1 AA bar (F-118) ──
+ * OButton's default md label is `text-sm font-medium` = 14px normal-weight
+ * text — below WCAG's large-text cut-offs (≥24px, or ≥18.66px bold) — so SC
+ * 1.4.3 demands 4.5:1 in every state the one label token rides (primary-600/
+ * 700/800 of the injected ramp). For these predefined palettes a single ink
+ * provably cannot deliver that. Two-sided constraint, dark O2 Horizon as the
+ * worked example (600 #588CF3, L 0.273; 800 #355492, L 0.092): a light ink on
+ * the rest fill is capped by white itself at 3.25, and clearing AA there
+ * needs L ≤ 0.022 — a dark ink — which on the active step tops out at black's
+ * (0.092+0.05)/0.05 = 2.83. Both luminance directions fail at opposite ends
+ * of the ramp, so no ink works; the full 12-scope table is in
+ * utils/theme.ts's picker, the five residual pairs are booked number-locked in
+ * tokens/themeRuntimeContrast.spec.ts (BUTTON_LABEL_RESIDUALS).
+ * Flagship defaults are clean in ALL states: light #1C1F23 16.54/17.65/18.62,
+ * dark #E6E6E6 (grey-900 ink) 14.36/9.04/5.19. The residual worst-of-states
+ * floor ships documented at 3.22–3.60 on predefined themes (3.07 for legacy
+ * stored custom pastels, e.g. #8B8DF0), gated at ≥3.00. Closing the gap needs
+ * a brand/palette-owner decision — darker saturated 600 steps (Horizon dark,
+ * both Lens) or a formal deviation record; per-state ink flips were rejected
+ * by design. This is an OPEN DECISION SURFACE, not hidden debt.
+ */
 /** Predefined themes with both light and dark mode colors. */
 export const PREDEFINED_THEMES: PredefinedTheme[] = [
   {

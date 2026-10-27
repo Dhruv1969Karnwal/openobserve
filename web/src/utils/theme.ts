@@ -142,18 +142,22 @@ const contrastRatio = (hexA: string, hexB: string): number => {
  * chosen ink must survive the darkest state too — checking the resting shade
  * alone shipped a 2.78:1 pressed label under O2 Crimson Ink dark.
  * Pure black joins the candidates because mid-tone brand fills (Crimson's
- * pressed #974450) leave neither white nor grey-900 at 3:1.
+ * pressed #974450) leave neither white nor grey-900 at 3:1. When no ink can
+ * reach AA, black is weighed before grey-900 so the honest worst state is the
+ * highest one available (Beacon dark active: black 3.55 vs grey-900 3.03);
+ * grey-900 keeps the label whenever it itself carries AA (Signature dark:
+ * worst state 5.19), because near-black stays the house ink by preference.
+ * The residual sub-AA pairs this leaves are booked with equality locks in
+ * tokens/themeRuntimeContrast.spec.ts and documented in constants/themes.ts.
  */
 const pickButtonForeground = (palette: Record<string, string>): string => {
   const darkText = cssToken("--color-grey-900", "#171717");
   const states = ["600", "700", "800"].map((shade) => palette[shade]);
   const worstState = (ink: string) => Math.min(...states.map((bg) => contrastRatio(ink, bg)));
-  const white = "#FFFFFF";
-  const candidates = [white, darkText, "#000000"];
-  return (
-    candidates.find((ink) => worstState(ink) >= 3) ??
-    candidates.reduce((a, b) => (worstState(a) >= worstState(b) ? a : b))
-  );
+  if (worstState("#FFFFFF") >= 3) return "#FFFFFF";
+  const grey = worstState(darkText);
+  if (grey >= 4.5) return darkText;
+  return worstState("#000000") >= grey ? "#000000" : darkText;
 };
 
 /** First primary-ramp shade (walking 600→900, so the brand color keeps its

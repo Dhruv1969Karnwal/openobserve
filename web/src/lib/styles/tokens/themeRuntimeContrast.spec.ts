@@ -433,6 +433,62 @@ const LIGHT_PAIR_DEFERRALS: Record<string, string> = {
     "grey-400: 2.29 on the runtime wash — booked light-pending text-placeholder row (the DATEPICKER placeholder role was fixed to grey-600; the global role still folds here)",
 };
 
+/**
+ * The primary button label's booked residuals: every scope whose picked ink
+ * cannot reach AA 4.5:1 in at least one state, pinned to its measured number
+ * and the fill behind it. These pairs are NOT skipped by the floor test below
+ * — they ride the documented 3:1 minimum — but they are shown here, equal-locked:
+ * an improvement that would retire an entry, a worsening, and a new sub-AA scope
+ * all fail the suite. The fix is out of this gate's hands: darker 600 steps for
+ * these brand colors restore white at rest, and per-state ink flips were
+ * rejected by design — both are the palette owner's call, not the picker's.
+ */
+const BUTTON_LABEL_RESIDUALS: Record<string, { at: number; note: string }> = {
+  "dark O2 Horizon rest": {
+    at: 3.25,
+    note: "white on #588CF3: the light fill caps white at rest while the ramp's 800 step caps grey-900/black at active (2.42/2.83) — no single ink serves all three states — palette-decision: see PR decision record",
+  },
+  "dark O2 Lens rest": {
+    at: 3.22,
+    note: "white on #E56D17: same two-sided squeeze (grey-900 2.41 / black 2.83 on active #89410e) — palette-decision: see PR decision record",
+  },
+  "light O2 Lens rest": {
+    at: 3.6,
+    note: "white on #4682FA: grey-900 reaches rest (4.98) but fails hover/active (3.40/2.24), black fails 3.98/2.63 — palette-decision: see PR decision record",
+  },
+  "dark O2 Beacon active": {
+    at: 3.55,
+    note: "black on #426598: white caps at rest (2.42 < the 3:1 floor), grey-900 caps at active at 3.03; black before grey at the floor lifts the worst state to 3.55 — still under AA — palette-decision: see PR decision record",
+  },
+  "dark O2 Crimson Ink active": {
+    at: 3.26,
+    note: "black on #974450: white fails rest at 2.69 and grey-900 active at 2.78 — both under the 3:1 floor; black's active is the highest single-ink worst state this ramp allows — palette-decision: see PR decision record",
+  },
+};
+
+const BUTTON_STATE_NAMES = ["rest", "hover", "active"] as const;
+
+const buttonLabelFailures = (): Map<string, string> => {
+  const failing = new Map<string, string>();
+  for (const [mode, scopes] of [
+    ["dark", RUNTIME_SCOPES],
+    ["light", LIGHT_RUNTIME_SCOPES],
+  ] as const) {
+    for (const { name, scope } of scopes) {
+      for (const [state, bg] of [
+        "--color-button-primary",
+        "--color-button-primary-hover",
+        "--color-button-primary-active",
+      ].entries()) {
+        const value = ratio("--color-button-primary-foreground", bg, scope);
+        if (value < TEXT_MIN)
+          failing.set(`${mode} ${name} ${BUTTON_STATE_NAMES[state]}`, value.toFixed(2));
+      }
+    }
+  }
+  return failing;
+};
+
 const pairKey = (pair: { fg: string; bg: string }): string => `${pair.fg} on ${pair.bg}`;
 
 const failingLightPairs = (pairs: { fg: string; bg: string }[]): Set<string> =>
@@ -638,8 +694,10 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     // floor is the 3:1 compromise documented on that function (white on a
     // saturated brand color at rest: O2 Lens light lands at 3.60); after the
     // worst-of-states pick the measured minimum across the twelve scopes is
-    // 3.03 (Beacon dark active, grey-900) with Crimson dark's pressed state at
-    // 3.26 on the black ink.
+    // 3.22 (dark O2 Lens rest, white). Nine scopes keep white, Signature dark
+    // keeps grey-900 (5.19), and black carries the two mid-tone pastels
+    // (Beacon dark 3.55, Crimson dark 3.26) — every sub-AA state is booked,
+    // number-locked and SHOWN by the ledger test below.
     const states = [
       "--color-button-primary",
       "--color-button-primary-hover",
@@ -660,6 +718,22 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
       }
     }
     expect(offenders).toEqual([]);
+  });
+
+  it("books every sub-AA button-label state pair at its measured number (palette-decision ledger)", () => {
+    // Bidirectional lock, same shape as the light deferral and consumer ledgers:
+    // the set of scopes below AA 4.5 must equal the booked set, and every booked
+    // number must still measure exactly as written. Nothing here exempts a pair
+    // from the 3:1 floor test above — this ledger SHOWS the accepted residuals.
+    const failing = buttonLabelFailures();
+    expect([...failing.keys()].sort()).toEqual(Object.keys(BUTTON_LABEL_RESIDUALS).sort());
+    for (const [key, measured] of failing) {
+      const booking = BUTTON_LABEL_RESIDUALS[key];
+      expect(
+        measured,
+        `${key} measures ${measured}:1, booked at ${booking.at.toFixed(2)}:1 — ${booking.note}`,
+      ).toBe(booking.at.toFixed(2));
+    }
   });
 
   it("measures the live-captured row-wash and ink regressions at their fixed values (O2 Signature)", () => {
