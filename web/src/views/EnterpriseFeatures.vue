@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     data-test="enterprise-features-page"
   >
     <div class="flex flex-col gap-8 pt-6 pb-4">
+      <!-- White labels here are booked, not oversight: see ACCENT_FILL_WHITE_BY_DESIGN in lib/styles/tokens/themeRuntimeContrast.spec.ts and the DECISION RECORD in constants/themes.ts. -->
       <div
         data-test="enterprise-features-banner"
         class="rounded-surface flex flex-wrap items-center justify-between gap-4 bg-[linear-gradient(135deg,var(--color-theme-accent)_0%,color-mix(in_srgb,var(--color-theme-accent)_85%,black_15%)_100%)] px-8 py-6 text-white"

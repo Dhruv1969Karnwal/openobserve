@@ -56,6 +56,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         :class="{ 'cloud-layout': dialogConfig.isCloudLayout }"
       >
         <!-- Left Panel - Hero Section (hidden for Cloud) -->
+        <!-- White labels here are booked, not oversight: see ACCENT_FILL_WHITE_BY_DESIGN in lib/styles/tokens/themeRuntimeContrast.spec.ts and the DECISION RECORD in constants/themes.ts. -->
         <div
           v-if="!dialogConfig.isCloudLayout"
           class="hero-panel relative flex min-h-0 [flex:0_0_35%] flex-col overflow-y-auto bg-[linear-gradient(135deg,var(--color-theme-accent)_0%,color-mix(in_srgb,var(--color-theme-accent)_85%,black_15%)_100%)] p-10 text-white max-[56.25rem]:min-h-100 max-[56.25rem]:flex-none"

@@ -68,7 +68,7 @@ export const THEME_STORAGE_KEYS = {
 } as const;
 
 /**
- * ── DECISION RECORD: single-ink button labels vs the 4.5:1 AA bar (F-118) ──
+ * ── DECISION RECORD: single-ink button labels vs the 4.5:1 AA bar ──
  * OButton's default md label is `text-sm font-medium` = 14px normal-weight
  * text — below WCAG's large-text cut-offs (≥24px, or ≥18.66px bold) — so SC
  * 1.4.3 demands 4.5:1 in every state the one label token rides (primary-600/
@@ -89,7 +89,7 @@ export const THEME_STORAGE_KEYS = {
  * both Lens) or a formal deviation record; per-state ink flips were rejected
  * by design. This is an OPEN DECISION SURFACE, not hidden debt.
  *
- * ── LINK / ACCENT-ON-TINT RESIDUALS (F-133) ──
+ * ── LINK / ACCENT-ON-TINT RESIDUALS ──
  * The same two-sided problem exists one tier lighter: an accent shade used AS
  * TEXT on the runtime accent tints. `--color-text-link` (light = themeColor,
  * dark = primary-400) measured 3.03:1 on `--color-surface-accent-active` under
@@ -109,7 +109,7 @@ export const THEME_STORAGE_KEYS = {
  * so the accent-ground consumers were routed to the picked accent label instead
  * and the page tier stays the palette owner's call.
  *
- * ── THE ACCENT FILL ITSELF (F-134) ──
+ * ── THE ACCENT FILL ITSELF ──
  * One tier heavier sits the raw brand fill: applyThemeColors paints
  * `--color-theme-accent` with the theme colour at alpha 1 in BOTH modes, so
  * `bg-theme-accent` is the same pixel as the ramp's 600 step (asserted) and every
@@ -122,7 +122,7 @@ export const THEME_STORAGE_KEYS = {
  * TINT pairs the picker already re-inks per theme (4.50–15.04 across the twelve
  * scopes), and the five filled-control ones bind the picked
  * `--color-button-primary-foreground`, whose three sub-AA scopes are the booked
- * `rest` states above — two of them are the confirm dialog's own branch (F-133), and
+ * `rest` states above — two of them are the confirm dialog's own branch, and
  * the three wrap toggles that remain are glyph-sized, i.e. the SC 1.4.11 3:1 bar,
  * which all twelve scopes clear. Two options were measured and rejected: routing every accent-fill label through the worst-of-states
  * button pick alone would have dropped the dark Horizon/Lens labels from 5.52/5.58 to
@@ -132,9 +132,20 @@ export const THEME_STORAGE_KEYS = {
  * answer to "what ink goes on the brand fill" and moves the pinned sheet counts, so
  * it is the palette owner's call, not a micro-fix's. Still white-by-design: the two
  * enterprise hero panels, whose fill is a gradient whose stops sit on opposite sides
- * of any one ink (white 1.25–3.60 at the light stop, near-black inks 1.03–1.21 at the
- * dark ones), and which hardcode white on three nested elements plus translucent-white
- * plates — that is a repaint decision, booked in the same ledger.
+ * of any one ink. Measured per scope (white on stop 0, then the dark inks on stop 1 =
+ * color-mix(accent 85%, black)): white caps at 1.25–3.60 in six of the twelve scopes
+ * (Signature dark 1.25, Beacon dark 2.42, Crimson dark 2.69, Lens dark 3.22, Horizon dark
+ * 3.25, Lens light 3.60) and clears AA in the other six (Pulse 4.80 both modes, Crimson
+ * light 4.70, Beacon light 5.08, Horizon light 5.12, Signature light 16.54).
+ * The near-black half of the squeeze is NOT a six-theme range — it is O2 Signature
+ * light, whose accent (#1C1F23) is itself near-black: grey-900 measures 1.08 at stop 0
+ * and 1.03 at stop 1 there, black 1.27/1.21. On the five chromatic light ramps the same
+ * inks sit 2.74–3.78 (grey-900) and 3.20–4.43 (black), i.e. comfortably above the white
+ * figure. The conclusion is unchanged — no single static ink holds 4.5 across both stops
+ * in all twelve scopes — but it holds for the shipped default because of its near-black
+ * accent, and for the other eleven because white cannot carry the dark scopes' stops.
+ * Both panels also hardcode white on three nested elements plus translucent-white plates,
+ * which assume a dark ground — that is a repaint decision, booked in the same ledger.
  */
 /** Predefined themes with both light and dark mode colors. */
 export const PREDEFINED_THEMES: PredefinedTheme[] = [

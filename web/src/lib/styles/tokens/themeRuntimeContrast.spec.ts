@@ -31,7 +31,7 @@
  * result — plus the inks `libraryForegroundTokens` computes and, where the
  * registry carries them, the theme's `semanticColors` overlay, exactly as
  * `applyThemeColors` writes them — over BOTH parsed sheets, and measures the
- * pairs against what the browser would actually paint. Four invariants, one
+ * pairs against what the browser would actually paint. Six invariants, one
  * matrix run over all twelve scopes, and one consumer scan per mode:
  *
  *  1. THEME-INVARIANT WASHES. The dark state surfaces that carry grey-tier text
@@ -58,7 +58,7 @@
  *     (FILL_INK_HOSTS), everything else on the popup/trigger tiers — so a fill
  *     token used as text, or a role dropping under AA on any predefined ramp,
  *     goes red naming the file.
- *  5. THE RUNTIME-GROUND SWEEP (F-133). A ground whose paint is injected
+ *  5. THE RUNTIME-GROUND SWEEP. A ground whose paint is injected
  *     (`--color-primary-*` tints and fills, the runtime washes under table rows,
  *     the accent chip/selection tiers) moves every text utility drawn on it, so
  *     each enumerated pair is measured under all twelve scopes, translucent
@@ -68,7 +68,7 @@
  *     the failure that justifies the pick (ACCENT_TINT_PICKS). What cannot be
  *     fixed without a palette-owner decision is booked number-locked in
  *     RUNTIME_GROUND_RESIDUALS, next to the button-label ledger.
- *  6. THE ACCENT FILL (F-134). `bg-theme-accent` is not a ramp token — the runtime
+ *  6. THE ACCENT FILL. `bg-theme-accent` is not a ramp token — the runtime
  *     writes the raw theme colour into --color-theme-accent at alpha 1 in both modes,
  *     so it is the same painted pixel as the button's rest fill. That ground is now in
  *     the injected map, its two ground/ink invariants are locked, and a template scan
@@ -344,7 +344,7 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-surface-accent-active",
     where: "applied-insight evidence sentence (DbmInsightStrip.vue)",
   },
-  // ── F-133: the rest of the runtime-accent-ground sweep. Every text/utility
+  // ── The rest of the runtime-accent-ground sweep. Every text/utility
   // class binding that lands on an accent wash, a selected fill or a runtime
   // tint, read out of the consumer source (see fixer notes for the matrix).
   // The reported pair was `text-text-link` here (3.03 light O2 Lens / 3.77 dark
@@ -670,7 +670,7 @@ const BUTTON_LABEL_RESIDUALS: Record<string, { at: number; note: string }> = {
 const BUTTON_STATE_NAMES = ["rest", "hover", "active"] as const;
 
 /**
- * F-133 — the accent-as-text roles whose SHEET value is a primary-ramp step and
+ * The accent-as-text roles whose SHEET value is a primary-ramp step and
  * whose ground is a runtime accent tint. Each entry names the ground the consumer
  * really paints it on and the themes where the sheet step is under AA there:
  * the pick (`libraryForegroundTokens`) is only justified while those numbers
@@ -760,7 +760,7 @@ const BOOKED_GROUND_PAIRS: { fg: string; bg: string; where: string }[] = [
   {
     // bg-theme-accent is the raw theme colour at alpha 1 (utils/theme.ts
     // hexToRgba(themeColor, 10)), i.e. the same painted pixel as --color-button-primary,
-    // so this row also governs the F-134 accent-fill consumers named below.
+    // so this row also governs the accent-fill consumers named below.
     fg: "--color-button-primary-foreground",
     bg: "--color-theme-accent",
     where:
@@ -793,7 +793,7 @@ const RUNTIME_GROUND_RESIDUALS: Record<string, { at: number; note: string }> = {
     at: 4.18,
     note: "same tier on the Crimson wash (#fef4f6); dark measures 10.40 on #1a1d21 — palette-decision: see PR decision record",
   },
-  // F-134: the accent FILL ground. bg-theme-accent is the raw theme colour at alpha 1
+  // The accent FILL ground. bg-theme-accent is the raw theme colour at alpha 1
   // in both modes, so the ink on it is the button label and the three failing scopes
   // are numerically the booked `rest` states of BUTTON_LABEL_RESIDUALS (same ink, same
   // painted pixel — the tripwire test below asserts the two grounds resolve identically).
@@ -926,7 +926,7 @@ const CONSUMER_LEDGERS: Record<"dark" | "light", Record<string, string>> = {
 };
 
 /**
- * F-134 — the accent FILL ground, which the runtime ramp injection does not reach.
+ * The accent FILL ground, which the runtime ramp injection does not reach.
  * `bg-theme-accent` is neither a ramp tint nor a ladder wash: applyThemeColors writes
  * the raw theme colour into --color-theme-accent (hexToRgba(themeColor, 10) = alpha 1)
  * in BOTH modes, so the ground is theme-variant and no static ink survives it —
@@ -938,7 +938,7 @@ const CONSUMER_LEDGERS: Record<"dark" | "light", Record<string, string>> = {
  */
 const ACCENT_FILL_WHITE_BY_DESIGN: Record<string, string> = {
   "components/EnterpriseUpgradeDialog.vue":
-    "the hero fill is a two-stop gradient (theme-accent → color-mix(theme-accent 85%, black)) and the panel hardcodes white on three nested elements plus rgba(255,255,255,.1-.2) plates that assume a dark ground: white caps at 1.25–3.60 at the light stop in 6 of 12 scopes while every dark ink inverts to 1.03–1.21 on the light themes' stops — the fill (or a per-stop ink) is the owner's call, not a class swap — palette-decision: see PR decision record",
+    "the hero fill is a two-stop gradient (theme-accent → color-mix(theme-accent 85%, black)) and the panel hardcodes white on three nested elements plus rgba(255,255,255,.1-.2) plates that assume a dark ground: white caps at 1.25–3.60 at the light stop in 6 of 12 scopes, while the near-black inversion to 1.03–1.21 is O2 Signature light alone (its accent is #1C1F23; the five chromatic light ramps hold their dark inks at 2.74–4.43) — the fill (or a per-stop ink) is the owner's call, not a class swap — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
   "views/EnterpriseFeatures.vue":
     "same two-stop hero gradient and white label as EnterpriseUpgradeDialog.vue — palette-decision: see PR decision record",
 };
@@ -1261,7 +1261,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     expect(underFloor).toEqual([]);
   });
 
-  // ── F-134: the accent FILL ground (bg-theme-accent), which the ramp injection
+  // ── The accent FILL ground (bg-theme-accent), which the ramp injection
   // above does not reach because it is written straight into --color-theme-accent.
   it("measures the raw accent fill as the primary button's rest state, both modes", () => {
     const offenders: string[] = [];
@@ -1331,7 +1331,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
 
   it("measures every template label painted on the raw accent fill, both modes", () => {
     const sites = accentFillSites();
-    // Anti-vacuity: the F-134 enumeration (two focused confirm branches, three wrap
+    // Anti-vacuity: the accent-fill enumeration (two focused confirm branches, three wrap
     // toggles, two gradient heroes) must still be there for this to mean anything.
     expect(sites.length, `only ${sites.length} accent-fill labels scanned`).toBeGreaterThanOrEqual(
       7,
