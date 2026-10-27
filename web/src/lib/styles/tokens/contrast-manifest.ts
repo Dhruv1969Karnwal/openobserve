@@ -925,6 +925,12 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     why: "a badge label is painted on the badge's own solid fill, never on the page",
   },
   {
+    fg: "--color-badge-default-soft-text",
+    bg: "--color-badge-default-soft-bg",
+    category: "text",
+    why: "a neutral count badge label sits on the badge fill (DbmSectionTabs inactive-tab counts and their vantage qualifier, at full alpha) — grey-700/grey-50 = 9.93:1 light, grey-300/grey-800 = 10.21:1 dark",
+  },
+  {
     fg: "--color-badge-default-solid-text",
     bg: "--color-badge-default-solid-bg",
     category: "text",
@@ -1346,6 +1352,12 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     bg: "--color-pagination-item-active-bg",
     category: "text",
     why: "the current page number sits on the active fill",
+  },
+  {
+    fg: "--color-pagination-item-text",
+    bg: "--color-surface-subtle-hover",
+    category: "text",
+    why: "a page number is judged on the hover tier it is painted on while pointing at the page — the page surface flatters it (light grey-600/grey-200 = 6.20:1, dark grey-400/overlay = 5.56:1)",
   },
   {
     fg: "--color-progress-bar-label",

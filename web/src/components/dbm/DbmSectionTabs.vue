@@ -70,20 +70,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
            one place the same number appears on all eight pages. The suffix is
            absent for the counts that exist in one vantage only: qualifying a
            deadlock count would imply a choice between feeds that was never
-           available. -->
+           available. The suffix carries no opacity: 80% alpha over the badge
+           sank the qualifier to 3.04:1 in light / 4.34:1 in dark, and the
+           badge paints on the badge-default-soft fill (a dedicated badge tier,
+           not the raw surface+role pair it replaced: grey-500 on grey-100 was
+           already 4.35:1), where its text clears AA at full alpha — 9.93:1
+           light, 10.21:1 dark. Size and weight keep the hierarchy the opacity
+           used to suggest. -->
       <span
         v-if="section.count != null"
         class="text-2xs inline-flex items-baseline gap-1 rounded-full px-1.5 py-1 leading-none font-bold"
         :class="
           section.key === activeTab
             ? 'bg-badge-primary-soft-bg text-badge-primary-soft-text'
-            : 'bg-surface-subtle text-text-secondary'
+            : 'bg-badge-default-soft-bg text-badge-default-soft-text'
         "
         :data-test="`dbm-section-tab-badge-${section.key}`"
         ><span>{{ section.count }}</span
         ><span
           v-if="section.vantageLabel"
-          class="text-3xs font-normal opacity-80"
+          class="text-3xs font-normal"
           :data-test="`dbm-section-tab-vantage-${section.key}`"
           >{{ section.vantageLabel }}</span
         ></span

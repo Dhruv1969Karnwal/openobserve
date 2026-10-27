@@ -552,7 +552,12 @@
   --color-thread-tool-link: var(--color-primary-500);
 
   /* Pagination (OPagination) */
-  --color-pagination-item-text: var(--color-text-secondary);
+  /* Item numbers are body-size text on the --color-surface-subtle-hover hover
+       tier: the light twin of --color-text-secondary (grey-500) read 3.76:1
+       there, so this token names its own step — grey-600 on grey-200 = 6.20:1,
+       one step darker than the secondary role it replaces, judged by manifest
+       pair. Dark re-points it to grey-400 on overlay (5.56:1). */
+  --color-pagination-item-text: var(--color-grey-600);
   --color-pagination-item-hover-bg: var(--color-surface-subtle-hover);
   --color-pagination-item-active-bg: var(--color-primary-600);
   --color-pagination-item-active-text: var(--color-white);
