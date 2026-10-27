@@ -1433,4 +1433,11 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     why: "the select dropdown content is the overlay tier (--color-select-content-bg) and paints the filter input's placeholder and the no-options row with this token (OSelect.vue:1497,1573)",
     themes: ["dark"],
   },
+  {
+    fg: "--color-datepicker-placeholder",
+    bg: "--color-surface-subtle",
+    category: "text",
+    why: "F-114: a disabled ODateTimeRange trigger dims onto --color-datepicker-disabled-bg, which folds into this step, while its label span still paints this placeholder role (ODateTimeRange.vue:299,351) — the grey-400 alias measured 2.31:1 here (2.52:1 on the near-white popup/trigger, judged by the light consumer-scan pass); the role now rides grey-600 (7.17:1 here)",
+    themes: ["light"],
+  },
 ];

@@ -46,9 +46,13 @@
  *     plus the ones found by grepping `hover:bg-*`/selected-state consumers);
  *     edges that carry a control state clear 3:1.
  *
- * Light is deliberately out of scope: the finding measured dark (the light ramp
- * mixes the other way and its washes are near-white on near-white by intent),
- * and light text-on-wash pairs stay judged by contrast.spec's sheet.
+ * Light was the original seam's blind spot: F-114 added the consumer-scan's
+ * light twin (same utilities, same hosts, all six light ramps) for the
+ * datepicker-control roles, whose placeholder class folded to grey-400 at
+ * 2.52:1 on the near-white light hosts. The light washes themselves stay
+ * judged by contrast.spec's sheet (they mix near-white on near-white by
+ * intent); light roles folding into a manifest-recorded PENDING root are
+ * deferred by the light pass — that debt is on the books, not news.
  */
 
 import { readFileSync } from "node:fs";
@@ -61,6 +65,7 @@ import { PREDEFINED_THEMES } from "@/constants/themes";
 import { generatePrimaryPalette } from "@/utils/theme";
 
 import { contrastRatio, relativeLuminance, resolveColor, resolveTokens } from "./colorMath";
+import { CONTRAST_PAIRS } from "./contrast-manifest";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -68,6 +73,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const TOKEN_FILES = ["base.css", "semantic.css", "component.css", "dark.css"];
 const SHEETS = TOKEN_FILES.map((file) => readFileSync(join(here, file), "utf8"));
 const SHEET_DARK = resolveTokens(SHEETS).dark;
+const SHEET_LIGHT = resolveTokens(SHEETS).light;
 
 const PALETTE_SHADES = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"];
 
@@ -84,6 +90,49 @@ const RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => {
   }
   return { name: String(theme.name), themeColor: theme.dark.themeColor, scope };
 });
+
+/**
+ * F-114: the LIGHT mirror of RUNTIME_SCOPES — the light sheet with each theme's
+ * light runtime ramp injected. The placeholder role folded to grey-400 here
+ * (2.52:1 on the white popup / 2.31:1 on the grey-100 trigger tier) exactly as
+ * it did in dark, and the dark-only scan could not see it.
+ */
+const LIGHT_RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => {
+  const scope = new Map(SHEET_LIGHT);
+  const palette = generatePrimaryPalette(theme.light.themeColor);
+  for (const shade of PALETTE_SHADES) {
+    scope.set(`--color-primary-${shade}`, palette[shade]);
+  }
+  return { name: String(theme.name), themeColor: theme.light.themeColor, scope };
+});
+
+/**
+ * The manifest's light-scope recorded PENDING debt, as the exact fg names the
+ * books carry. F-114's light consumer scan measures every datepicker text
+ * utility the ACTIVE controls paint; a role that folds through bare var()
+ * aliases into booked debt (e.g. `--color-datepicker-label → --color-text-label`,
+ * light-pending) is not new news here, so the scan defers to contrast.spec
+ * instead of re-judging booked debt as a fresh offender. Exempt roots are NOT
+ * deferred — folding a live control into the disabled exemption is the exact
+ * hole F-109 closed; only the `/disabled/` NAME filter reaches inactive roles.
+ */
+const LIGHT_BOOKED_FGS = new Set(
+  CONTRAST_PAIRS.filter(
+    (pair) => (pair.themes ?? ["light", "dark"]).includes("light") && pair.category === "pending",
+  ).map((pair) => pair.fg),
+);
+
+/** Bare-var()-alias chain a role token folds through in `scope` (self first). */
+const aliasChain = (name: string, scope: Map<string, string>): string[] => {
+  const chain = [name];
+  let current = name;
+  for (;;) {
+    const match = /^var\(\s*(--[a-zA-Z0-9-]+)\s*\)$/.exec((scope.get(current) ?? "").trim());
+    if (!match || chain.includes(match[1])) return chain;
+    current = match[1];
+    chain.push(current);
+  }
+};
 
 const hexOf = (name: string, scope: Map<string, string>): string => {
   const color = resolveColor(name, scope);
@@ -331,7 +380,10 @@ const NON_TEXT_MIN = 3;
  * label (ODateTimeRange.vue:351) and the ODate separators / empty segments
  * (ODate.vue:206-207) — where disabled-state language does not apply. Both
  * roles now ride the raised placeholder tier (grey-450: 4.76:1 popup /
- * 5.48:1 trigger) and the scan measures them.
+ * 5.48:1 trigger) and the scan measures them. F-114 adds the light twin of
+ * this pass — same utilities on the near-white light hosts across the six
+ * light ramps, where the placeholder tier rides grey-600 (7.81:1 popup /
+ * 7.81:1 trigger / 7.17:1 surface-subtle).
  */
 const CONSUMER_COMPONENTS: { file: string; path: string }[] = [
   { file: "OTime.vue", path: "../../forms/Time/OTime.vue" },
@@ -523,6 +575,56 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
       }
       // Anti-vacuity: a moved/renamed class vocabulary must not silent-pass the scan.
       expect(seen.size, `${file} parsed only ${seen.size} text utilities`).toBeGreaterThan(4);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("clears 4.5:1 on every light-scope text utility the time-range controls paint (F-114)", () => {
+    // The dark twin above proved the seam; F-114 flagged its light mirror — the
+    // placeholder role folded to grey-400 and measured 2.52:1 on both near-white
+    // light hosts (2.31:1 on the surface-subtle trigger tier). Same utilities,
+    // same host tokens, all six light ramps. Skips, each booked elsewhere:
+    // `/disabled/` (inactive roles); `/selected|segment-focus/` (the white-on-
+    // fill day/preset/segment glyphs, whose manifest fg×fill pairs judge them —
+    // white on the near-white hosts is vacuous there — plus the brand selected-
+    // fg, whose light value rides the themeColor wash this file keeps out of
+    // light scope); and alias chains reaching booked light-pending debt
+    // (datepicker-label → text-label). Placeholder-tier roles additionally
+    // ride --color-surface-subtle, the worst light panel they can land on:
+    // grey-500 passes the whites at 4.74 and fails there at 4.35; the shipped
+    // grey-600 measures 7.81 / 7.81 / 7.17.
+    const offenders: string[] = [];
+    for (const file of [
+      "OTime.vue",
+      "ODateTimeRange.vue",
+      "ODate.vue",
+      "ODateRangeCalendar.vue",
+      "OColor.vue",
+    ]) {
+      const { utilities } = CONSUMER_UTILITIES.find((entry) => entry.file === file)!;
+      const seen = new Set<string>();
+      for (const { prefix, token } of utilities) {
+        if (prefix !== "text" || seen.has(token)) continue;
+        seen.add(token);
+        if (/disabled/.test(token)) continue; // inactive-cell roles only, see the note
+        if (/selected|segment-focus/.test(token)) continue; // fill-painted glyphs, manifest pairs
+        const chain = aliasChain(token, SHEET_LIGHT);
+        if (chain.some((step) => LIGHT_BOOKED_FGS.has(step))) continue;
+        const hosts = ["--color-datepicker-popup-bg", "--color-datepicker-bg"];
+        if (chain.includes("--color-datepicker-placeholder")) hosts.push("--color-surface-subtle");
+        for (const theme of LIGHT_RUNTIME_SCOPES) {
+          for (const bg of hosts) {
+            const value = ratio(token, bg, theme.scope as Map<string, string>);
+            if (value < TEXT_MIN) {
+              offenders.push(`${file}: ${token} on ${bg} = ${value.toFixed(2)}:1 (${theme.name})`);
+            }
+          }
+        }
+      }
+      expect(
+        seen.size,
+        `${file} parsed only ${seen.size} text utilities (light pass)`,
+      ).toBeGreaterThan(4);
     }
     expect(offenders).toEqual([]);
   });
