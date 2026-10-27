@@ -72,10 +72,12 @@ export interface FeatureGateContext {
   isEnterprise: boolean;
   isCloud: boolean;
   /**
-   * `rbac_enabled` defaults OPEN (`!== false`, not `!!`) so a cold load with
-   * `zoConfig` still `{}` doesn't lock out a real Enterprise/Cloud user with
-   * RBAC on — same `=== false` convention the other runtime-flag route
-   * guards in this codebase already use (see useEnterpriseRoutes.ts).
+   * Two-tier on purpose. A LOADED config defaults OPEN (`!== false`, not `!!`) so
+   * a cold load with `zoConfig` still `{}` doesn't lock out a real Enterprise/Cloud
+   * user with RBAC on — same `=== false` convention the other runtime-flag route
+   * guards in this codebase already use (see useEnterpriseRoutes.ts). A caller that
+   * passes no config at all gets CLOSED: that is a gate that never said where its
+   * state came from, not a cold load.
    */
   rbac: boolean;
 }
@@ -93,7 +95,7 @@ export function buildFeatureGateContext(
   return {
     isEnterprise: config.isEnterprise == "true",
     isCloud: config.isCloud == "true",
-    rbac: zoConfig?.rbac_enabled !== false,
+    rbac: zoConfig == null ? false : zoConfig.rbac_enabled !== false,
   };
 }
 
@@ -359,10 +361,14 @@ export type PaidFeaturePolicy = "hide" | "lock";
 /**
  * Retrace.ai ships one edition, so an entitlement-gated feature is not sold in
  * the UI: `"hide"` renders nothing at all instead of a locked affordance.
- * Setting `"lock"` restores BEHAVIOR and VISIBILITY: gated controls become
- * visible-but-locked and their clicks open the upsell dialog again, because
- * every surface reads the policy through {@link checkFeatureAccess} or
- * {@link showsLockedAffordances}. It does NOT restore the lock-icon GLYPHS
+ * Setting `"lock"` restores BEHAVIOR and VISIBILITY through TWO different
+ * mechanisms, because every surface reads the policy through
+ * {@link checkFeatureAccess} or {@link showsLockedAffordances}: an affordance-level
+ * gate (a button, tab or menu item wrapped in {@link useLockedAffordance}) becomes
+ * visible-but-locked again and its click opens the upsell dialog, while a
+ * route-level gate ({@link withFeatureGate}) shows whatever entry the surface has
+ * and the click or deep link lands on the shared `enterpriseFeatureLocked` PAGE —
+ * a gated route can never hand back the page its guard refused. It does NOT restore the lock-icon GLYPHS
  * deleted during the hide rollout (10 icons across Header, QueryEditor,
  * ServiceAccountsList, PipelineEditor, JsonPreview, logs/SearchBar and
  * traces/TraceDetails): a `"lock"` build shows those affordances unlocked-
@@ -440,8 +446,9 @@ export function checkFeatureAccess(key: FeatureKey, context: FeatureGateContext)
  * components would freeze at whichever resolved first. A guard re-runs every
  * navigation, so it can safely depend on state that's still loading.
  *
- * `getContext` defaults to the edition-only context (no `rbac` dependency);
- * pass one that reads `store.state.zoConfig` for a route whose key needs it.
+ * `getContext` defaults to a context whose `rbac` is false, so it serves the
+ * edition-only keys only; a route whose key reads RBAC must pass one that
+ * reads `store.state.zoConfig` (see the shim in useEnterpriseRoutes.ts).
  */
 export function withFeatureGate(
   key: FeatureKey,

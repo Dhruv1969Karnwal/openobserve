@@ -43,12 +43,22 @@ describe("enterpriseFeatures", () => {
       expect(buildFeatureGateContext().isCloud).toBe(false);
     });
 
-    it("reads rbac from the given zoConfig-shaped object, defaulting open when not yet loaded", () => {
+    it("reads rbac from a LOADED zoConfig-shaped object, open until it says otherwise", () => {
       expect(buildFeatureGateContext({ rbac_enabled: true }).rbac).toBe(true);
       expect(buildFeatureGateContext({ rbac_enabled: false }).rbac).toBe(false);
-      expect(buildFeatureGateContext(undefined).rbac).toBe(true);
-      expect(buildFeatureGateContext(null).rbac).toBe(true);
+      // A config object that exists but is silent is the documented cold-load case.
       expect(buildFeatureGateContext({}).rbac).toBe(true);
+    });
+
+    // F-104: no argument is not a cold load, it is a gate that never said where
+    // its state came from. The fail-open default was the latent half of SEC-1.
+    it("fails rbac CLOSED for a caller that passes no config at all (F-104)", () => {
+      expect(buildFeatureGateContext().rbac).toBe(false);
+      expect(buildFeatureGateContext(undefined).rbac).toBe(false);
+      expect(buildFeatureGateContext(null).rbac).toBe(false);
+      config.isEnterprise = "true";
+      expect(checkFeatureAccess("rbac", buildFeatureGateContext()).allowed).toBe(false);
+      config.isEnterprise = "false";
     });
   });
 
@@ -190,10 +200,11 @@ describe("enterpriseFeatures", () => {
 
     // N1 regression: zoConfig is still {} on a cold load/refresh — this must
     // NOT bounce a real Enterprise/Cloud user with RBAC on to the locked page.
-    it("unlocks rbac in an enterprise build when the backend flag hasn't loaded yet", () => {
+    it("unlocks rbac in an enterprise build when the loaded flag hasn't loaded yet", () => {
       config.isEnterprise = "true";
+      // The store seeds `zoConfig` to `{}` (stores/index.ts), so this is every
+      // real cold load; the no-config case stays closed (F-104, above).
       expect(checkFeatureAccess("rbac", buildFeatureGateContext({})).allowed).toBe(true);
-      expect(checkFeatureAccess("rbac", buildFeatureGateContext(undefined)).allowed).toBe(true);
     });
 
     it("marks the upgrade CTA irrelevant when the edition already supports RBAC but the toggle is off", () => {
@@ -234,6 +245,36 @@ describe("enterpriseFeatures", () => {
         name: "home",
         query: { org_identifier: "o1" },
       });
+    });
+
+    // The hole SEC-1 named: an RBAC-dependent key gated without a context used to
+    // read `rbac: true` and let the navigation through on a flag-off org.
+    it("refuses an rbac route whose gate passes no context, even entitled (F-104)", () => {
+      config.isEnterprise = "true";
+      const guard = vi.fn();
+      const next = vi.fn();
+      withFeatureGate("rbac", guard)(
+        { query: { org_identifier: "o1" }, fullPath: "/iam" },
+        {},
+        next,
+      );
+      expect(guard).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "o1" } });
+      config.isEnterprise = "false";
+    });
+
+    it("still serves an rbac route through the context the guards inject (F-104 mirror)", () => {
+      config.isEnterprise = "true";
+      const guard = vi.fn();
+      const next = vi.fn();
+      withFeatureGate("rbac", guard, () => buildFeatureGateContext({ rbac_enabled: true }))(
+        { query: {}, fullPath: "/iam" },
+        {},
+        next,
+      );
+      expect(guard).toHaveBeenCalled();
+      expect(next).not.toHaveBeenCalled();
+      config.isEnterprise = "false";
     });
 
     it("never reaches the upsell page while the hide policy is in force", () => {
