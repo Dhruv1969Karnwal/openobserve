@@ -324,6 +324,41 @@ describe("SearchBar — paid affordances derive from the registry", () => {
       pushSpy.mockRestore();
     });
   });
+
+  /**
+   * The e2e locked-state oracle (`tests/ui-testing/playwright-tests/Logs/logsActionReasons.spec.js`)
+   * counted `search-scheduler-locked-icon`, the label-action glyph this wave deleted. The group
+   * now names itself per entitlement so that oracle has one hook to read in every build.
+   */
+  describe("scheduled-search menu group hook", () => {
+    const openMoreMenu = async () => {
+      await mountSearchBar();
+      await wrapper!.get('[data-test="logs-search-bar-more-options-btn"]').trigger("click");
+      await flushPromises();
+    };
+    const hook = (name: string) => document.querySelector(`[data-test="${name}"]`);
+
+    it("renders no schedule group hook on the shipped hide build", async () => {
+      await openMoreMenu();
+      expect(hook("search-scheduler-menu-group")).toBeNull();
+      expect(hook("search-scheduler-menu-group-locked")).toBeNull();
+      expect(hook("search-scheduler-list-btn")).toBeNull();
+    });
+
+    it("names the rendered group '-locked' where the policy keeps it visible but refused", async () => {
+      policy.lockSim = true;
+      await openMoreMenu();
+      expect(hook("search-scheduler-menu-group")).toBeNull();
+      expect(hook("search-scheduler-menu-group-locked")).not.toBeNull();
+    });
+
+    it("names the rendered group without the suffix once the entitlement allows it", async () => {
+      (config as any).isEnterprise = "true";
+      await openMoreMenu();
+      expect(hook("search-scheduler-menu-group")).not.toBeNull();
+      expect(hook("search-scheduler-menu-group-locked")).toBeNull();
+    });
+  });
 });
 
 /**

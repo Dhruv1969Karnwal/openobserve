@@ -772,8 +772,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
           <ODropdownSeparator />
 
+          <!-- Named per entitlement so a "lock" build keeps a stable hook for the locked group (its label-action glyph is gone under "hide"). -->
           <ODropdownGroup
             v-if="scheduledSearchAccess.visible"
+            :data-test="
+              scheduledSearchAccess.allowed
+                ? 'search-scheduler-menu-group'
+                : 'search-scheduler-menu-group-locked'
+            "
             :label="t('search.menuGroupSchedule')"
           >
             <ODropdownItem
