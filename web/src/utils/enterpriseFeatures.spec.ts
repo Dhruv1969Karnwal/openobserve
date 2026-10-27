@@ -81,6 +81,57 @@ describe("enterpriseFeatures", () => {
       expect(isFeatureKey("databaseMonitoring")).toBe(false);
       expect(isFeatureKey("logs")).toBe(false);
     });
+
+    /**
+     * The registry assumes every Cloud build also ships `isEnterprise=true`
+     * (enterpriseFeatures.ts, note above FEATURE_GATES) and nothing in this repository can
+     * pin that — no `.env*` is tracked, `build-cloud-prod` is `--mode=production`. What IS
+     * testable is the direction the assumption is allowed to be wrong in: a counterfactual
+     * pure-Cloud context may only ever REFUSE more than the shipped Cloud shape, never
+     * allow more. So the two cells below are a set relation over all 38 keys, not a sample.
+     */
+    describe("the unpinnable Cloud premise", () => {
+      const pureCloud = () => {
+        config.isEnterprise = "false";
+        config.isCloud = "true";
+        return buildFeatureGateContext({ rbac_enabled: true });
+      };
+      const shippedCloud = () => {
+        config.isEnterprise = "true";
+        config.isCloud = "true";
+        return buildFeatureGateContext({ rbac_enabled: true });
+      };
+
+      it("makes a counterfactual pure-Cloud build a SUBSET of the shipped Cloud shape (loses affordances, never gains one)", () => {
+        const pure = pureCloud();
+        const shipped = shippedCloud();
+        const pureAllowed = ALL_FEATURE_KEYS.filter((key) => checkFeatureAccess(key, pure).allowed);
+        const shippedAllowed = new Set(
+          ALL_FEATURE_KEYS.filter((key) => checkFeatureAccess(key, shipped).allowed),
+        );
+        for (const key of pureAllowed) {
+          expect(
+            shippedAllowed.has(key),
+            `${key} is granted on Cloud only because the premise failed`,
+          ).toBe(true);
+        }
+        // Anti-vacuity: the premise really is load-bearing, or the relation above is free.
+        expect(pureAllowed.length).toBeGreaterThan(0);
+        expect(pureAllowed.length).toBeLessThan(shippedAllowed.size);
+      });
+
+      it("makes every refusal on a counterfactual pure-Cloud build a silent hide, never a false Cloud upsell", () => {
+        for (const key of ALL_FEATURE_KEYS) {
+          const result = checkFeatureAccess(key, pureCloud());
+          if (result.allowed) continue;
+          expect(
+            result.visible,
+            `${key} must be omitted, not offered as a false Cloud upsell`,
+          ).toBe(false);
+          expect(result.message).toBe("");
+        }
+      });
+    });
   });
 
   describe("checkFeatureAccess — isEnterprise-only keys", () => {

@@ -115,6 +115,16 @@ interface FeatureGateDefinition {
 }
 
 const FEATURE_GATES: Record<FeatureKey, FeatureGateDefinition> = {
+  // DOCUMENTED ASSUMPTION, not a verified fact: every Cloud build of this product is
+  // also built with `isEnterprise=true` (see `aiAssistant` below and
+  // `searchJobInspectorGateContext` in composables/shared/router.ts). Nothing in this
+  // repository pins it — no `.env*` is tracked and `build-cloud-prod` is
+  // `--mode=production` — so the predicate shapes that lean on it are pinned at the
+  // level that IS testable: a pure-Cloud context (isCloud&&!isEnterprise) may only ever
+  // LOSE affordances, never gain one (enterpriseFeatures.spec.ts, "the unpinnable Cloud
+  // premise"). Consequence if the premise ever breaks: the 18 keys whose predicate is the
+  // bare `isEnterprise` bit stop answering to a Cloud build and disappear from its UI — a
+  // lost affordance, not a paid leak.
   // Generic "this needs Enterprise" gate — e.g. the Traces Service Graph tab,
   // which has no settings/IAM label of its own to borrow. Self-hosted only,
   // same as the Settings batch below — Cloud doesn't offer it either.
@@ -377,12 +387,28 @@ export type PaidFeaturePolicy = "hide" | "lock";
  * | surface registered only when the build says enterprise/cloud (AutoObserve, Fleet, Announcements, org management) | `config.isEnterprise` / `isCloud` at registration time | 404 — the route does not exist, so no gate ever runs | same |
  * | left-rail / menu tile carrying `locked` (`ONavGroup`, `MenuLink`) | the tile's click handler | `router.push({name:"enterpriseFeatures"})` — the COMPARISON page, not the lock page and not the dialog | tile is dropped (`visible` false) |
  * | `AiScopeBar`'s Stream/Agent toggle | the callers: `visible && allowed` as `show-agent-toggle`, and the pitch behind `.visible` as `agentToggleLockedMessage` | the Agent item stays in the bar carrying a lock suffix and its click opens the upsell dialog | the toggle group is omitted (`visible` false ⇒ no message passed either) |
+ * | route entered while the ORGANIZATION's trial has lapsed (`shouldPaywallRoute` / `isPaywalledDestination` → `routeGuard`, `utils/auth.ts:109-142`) | the org's `free_trial_expiry`, never this policy | `next({ name: "plans" })` + `notifyTrialBlocked`; `ONavGroup` paints its own `lock` glyphs on paywalled tiles while this policy is `"hide"` (`ONavGroup.vue:316-327,735-742`) | the same — this guard has no policy branch |
  *
- * So the shared lock page is ONE of four refusal destinations (lock page, section
- * home, comparison page, 404) and each guard/entry's own comment is normative for
- * its class; {@link withFeatureGate} alone does not promise a lock-page landing.
+ * So the shared lock page is ONE of five refusal destinations (lock page, section
+ * home, comparison page, 404, and the trial paywall's `plans`) and each guard/entry's
+ * own comment is normative for its class; {@link withFeatureGate} alone does not
+ * promise a lock-page landing.
  * Both upsell surfaces are themselves policy-gated (`hideUpsellPage`), which is what
- * keeps `"hide"` free of any path back to a paid page.
+ * keeps `"hide"` free of any path back to a paid page. The paywall class is the odd
+ * one out: `shouldPaywallRoute` requires `config.isCloud === "true"` AND an org
+ * `free_trial_expiry`, so it is inert in the edition this branch ships and live in a
+ * Cloud build of it — which is why it belongs in the table even though no policy
+ * branch of ours reaches it.
+ *
+ * LIMITATION, restated so the table above is not read as verified behaviour: the
+ * `"lock"` half of every row is UNEXECUTABLE and therefore UNTESTED in this tree.
+ * {@link checkFeatureAccess} and {@link withFeatureGate} read the module-scope
+ * `hidesPaidFeatures` constant, so the test seam
+ * (`web/src/test/unit/helpers/paidFeaturePolicy.ts`, which overrides only the exported
+ * getters) cannot reach them — see that file's own LIMITATION note, and
+ * `composables/shared/useEnterpriseRoutes.spec.ts`, which declines to write a
+ * lock-mode guard case for exactly this reason. No test in the repository executes the
+ * class-2 lock-page landing; the table is a reading of the code, not a green suite.
  *
  * This does NOT restore the lock-icon GLYPHS deleted during the hide rollout (10
  * icons across Header, QueryEditor, ServiceAccountsList, PipelineEditor, JsonPreview,
