@@ -322,14 +322,16 @@ const NON_TEXT_MIN = 3;
  * (--color-datepicker-bg, the panel tier); the overlay is the lighter host, so
  * base follows both. Reverting a component class or re-darkening the
  * fg token turns this red on its own.
- * Exemptions: `disabled` (the `data-unavailable`/`data-disabled` day cell — a
- * cell the library makes non-interactive) is WCAG 1.4.3 inactive text.
- * `outside` still rides the name-exemption until F-111's clickable-cell fix
- * lands. `placeholder` is NOT exempt (F-109): it paints the value of ACTIVE
- * controls — the ODateTimeRange trigger label (ODateTimeRange.vue:351) and the
- * ODate separators / empty segments (ODate.vue:206-207) — where disabled-state
- * language does not apply, so the role moved to the placeholder text tier
- * (grey-450: 4.76:1 popup / 5.48:1 trigger) and the scan measures it.
+ * Exemptions are exactly the NON-INTERACTIVE roles: `disabled` — the
+ * `data-unavailable`/`data-disabled` day cell, which the libraries render with
+ * pointer-events:none / cursor:not-allowed — is WCAG 1.4.3 inactive text, and
+ * nothing else rides the name filter. `outside` is NOT exempt (F-111): an
+ * outside-month cell is still a clickable button. `placeholder` is NOT exempt
+ * (F-109): it paints the value of ACTIVE controls — the ODateTimeRange trigger
+ * label (ODateTimeRange.vue:351) and the ODate separators / empty segments
+ * (ODate.vue:206-207) — where disabled-state language does not apply. Both
+ * roles now ride the raised placeholder tier (grey-450: 4.76:1 popup /
+ * 5.48:1 trigger) and the scan measures them.
  */
 const CONSUMER_COMPONENTS: { file: string; path: string }[] = [
   { file: "OTime.vue", path: "../../forms/Time/OTime.vue" },
@@ -506,7 +508,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
       for (const { prefix, token } of utilities) {
         if (prefix !== "text" || seen.has(token)) continue;
         seen.add(token);
-        if (/disabled|outside/.test(token)) continue; // see the F-107/F-109 note
+        if (/disabled/.test(token)) continue; // inactive-cell roles only, see the note
         for (const theme of RUNTIME_SCOPES) {
           for (const bg of [
             "--color-datepicker-popup-bg", // calendar popup (overlay tier)

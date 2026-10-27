@@ -296,9 +296,14 @@
      value must clear 4.5:1 on the lightest state, the accent-active fill:
      grey-400 was 4.15:1
      there (and grey-400@60% only 3.36:1 at rest on the canvas). grey-300 =
-     7.06 pressed, 8.44 hover, 4.80–5.08 at rest through opacity-60. The
-     hover accent keeps primary-300 for the same reason: primary-400 sank to
-     3.77:1 (Pulse ramp) once pressed onto accent-active. */
+     7.06 pressed, 8.44 hover. At rest the claim is surface-bounded and only
+     ghost-subtle dims itself (opacity-60 until hover): 5.08 on the canvas,
+     4.80 panel, 4.61 well, 4.44 on the overlay tier — rest-on-overlay is a
+     RECORDED sub-4.5 residual (the brightest realistic rest host; no rest
+     opacity clears it without erasing the ghost look, and hover restores
+     full alpha immediately). ghost-muted rests at full alpha: 12.12 canvas.
+     The hover accent keeps primary-300 for the same reason: primary-400 sank
+     to 3.77:1 (Pulse ramp) once pressed onto accent-active. */
   --color-button-ghost-muted-text: var(--color-grey-300);
   --color-button-ghost-muted-hover-text: var(--color-primary-300);
   --color-button-ghost-muted-hover-bg: var(--color-surface-accent-hover);
@@ -586,7 +591,10 @@
      overlay, 14.81 on panel; the step-dot/underline markers clear 3:1 by it. */
   --color-datepicker-selected-fg: var(--color-grey-100);
   --color-datepicker-day-today-border: var(--color-primary-400);
-  --color-datepicker-day-outside-text: var(--color-text-disabled);
+  /* An outside-month day cell is still a clickable button — no disabled-state
+     exemption (F-111): it rides the raised placeholder tier above (grey-450,
+     4.76:1 on the popup) instead of the disabled step it folded to at 1.79:1. */
+  --color-datepicker-day-outside-text: var(--color-datepicker-placeholder);
   --color-datepicker-nav-hover-bg: var(--color-surface-accent-hover);
   --color-datepicker-day-range-bg: var(--color-primary-900);
   --color-datepicker-day-range-text: var(--color-primary-200);
