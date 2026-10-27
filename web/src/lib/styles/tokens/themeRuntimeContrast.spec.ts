@@ -654,14 +654,21 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     expect([...failing].sort()).toEqual([...deferred].sort());
   });
 
-  describe.each([
-    ...RUNTIME_SCOPES.map(({ name, themeColor, scope }) => [`dark ${name} (${themeColor})`, scope]),
-    ...LIGHT_RUNTIME_SCOPES.map(({ name, themeColor, scope }) => [
-      `light ${name} (${themeColor})`,
-      scope,
-    ]),
-  ])("%s ramp injected", (_label, scope) => {
-    const light = _label.startsWith("light");
+  describe.each<[string, Map<string, string>]>([
+    ...RUNTIME_SCOPES.map(
+      ({ name, themeColor, scope }): [string, Map<string, string>] => [
+        `dark ${name} (${themeColor})`,
+        scope,
+      ],
+    ),
+    ...LIGHT_RUNTIME_SCOPES.map(
+      ({ name, themeColor, scope }): [string, Map<string, string>] => [
+        `light ${name} (${themeColor})`,
+        scope,
+      ],
+    ),
+  ])("%s ramp injected", (label, scope) => {
+    const light = label.startsWith("light");
     it("clears 4.5:1 on every enumerated text pair painted on a state surface", () => {
       const offenders = TEXT_PAIRS.filter(
         (pair) => !(light && pairKey(pair) in LIGHT_PAIR_DEFERRALS),
