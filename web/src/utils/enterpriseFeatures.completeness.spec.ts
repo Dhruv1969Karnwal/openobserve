@@ -36,7 +36,7 @@ const SOURCE_EXTENSIONS = [".ts", ".vue"];
  * to catch — an assertion about `withFeatureGate("x")` is not a surface that
  * spends the key — so spec files are out of the scanned set entirely.
  */
-const SPEC_FILE = /\.spec\.[cm][jt]s$|\.spec\.vue$|\.stories\.[cm][jt]s$/;
+const SPEC_FILE = /(\.spec|\.test|\.stories)\.[cm]?[jt]s$|\.spec\.vue$/;
 
 function walk(dir: string, files: string[] = []): string[] {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -91,5 +91,61 @@ describe("FEATURE_GATES completeness", () => {
       orphaned,
       `FeatureKey(s) with no checkFeatureAccess/withFeatureGate/useLockedAffordance call site anywhere in web/src — either wire them up or remove the registry entry: ${orphaned.join(", ")}`,
     ).toEqual([]);
+  });
+
+  /**
+   * The other half of the same coin: a key that IS spent, spent wrongly. `rbac` is the only
+   * registry key whose predicate reads a runtime flag (`zoConfig.rbac_enabled`), and
+   * `buildFeatureGateContext()` with no argument fails that flag CLOSED. `withFeatureGate`
+   * defaults its context to exactly that no-arg call, so an RBAC route gate that passes only
+   * two arguments would lock an entitled admin's page to home. The five production gates
+   * survive today only because `useEnterpriseRoutes.ts` shadows the import with a shim that
+   * supplies a store-reading context; a sixth gate written anywhere else — `router.ts`,
+   * `useManagementRoutes.ts`, `useAIObservabilityRoutes.ts` all import `withFeatureGate`
+   * directly — would fail silently, and nothing but this assertion says so.
+   */
+  it("never gates an RBAC-reading key through the default no-context withFeatureGate", () => {
+    const SHIMMED = "composables/shared/useEnterpriseRoutes.ts";
+    const offenders: string[] = [];
+    for (const file of SOURCE_FILES) {
+      const relative = file.slice(SRC_ROOT.length + 1).replace(/\\/g, "/");
+      if (relative === SHIMMED) continue;
+      const text = SOURCE_TEXT.get(file)!;
+      for (const match of text.matchAll(/withFeatureGate\(\s*["']rbac["']/g)) {
+        // Walk the balanced call arguments so a third argument anywhere settles it.
+        const open = text.indexOf("(", (match.index ?? 0) + "withFeatureGate".length);
+        let depth = 0;
+        let end = -1;
+        for (let i = open; i < text.length; i++) {
+          if (text[i] === "(") depth += 1;
+          else if (text[i] === ")") {
+            depth -= 1;
+            if (depth === 0) {
+              end = i;
+              break;
+            }
+          }
+        }
+        const args = end === -1 ? "" : text.slice(open + 1, end);
+        let commas = 0;
+        let nesting = 0;
+        for (const ch of args) {
+          if ("([{".includes(ch)) nesting += 1;
+          else if (")]}".includes(ch)) nesting -= 1;
+          else if (ch === "," && nesting === 0) commas += 1;
+        }
+        if (commas < 2)
+          offenders.push(`${relative}:${text.slice(0, match.index ?? 0).split("\n").length}`);
+      }
+    }
+    expect(
+      offenders,
+      `withFeatureGate("rbac", …) without an explicit context — the default reads no zoConfig, so the route locks an entitled admin out: ${offenders.join(", ")}`,
+    ).toEqual([]);
+    // Anti-vacuity: the rule is about real gates, and they exist in the shimmed module.
+    const shimmed = SOURCE_FILES.filter((f) => f.endsWith("useEnterpriseRoutes.ts"));
+    const rbacGates =
+      (SOURCE_TEXT.get(shimmed[0]) ?? "").match(/withFeatureGate\(\s*"rbac"/g) ?? [];
+    expect(rbacGates.length).toBeGreaterThan(0);
   });
 });
