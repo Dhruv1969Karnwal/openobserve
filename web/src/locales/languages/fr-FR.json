@@ -11608,7 +11608,7 @@
       "network": "La bibliothèque est inaccessible. Vérifiez votre connexion réseau et réessayez.",
       "http": "Le serveur de la bibliothèque a renvoyé une erreur. Réessayez dans un instant.",
       "unparseable": "La bibliothèque a renvoyé quelque chose qui n'est pas un catalogue.",
-      "unsupported_version": "Ce catalogue de bibliothèque est plus récent que ce que cette version d'OpenObserve peut lire. Mettez à niveau pour le parcourir.",
+      "unsupported_version": "Ce catalogue de bibliothèque est plus récent que ce que cette version d'Retrace.ai peut lire. Mettez à niveau pour le parcourir.",
       "malformed": "Le catalogue de la bibliothèque est incomplet ou endommagé."
     }
   },

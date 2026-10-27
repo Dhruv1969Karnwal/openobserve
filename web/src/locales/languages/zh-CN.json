@@ -11608,7 +11608,7 @@
       "network": "无法访问库。请检查网络连接并重试。",
       "http": "库服务器返回错误。请稍后重试。",
       "unparseable": "库的响应不是目录。",
-      "unsupported_version": "此库目录比此版本的 OpenObserve 能读取的版本新。请升级以浏览它。",
+      "unsupported_version": "此库目录比此版本的 Retrace.ai 能读取的版本新。请升级以浏览它。",
       "malformed": "库目录不完整或已损坏。"
     }
   },

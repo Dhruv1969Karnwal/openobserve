@@ -11608,7 +11608,7 @@
       "network": "Kütüphaneye ulaşılamadı. Ağ bağlantınızı kontrol edip tekrar deneyin.",
       "http": "Kütüphane sunucusu bir hata döndürdü. Birazdan tekrar deneyin.",
       "unparseable": "Kütüphane, katalog olmayan bir yanıt döndürdü.",
-      "unsupported_version": "Bu kütüphane kataloğu, bu OpenObserve sürümünün okuyabildiğinden daha yeni. Göz atmak için yükseltin.",
+      "unsupported_version": "Bu kütüphane kataloğu, bu Retrace.ai sürümünün okuyabildiğinden daha yeni. Göz atmak için yükseltin.",
       "malformed": "Kütüphane kataloğu eksik veya bozuk."
     }
   },

@@ -11608,7 +11608,7 @@
       "network": "Impossibile raggiungere la libreria. Controlla la connessione di rete e riprova.",
       "http": "Il server della libreria ha restituito un errore. Riprova tra un momento.",
       "unparseable": "La libreria ha risposto con qualcosa che non è un catalogo.",
-      "unsupported_version": "Questo catalogo della libreria è più recente di quanto questa versione di OpenObserve possa leggere. Aggiorna per consultarlo.",
+      "unsupported_version": "Questo catalogo della libreria è più recente di quanto questa versione di Retrace.ai possa leggere. Aggiorna per consultarlo.",
       "malformed": "Il catalogo della libreria è incompleto o danneggiato."
     }
   },

@@ -11608,7 +11608,7 @@
       "network": "De bibliotheek kon niet worden bereikt. Controleer uw netwerkverbinding en probeer het opnieuw.",
       "http": "De bibliotheekserver heeft een fout geretourneerd. Probeer het over een moment opnieuw.",
       "unparseable": "De bibliotheek heeft iets geretourneerd dat geen catalogus is.",
-      "unsupported_version": "Deze bibliotheekcatalogus is nieuwer dan deze versie van OpenObserve kan lezen. Upgrade om deze te bekijken.",
+      "unsupported_version": "Deze bibliotheekcatalogus is nieuwer dan deze versie van Retrace.ai kan lezen. Upgrade om deze te bekijken.",
       "malformed": "De bibliotheekcatalogus is onvolledig of beschadigd."
     }
   },

@@ -11608,7 +11608,7 @@
       "network": "Không thể truy cập thư viện. Kiểm tra kết nối mạng của bạn và thử lại.",
       "http": "Máy chủ thư viện đã trả về lỗi. Vui lòng thử lại sau ít phút.",
       "unparseable": "Thư viện phản hồi với dữ liệu không phải là một danh mục.",
-      "unsupported_version": "Danh mục thư viện này mới hơn phiên bản OpenObserve này có thể đọc. Hãy nâng cấp để duyệt nó.",
+      "unsupported_version": "Danh mục thư viện này mới hơn phiên bản Retrace.ai này có thể đọc. Hãy nâng cấp để duyệt nó.",
       "malformed": "Danh mục thư viện không đầy đủ hoặc bị hỏng."
     }
   },

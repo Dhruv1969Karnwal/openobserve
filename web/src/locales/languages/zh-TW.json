@@ -11603,7 +11603,7 @@
       "network": "無法連線到程式庫。請檢查您的網路連線後再試一次。",
       "http": "程式庫伺服器傳回錯誤。請稍後再試一次。",
       "unparseable": "程式庫回應的內容並非目錄。",
-      "unsupported_version": "此程式庫目錄比目前版本的 OpenObserve 可讀取的版本還新。請升級以瀏覽它。",
+      "unsupported_version": "此程式庫目錄比目前版本的 Retrace.ai 可讀取的版本還新。請升級以瀏覽它。",
       "malformed": "程式庫目錄不完整或已損毀。"
     }
   },

@@ -166,6 +166,11 @@ const PRODUCT_REFERENT_KEYS = [
   "infra.k8s2.workloadsRuleTip",
   "fleet.settings.targetVersionDesc",
   "storage_settings.awsStsCloudInfo",
+  // The Alert Library's "catalog too new" error names the deployment the user is
+  // browsing, not the catalog's publisher, and the login banner has always been
+  // this product's own pitch; both were renamed without ever being pinned.
+  "alert_library.error.unsupported_version",
+  "login.getStartedBannerMessage",
 ];
 
 // Keys whose referent is an upstream-run artifact — editions and license banners, the Terraform
@@ -283,6 +288,10 @@ describe("product referents name this product, upstream referents do not", () =>
 
 const componentSource = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
 
+/** A `raw("…")` / `raw('…')` slot — the templates do not agree on quote style. */
+const fillsWith = (source: string, brand: string) =>
+  source.includes(`raw("${brand}")`) || source.includes(`raw('${brand}')`);
+
 describe("raw product-name slots in components", () => {
   for (const [file, call] of [
     ["src/components/ingestion/logs/SplunkHec.vue", 't("ingestion.splunkHec.intro"'],
@@ -301,6 +310,45 @@ describe("raw product-name slots in components", () => {
       expect(slot).not.toContain(`raw("${UPSTREAM}")`);
     });
   }
+
+  // The Slack OAuth slots split by referent, and the split is easy to get wrong
+  // from across the room: the popup blocker acts on THIS deployment's origin and
+  // the callback page IS this deployment, so those two name this product — while
+  // the consent strings describe the app registered inside Slack, which really is
+  // called OpenObserve there, and must keep saying so.
+  it("names this product in the Slack OAuth slots that describe this deployment", () => {
+    for (const [file, call] of [
+      [
+        "src/composables/slack/useSlackOAuthPopup.ts",
+        't("alert_destinations.slackOAuth.popupBlocked"',
+      ],
+      ["src/views/SlackOAuthCallback.vue", 't("alert_destinations.slackOAuth.callbackWorking"'],
+      ["src/views/SlackConnectCallback.vue", "t('alert_destinations.slackOAuth.callbackWorking'"],
+    ] as [string, string][]) {
+      const source = componentSource(file);
+      const at = source.indexOf(call);
+      expect(at, `${file} still fills ${call}`).toBeGreaterThan(-1);
+      const slot = source.slice(at, at + 220);
+      // Either quote style is fine (one of these bindings is single-quoted); only a
+      // rename of the referent is not.
+      expect(fillsWith(slot, PRODUCT), file).toBe(true);
+      expect(fillsWith(slot, UPSTREAM), file).toBe(false);
+    }
+  });
+
+  it("leaves the Slack consent slots naming the app registered in the workspace", () => {
+    const source = componentSource("src/components/alerts/SlackDestinationSetup.vue");
+    for (const call of [
+      't("alert_destinations.slackOAuth.permissionNote"',
+      't("slackApp.connect.consentPending"',
+    ]) {
+      const at = source.indexOf(call);
+      expect(at, `SlackDestinationSetup.vue still fills ${call}`).toBeGreaterThan(-1);
+      const slot = source.slice(at, at + 220);
+      expect(fillsWith(slot, UPSTREAM), call).toBe(true);
+      expect(fillsWith(slot, PRODUCT), call).toBe(false);
+    }
+  });
 
   it("labels the built-in cipher key type and the openobserve pipeline type as this product", () => {
     expect(componentSource("src/components/cipherkeys/AddCipherKey.vue")).toContain(

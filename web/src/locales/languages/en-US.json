@@ -11606,7 +11606,7 @@
       "network": "The library could not be reached. Check your network connection and try again.",
       "http": "The library server returned an error. Try again in a moment.",
       "unparseable": "The library responded with something that is not a catalog.",
-      "unsupported_version": "This library catalog is newer than this version of OpenObserve can read. Upgrade to browse it.",
+      "unsupported_version": "This library catalog is newer than this version of Retrace.ai can read. Upgrade to browse it.",
       "malformed": "The library catalog is incomplete or damaged."
     }
   },

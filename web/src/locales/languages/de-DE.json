@@ -11608,7 +11608,7 @@
       "network": "Die Bibliothek konnte nicht erreicht werden. Überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.",
       "http": "Der Bibliotheksserver hat einen Fehler zurückgegeben. Versuchen Sie es gleich noch einmal.",
       "unparseable": "Die Bibliothek hat etwas zurückgegeben, das kein Katalog ist.",
-      "unsupported_version": "Dieser Bibliothekskatalog ist neuer, als diese Version von OpenObserve lesen kann. Aktualisieren Sie, um ihn zu durchsuchen.",
+      "unsupported_version": "Dieser Bibliothekskatalog ist neuer, als diese Version von Retrace.ai lesen kann. Aktualisieren Sie, um ihn zu durchsuchen.",
       "malformed": "Der Bibliothekskatalog ist unvollständig oder beschädigt."
     }
   },

@@ -11608,7 +11608,7 @@
       "network": "Não foi possível aceder à biblioteca. Verifique a sua ligação de rede e tente novamente.",
       "http": "O servidor da biblioteca devolveu um erro. Tente novamente em instantes.",
       "unparseable": "A biblioteca respondeu com algo que não é um catálogo.",
-      "unsupported_version": "Este catálogo da biblioteca é mais recente do que esta versão do OpenObserve pode ler. Atualize para o explorar.",
+      "unsupported_version": "Este catálogo da biblioteca é mais recente do que esta versão do Retrace.ai pode ler. Atualize para o explorar.",
       "malformed": "O catálogo da biblioteca está incompleto ou danificado."
     }
   },

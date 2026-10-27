@@ -11608,7 +11608,7 @@
       "network": "Nie można połączyć się z biblioteką. Sprawdź połączenie sieciowe i spróbuj ponownie.",
       "http": "Serwer biblioteki zwrócił błąd. Spróbuj ponownie za chwilę.",
       "unparseable": "Biblioteka odpowiedziała czymś, co nie jest katalogiem.",
-      "unsupported_version": "Ten katalog biblioteki jest nowszy, niż ta wersja OpenObserve może odczytać. Zaktualizuj oprogramowanie, aby go przeglądać.",
+      "unsupported_version": "Ten katalog biblioteki jest nowszy, niż ta wersja Retrace.ai może odczytać. Zaktualizuj oprogramowanie, aby go przeglądać.",
       "malformed": "Katalog biblioteki jest niekompletny lub uszkodzony."
     }
   },
