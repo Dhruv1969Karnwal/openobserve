@@ -92,4 +92,47 @@ describe("DbmInsightStrip", () => {
     await wrapper.find('[data-test="dbm-insight-new-expensive"]').trigger("click");
     expect(wrapper.emitted("filter")?.[0]).toEqual([one]);
   });
+
+  /**
+   * An applied insight keeps its chip on the accent-active ground until the filter
+   * is cleared, so the sentence has to survive that ground as long as the filter
+   * does — the secondary tier measures 4.15:1 there, under AA.
+   */
+  describe("the applied chip keeps its evidence sentence legible", () => {
+    const applied = () => mountStrip([insight(), insight({ id: "rank-churn" })], "new-expensive");
+    const sentenceIn = (id: string) =>
+      applied().get(`[data-test="dbm-insight-${id}"] [data-test="dbm-insight-sentence"]`);
+
+    it("paints the accent-active ground on the applied chip only", () => {
+      expect(applied().get('[data-test="dbm-insight-new-expensive"]').classes()).toContain(
+        "bg-surface-accent-active",
+      );
+      expect(applied().get('[data-test="dbm-insight-rank-churn"]').classes()).not.toContain(
+        "bg-surface-accent-active",
+      );
+    });
+
+    it("binds the heading tier to the sentence the accent-active ground holds", () => {
+      const classes = sentenceIn("new-expensive").classes();
+      expect(classes).toContain("text-text-heading");
+      expect(classes).not.toContain("text-text-secondary");
+    });
+
+    it("keeps the secondary tier on the chip that is not applied", () => {
+      const classes = sentenceIn("rank-churn").classes();
+      expect(classes).toContain("text-text-secondary");
+      expect(classes).not.toContain("text-text-heading");
+    });
+
+    it("moves the sentence to the heading tier as soon as its filter applies", async () => {
+      const wrapper = mountStrip([insight()]);
+      expect(wrapper.get('[data-test="dbm-insight-sentence"]').classes()).toContain(
+        "text-text-secondary",
+      );
+      await wrapper.setProps({ activeId: "new-expensive" });
+      expect(wrapper.get('[data-test="dbm-insight-sentence"]').classes()).toContain(
+        "text-text-heading",
+      );
+    });
+  });
 });

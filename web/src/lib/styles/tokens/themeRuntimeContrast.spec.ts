@@ -289,6 +289,16 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-surface-accent-active",
     where: "active chat title (HomeChatHistory.vue)",
   },
+  // Applied insight chip (DbmInsightStrip.vue): the same held accent-active host,
+  // reached by a different route — grey-400 secondary measures 4.15 on the
+  // theme-invariant dark #39404a (the light twin was already 5.76+ since
+  // grey-600), so the evidence sentence binds the heading tier while the filter
+  // applies: 8.31 dark, 11.15–12.75 across the six injected light ramps.
+  {
+    fg: "--color-text-heading",
+    bg: "--color-surface-accent-active",
+    where: "applied-insight evidence sentence (DbmInsightStrip.vue)",
+  },
   // Active / selected fills.
   {
     fg: "--color-checkbox-checked-fg",
@@ -665,6 +675,29 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     const failing = failingLightPairs(TEXT_PAIRS);
     const deferred = new Set(Object.keys(LIGHT_PAIR_DEFERRALS));
     expect([...failing].sort()).toEqual([...deferred].sort());
+  });
+
+  it("keeps the accent-active heading re-ink on a measured reason, both modes", () => {
+    // The active chat row (HomeChatHistory.vue) and the applied insight chip
+    // (DbmInsightStrip.vue) bind the heading tier on --color-surface-accent-active
+    // because the secondary tier cannot clear AA on its dark host. Bidirectional
+    // like the other ledgers: move the secondary tier above the bar and this goes
+    // red, and the re-ink plus its TEXT_PAIRS bookings must be revisited.
+    const dark = [
+      ...new Set(
+        RUNTIME_SCOPES.map(({ scope }) =>
+          ratio("--color-text-secondary", "--color-surface-accent-active", scope).toFixed(2),
+        ),
+      ),
+    ];
+    expect(dark, "the dark host is the theme-invariant #39404a under every ramp").toEqual(["4.15"]);
+    const light = LIGHT_RUNTIME_SCOPES.map(({ scope }) =>
+      ratio("--color-text-secondary", "--color-surface-accent-active", scope),
+    );
+    expect(
+      Math.min(...light),
+      "the light twin (grey-600 on primary-100, 5.76) was never the defect",
+    ).toBeGreaterThanOrEqual(TEXT_MIN);
   });
 
   describe.each<[string, Map<string, string>]>([
