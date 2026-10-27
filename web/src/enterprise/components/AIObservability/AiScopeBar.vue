@@ -218,11 +218,14 @@ const props = withDefaults(
         click on it opens the upgrade dialog (see `onFilterModeChange`) instead of
         switching mode. NOTE: this component has no consumer that displays the
         message TEXT — the value's presence is what matters, its content is not
-        rendered. Leave it unset for a caller with truly no Agent concept to
-        advertise: the whole toggle is then omitted, which is what the shipped
-        "hide" policy needs, so callers pass it behind `.visible`, never
-        unconditionally (an empty message under "hide" is still a truthy object and
-        would put a locked affordance on a free build). */
+        rendered. Leave it unset for a caller with no Agent concept to advertise:
+        the whole toggle is then omitted, which is what the shipped "hide" policy
+        needs. Callers therefore pass it behind `.visible` rather than raw: under
+        "hide" the message happens to be `raw("")`, and `raw()` is the identity at
+        runtime so that particular value is falsy — but emptiness is that string's
+        accident, not the contract of a hidden affordance, and keying the render
+        switch off `visible` is what stops a future change to the hidden message
+        from painting a locked control on a free build. */
     agentToggleLockedMessage?: I18nText;
   }>(),
   {

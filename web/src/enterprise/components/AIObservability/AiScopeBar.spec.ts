@@ -215,9 +215,8 @@ describe("AiScopeBar", () => {
      * in the bar with a lock suffix rather than hiding the whole toggle — and the
      * controlled group still refuses to advance into the locked mode. The negative
      * cell directly above is what the SHIPPED "hide" policy produces, because its
-     * callers pass the message behind `.visible` (an empty message is still a truthy
-     * object, and passing it unconditionally would put a locked affordance on a free
-     * build).
+     * callers key the render switch off `access.visible` instead of relying on the
+     * hidden message being an empty string.
      */
     it("renders the Agent item locked and refuses the mode change when a locked message is passed", async () => {
       const w = mountBar({
