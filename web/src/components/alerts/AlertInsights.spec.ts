@@ -20,6 +20,7 @@ import store from "@/test/unit/helpers/store";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
 
 const mockPush = vi.fn();
+const mockReplace = vi.fn();
 // A SHARED route object so a spec can put a `?tab=` in place BEFORE the mount —
 // the restore under test happens once, in `onMounted`.
 const mockRoute: { params: Record<string, any>; query: Record<string, any> } = {
@@ -37,7 +38,7 @@ const resetMockRoute = () => {
   mockRoute.query = {};
 };
 vi.mock("vue-router", () => ({
-  useRouter: () => ({ push: mockPush, back: vi.fn() }),
+  useRouter: () => ({ push: mockPush, replace: mockReplace, back: vi.fn() }),
   useRoute: () => mockRoute,
 }));
 
@@ -207,6 +208,73 @@ describe("AlertInsights - rendering", () => {
     await flushPromises();
 
     expect((w.vm as any).currentTab).toBe(tab);
+  });
+
+  /**
+   * The coercion has to reach the address bar too. This component never writes
+   * `?tab=` on its own, so without the normalization the refused value stayed
+   * parked in the URL: the page rendered overview while the link still promised a
+   * tab that does not render, and a `goBack` forwarded that stale param to the
+   * Alerts list. Same convention as the list surface: the coerced tab is
+   * materialised, and by REPLACE — a normalization must not cost a history entry.
+   */
+  it.each(["incidents", "frequency", "quality "])(
+    "re-writes the URL with the restored tab %p by replace, never push",
+    async (tab) => {
+      mockRoute.query = { tab, org_identifier: "default" };
+      await mountComp();
+      await flushPromises();
+
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith({
+        query: { org_identifier: "default", tab: "overview" },
+      });
+      expect(mockPush).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Bidirectional: a URL whose tab IS canonical is left exactly as it is — no
+   * normalization hop, no extra history entry for a working deep link.
+   */
+  it.each(["overview", "quality"])(
+    "does not touch the URL for the canonical tab %s",
+    async (tab) => {
+      mockRoute.query = { tab };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe(tab);
+      expect(mockReplace).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * The one value that is refused for RENDERING but deliberately left in the URL:
+   * `tab` is shared with the Alerts list, which passes its own active tab on the way
+   * in so `goBack` can hand it back. The two vocabularies do not overlap, so
+   * `?tab=scheduled` shows overview here — and rewriting it to `overview` would
+   * reset the user's list filter on the way back. Refuse the tab, keep the token.
+   */
+  it.each(["scheduled", "realTime", "composite"])(
+    "keeps the carried-over Alerts-list tab %s in the URL while rendering overview",
+    async (tab) => {
+      mockRoute.query = { tab, org_identifier: "default" };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe("overview");
+      expect(mockReplace).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not invent a tab param for a URL that never named one", async () => {
+    mockRoute.query = {};
+    const w = await mountComp();
+    await flushPromises();
+
+    expect((w.vm as any).currentTab).toBe("overview");
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 
   /** Locked-tab defense in depth, now expressed by the same resolver. */

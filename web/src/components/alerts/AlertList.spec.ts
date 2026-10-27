@@ -1530,6 +1530,42 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     expect(replace).not.toHaveBeenCalled();
     replace.mockRestore();
   });
+
+  /**
+   * The closed set is enforced at the CHANGE SINK as well as at the URL restore, so
+   * it has one meaning in this component: a handler that trusts its caller would
+   * adopt a value no tab renders, switch row filtering off with nothing lit, and
+   * have the `activeTab` watcher re-persist that value into the URL. Only the
+   * rendered toggle group feeds this handler today, which is why the assertion pins
+   * the contract instead of a reachable user flow — and it fails the moment the
+   * sink starts assigning the raw value again.
+   */
+  it("refuses a non-tab value at the change handler instead of adopting it", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+
+    wrapper.vm.onAlertTabChange("incidents");
+    await flushPromises();
+
+    expect(wrapper.vm.activeTab).toBe("all");
+    // Row filtering stayed on: "all" is the branch that shows every alert.
+    expect(wrapper.vm.filteredResults.length).toBe(wrapper.vm.allAlerts.length);
+
+    // The ungated values still round-trip — the sink is not a blanket reset.
+    wrapper.vm.onAlertTabChange("scheduled");
+    await flushPromises();
+    expect(wrapper.vm.activeTab).toBe("scheduled");
+  });
+
+  it("keeps refusing to activate the anomaly tab while the feature is off", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+
+    wrapper.vm.onAlertTabChange("anomalyDetection");
+    await flushPromises();
+
+    expect(wrapper.vm.activeTab).not.toBe("anomalyDetection");
+  });
 });
 
 // 12. ODialog / ODrawer migration coverage

@@ -86,7 +86,9 @@ vi.mock("@/lib/feedback/Toast/useToast", () => ({
 
 // Mock vue-router
 const mockRouterPush = vi.fn();
-const mockCurrentRoute = ref({
+// Typed loosely on purpose: the writers under test read `name` (isLogsRoute) and
+// carry arbitrary query objects; the real route is only mocked here.
+const mockCurrentRoute = ref<{ name?: string; query: Record<string, unknown> }>({
   query: {},
 });
 
@@ -137,6 +139,7 @@ vi.mock("@openobserve/node-sql-parser/build/datafusionsql", () => ({
 
 // Import the module under test (after mocks are set up)
 import { logsUtils } from "./logsUtils";
+import { bindLogsUrlRouter, resetLogsUrlForTests } from "@/composables/useLogs/useLogsUrl";
 
 describe("logsUtils", () => {
   let utils: ReturnType<typeof logsUtils>;
@@ -749,6 +752,61 @@ describe("logsUtils", () => {
       mockSearchObj.meta.logsVisualizeToggle = "visualize";
       const query = utils.generateURLQuery();
       expect(query.logs_visualize_toggle).toBe("visualize");
+    });
+
+    it("omits the param when the panel is the default (absence IS the value)", () => {
+      mockSearchObj.meta.logsVisualizeToggle = "logs";
+      expect(utils.generateURLQuery()).not.toHaveProperty("logs_visualize_toggle");
+    });
+
+    describe("panel param byte-shape across successive navigations", () => {
+      let writer: any;
+
+      beforeEach(() => {
+        // updateUrlQueryParams only writes while the bound router says we are on
+        // Logs; the shared mock route carries no name by default.
+        mockCurrentRoute.value = { name: "logs", query: {} };
+        writer = {
+          currentRoute: mockCurrentRoute,
+          push: vi.fn().mockResolvedValue(undefined),
+          replace: vi.fn().mockResolvedValue(undefined),
+        };
+        bindLogsUrlRouter(writer as any);
+      });
+
+      afterEach(() => {
+        resetLogsUrlForTests();
+        mockCurrentRoute.value = { query: {} };
+      });
+
+      const writtenQuery = (call: number) => writer.replace.mock.calls[call][0].query as any;
+
+      it("never names the default panel — not on the first write, not after a panel round trip", () => {
+        mockSearchObj.meta.logsVisualizeToggle = "logs";
+        utils.updateUrlQueryParams(null, null, "replace");
+        expect(writer.replace).toHaveBeenCalledTimes(1);
+        expect(writtenQuery(0)).not.toHaveProperty("logs_visualize_toggle");
+
+        // Switch panels: the non-default panel is named explicitly.
+        mockSearchObj.meta.logsVisualizeToggle = "visualize";
+        utils.updateUrlQueryParams(null, null, "replace");
+        expect(writtenQuery(1).logs_visualize_toggle).toBe("visualize");
+
+        // And back: the URL returns to the byte-shape a link that never chose a
+        // panel had, instead of keeping the value the previous write put there.
+        mockSearchObj.meta.logsVisualizeToggle = "logs";
+        utils.updateUrlQueryParams(null, null, "replace");
+        expect(writtenQuery(2)).not.toHaveProperty("logs_visualize_toggle");
+      });
+
+      it("drops a stale default-valued param on the next view-state patch", () => {
+        // A URL restored from an external link that still spells the default.
+        mockCurrentRoute.value = { name: "logs", query: { logs_visualize_toggle: "logs" } };
+        mockSearchObj.meta.logsVisualizeToggle = "logs";
+        utils.patchUrlViewState();
+        expect(writer.replace).toHaveBeenCalledTimes(1);
+        expect(writtenQuery(0)).not.toHaveProperty("logs_visualize_toggle");
+      });
     });
 
     it("should handle stream as object with value property", () => {

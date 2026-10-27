@@ -14,6 +14,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   ALERT_INSIGHTS_TABS,
   ALERT_LIST_TABS,
@@ -138,5 +140,68 @@ describe("resolveAlertInsightsTab (F-101)", () => {
     for (const locked of LOCKED_ALERT_INSIGHTS_TABS) {
       expect(ALERT_INSIGHTS_TABS).toContain(locked);
     }
+  });
+});
+
+/**
+ * The closed sets claim to be "every tab the component renders", so they are
+ * checked against the components themselves rather than against a literal copy
+ * of the constant: a transcription that matches itself stays green when a tab is
+ * added or renamed upstream, and the coercion would then start refusing a
+ * legitimate deep link — invisibly, because the refused value is exactly the one
+ * that no longer appears in the set. Same source-scanning pattern
+ * themeRuntimeContrast.spec.ts uses for its consumer sweep, anti-vacuity floor
+ * included: a regex that stops matching anything fails the floor, not the test.
+ */
+describe("closed sets match the components they mirror", () => {
+  const here = process.cwd();
+  const sourceOf = (rel: string) => readFileSync(join(here, rel), "utf8");
+
+  /** The `value:` literals inside AlertList.vue's own `alertTabs` computed. */
+  const renderedAlertListTabs = () => {
+    const source = sourceOf("src/components/alerts/AlertList.vue");
+    const start = source.indexOf("const alertTabs = computed(");
+    const end = source.indexOf("return tabs;", start);
+    expect(start, "AlertList.vue must still build its tabs in `alertTabs`").toBeGreaterThan(-1);
+    expect(end, "AlertList.vue's `alertTabs` must still end with `return tabs`").toBeGreaterThan(
+      start,
+    );
+    return [...source.slice(start, end).matchAll(/value:\s*"([^"]+)"/g)].map((m) => m[1]);
+  };
+
+  /** Every `<OTab name>` in AlertInsights.vue, plus the ones gated on the paid tabs. */
+  const renderedInsightsTabs = () => {
+    const source = sourceOf("src/components/alerts/AlertInsights.vue");
+    const blocks = [...source.matchAll(/<OTab\b([^>]*?)\/>/g)].map((m) => m[1]);
+    expect(
+      blocks.length,
+      "AlertInsights.vue must still render its tabs with <OTab>",
+    ).toBeGreaterThan(1);
+    return blocks.map((attrs) => ({
+      name: /name="([^"]+)"/.exec(attrs)?.[1] ?? "",
+      gated: /v-if="insightsAccess\.visible"/.test(attrs),
+    }));
+  };
+
+  it("keeps ALERT_LIST_TABS equal to the values AlertList.vue renders", () => {
+    const rendered = renderedAlertListTabs();
+    expect(rendered.length).toBeGreaterThan(4); // anti-vacuity floor
+    expect([...ALERT_LIST_TABS].sort()).toEqual([...rendered].sort());
+  });
+
+  it("keeps ALERT_INSIGHTS_TABS and its locked subset equal to the OTabs AlertInsights.vue renders", () => {
+    const rendered = renderedInsightsTabs();
+    expect(rendered.length).toBeGreaterThan(1); // anti-vacuity floor
+    expect(ALERT_INSIGHTS_TABS).toEqual(rendered.map((tab) => tab.name));
+    expect(LOCKED_ALERT_INSIGHTS_TABS).toEqual(
+      rendered.filter((tab) => tab.gated).map((tab) => tab.name),
+    );
+  });
+
+  it("keeps each set's default on a tab that is always rendered (never the gated one)", () => {
+    expect(ALERT_LIST_TABS).toContain(DEFAULT_ALERT_LIST_TAB);
+    expect(renderedAlertListTabs()).toContain(DEFAULT_ALERT_LIST_TAB);
+    expect(ALERT_INSIGHTS_TABS).toContain(DEFAULT_ALERT_INSIGHTS_TAB);
+    expect(LOCKED_ALERT_INSIGHTS_TABS).not.toContain(DEFAULT_ALERT_INSIGHTS_TAB);
   });
 });

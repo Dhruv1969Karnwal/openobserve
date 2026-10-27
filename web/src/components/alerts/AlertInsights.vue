@@ -276,7 +276,11 @@ import { toast } from "@/lib/feedback/Toast/useToast";
 import type { ToastOptions } from "@/lib/feedback/Toast/OToast.types";
 import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
-import { resolveAlertInsightsTab, LOCKED_ALERT_INSIGHTS_TABS } from "@/utils/alerts/alertTabs";
+import {
+  isAlertListTab,
+  resolveAlertInsightsTab,
+  LOCKED_ALERT_INSIGHTS_TABS,
+} from "@/utils/alerts/alertTabs";
 
 const router = useRouter();
 const route = useRoute();
@@ -738,13 +742,28 @@ onMounted(async () => {
   // is disabled in the UI, but a direct link with ?tab=frequency/correlation
   // shouldn't be able to land on it while locked.
   //
-  // F-101: the restore is a CLOSED SET, not just the locked-tab check — anything
+  // The restore is a CLOSED SET, not just the locked-tab check — anything
   // that is not one of the four rendered tabs used to become `currentTab`, which
   // matched no tab in the dashboard config and left the whole page empty under a
   // URL that looked like a working deep link.
-  currentTab.value = resolveAlertInsightsTab(route.query.tab, {
+  const rawTab = route.query.tab;
+  currentTab.value = resolveAlertInsightsTab(rawTab, {
     insightsAllowed: insightsAccess.value.allowed,
   });
+  // The coercion has to reach the URL too: this component never writes `?tab=` on
+  // its own, so without this the refused value stayed parked in the address bar and
+  // the page showed overview under a link promising a tab that does not render.
+  //
+  // `tab` is SHARED with the Alerts list, which passes its own active tab through
+  // on the way in (`AlertList.vue`'s insights push) precisely so `goBack` can hand
+  // it back — the two vocabularies do not overlap at all, so every one of those
+  // values also coerces here. Erasing one would silently reset the user's list
+  // filter on the way back, so only a value NEITHER surface renders is garbage
+  // worth normalizing. `replace`, never `push`: a normalization must not add a
+  // history entry the Back button has to step over twice (same rule the list follows).
+  if (rawTab !== undefined && rawTab !== currentTab.value && !isAlertListTab(rawTab)) {
+    void router.replace({ query: { ...route.query, tab: currentTab.value } });
+  }
 
   // Fetch alerts list once on mount
   await fetchAlerts();

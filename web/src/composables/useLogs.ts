@@ -51,10 +51,11 @@ import {
   initShownSearchFromUrl,
   parseRowsParam,
   writeLogsUrl,
+  writeVisualizeToggleParam,
 } from "@/composables/useLogs/useLogsUrl";
 import { columnsFromUrl } from "@/composables/useLogs/useLogPermalink";
 import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
-import { DEFAULT_LOGS_VISUALIZE_TOGGLE, resolveLogsVisualizeToggle } from "@/ts/interfaces/logs";
+import { resolveLogsVisualizeToggle } from "@/ts/interfaces/logs";
 
 const useLogs = (t: TranslateFn) => {
   const store = useStore();
@@ -535,13 +536,10 @@ const useLogs = (t: TranslateFn) => {
       defined_schemas: searchObj.meta.useUserDefinedSchemas,
     };
     // The raw param may carry a gated or unknown toggle the sanitizer rewrote, so the URL is
-    // rewritten to the RESTORED state; the default tab is written by absence rather than as a
-    // value, so a link that never chose a panel keeps its byte-shape (F-91).
-    if (searchObj.meta.logsVisualizeToggle === DEFAULT_LOGS_VISUALIZE_TOGGLE) {
-      delete restoredQuery.logs_visualize_toggle;
-    } else {
-      restoredQuery.logs_visualize_toggle = searchObj.meta.logsVisualizeToggle;
-    }
+    // rewritten to the RESTORED state; the default panel travels by absence (see
+    // writeVisualizeToggleParam — the canonical builder applies the same rule, which is what
+    // makes the byte-shape survive a search or pagination write instead of just this one).
+    writeVisualizeToggleParam(restoredQuery, searchObj.meta.logsVisualizeToggle);
     void writeLogsUrl("replace", restoredQuery);
   };
 

@@ -2344,9 +2344,20 @@ export default defineComponent({
         openUpgradeDialog();
         return;
       }
-      activeTab.value = tab;
+      // Same closed set the URL restore uses, enforced at the sink as well: today
+      // only the rendered `OTabs` values reach this handler, but the set is
+      // declared once in `alertTabs.ts` precisely so a caller cannot introduce a
+      // value that renders nothing and re-persists itself through the watcher.
+      const resolvedTab = resolveAlertListTab(tab, {
+        anomalyDetectionEnabled: isAnomalyDetectionEnabled.value,
+      });
+      activeTab.value = resolvedTab;
       const apiType =
-        tab === "realTime" ? "realtime" : tab === "anomalyDetection" ? "anomaly_detection" : tab;
+        resolvedTab === "realTime"
+          ? "realtime"
+          : resolvedTab === "anomalyDetection"
+            ? "anomaly_detection"
+            : resolvedTab;
       await getAlertsFn(store, activeFolderId.value, "", true, apiType);
     };
 
