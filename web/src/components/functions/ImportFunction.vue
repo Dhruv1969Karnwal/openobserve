@@ -88,7 +88,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                        screens do. Typing writes straight back into the JSON on the
                        left, so the document and these fields never disagree. -->
                   <template v-if="typeof errorMessage === 'object'">
-                    <span class="text-status-negative">{{ errorMessage.message }}</span>
+                    <span class="text-status-error-text">{{ errorMessage.message }}</span>
 
                     <!-- Missing, unusable, repeated in the file, or already taken:
                          four checks, one fix — a name that is free and valid. -->
@@ -199,7 +199,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       />
                     </div>
                   </template>
-                  <span v-else class="text-status-negative">{{ errorMessage }}</span>
+                  <span v-else class="text-status-error-text">{{ errorMessage }}</span>
                 </div>
               </div>
             </div>
@@ -354,7 +354,7 @@ export default defineComponent({
     const triggerImport = () => baseImportRef.value?.handleImport();
 
     const resultClass = (status: ImportStatus) =>
-      status === "failed" ? "text-status-negative" : "text-status-positive";
+      status === "failed" ? "text-status-error-text" : "text-status-success-text";
 
     // Describes one org's functions and means nothing in the next.
     watch(orgId, () => {

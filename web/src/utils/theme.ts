@@ -131,21 +131,46 @@ const contrastRatio = (hexA: string, hexB: string): number => {
 };
 
 /**
- * Pick white or dark label text for a button whose background is theme-color
- * derived. Predefined dark-mode theme colors are deliberately light/pastel (so
- * they double as readable text/link accents on dark surfaces) — which can drop
- * hardcoded white button-label text well below readable, e.g. O2 Signature's
- * dark accent #8B8DF0 with white text lands at 2.93:1. Falls back to dark text
- * only below a floor, not the strict 4.5:1 AA text bar: every saturated brand
- * color (e.g. O2 Signature light #6B76E3, white text at 3.94:1) already ships
- * with white and sits just under that bar, so comparing "whichever wins" flips
- * text to dark across the whole app over a fractional AA shortfall.
+ * Pick label text for a button whose background is theme-color derived, across
+ * ALL fills the single label token rides: rest (600), hover (700), active (800).
+ * Predefined dark-mode theme colors are deliberately light/pastel — which can
+ * drop hardcoded white well below readable, e.g. O2 Signature's dark accent
+ * #8B8DF0 with white text lands at 2.93:1. The floor is 3:1, not the strict
+ * 4.5:1 AA bar: every saturated brand color (O2 Lens light #4682FA at 3.60:1)
+ * already ships with white just under it, and the bar move would flip text
+ * across the app for a fractional shortfall. What is NOT a compromise: the
+ * chosen ink must survive the darkest state too — checking the resting shade
+ * alone shipped a 2.78:1 pressed label under O2 Crimson Ink dark (F-118).
+ * Pure black joins the candidates because mid-tone brand fills (Crimson's
+ * pressed #974450) leave neither white nor grey-900 at 3:1.
  */
-const pickButtonForeground = (bgHex: string): string => {
+const pickButtonForeground = (palette: Record<string, string>): string => {
   const darkText = cssToken("--color-grey-900", "#171717");
+  const states = ["600", "700", "800"].map((shade) => palette[shade]);
+  const worstState = (ink: string) => Math.min(...states.map((bg) => contrastRatio(ink, bg)));
   const white = "#FFFFFF";
-  const MIN_WHITE_CONTRAST = 3;
-  return contrastRatio(white, bgHex) >= MIN_WHITE_CONTRAST ? white : darkText;
+  const candidates = [white, darkText, "#000000"];
+  return (
+    candidates.find((ink) => worstState(ink) >= 3) ??
+    candidates.reduce((a, b) => (worstState(a) >= worstState(b) ? a : b))
+  );
+};
+
+/** First primary-ramp shade (walking 600→900, so the brand color keeps its
+ *  lightest legible voice) that clears AA text on an explicit host. Accent
+ *  used AS TEXT on the theme's own tints cannot ride the raw ramp: the light
+ *  active-tab ink on its primary-100 pill measured 3.03:1 under O2 Lens (F-117). */
+const pickReadableShade = (
+  palette: Record<string, string>,
+  hostHex: string,
+  start = "600",
+): string => {
+  const darkText = cssToken("--color-grey-900", "#171717");
+  const shades = ["600", "700", "800", "900"];
+  const firstPassing = shades
+    .slice(shades.indexOf(start))
+    .find((shade) => contrastRatio(palette[shade], hostHex) >= 4.5);
+  return firstPassing ?? darkText;
 };
 
 /** Text for an arbitrary user-chosen background, always at least WCAG AA (4.5:1). */
@@ -185,10 +210,19 @@ export const libraryForegroundTokens = (
   const checkboxFill = mode === "dark" ? palette["500"] : palette["600"];
   const tokens: Record<string, string> = {
     "--color-checkbox-checked-fg": pickReadableForeground(checkboxFill),
+    "--color-button-primary-foreground": pickButtonForeground(palette),
   };
   if (mode === "light") {
     const fillFg = pickSelectedFillForeground(palette["600"]);
     for (const name of SELECTED_FILL_INK_TOKENS) tokens[name] = fillFg;
+    // Accent-as-text roles: their light sheets point at ramp shades whose
+    // contrast depends on the theme color (3.03-4.44 worst-case, F-117/F-119).
+    // Dark pins all five to ladder-invariant sheet values instead (dark.css).
+    tokens["--color-tabs-active-text"] = pickReadableShade(palette, palette["100"]);
+    tokens["--color-select-item-selected-text"] = pickReadableShade(palette, palette["100"], "700");
+    tokens["--color-button-ghost-muted-hover-text"] = pickReadableShade(palette, palette["100"]);
+    tokens["--color-button-ghost-primary-text"] = pickReadableShade(palette, palette["100"]);
+    tokens["--color-datepicker-selected-fg"] = pickReadableShade(palette, "#FFFFFF");
   }
   return tokens;
 };
@@ -196,7 +230,13 @@ export const libraryForegroundTokens = (
 /** Names libraryForegroundTokens may write in either mode (probe palette —
  *  keys never depend on the colors, only the values do). */
 const libraryForegroundTokenNames = (): string[] => {
-  const probe = { "500": "#888888", "600": "#888888" };
+  const probe = {
+    "100": "#cccccc",
+    "500": "#888888",
+    "600": "#888888",
+    "700": "#444444",
+    "800": "#333333",
+  };
   return [
     ...new Set([
       ...Object.keys(libraryForegroundTokens("light", probe)),
@@ -286,10 +326,6 @@ const syncO2LibraryTokens = (themeColor: string, mode: "light" | "dark"): void =
   for (const [shade, hex] of Object.entries(palette)) {
     root.style.setProperty(`--color-primary-${shade}`, hex);
   }
-  // The "primary" button variant's label text must stay readable against its
-  // resting background (the 600 shade) — see pickButtonForeground for why this
-  // can't be hardcoded to white.
-  root.style.setProperty("--color-button-primary-foreground", pickButtonForeground(palette["600"]));
   const active = libraryForegroundTokens(mode, palette);
   for (const name of libraryForegroundTokenNames()) {
     // A name the current mode does not compute belongs to the other mode's
@@ -328,7 +364,6 @@ export const applyThemeColors = (
         root.style.removeProperty(`--color-primary-${shade}`);
       },
     );
-    root.style.removeProperty("--color-button-primary-foreground");
     for (const name of libraryForegroundTokenNames()) {
       root.style.removeProperty(name);
     }

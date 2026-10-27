@@ -263,13 +263,11 @@ export default defineComponent({
 
     const activePillClass = computed(() => {
       if (slideActive.value) {
-        return isDark.value
-          ? "text-tabs-active-text border-s-2 border-transparent"
-          : "text-accent border-s-2 border-transparent";
+        return "text-tabs-active-text border-s-2 border-transparent";
       }
       return isDark.value
         ? "text-tabs-active-text bg-tabs-active-bg border-s-2 border-accent"
-        : "text-accent bg-surface-base border-s-2 border-accent";
+        : "text-tabs-active-text bg-surface-base border-s-2 border-accent";
     });
     const activeIconClass = computed(() =>
       isDark.value ? "text-tabs-active-text!" : "text-accent!",

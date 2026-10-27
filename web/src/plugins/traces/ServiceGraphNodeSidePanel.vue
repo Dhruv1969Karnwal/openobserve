@@ -306,7 +306,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 "
               >
                 <template #cell-errors="{ row }">
-                  <span :class="row.errors > 0 ? 'text-status-negative font-semibold' : ''">{{
+                  <span :class="row.errors > 0 ? 'text-status-error-text font-semibold' : ''">{{
                     row.errors
                   }}</span>
                 </template>
@@ -452,7 +452,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </OButton>
                 </template>
                 <template #cell-errors="{ row }">
-                  <span :class="row.errors > 0 ? 'text-status-negative font-semibold' : ''">{{
+                  <span :class="row.errors > 0 ? 'text-status-error-text font-semibold' : ''">{{
                     row.errors
                   }}</span>
                 </template>

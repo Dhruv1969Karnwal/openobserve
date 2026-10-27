@@ -74,8 +74,8 @@ const formatTimestamp = (timestamp: number) => formatToolCallTimestamp(timestamp
               ? 'text-accent'
               : 'text-warning'
             : block.success === false
-              ? 'text-status-negative'
-              : 'text-status-positive'
+              ? 'text-status-error-text'
+              : 'text-status-success-text'
         "
       />
       <span class="tool-call-name flex-1 font-medium">
@@ -115,7 +115,7 @@ const formatTimestamp = (timestamp: number) => formatToolCallTimestamp(timestamp
             t("common.error")
           }}</span>
           <span
-            class="detail-value text-status-negative max-w-full min-w-0 text-xs [overflow-wrap:anywhere] break-words select-text"
+            class="detail-value text-status-error-text max-w-full min-w-0 text-xs [overflow-wrap:anywhere] break-words select-text"
             >{{ block.resultMessage }}</span
           >
         </div>
@@ -456,7 +456,7 @@ const formatTimestamp = (timestamp: number) => formatToolCallTimestamp(timestamp
               </template>
               <span
                 v-if="res.message"
-                class="hit-field text-status-negative cursor-text break-all select-text"
+                class="hit-field text-status-error-text cursor-text break-all select-text"
               >
                 <span class="hit-key font-semibold opacity-60">{{
                   t("aiAssistant.errorLabel")

@@ -40,18 +40,18 @@
   --color-button-outline-text: var(--color-text-heading);
   --color-button-outline-border: var(--color-border-default);
   --color-button-outline-hover-bg: var(--color-interactive-hover-bg);
-  --color-button-outline-hover-border: var(--color-primary-300);
+  --color-button-outline-hover-border: var(--color-primary-600);
   --color-button-outline-active-bg: var(--color-surface-accent-active);
 
   /* Button — ghost */
   --color-button-ghost-text: var(--color-text-heading);
   --color-button-ghost-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-active-bg: var(--color-surface-accent-active);
-  --color-button-ghost-hover-ring: var(--color-primary-300);
+  --color-button-ghost-hover-ring: var(--color-primary-600);
   --color-button-ghost-focus-ring: var(--color-focus-ring-accent);
 
   /* Button — ghost-primary (flat + primary color text) */
-  --color-button-ghost-primary-text: var(--color-primary-600);
+  --color-button-ghost-primary-text: var(--color-primary-800);
   --color-button-ghost-primary-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-primary-active-bg: var(--color-surface-accent-active);
   --color-button-ghost-primary-focus-ring: var(--color-focus-ring-accent);
@@ -75,13 +75,13 @@
 
   /* Button — ghost-muted (secondary text at rest → primary text + bg on hover) */
   --color-button-ghost-muted-text: var(--color-text-secondary);
-  --color-button-ghost-muted-hover-text: var(--color-primary-600);
+  --color-button-ghost-muted-hover-text: var(--color-primary-800);
   --color-button-ghost-muted-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-muted-active-bg: var(--color-surface-accent-active);
   --color-button-ghost-muted-focus-ring: var(--color-focus-ring-accent);
 
   /* Button — ghost-subtle (secondary text, 60 % opacity at rest, full on hover) */
-  --color-button-ghost-subtle-text: var(--color-text-secondary);
+  --color-button-ghost-subtle-text: var(--color-grey-950);
   --color-button-ghost-subtle-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-subtle-active-bg: var(--color-surface-accent-active);
   --color-button-ghost-subtle-focus-ring: var(--color-focus-ring-accent);
@@ -191,7 +191,7 @@
 
   /* Tabs */
   --color-tabs-indicator: var(--color-primary-600);
-  --color-tabs-active-text: var(--color-primary-600);
+  --color-tabs-active-text: var(--color-primary-800);
   --color-tabs-active-bg: var(--color-surface-accent-active);
   --color-tabs-inactive-text: var(--color-text-heading);
   --color-tabs-hover-text: var(--color-text-heading);
@@ -315,9 +315,7 @@
   --color-badge-default-soft-text: var(--color-grey-700);
 
   /* Badge — primary */
-  --color-badge-primary-solid-bg: var(--color-primary-600);
-  --color-badge-primary-solid-text: var(--color-white);
-  --color-badge-primary-ol-border: var(--color-primary-400);
+  --color-badge-primary-ol-border: var(--color-primary-600);
   --color-badge-primary-ol-text: var(--color-primary-700);
   --color-badge-primary-soft-bg: var(--color-primary-100);
   --color-badge-primary-soft-text: var(--color-primary-700);
@@ -580,8 +578,8 @@
   /* Input (OInput, OTextarea) */
   --color-input-bg: var(--color-surface-base);
   --color-input-border: var(--color-border-control);
-  --color-input-border-hover: var(--color-primary-300);
-  --color-input-border-focus: var(--color-primary-300);
+  --color-input-border-hover: var(--color-primary-600);
+  --color-input-border-focus: var(--color-primary-600);
   --color-input-border-error: var(--color-error-500);
   /* Disabled-bg uses grey-200 (#e5e5e5) — `surface-subtle` (grey-100 #f5f5f5)
      was almost identical to the enabled white bg in light mode, making
@@ -606,8 +604,8 @@
   --color-select-bg: var(--color-surface-base);
   --color-select-border: var(--color-border-control);
   --color-select-disabled-border: var(--color-border-default);
-  --color-select-border-hover: var(--color-primary-300);
-  --color-select-border-focus: var(--color-primary-300);
+  --color-select-border-hover: var(--color-primary-600);
+  --color-select-border-focus: var(--color-primary-600);
   --color-select-border-error: var(--color-error-500);
   /* Same rationale as input-disabled-bg. */
   --color-select-disabled-bg: var(--color-grey-200);
@@ -650,7 +648,7 @@
   /* Checkbox (OCheckbox) */
   --color-checkbox-bg: var(--color-surface-base);
   --color-checkbox-border: var(--color-border-strong);
-  --color-checkbox-hover-border: var(--color-primary-400);
+  --color-checkbox-hover-border: var(--color-primary-600);
   --color-checkbox-checked-bg: var(--color-primary-600);
   --color-checkbox-checked-border: var(--color-primary-600);
   --color-checkbox-checked-fg: var(--color-white);
@@ -689,8 +687,8 @@
   /* File (OFile) */
   --color-file-bg: var(--color-surface-base);
   --color-file-border: var(--color-border-strong);
-  --color-file-hover-border: var(--color-primary-400);
-  --color-file-focus-border: var(--color-primary-500);
+  --color-file-hover-border: var(--color-primary-600);
+  --color-file-focus-border: var(--color-primary-600);
   --color-file-focus-ring: var(--color-focus-ring-accent);
   --color-file-disabled-bg: var(--color-surface-subtle);
   --color-file-disabled-border: var(--color-border-default);
@@ -704,13 +702,13 @@
   --color-file-chip-text: var(--color-primary-700);
   --color-file-chip-remove: var(--color-primary-700);
   --color-file-drag-bg: var(--color-primary-50);
-  --color-file-drag-border: var(--color-primary-500);
+  --color-file-drag-border: var(--color-primary-600);
 
   /* Date / Time / Color (ODate, OTime, OColor) — share input surface */
   --color-datepicker-bg: var(--color-surface-base);
   --color-datepicker-border: var(--color-border-default);
-  --color-datepicker-hover-border: var(--color-primary-300);
-  --color-datepicker-focus-border: var(--color-primary-300);
+  --color-datepicker-hover-border: var(--color-primary-600);
+  --color-datepicker-focus-border: var(--color-primary-600);
   --color-datepicker-focus-ring: var(--color-focus-ring-accent);
   --color-datepicker-disabled-bg: var(--color-surface-subtle);
   --color-datepicker-disabled-border: var(--color-border-default);
@@ -740,7 +738,7 @@
      text — dark paints it light-neutral while day-selected-bg stays a fill.
      Light deliberately equals the old fill value, so light paints unchanged. */
   --color-datepicker-selected-fg: var(--color-primary-600);
-  --color-datepicker-day-today-border: var(--color-primary-400);
+  --color-datepicker-day-today-border: var(--color-primary-600);
   /* Outside-month days are clickable buttons (F-111), so light mirrors the dark
      tier here: they ride the raised placeholder step, not the disabled alias. */
   --color-datepicker-day-outside-text: var(--color-datepicker-placeholder);
@@ -1752,8 +1750,6 @@
   --color-badge-default-soft-text: var(--color-badge-default-soft-text);
 
   /* Badge — primary */
-  --color-badge-primary-solid-bg: var(--color-badge-primary-solid-bg);
-  --color-badge-primary-solid-text: var(--color-badge-primary-solid-text);
   --color-badge-primary-ol-border: var(--color-badge-primary-ol-border);
   --color-badge-primary-ol-text: var(--color-badge-primary-ol-text);
   --color-badge-primary-soft-bg: var(--color-badge-primary-soft-bg);

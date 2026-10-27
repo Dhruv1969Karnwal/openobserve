@@ -361,8 +361,6 @@
   --color-badge-default-soft-bg: var(--color-grey-800);
   --color-badge-default-soft-text: var(--color-grey-300);
 
-  /* primary: brighten solid bg in dark mode — primary-600 on primary-800 (active tab) has near-zero contrast */
-  --color-badge-primary-solid-bg: var(--color-primary-400);
   --color-badge-primary-ol-text: var(--color-primary-300);
   --color-badge-primary-soft-bg: var(--color-primary-900);
   --color-badge-primary-soft-text: var(--color-primary-300);

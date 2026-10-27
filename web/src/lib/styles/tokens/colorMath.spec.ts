@@ -389,8 +389,11 @@ describe("the real token sheets", () => {
   });
 
   describe.each([
-    ["light", 1075, 1063],
-    ["dark", 1076, 1064],
+    // -2 per theme vs the previous pin: the dead --color-badge-primary-solid-bg
+    // and -text pair (zero consumers web-wide; F-126 ledger honesty) left the
+    // sheets with this wave.
+    ["light", 1073, 1061],
+    ["dark", 1074, 1062],
   ] as const)("%s theme", (theme, total, resolved) => {
     const scope = THEMES[theme];
     const names = colorTokens(scope);

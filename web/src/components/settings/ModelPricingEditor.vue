@@ -178,7 +178,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <OIcon
                     :name="copiedPattern === ex.match_pattern ? 'check' : 'content-copy'"
                     size="xs"
-                    :class="copiedPattern === ex.match_pattern ? 'text-status-positive' : ''"
+                    :class="copiedPattern === ex.match_pattern ? 'text-status-success-text' : ''"
                   />
                   <OTooltip
                     :side-offset="4"

@@ -105,7 +105,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <div class="max-h-[calc(100vh-400px)] overflow-y-auto">
           <!-- Additions -->
           <div v-if="diffData.additions.length > 0" class="mb-3">
-            <div class="border-separator text-status-positive border-b p-2 text-sm font-semibold">
+            <div
+              class="border-separator text-status-success-text border-b p-2 text-sm font-semibold"
+            >
               <OIcon name="add-circle" size="sm" />
               {{ t("correlation.new") }} ({{ selectedAdditions.length }}/{{
                 diffData.additions.length
@@ -287,7 +289,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
       </div>
       <div class="w-1/2">
-        <div class="text-status-positive mb-2 text-sm font-medium">
+        <div class="text-status-success-text mb-2 text-sm font-medium">
           {{ t("correlation.proposed") }}
         </div>
         <div class="mb-1 text-xs">

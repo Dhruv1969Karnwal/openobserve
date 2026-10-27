@@ -76,7 +76,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         :data-test="`dependency-impact-delete-${node.name}`"
         @click.stop="emit('delete', node)"
       >
-        <OIcon name="delete" size="sm" class="text-status-negative" />
+        <OIcon name="delete" size="sm" class="text-status-error-text" />
         <OTooltip side="top" :content="t('alert_dependencies.actionDelete')" />
       </OButton>
     </div>

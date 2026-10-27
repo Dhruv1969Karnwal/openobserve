@@ -42,7 +42,7 @@
             ref="alwaysButtonRef"
             variant="outline"
             :block="true"
-            class="confirmation-btn rounded-default text-status-positive border-border-default bg-surface-base hover:bg-button-ghost-success-hover-bg hover:border-status-positive w-full border-2 text-sm font-semibold tracking-normal normal-case transition-all duration-200"
+            class="confirmation-btn rounded-default text-status-success-text border-border-default bg-surface-base hover:bg-button-ghost-success-hover-bg hover:border-status-positive w-full border-2 text-sm font-semibold tracking-normal normal-case transition-all duration-200"
             :class="
               isFocusedAlways
                 ? 'bg-status-positive! border-status-positive! ring-status-positive/40 text-white! ring-3'

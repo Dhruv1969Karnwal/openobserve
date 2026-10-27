@@ -55,7 +55,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 >
                   <span
                     data-test="model-pricing-import-name-error"
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'model_pricing_name'
                     "
@@ -74,7 +74,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
                   <span
                     data-test="model-pricing-import-pattern-error"
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' &&
                       errorMessage.field == 'model_pricing_pattern'
@@ -92,7 +92,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       />
                     </div>
                   </span>
-                  <span class="text-status-negative" v-else>{{ errorMessage }}</span>
+                  <span class="text-status-error-text" v-else>{{ errorMessage }}</span>
                 </div>
               </div>
             </div>
@@ -115,7 +115,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :class="{
                   'py-1.25 text-sm font-bold': true,
                   'text-green': val.success,
-                  'text-status-negative': !val.success,
+                  'text-status-error-text': !val.success,
                 }"
                 :data-test="`model-pricing-import-creation-${index}-message`"
               >

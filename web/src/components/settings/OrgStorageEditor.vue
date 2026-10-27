@@ -71,7 +71,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </div>
               <div class="mb-2 text-sm font-medium">
                 {{ t("settings.orgStorageEditor.selectStorageProviderLabel")
-                }}<span class="text-status-negative">*</span>
+                }}<span class="text-status-error-text">*</span>
               </div>
               <div
                 class="destination-type-grid grid grid-cols-[repeat(auto-fill,minmax(8.75rem,1fr))] gap-3"

@@ -36,9 +36,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             >
               <!-- version -->
               <span
-                class="rounded-default text-status-positive border-status-positive/28 bg-card-glass-tint-positive inline-flex items-center gap-1.5 border px-3.5 py-2 text-sm font-semibold whitespace-nowrap"
+                class="rounded-default text-status-success-text border-status-positive/28 bg-card-glass-tint-positive inline-flex items-center gap-1.5 border px-3.5 py-2 text-sm font-semibold whitespace-nowrap"
               >
-                <OIcon name="check-circle" size="sm" class="text-status-positive shrink-0" />
+                <OIcon name="check-circle" size="sm" class="text-status-success-text shrink-0" />
                 {{ store.state.zoConfig.version }}
               </span>
               <!-- build type -->
@@ -329,7 +329,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       />
                       <span
                         :class="
-                          licenseData?.expired ? 'text-status-error-text' : 'text-status-positive'
+                          licenseData?.expired
+                            ? 'text-status-error-text'
+                            : 'text-status-success-text'
                         "
                       >
                         {{ licenseData?.expired ? t("about.expired_lbl") : t("about.active_lbl") }}
@@ -429,7 +431,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
               </div>
               <div
-                class="text-status-positive rounded-default border-status-positive/22 bg-card-glass-tint-positive flex items-start gap-1.5 border px-3 py-2 text-xs"
+                class="text-status-success-text rounded-default border-status-positive/22 bg-card-glass-tint-positive flex items-start gap-1.5 border px-3 py-2 text-xs"
               >
                 <OIcon name="check-circle" size="sm" class="mt-0.5 shrink-0" />
                 {{ t("about.feature_comparision_plan_detail") }}

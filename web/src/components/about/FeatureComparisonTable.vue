@@ -115,7 +115,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <span
               class="mt-0.5 shrink-0 leading-none"
               :class="{
-                'text-status-positive': getFeatureStatus(feature, ed.id) !== 'unavailable',
+                'text-status-success-text': getFeatureStatus(feature, ed.id) !== 'unavailable',
                 'text-text-muted': getFeatureStatus(feature, ed.id) === 'unavailable',
               }"
             >

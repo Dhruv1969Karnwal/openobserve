@@ -190,6 +190,12 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     why: "SC 1.4.11 decorative: a container hairline, not information required to identify a component or its state",
   },
   {
+    fg: "--color-tabs-active-text",
+    bg: "--color-tabs-active-bg",
+    category: "text",
+    why: "the active tab ink lands on the accent-tinted pill (MenuLink) or the white panel (dashboard TabList/QueryEditor); utils/theme.ts injects the lightest AA shade of the runtime ramp (min 5.27 across the six light themes; dark keeps white on the invariant wash at 10.47) — the sheet fallback names primary-800 because the raw 600 shade measured 3.03-4.17 on the runtime tint",
+  },
+  {
     fg: "--color-text-disabled",
     category: "exempt",
     why: "SC 1.4.3 exempts text and boundaries that belong to a disabled, inactive control",
@@ -352,21 +358,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     issue: "WCAG-AA colour remediation (follow-up PR)",
   },
   {
-    fg: "--color-badge-primary-ol-border",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
-    fg: "--color-badge-primary-solid-text",
-    bg: "--color-badge-primary-solid-bg",
-    category: "pending",
-    why: "a badge label is painted on the badge's own solid fill, never on the page",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["dark"],
-  },
-  {
     fg: "--color-badge-purple-solid-text",
     bg: "--color-badge-purple-solid-bg",
     category: "pending",
@@ -416,20 +407,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     issue: "WCAG-AA colour remediation (follow-up PR)",
   },
   {
-    fg: "--color-border-strong",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
-    fg: "--color-button-ghost-hover-ring",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
     fg: "--color-button-ghost-success-text",
     category: "pending",
     why: "fails the threshold against the page surface it is painted on",
@@ -449,13 +426,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     why: "fails the threshold against the page surface it is painted on",
     issue: "WCAG-AA colour remediation (follow-up PR)",
     themes: ["dark"],
-  },
-  {
-    fg: "--color-button-outline-hover-border",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
   },
   {
     fg: "--color-button-outline-warning-border",
@@ -479,13 +449,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
   },
   {
     fg: "--color-button-warning-border",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
-    fg: "--color-checkbox-hover-border",
     category: "pending",
     why: "fails the threshold against the page surface it is painted on",
     issue: "WCAG-AA colour remediation (follow-up PR)",
@@ -548,27 +511,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     themes: ["light"],
   },
   {
-    fg: "--color-datepicker-day-today-border",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
-    fg: "--color-datepicker-focus-border",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
-    fg: "--color-datepicker-hover-border",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
     fg: "--color-error-tag-text",
     bg: "--color-error-tag-bg",
     category: "pending",
@@ -617,13 +559,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     themes: ["light"],
   },
   {
-    fg: "--color-file-hover-border",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
     fg: "--color-flame-tooltip-label",
     category: "pending",
     why: "fails the threshold against the page surface it is painted on",
@@ -661,20 +596,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     why: "fails the threshold against the page surface it is painted on",
     issue: "WCAG-AA colour remediation (follow-up PR)",
     themes: ["dark"],
-  },
-  {
-    fg: "--color-input-border-focus",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
-    fg: "--color-input-border-hover",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
   },
   {
     fg: "--color-label-chip-email-text",
@@ -799,20 +720,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     issue: "WCAG-AA colour remediation (follow-up PR)",
   },
   {
-    fg: "--color-select-border-focus",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
-    fg: "--color-select-border-hover",
-    category: "pending",
-    why: "fails the threshold against the page surface it is painted on",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
     fg: "--color-slider-error-text",
     category: "pending",
     why: "fails the threshold against the page surface it is painted on",
@@ -824,6 +731,18 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     bg: "--color-status-info-bg",
     category: "text",
     why: "a chip/badge label painted on its own -bg sibling (AlertInsights.vue filter chips, TraceTree.vue HTTP-status legend), not the page — the real backdrop is darker than --color-surface-base, so it is the pair that must clear 4.5:1",
+  },
+  {
+    fg: "--color-status-success-text",
+    bg: "--color-status-success-bg",
+    category: "text",
+    why: "the stable success ink (routed at every text consumer — status-positive is the accent slot Crimson repaints) on the success wash: 5.16 light / 8.04 dark static, 5.16+ under every injected semantic",
+  },
+  {
+    fg: "--color-status-error-text",
+    bg: "--color-status-error-bg",
+    category: "text",
+    why: "the stable error ink (routed at every text consumer — status-negative lands at 2.80 under O2 Crimson Ink light) on the error wash: 4.76 light / 5.80 dark static, 4.88 light / 6.97 dark under Crimson's injected semantics",
   },
   {
     fg: "--color-stepper-indicator-default",
@@ -934,12 +853,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     why: "a badge label is painted on the badge's own solid fill, never on the page",
   },
   {
-    fg: "--color-badge-primary-solid-text",
-    bg: "--color-badge-primary-solid-bg",
-    category: "text",
-    why: "a badge label is painted on the badge's own solid fill, never on the page",
-  },
-  {
     fg: "--color-badge-purple-solid-text",
     bg: "--color-badge-purple-solid-bg",
     category: "text",
@@ -1027,7 +940,7 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     fg: "--color-button-primary-foreground",
     bg: "--color-button-primary",
     category: "text",
-    why: "a filled button's label sits on the button",
+    why: "a filled button's label sits on the button; the single label token rides rest/hover/active (primary-600/700/800), so utils/theme.ts picks it worst-of-states at the documented 3:1 floor (min 3.03 across the twelve runtime scopes, themeRuntimeContrast)",
   },
   {
     fg: "--color-button-warning-foreground",
@@ -1045,7 +958,13 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     fg: "--color-checkbox-checked-fg",
     bg: "--color-checkbox-checked-bg",
     category: "text",
-    why: "the tick is drawn inside the checked box",
+    why: "the tick is drawn inside the checked box, whose fill is the runtime theme accent; utils/theme.ts picks the ink per theme (4.95-14.90 dark / 4.70-16.54 light across the predefined ramps, themeRuntimeContrast) and the sheet fallbacks measure 4.80 light / 4.94 dark",
+  },
+  {
+    fg: "--color-select-item-selected-text",
+    bg: "--color-select-item-selected-bg",
+    category: "text",
+    why: "the highlighted option rides the accent wash (runtime primary-100 in light); the ink shade is picked per theme (runtime min 5.30); sheet fallbacks 5.65 light / 7.06 dark",
   },
   {
     fg: "--color-dag-node-agent-text",
@@ -1135,25 +1054,25 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     fg: "--color-datepicker-clock-selected-text",
     bg: "--color-datepicker-clock-selected-bg",
     category: "text",
-    why: "a selected clock number sits on the selection fill",
+    why: "a selected clock number sits on the selection fill — light: runtime themeColor with the picked ink (4.70 min); dark inverts to ink on the light disc (14.26)",
   },
   {
     fg: "--color-datepicker-day-selected-text",
     bg: "--color-datepicker-day-selected-bg",
     category: "text",
-    why: "a selected day sits on the selection fill",
+    why: "a selected day sits on the selection fill — light: the runtime themeColor, ink picked per theme (4.70 min white / 4.98 flipped); dark: ladder-invariant wash with white (10.47)",
   },
   {
     fg: "--color-datepicker-relative-btn-selected-text",
     bg: "--color-datepicker-relative-btn-selected-bg",
     category: "text",
-    why: "a selected preset sits on the selection fill",
+    why: "a selected preset sits on the selection fill — same runtime-fill pick (4.70 min)",
   },
   {
     fg: "--color-datepicker-segment-focus-text",
     bg: "--color-datepicker-segment-focus-bg",
     category: "text",
-    why: "a focused date segment is highlighted behind the digits",
+    why: "a focused date segment is highlighted behind the digits — same runtime-fill pick as the selected day (4.70 min)",
   },
   {
     fg: "--color-datepicker-selected-fg",
@@ -1342,7 +1261,7 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     fg: "--color-pagination-item-active-text",
     bg: "--color-pagination-item-active-bg",
     category: "text",
-    why: "the current page number sits on the active fill",
+    why: "the current page number sits on the active fill — light: runtime themeColor with the picked ink (4.70 min); dark: white on the invariant wash (10.47)",
   },
   {
     fg: "--color-pagination-item-text",

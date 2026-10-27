@@ -14,7 +14,9 @@
   /* Text — grey-based semantic hierarchy */
   --color-text-heading: var(--color-grey-800); /* h1-h6, modal titles, page/panel titles */
   --color-text-body: var(--color-grey-700); /* paragraphs, default body */
-  --color-text-secondary: var(--color-grey-500); /* supporting text, descriptions, captions */
+  --color-text-secondary: var(
+    --color-grey-600
+  ); /* supporting text, descriptions, captions — grey-500 (4.74) sank to 3.49-4.45 on the runtime primary-50/100 washes (F-119); grey-600 holds 5.76+ on every ramp's tint */
   --color-text-label: var(--color-grey-400); /* form labels, metadata, badges */
   --color-text-muted: var(--color-grey-300); /* disabled, placeholder, de-emphasized */
   /* label / disabled / placeholder (+ border-strong, scrollbar-thumb-hover) are
@@ -71,16 +73,18 @@
        subtle  #ededed  1.17:1   grouping only, never a control edge
        default #d4d4d4  1.48:1   card / table / rail edges
        control #949494  3.02:1   inputs, checkboxes, anything operable
-       strong  #a3a3a3  2.52:1   emphasis, not an accessibility guarantee
+       strong  #737373  4.74:1   emphasis + the checkbox/radio/file outlines
 
      `default` was grey-200 (1.26:1) and read as barely-there on a white card;
-     grey-300 firms it without turning every card into a box. Controls get
-     their own token rather than borrowing `strong`, which does NOT reach 3:1
-     and would have quietly implied it did. */
+     grey-300 firms it without turning every card into a box. Controls keep
+     their own token so the operable-edge floor is stated once; `strong` was
+     grey-400 (2.52:1) while its checkbox/radio/file outlines are component
+     boundaries SC 1.4.11 prices at 3:1 — grey-500 clears that on the page
+     (4.74) and on every runtime accent wash (3.49 worst, themeRuntimeContrast). */
   --color-border-default: var(--color-grey-300);
-  --color-border-strong: var(--color-grey-400);
-  /* The only border step that clears 3:1 in light mode. Use for the edge of
-     anything the user operates — input, select, checkbox, radio, textarea. */
+  --color-border-strong: var(--color-grey-500);
+  /* The operable-edge floor in light mode. Use for the edge of
+     anything the user operates — input, select, radio, textarea. */
   --color-border-control: #949494;
   /* Soft divider — lighter than the structural border. Use for in-list row
      dividers and intra-card section splits. */
@@ -495,10 +499,11 @@
   --color-status-positive: #208a3c;
   --color-status-error-text: #cc3645;
   --color-status-error-bg: #fff7f7;
-  /* Nudged from #208a3c (4.41:1) to clear 4.5:1 for its several genuine
-     plain-text uses (QualityRunsTable.vue, AppSessions.vue, MonitorRuns.vue
-     KPI values) — imperceptibly darker. */
-  --color-status-success-text: #20883b;
+  /* Stable success ink: genuine text (diff tables, checklists, KPI values) and
+     the routed status labels sit on the wash, the page and grey panels —
+     #208a3c/#20883b measured 4.41/4.52 on white and 4.30 on the wash; #1a7a33
+     clears 5.16 on the wash, 5.42 on white, 5.19 on the panel tier. */
+  --color-status-success-text: #1a7a33;
   --color-status-success-bg: #f2fcf3;
 }
 

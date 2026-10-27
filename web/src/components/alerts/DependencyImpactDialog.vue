@@ -155,7 +155,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             data-test="dependency-impact-lane-alert"
           >
             <div class="mb-1.5 flex items-center gap-1.5 px-1">
-              <OIcon name="shield-alert-outline" size="sm" class="text-status-positive" />
+              <OIcon name="shield-alert-outline" size="sm" class="text-status-success-text" />
               <span class="text-text-secondary text-2xs font-semibold">
                 {{ t("alert_dependencies.sectionAlerts") }}
               </span>
