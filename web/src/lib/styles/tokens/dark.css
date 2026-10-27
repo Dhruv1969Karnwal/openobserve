@@ -524,11 +524,16 @@
   --color-switch-disabled-border: var(--color-grey-600);
   --color-switch-disabled-thumb: var(--color-grey-600);
 
-  /* Checkbox (OCheckbox) */
+  /* Checkbox (OCheckbox) — the fill rides the runtime primary ramp (a light
+     pastel under every predefined dark theme), so the tick is the dark ink
+     that survives it: grey-900 on the sheet's primary-500 is 4.95:1, and
+     utils/theme.ts re-picks the tick against each theme's injected 500 shade
+     (4.95-14.90 across the six ramps, themeRuntimeContrast.spec measures). */
   --color-checkbox-bg: var(--color-surface-panel);
   --color-checkbox-border: var(--color-border-strong);
   --color-checkbox-checked-bg: var(--color-primary-500);
   --color-checkbox-checked-border: var(--color-primary-500);
+  --color-checkbox-checked-fg: var(--color-grey-900);
   --color-checkbox-disabled-bg: var(--color-surface-subtle);
   --color-checkbox-disabled-border: var(--color-border-default);
 

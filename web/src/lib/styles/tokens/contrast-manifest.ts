@@ -485,14 +485,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     themes: ["light"],
   },
   {
-    fg: "--color-checkbox-checked-fg",
-    bg: "--color-checkbox-checked-bg",
-    category: "pending",
-    why: "the tick is drawn inside the checked box",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["dark"],
-  },
-  {
     fg: "--color-checkbox-hover-border",
     category: "pending",
     why: "fails the threshold against the page surface it is painted on",

@@ -158,6 +158,22 @@ export const pickReadableForeground = (bgHex: string): string => {
 };
 
 /**
+ * Inks the runtime injects alongside the primary ramp, computed against the
+ * ramp the page will actually paint (the token sheets cannot know it). Pure so
+ * tokens/themeRuntimeContrast.spec.ts measures production's exact answers.
+ */
+export const libraryForegroundTokens = (
+  mode: "light" | "dark",
+  palette: Record<string, string>,
+): Record<string, string> => {
+  // The dark checkbox fill rides primary-500 (dark.css), the light fill primary-600.
+  const checkboxFill = mode === "dark" ? palette["500"] : palette["600"];
+  return {
+    "--color-checkbox-checked-fg": pickReadableForeground(checkboxFill),
+  };
+};
+
+/**
  * Mix two colors together (similar to CSS color-mix)
  * @param color1 - First hex color code (e.g., "#3F7994")
  * @param color2 - Second hex color code (e.g., "#FFFFFF")
@@ -232,7 +248,7 @@ export const generatePrimaryPalette = (baseHex: string): Record<string, string> 
  * Sync the O2 component-library design tokens (--color-primary-*)
  * with the current custom theme color so all O2 components pick it up.
  */
-const syncO2LibraryTokens = (themeColor: string): void => {
+const syncO2LibraryTokens = (themeColor: string, mode: "light" | "dark"): void => {
   const palette = generatePrimaryPalette(themeColor);
   const root = document.documentElement;
   for (const [shade, hex] of Object.entries(palette)) {
@@ -242,6 +258,9 @@ const syncO2LibraryTokens = (themeColor: string): void => {
   // resting background (the 600 shade) — see pickButtonForeground for why this
   // can't be hardcoded to white.
   root.style.setProperty("--color-button-primary-foreground", pickButtonForeground(palette["600"]));
+  for (const [token, hex] of Object.entries(libraryForegroundTokens(mode, palette))) {
+    root.style.setProperty(token, hex);
+  }
 };
 
 /**
@@ -273,8 +292,15 @@ export const applyThemeColors = (
       },
     );
     root.style.removeProperty("--color-button-primary-foreground");
+    const palette = generatePrimaryPalette(themeColor);
+    for (const token of new Set([
+      ...Object.keys(libraryForegroundTokens("light", palette)),
+      ...Object.keys(libraryForegroundTokens("dark", palette)),
+    ])) {
+      root.style.removeProperty(token);
+    }
   } else {
-    syncO2LibraryTokens(themeColor);
+    syncO2LibraryTokens(themeColor, mode);
   }
 
   if (darkModeActive) {

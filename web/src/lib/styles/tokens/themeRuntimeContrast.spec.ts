@@ -62,7 +62,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { PREDEFINED_THEMES } from "@/constants/themes";
-import { generatePrimaryPalette } from "@/utils/theme";
+import { generatePrimaryPalette, libraryForegroundTokens } from "@/utils/theme";
 
 import { contrastRatio, relativeLuminance, resolveColor, resolveTokens } from "./colorMath";
 import { CONTRAST_PAIRS } from "./contrast-manifest";
@@ -88,6 +88,11 @@ const RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => {
   for (const shade of PALETTE_SHADES) {
     scope.set(`--color-primary-${shade}`, palette[shade]);
   }
+  // F-120: syncO2LibraryTokens also writes the computed fg tokens inline; the
+  // gate measures production's own map, not a transcription of it.
+  for (const [token, hex] of Object.entries(libraryForegroundTokens("dark", palette))) {
+    scope.set(token, hex);
+  }
   return { name: String(theme.name), themeColor: theme.dark.themeColor, scope };
 });
 
@@ -102,6 +107,9 @@ const LIGHT_RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => {
   const palette = generatePrimaryPalette(theme.light.themeColor);
   for (const shade of PALETTE_SHADES) {
     scope.set(`--color-primary-${shade}`, palette[shade]);
+  }
+  for (const [token, hex] of Object.entries(libraryForegroundTokens("light", palette))) {
+    scope.set(token, hex);
   }
   return { name: String(theme.name), themeColor: theme.light.themeColor, scope };
 });
@@ -254,6 +262,11 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     where: "hover-wash ceiling role",
   },
   // Active / selected fills.
+  {
+    fg: "--color-checkbox-checked-fg",
+    bg: "--color-checkbox-checked-bg",
+    where: "checked tick inside the fill (OCheckbox.vue / OSelect.vue ticks)",
+  },
   {
     fg: "--color-tabs-active-text",
     bg: "--color-tabs-active-bg",
@@ -625,6 +638,26 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
         seen.size,
         `${file} parsed only ${seen.size} text utilities (light pass)`,
       ).toBeGreaterThan(4);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps the checkbox tick AA on every runtime fill in both modes (F-120)", () => {
+    // The tick conveys state; the fill it sits on is the theme's own accent
+    // (primary-500 in dark.css, primary-600 in the light sheet), so the ink is
+    // picked from the injected ramp by libraryForegroundTokens — the exact map
+    // production writes, measured here under all twelve runtime scopes.
+    const offenders: string[] = [];
+    for (const [mode, scopes] of [
+      ["dark", RUNTIME_SCOPES],
+      ["light", LIGHT_RUNTIME_SCOPES],
+    ] as const) {
+      for (const { name, scope } of scopes) {
+        const value = ratio("--color-checkbox-checked-fg", "--color-checkbox-checked-bg", scope);
+        if (value < TEXT_MIN) {
+          offenders.push(`${mode} ${name}: ${value.toFixed(2)}:1`);
+        }
+      }
     }
     expect(offenders).toEqual([]);
   });
