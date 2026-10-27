@@ -258,7 +258,10 @@ function formatTime(ts: string): string {
           >
             {{ chat.title }}
           </OTruncatedText>
-          <div class="text-text-secondary mt-[0.0625em] text-[0.6875em]">
+          <div
+            class="mt-[0.0625em] text-[0.6875em]"
+            :class="activeChatId === chat.id ? 'text-text-heading' : 'text-text-secondary'"
+          >
             {{ formatTime(chat.timestamp) }}
           </div>
         </div>

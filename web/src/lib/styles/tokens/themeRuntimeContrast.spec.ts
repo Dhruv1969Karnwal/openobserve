@@ -276,6 +276,19 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
     bg: "--color-surface-accent-hover",
     where: "hover-wash ceiling role",
   },
+  // Active chat row (HomeChatHistory.vue): the title rides the body tier and
+  // the preview the heading tier (NOT secondary — grey-400 measured 4.15 on the
+  // theme-invariant dark #39404a active host). Both clear AA on every ramp.
+  {
+    fg: "--color-text-heading",
+    bg: "--color-surface-accent-active",
+    where: "active chat preview (HomeChatHistory.vue)",
+  },
+  {
+    fg: "--color-text-body",
+    bg: "--color-surface-accent-active",
+    where: "active chat title (HomeChatHistory.vue)",
+  },
   // Active / selected fills.
   {
     fg: "--color-checkbox-checked-fg",
@@ -655,18 +668,14 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
   });
 
   describe.each<[string, Map<string, string>]>([
-    ...RUNTIME_SCOPES.map(
-      ({ name, themeColor, scope }): [string, Map<string, string>] => [
-        `dark ${name} (${themeColor})`,
-        scope,
-      ],
-    ),
-    ...LIGHT_RUNTIME_SCOPES.map(
-      ({ name, themeColor, scope }): [string, Map<string, string>] => [
-        `light ${name} (${themeColor})`,
-        scope,
-      ],
-    ),
+    ...RUNTIME_SCOPES.map(({ name, themeColor, scope }): [string, Map<string, string>] => [
+      `dark ${name} (${themeColor})`,
+      scope,
+    ]),
+    ...LIGHT_RUNTIME_SCOPES.map(({ name, themeColor, scope }): [string, Map<string, string>] => [
+      `light ${name} (${themeColor})`,
+      scope,
+    ]),
   ])("%s ramp injected", (label, scope) => {
     const light = label.startsWith("light");
     it("clears 4.5:1 on every enumerated text pair painted on a state surface", () => {
