@@ -587,10 +587,9 @@ watch(
 );
 
 onBeforeMount(() => {
-  // Self-hosted-only (cloudOffers: false) — a pure-Cloud build reports
-  // `visible: false` so the node stays entirely absent there, matching
-  // today's real behavior; OSS gets it LOCKED instead of omitted so the
-  // capability is discoverable while building a pipeline.
+  // Self-hosted-only (cloudOffers: false): a pure-Cloud build reports `visible: false`,
+  // and under the shipped "hide" policy so does OSS — the node is absent unless entitled.
+  // Only a "lock" build renders it here, discoverable while building a pipeline.
   if (pipelineDestinationsAccess.value.visible) {
     nodeTypes.push({
       label: t("pipeline.remoteNode"),

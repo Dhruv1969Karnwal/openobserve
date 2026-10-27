@@ -138,10 +138,11 @@ const tooltipText = computed<I18nText>(() =>
 );
 
 // Edition entitlement and the backend /config runtime flag are separate
-// gates — same split MainLayout's nav-rail Workflows entry uses: an edition
-// that doesn't unlock workflows stays visible but LOCKED (upgrading fixes
-// it); a deployment that simply hasn't turned the runtime flag on stays
-// HIDDEN (upgrading wouldn't change that).
+// gates — same split MainLayout's nav-rail Workflows entry uses: an edition that
+// doesn't unlock workflows is omitted under the shipped "hide" policy and stays
+// visible-but-locked only in a "lock" build (upgrading fixes it); a deployment
+// that simply hasn't turned the runtime flag on stays HIDDEN (upgrading wouldn't
+// change that).
 const workflowsAccess = useLockedAffordance("workflows");
 const workflowsRuntimeEnabled = computed(() => store.state.zoConfig?.workflows_enabled === true);
 const workflowsEnabled = computed(

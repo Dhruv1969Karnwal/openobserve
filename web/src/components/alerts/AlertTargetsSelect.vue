@@ -217,9 +217,10 @@ const options = computed(() => {
   if (!props.workflowsEnabled && !props.workflowsLocked) return [...dests, ...missingDests];
   const workflowsHeader = { header: true, label: t("alerts.alertSettings.targetsWorkflowsGroup") };
   if (!props.workflowsEnabled) {
-    // Locked: the header stays visible (so the capability is discoverable
-    // while browsing), but there's nothing selectable beneath it — this
-    // edition has no entitlement to produce real options for.
+    // Only a "lock" build reaches this branch: the header stays visible (so the
+    // capability is discoverable while browsing), but there's nothing selectable
+    // beneath it — this edition has no entitlement to produce real options for.
+    // Under the shipped "hide" policy the parent never sets workflowsLocked.
     return [
       { header: true, label: t("alerts.alertSettings.targetsDestinationsGroup") },
       ...dests,

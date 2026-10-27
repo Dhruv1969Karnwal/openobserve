@@ -33,7 +33,8 @@ export type AlertListTab = (typeof ALERT_LIST_TABS)[number];
 
 export const DEFAULT_ALERT_LIST_TAB: AlertListTab = "all";
 
-/** The gated tab: rendered but locked unless the anomaly feature is enabled.
+/** The gated tab: a "lock" build renders it locked, the shipped "hide" policy omits it
+ *  (`useAnomalyLibraryAccess()` → "hidden").
  *  Module-internal on purpose — callers pass the ENABLED answer, never this name,
  *  so the set and its gated member cannot be re-assembled wrongly elsewhere. */
 const GATED_ALERT_LIST_TAB: AlertListTab = "anomalyDetection";
