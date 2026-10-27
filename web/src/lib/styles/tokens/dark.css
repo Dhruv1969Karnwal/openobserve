@@ -563,6 +563,13 @@
   --color-datepicker-border: var(--color-border-strong);
   --color-datepicker-disabled-bg: var(--color-surface-subtle);
   --color-datepicker-disabled-border: var(--color-border-default);
+  /* Placeholder ink paints ACTIVE controls — the ODateTimeRange trigger label,
+     the ODate separators and empty segments, the popup timezone inputs — so it
+     rides the placeholder text tier, not the disabled step: the old
+     var(--color-text-disabled) measured 1.79:1 on the popup and 2.07:1 on the
+     trigger. grey-450 clears 4.76:1 on popup (overlay) / 5.48:1 on trigger
+     (panel); disabled controls keep dimming via their opacity-60 wrapper. */
+  --color-datepicker-placeholder: var(--color-text-placeholder);
   --color-datepicker-error-text: var(
     --color-error-400
   ); /* was the un-overridden light error-600 (2.90:1, manifest-pending) — same fix input/select/file roles already carry */

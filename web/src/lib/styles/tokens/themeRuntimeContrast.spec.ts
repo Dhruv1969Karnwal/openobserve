@@ -317,19 +317,26 @@ const NON_TEXT_MIN = 3;
  * dark. Rather than transcribing pairs, this scans the actual consumer sources
  * and measures what they reference: no `text-`/`border-` utility may name a
  * `-bg` token, and every text utility the time-range controls paint must clear
- * 4.5:1 on the calendar popup — the brightest surface in those files, so the
- * darker panel/base follow. Reverting a component class or re-darkening the
+ * 4.5:1 on BOTH host surfaces those controls draw on — the calendar popup
+ * (--color-datepicker-popup-bg, the overlay tier) and the trigger/field
+ * (--color-datepicker-bg, the panel tier); the overlay is the lighter host, so
+ * base follows both. Reverting a component class or re-darkening the
  * fg token turns this red on its own.
- * `disabled` / `outside` roles are exempt by name (WCAG 1.4.3 excludes inactive
- * text). `placeholder` is exempt as a RECORDED pre-existing debt, not a pass:
- * `--color-datepicker-placeholder` folds to the disabled step in dark and is
- * filed as a new observation in fixer-notes-14, deliberately not widened here.
+ * Exemptions: `disabled` (the `data-unavailable`/`data-disabled` day cell — a
+ * cell the library makes non-interactive) is WCAG 1.4.3 inactive text.
+ * `outside` still rides the name-exemption until F-111's clickable-cell fix
+ * lands. `placeholder` is NOT exempt (F-109): it paints the value of ACTIVE
+ * controls — the ODateTimeRange trigger label (ODateTimeRange.vue:351) and the
+ * ODate separators / empty segments (ODate.vue:206-207) — where disabled-state
+ * language does not apply, so the role moved to the placeholder text tier
+ * (grey-450: 4.76:1 popup / 5.48:1 trigger) and the scan measures it.
  */
 const CONSUMER_COMPONENTS: { file: string; path: string }[] = [
   { file: "OTime.vue", path: "../../forms/Time/OTime.vue" },
   { file: "ODateTimeRange.vue", path: "../../forms/DateTimeRange/ODateTimeRange.vue" },
   { file: "ODate.vue", path: "../../forms/Date/ODate.vue" },
   { file: "ODateRangeCalendar.vue", path: "../../forms/DateTimeRange/ODateRangeCalendar.vue" },
+  { file: "OColor.vue", path: "../../forms/Color/OColor.vue" },
   { file: "OPagination.vue", path: "../../navigation/Pagination/OPagination.vue" },
 ];
 
@@ -487,21 +494,28 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
 
   it("clears 4.5:1 on every text utility the time-range controls paint", () => {
     const offenders: string[] = [];
-    for (const file of ["OTime.vue", "ODateTimeRange.vue"]) {
+    for (const file of [
+      "OTime.vue",
+      "ODateTimeRange.vue",
+      "ODate.vue",
+      "ODateRangeCalendar.vue",
+      "OColor.vue",
+    ]) {
       const { utilities } = CONSUMER_UTILITIES.find((entry) => entry.file === file)!;
       const seen = new Set<string>();
       for (const { prefix, token } of utilities) {
         if (prefix !== "text" || seen.has(token)) continue;
         seen.add(token);
-        if (/disabled|outside|placeholder/.test(token)) continue; // see the F-107 note
+        if (/disabled|outside/.test(token)) continue; // see the F-107/F-109 note
         for (const theme of RUNTIME_SCOPES) {
-          const value = ratio(
-            token,
-            "--color-datepicker-popup-bg",
-            theme.scope as Map<string, string>,
-          );
-          if (value < TEXT_MIN) {
-            offenders.push(`${file}: ${token} on popup = ${value.toFixed(2)}:1 (${theme.name})`);
+          for (const bg of [
+            "--color-datepicker-popup-bg", // calendar popup (overlay tier)
+            "--color-datepicker-bg", // trigger / field / input (panel tier)
+          ]) {
+            const value = ratio(token, bg, theme.scope as Map<string, string>);
+            if (value < TEXT_MIN) {
+              offenders.push(`${file}: ${token} on ${bg} = ${value.toFixed(2)}:1 (${theme.name})`);
+            }
           }
         }
       }
