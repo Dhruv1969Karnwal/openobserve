@@ -212,6 +212,114 @@ const AMBIGUOUS_HELD_KEYS = [
 // teams.rs, email.rs and webhook.rs) — so the preview that promises it must say what arrives.
 const PAYLOAD_FIDELITY_KEYS = ["alert_templates.viewAlertLinkLabel"];
 
+/**
+ * The keep side of the same ratchet, generated from en-US itself rather than hand-listed.
+ * The three ledgers above pinned 24 of the 105 English strings that still name upstream, so
+ * 81 upstream-owned strings sat one blind find-and-replace away from being credited to this
+ * product with the whole suite still green — exactly the failure mode the pins exist to
+ * prevent. This list closes 73 of them and the list below books the remaining 8, so the five
+ * ledgers together cover 105/105 (locked as a set equality below).
+ */
+const KEPT_UPSTREAM_KEYS = [
+  // about — license banners, waiver/usage notices, edition prose on the About page (9)
+  "about.banner_paused_other",
+  "about.banner_paused_usage",
+  "about.banner_restored",
+  "about.banner_restored_with_note",
+  "about.feature_comparision_ent_msg",
+  "about.feature_comparision_good_news",
+  "about.feature_comparision_os_msg",
+  "about.waivers_from_key",
+  "about.waivers_title",
+  "about.enterprise_offer.cloud.features_title",
+  "about.enterprise_offer.enterprise_with_license.offer_text",
+  "about.enterprise_offer.enterprise_without_license.offer_text",
+  "about.header_button.get_enterprise_free",
+  // upstream editions and license operations, adjacent to already-pinned siblings
+  "alert_destinations.streamHelpText",
+  "alert_library.enterpriseHint",
+  "alert_library.install.anomalyUnavailable",
+  "billing.upgradeToPlanMessage",
+  "communitySlackInvite.communityNote",
+  "enterpriseFeature.availableIn",
+  "login.copyrightNotice",
+  "modelPricing.openObserveLogoAlt",
+  // collector / agent / installer prose — upstream-shipped binaries and charts
+  "infra.hosts.group.hostMetricsHint",
+  "infra.k8s.group.nodeMetricsHint",
+  "ingestion.fluentBitDocLinkText",
+  "ingestion.cloudwatchMetrics.docLinkText",
+  "ingestion.integrations.aws.ec2.linuxUnixMacosManualInstallDescription",
+  "ingestion.integrations.aws.ec2.windowsManualInstallDescription",
+  "ingestion.setupCard.gpuExporterK8sNote",
+  "ingestion.setupCard.gpuFixBody",
+  "ingestion.setupCard.gpuPrereqK8sNote",
+  "ingestion.setupCard.gpuShipK8sNote",
+  "ingestion.setupCard.gpuTroubleGkeA",
+  "ingestion.setupCard.gpuTroubleNoMetricsA",
+  "ingestion.setupCard.gpuTroubleOperatorA",
+  "ingestion.setupCard.installAndroidSdkDesc",
+  "ingestion.setupCard.k8sEbpfNote",
+  "ingestion.setupCard.k8sInstallerNote",
+  "ingestion.setupCard.k8sTroubleAnnotationA",
+  "ingestion.setupCard.macosTroubleUnifiedLogA",
+  "ingestion.setupCard.macosTroubleVolumeA",
+  "ingestion.setupCard.quickInstallDesc",
+  "ingestion.setupCard.taglineLinux",
+  "ingestion.setupCard.taglineMacos",
+  "ingestion.setupCard.taglineWindows",
+  "ingestion.setupCard.uninstallAgentDescLinux",
+  // the external pipeline destination is a foreign (upstream-named) instance
+  "pipeline.destinationNotes.openobserveStep1",
+  "pipeline.destinationNotes.openobserveStep2",
+  "pipeline.destinationNotes.openobserveStep6",
+  "pipeline.orgRequiredOpenobserve",
+  "pipeline.streamRequiredOpenobserve",
+  // the Slack app registered in the customer's workspace, and its wire identifiers
+  "slackApp.card.forgetMessage",
+  "slackApp.channels.privateHint",
+  "slackApp.connect.consent",
+  "slackApp.connect.consentPrivate",
+  "slackApp.connect.description",
+  "slackApp.connect.requestText",
+  "slackApp.connect.selfHostedHint",
+  "slackApp.connect.setupAppOtherTeam",
+  "slackApp.connectCallback.connectedDetail",
+  "slackApp.credentials.installerUserToken",
+  "slackApp.link.resentDetail",
+  "slackApp.link.unknownDetail",
+  "slackApp.linkedAccounts.emptyDetail",
+  "slackApp.linkedAccounts.note",
+  "slackApp.linking.autoHelp",
+  "slackApp.linking.matches",
+  "slackApp.orgAccess.otherAppTitle",
+  "slackApp.people.unlinkMessage",
+  "slackApp.wizard.create.socketDescription",
+  "slackApp.wizard.create.tokenHelp",
+  "slackApp.wizard.install.appNotCreatedByO2",
+  "slackApp.wizard.install.appNotDeleted",
+  "slackApp.wizard.instanceTeamRemoved",
+];
+
+/**
+ * Held out of BOTH directions on purpose: the referent of these eight is arguably this
+ * deployment (its admins, its support routing, its user directory) rather than upstream's
+ * registered app, which is an open naming question the sibling sweep left unresolved. Pinning
+ * them "must keep upstream" would decide that question by accident; leaving them unlisted
+ * would let a blind sweep rename them silently. So they are named, and only checked for the
+ * invariant that holds either way — no string names both brands at once.
+ */
+const REFERENT_UNDER_REVIEW_KEYS = [
+  "slackApp.link.noAccessTitle",
+  "slackApp.link.noAccessDetail",
+  "slackApp.link.helpContactDefault",
+  "slackApp.linking.mappedReadonly",
+  "slackApp.linking.removedUsers",
+  "slackApp.people.columnUser",
+  "slackApp.linkedAccounts.description",
+  "slackApp.channels.description",
+];
+
 function collectStrings(node: any, path: string, into: [string, string][]): void {
   if (typeof node === "string") into.push([path, node]);
   else if (Array.isArray(node)) node.forEach((v, i) => collectStrings(v, `${path}[${i}]`, into));
@@ -255,6 +363,51 @@ describe("product referents name this product, upstream referents do not", () =>
   it("names this product in English where the sweep applied", () => {
     for (const key of PRODUCT_REFERENT_KEYS) {
       expect(String(atPath(enUs, key)), key).toContain(PRODUCT);
+    }
+  });
+
+  /**
+   * The ratchet itself: the five ledgers are not a sample, they are the whole population.
+   * A string that starts naming upstream without being booked here, or one booked here that
+   * stopped naming upstream, fails this equality — which is what a rename of a keep-side key
+   * looks like from the inside.
+   */
+  it("covers every upstream-naming English string exactly once", () => {
+    const flat: [string, string][] = [];
+    collectStrings(enUs, "", flat);
+    const population = flat
+      .filter(([, value]) => /openobserve/i.test(value))
+      .map(([key]) => key)
+      .sort();
+    const ledgers = [
+      ...UPSTREAM_REFERENT_KEYS,
+      ...AMBIGUOUS_HELD_KEYS,
+      ...PAYLOAD_FIDELITY_KEYS,
+      ...KEPT_UPSTREAM_KEYS,
+      ...REFERENT_UNDER_REVIEW_KEYS,
+    ];
+    expect(new Set(ledgers).size, "a key is booked by two ledgers").toBe(ledgers.length);
+    expect(ledgers.sort()).toEqual(population);
+    expect(population.length).toBe(105);
+  });
+
+  for (const [code, locale] of LOCALES) {
+    it(`${code} leaves all ${KEPT_UPSTREAM_KEYS.length} kept upstream referents unclaimed`, () => {
+      for (const key of KEPT_UPSTREAM_KEYS) {
+        const value = atPath(locale, key);
+        expect(typeof value, key).toBe("string");
+        expect(value, key).not.toContain(PRODUCT);
+      }
+    });
+  }
+
+  // Not "must keep upstream" and not "must rename": these eight are only checked to name one
+  // brand, so the pending referent decision stays open without going unpinned.
+  it("keeps each under-review referent naming exactly one brand", () => {
+    for (const key of REFERENT_UNDER_REVIEW_KEYS) {
+      const value = String(atPath(enUs, key));
+      const names = [/retrace/i.test(value), /openobserve/i.test(value)];
+      expect(names.filter(Boolean).length, key).toBe(1);
     }
   });
 
@@ -375,6 +528,7 @@ describe("raw product-name slots in components", () => {
       ["src/components/settings/ModelPricingList.vue", `raw('${UPSTREAM}')`],
       ["src/components/Header.vue", `raw("${UPSTREAM}")`],
       ["src/components/CommunitySlackInvite.vue", `raw("${UPSTREAM}")`],
+      ["src/components/ingestion/McpCrossLink.vue", `raw("${UPSTREAM}")`],
       ["src/components/ingestion/ai/McpServerCard.vue", `raw("${UPSTREAM}")`],
     ];
     for (const [file, needle] of keeps) {
