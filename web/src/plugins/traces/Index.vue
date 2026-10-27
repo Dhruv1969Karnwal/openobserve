@@ -86,7 +86,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <div class="h-full overflow-hidden">
             <!-- Service Graph Tab Content -->
             <div
-              v-if="activeTab === 'service-graph' && config.isEnterprise == 'true'"
+              v-if="activeTab === 'service-graph' && serviceGraphAllowed"
               class="h-full overflow-hidden"
             >
               <ServiceGraph
@@ -338,6 +338,7 @@ import { logsUtils } from "@/composables/useLogs/logsUtils";
 import { useTracesTableColumns } from "./composables/useTracesTableColumns";
 import { tracesRowNavAnnouncement } from "./composables/tracesRowNav";
 import { resolveTraceSearchMode, type TraceSearchMode } from "@/ts/interfaces/traces/trace.types";
+import { buildFeatureGateContext, checkFeatureAccess } from "@/utils/enterpriseFeatures";
 import { isRangeSelectionCurrent } from "@/plugins/traces/metrics/latencyHeatmap";
 import { isLLMTrace } from "@/utils/llmUtils";
 import ODialog from "@/lib/overlay/Dialog/ODialog.vue";
@@ -376,10 +377,16 @@ const SearchResult = defineAsyncComponent(() => import("./SearchResult.vue"));
 const ServiceGraph = defineAsyncComponent(() => import("./ServiceGraph.vue"));
 const ServicesCatalog = defineAsyncComponent(() => import("./ServicesCatalog.vue"));
 
-const supportedTraceSearchMode = (value: unknown): TraceSearchMode =>
-  resolveTraceSearchMode(value, config.isEnterprise === "true");
-
 const store = useStore();
+
+// The entitlement behind the paid trace modes comes from the registry, the same
+// answer the tab's own v-if gives; a raw `config` read here could drift from it.
+const serviceGraphAllowed = computed(
+  () => checkFeatureAccess("enterprise", buildFeatureGateContext(store.state.zoConfig)).allowed,
+);
+
+const supportedTraceSearchMode = (value: unknown): TraceSearchMode =>
+  resolveTraceSearchMode(value, serviceGraphAllowed.value);
 const activeTab = computed(() => {
   if (searchObj.meta.searchMode === "service-graph") return "service-graph";
   if (searchObj.meta.searchMode === "services-catalog") return "services-catalog";

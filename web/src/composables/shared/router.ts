@@ -47,8 +47,13 @@ const PromQLQueryBuilder = () => import("@/views/PromQL/QueryBuilder.vue");
 const TraceDetails = () => import("@/plugins/traces/TraceDetails.vue");
 const SessionDetails = () => import("@/plugins/traces/SessionDetails.vue");
 
+// The paid trace modes resolve through the registry, the same source the logs
+// sanitizer uses, so the URL coercion cannot drift from the tab it gates.
 const supportedTraceTab = (tab: unknown): TraceSearchMode =>
-  resolveTraceSearchMode(tab, config.isEnterprise === "true");
+  resolveTraceSearchMode(
+    tab,
+    checkFeatureAccess("enterprise", buildFeatureGateContext(store?.state?.zoConfig)).allowed,
+  );
 
 const canonicalTraceQuery = (
   query: LocationQuery | undefined,

@@ -101,6 +101,7 @@ const router = createRouter({
 describe("SearchBar — paid affordances derive from the registry (F-36)", () => {
   let wrapper: VueWrapper<any> | undefined;
   const originalIsEnterprise = config.isEnterprise;
+  const originalIsCloud = config.isCloud;
   const originalZoConfig = { ...store.state.zoConfig };
 
   const mountSearchBar = async () => {
@@ -143,7 +144,43 @@ describe("SearchBar — paid affordances derive from the registry (F-36)", () =>
     wrapper = undefined;
     policy.lockSim = false;
     (config as any).isEnterprise = originalIsEnterprise;
+    (config as any).isCloud = originalIsCloud;
     store.state.zoConfig = originalZoConfig;
+  });
+
+  // F-100: the Inspect group now reads the `searchJobInspector` key its route is
+  // gated on instead of re-deriving the edition from `config`; the backend
+  // `search_inspector_enabled` flag stays the caller-side conjunct. The four cells
+  // are the truth table of the raw triple this replaces.
+  describe("Search Job Inspector entry reads the registry (F-100)", () => {
+    it.each([
+      { label: "OSS with the flag on", ent: "false", cloud: "false", flag: true, want: false },
+      {
+        label: "self-hosted enterprise with the flag on",
+        ent: "true",
+        cloud: "false",
+        flag: true,
+        want: true,
+      },
+      {
+        label: "self-hosted enterprise with the flag off",
+        ent: "true",
+        cloud: "false",
+        flag: false,
+        want: false,
+      },
+      { label: "cloud enterprise", ent: "true", cloud: "true", flag: true, want: false },
+    ])(
+      "renders the group exactly where the raw triple did: $label",
+      async ({ ent, cloud, flag, want }) => {
+        (config as any).isEnterprise = ent;
+        (config as any).isCloud = cloud;
+        const w = await mountSearchBar();
+        (store.state.zoConfig as any).search_inspector_enabled = flag;
+        await flushPromises();
+        expect(w.vm.inspectorVisible).toBe(want);
+      },
+    );
   });
 
   describe("narrow-viewport view-mode menu (F-36b)", () => {
@@ -230,7 +267,11 @@ describe("SearchBar — paid affordances derive from the registry (F-36)", () =>
       pushSpy.mockRestore();
     });
 
-    it("bounces the dialog even on the shipped hide build as defense in depth", async () => {
+    // Handler-level defense, not a shipped interaction: under "hide" the whole
+    // schedule group sits behind `v-if="scheduledSearchAccess.visible"`, so no DOM
+    // click can reach this — the real hide-build `open()` is the no-op that fires
+    // reportLockedAffordanceUnderHide (useEnterpriseUpgradeDialog.ts).
+    it("bounces the dialog from the handler even where hide makes it DOM-unreachable", async () => {
       const pushSpy = vi.spyOn(router, "push");
       await mountSearchBar();
       wrapper!.vm.onScheduleListMenuSelect();

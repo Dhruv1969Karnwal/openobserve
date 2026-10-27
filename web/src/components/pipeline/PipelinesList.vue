@@ -272,10 +272,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   {{ t("pipeline.delete") }}
                 </ODropdownItem>
                 <ODropdownSeparator
-                  v-if="row.source.source_type === 'scheduled' && config.isEnterprise == 'true'"
+                  v-if="row.source.source_type === 'scheduled' && backfillAccess.visible"
                 />
                 <ODropdownItem
-                  v-if="row.source.source_type === 'scheduled' && config.isEnterprise == 'true'"
+                  v-if="row.source.source_type === 'scheduled' && backfillAccess.visible"
                   :data-test="`pipeline-list-${row.name}-backfill-action`"
                   @select="openBackfillDialog(row)"
                 >
@@ -524,7 +524,7 @@ import { useListViewState } from "@/composables/useListViewState";
 import StreamSelection from "./StreamSelection.vue";
 import pipelineService from "@/services/pipelines";
 import { useStore } from "vuex";
-import config from "@/aws-exports";
+import { buildFeatureGateContext, checkFeatureAccess } from "@/utils/enterpriseFeatures";
 
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import OTable from "@/lib/core/Table/OTable.vue";
@@ -653,6 +653,12 @@ const pipelinesList = useQuery(() =>
 const pipelines = computed(() => shapePipelines(pipelinesList.data.value ?? []));
 
 const store = useStore();
+
+// Registry gate for the Backfill row action — Functions.vue's header entry and the
+// `pipelineBackfill` route read the same key, so the three cannot diverge.
+const backfillAccess = computed(() =>
+  checkFeatureAccess("pipelineBackfill", buildFeatureGateContext(store.state.zoConfig)),
+);
 
 const shouldStartfromNow = ref(true);
 const resumePipelineDialogMeta: any = ref({

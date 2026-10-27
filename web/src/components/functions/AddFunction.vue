@@ -95,8 +95,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     :default-language="transType === '1' ? 'javascript' : 'vrl'"
                     :query="formData.function"
                     v-model:nlp-mode="functionEditorNlpMode"
-                    :hide-nl-toggle="!store.state.zoConfig.ai_enabled"
-                    :disable-ai="!store.state.zoConfig.ai_enabled"
+                    :hide-nl-toggle="!aiFunctionVisible"
+                    :disable-ai="!aiFunctionEnabled"
                     :disable-ai-reason="raw('')"
                     :ai-placeholder="t('function.askAIFunctionPlaceholder')"
                     :ai-tooltip="t('function.enterFunctionPrompt')"
@@ -233,6 +233,7 @@ import { useOForm } from "@/lib/forms/Form/useOForm";
 import { makeAddFunctionSchema, type AddFunctionForm } from "./AddFunction.schema";
 import { useMutation } from "@tanstack/vue-query";
 import { useOrgId } from "@/composables/query/useOrgId";
+import { buildFeatureGateContext, checkFeatureAccess } from "@/utils/enterpriseFeatures";
 export const defaultValue: any = () => {
   return {
     name: "",
@@ -309,6 +310,19 @@ export default defineComponent({
   emits: ["update:list", "cancel:hideform", "sendToAiChat"],
   setup(props, { emit, expose }) {
     const store: any = useStore();
+    // The NL→VRL bar is the aiAssistant family, so its edition half comes from the
+    // registry (QueryEditor.vue's `ai_enabled`-is-an-admin-preference split).
+    const aiAssistantAccess = computed(() =>
+      checkFeatureAccess("aiAssistant", buildFeatureGateContext(store.state.zoConfig)),
+    );
+    const aiFunctionVisible = computed(
+      () =>
+        aiAssistantAccess.value.visible &&
+        (!aiAssistantAccess.value.allowed || Boolean(store.state.zoConfig.ai_enabled)),
+    );
+    const aiFunctionEnabled = computed(
+      () => aiFunctionVisible.value && aiAssistantAccess.value.allowed,
+    );
     const router = useRouter();
     const { isMobile } = useBreakpoint();
     const { track } = useReo();
@@ -674,6 +688,8 @@ export default defineComponent({
       beingUpdated,
       formData,
       store,
+      aiFunctionVisible,
+      aiFunctionEnabled,
       compilationErr,
       indexOptions,
       editorRef,

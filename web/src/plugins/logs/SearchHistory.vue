@@ -174,11 +174,7 @@
                   {{ goToLogsLabel(row) }}
                 </OButton>
                 <OButton
-                  v-if="
-                    config.isEnterprise == 'true' &&
-                    config.isCloud == 'false' &&
-                    store.state.zoConfig.search_inspector_enabled
-                  "
+                  v-if="inspectorVisible"
                   data-test="search-history-inspect-btn"
                   variant="outline"
                   size="chip"
@@ -330,7 +326,7 @@ import useBreakpoint from "@/composables/useBreakpoint";
 import { useI18nTyped } from "@/types/i18n";
 import AppTabs from "@/components/common/AppTabs.vue";
 
-import config from "@/aws-exports";
+import { buildFeatureGateContext, checkFeatureAccess } from "@/utils/enterpriseFeatures";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OTag from "@/lib/core/Badge/OTag.vue";
@@ -383,6 +379,14 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
+    // Registry gate for the Inspect entry: the route it opens carries the same
+    // `searchJobInspector` key, so entry and page cannot diverge; the backend
+    // `search_inspector_enabled` flag is the caller-side conjunct.
+    const inspectorVisible = computed(
+      () =>
+        checkFeatureAccess("searchJobInspector", buildFeatureGateContext(store.state.zoConfig))
+          .visible && !!store.state.zoConfig.search_inspector_enabled,
+    );
     const { t } = useI18nTyped();
     const { isMobile } = useBreakpoint();
     const searchDateTimeRef = ref(null);
@@ -840,7 +844,7 @@ export default defineComponent({
       tabs,
       moreDetailsToDisplay,
       wrapText,
-      config,
+      inspectorVisible,
     };
     // Watch the searchObj for changes
   },

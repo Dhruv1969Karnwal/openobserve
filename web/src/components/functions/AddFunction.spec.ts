@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import AddFunction from "./AddFunction.vue";
 import OForm from "@/lib/forms/Form/OForm.vue";
@@ -139,6 +139,74 @@ describe("AddFunction.vue Branch Coverage", () => {
       },
     });
   const getForm = (wrapper: any) => (wrapper.findComponent(OForm).vm as any).form;
+
+  // F-100: the NL→VRL bar used to read `zoConfig.ai_enabled` ALONE, with no edition
+  // half at all — inert only because the OSS backend never emits that flag. It now
+  // takes the edition from the `aiAssistant` registry key and treats ai_enabled as
+  // the admin preference on top (QueryEditor.vue's documented split).
+  describe("NL→VRL AI bar entitlement (F-100)", () => {
+    // A probe stub for the real editor: the props are what the gate renders, so
+    // asserting them keeps the proof on the template rather than on the computed.
+    const AiBarProbe = {
+      name: "UnifiedQueryEditor",
+      props: ["hideNlToggle", "disableAi"],
+      template:
+        '<div class="ai-bar-probe" :data-hidden="String(hideNlToggle)" :data-disabled="String(disableAi)" />',
+    };
+    const mountWithAiBarProbe = () =>
+      mount(AddFunction, {
+        props: defaultProps,
+        global: {
+          plugins: [mockI18n, mockRouter],
+          provide: { store: mockStore },
+          stubs: { ...stubs, UnifiedQueryEditor: AiBarProbe },
+        },
+      });
+
+    const withAiFlag = (enabled: boolean) => {
+      (mockStore.state as any).zoConfig.ai_enabled = enabled;
+    };
+
+    afterEach(() => {
+      withAiFlag(false);
+      (config as any).isEnterprise = "false";
+      (config as any).isCloud = "false";
+    });
+
+    it("stays hidden on OSS even when the backend emits ai_enabled", () => {
+      withAiFlag(true);
+      // The DOM-facing half first: what the editor is actually told, proven without
+      // touching the computed that only exists after the fix.
+      const probe = mountWithAiBarProbe();
+      expect(probe.find(".ai-bar-probe").attributes()).toMatchObject({
+        "data-hidden": "true",
+        "data-disabled": "true",
+      });
+      const wrapper = mountAddFunction();
+      expect(wrapper.vm.aiFunctionVisible).toBe(false);
+      expect(wrapper.vm.aiFunctionEnabled).toBe(false);
+    });
+
+    // The lock-policy mirror of this pair is NOT assertable here: the mocked
+    // helper's own LIMITATION note says the real checkFeatureAccess reads the
+    // shipped constant from inside its own module.
+
+    it("is enabled for an entitled org that has ai_enabled on", () => {
+      withAiFlag(true);
+      (config as any).isEnterprise = "true";
+      const wrapper = mountAddFunction();
+      expect(wrapper.vm.aiFunctionVisible).toBe(true);
+      expect(wrapper.vm.aiFunctionEnabled).toBe(true);
+    });
+
+    it("stays hidden for an entitled org that turned ai_enabled off", () => {
+      withAiFlag(false);
+      (config as any).isEnterprise = "true";
+      const wrapper = mountAddFunction();
+      expect(wrapper.vm.aiFunctionVisible).toBe(false);
+      expect(wrapper.vm.aiFunctionEnabled).toBe(false);
+    });
+  });
 
   // JavaScript functions are an enterprise/cloud entitlement. Under the shipped
   // "hide" policy the option is omitted (a locked one would open a refused dialog);

@@ -846,14 +846,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
           <ODropdownSeparator />
 
-          <ODropdownGroup
-            v-if="
-              config.isEnterprise == 'true' &&
-              config.isCloud == 'false' &&
-              store.state.zoConfig.search_inspector_enabled
-            "
-            :label="t('search.menuGroupInspect')"
-          >
+          <ODropdownGroup v-if="inspectorVisible" :label="t('search.menuGroupInspect')">
             <ODropdownItem data-test="search-inspect-btn" @select="openSearchInspectDialog">
               <template #icon-left>
                 <span
@@ -2050,6 +2043,13 @@ export default defineComponent({
     // Scheduled Search menu — same policy split as the Patterns toggle above.
     const scheduledSearchAccess = computed(() =>
       checkFeatureAccess("scheduledSearch", buildFeatureGateContext(store.state.zoConfig)),
+    );
+    // The Search Job Inspector's route carries the same `searchJobInspector` key;
+    // the backend `search_inspector_enabled` flag is the caller-side conjunct.
+    const inspectorVisible = computed(
+      () =>
+        checkFeatureAccess("searchJobInspector", buildFeatureGateContext(store.state.zoConfig))
+          .visible && !!store.state.zoConfig.search_inspector_enabled,
     );
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
     const orgIdForWrites = useOrgId();
@@ -5067,6 +5067,7 @@ export default defineComponent({
       config,
       patternsAccess,
       scheduledSearchAccess,
+      inspectorVisible,
       openUpgradeDialog,
       handleRegionsSelection,
       handleQuickMode,
