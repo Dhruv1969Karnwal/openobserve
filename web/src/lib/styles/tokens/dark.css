@@ -168,11 +168,15 @@
                                                      well L .02022 → overlay .02491 (1.067:1
                                                      lighter). The old value (--d-panel) sat
                                                      1.198:1 DARKER than the well it hovered,
-                                                     contradicting this comment. Consumers:
-                                                     pagination hover (component.css:555,561)
-                                                     and the ScheduledDashboards rum-tab
+                                                     contradicting this comment. Contrast-
+                                                     relevant consumers only: pagination hover
+                                                     (component.css:556,561) and the
+                                                     ScheduledDashboards rum-tab
                                                      (ScheduledDashboards.vue:461); its text
-                                                     --color-text-secondary reads 5.56:1 here. */
+                                                     --color-text-secondary reads 5.56:1 here.
+                                                     The other 22 consumers (component.css:273
+                                                     and :900, dark.css:561, 19 .vue hover
+                                                     utilities) carry brighter text on it. */
   /* Accent-tinted interaction surfaces — dark accent hover/active values. */
   --color-surface-accent-hover: var(--color-primary-900);
   --color-surface-accent-active: var(--color-primary-800);
@@ -843,7 +847,13 @@
      (L .01736, below --d-well so a resting panel header never outranks a floating
      menu); the light side (--color-grey-100 on the white canvas, component.css) is
      1.090:1. A literal, so tier moves cannot drift the band — if a tier crosses
-     1.1–1.2:1 off base, re-measure both themes and change the pair together. */
+     1.1–1.2:1 off base, re-measure both themes and change the pair together.
+     The pair that reads is the 1.152:1 against the canvas the bar sits ON; its
+     1.042:1 against --d-well is deliberately imperceptible — a chart header band
+     is not a surface tier, and --color-panel-bar-border carries that separation.
+     Widening the well gap by moving the fill down only trades one unreadable pair
+     for another: 1.13:1 off base (L .01607) would read 1.063:1 off --d-well and
+     just 1.016:1 off --d-panel. */
   --color-panel-bar-bg: #20242a;
   --color-panel-bar-border: var(--d-border);
 }

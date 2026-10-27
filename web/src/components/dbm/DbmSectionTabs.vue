@@ -175,7 +175,12 @@ const gatedTabsAccess = computed<FeatureAccess>(() =>
   checkFeatureAccess("enterprise", buildFeatureGateContext()),
 );
 
-/** The lock-but-clickable state: a disabled trigger would swallow the dialog click. */
+/**
+ * The lock-but-clickable state: a disabled trigger would swallow the dialog click.
+ * `:disable` is therefore false for every tab that renders at all — under "hide" a
+ * gated tab is filtered out before it reaches the template — and the expression is
+ * kept as the belt that holds that if a gated tab ever renders unlocked-but-hidden.
+ */
 const showsLockedTabs = computed(
   () => gatedTabsAccess.value.visible && !gatedTabsAccess.value.allowed,
 );

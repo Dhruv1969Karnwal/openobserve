@@ -814,10 +814,12 @@ export default defineComponent({
       }
     });
 
-    // Shows the entry only when the edition unlocks `featureKey` AND the
-    // admin's runtime flag is on. `access.visible` carries the edition half:
-    // under `PAID_FEATURE_POLICY = "hide"` it is false for an edition that
-    // doesn't unlock the feature, so no locked tile is inserted at all.
+    // The edition is the entry's gate: `access.visible` carries the policy half
+    // (false under `PAID_FEATURE_POLICY = "hide"` for an edition that does not
+    // unlock `featureKey`, so no locked tile is inserted at all), and an entitled
+    // edition keeps the entry even when the admin's runtime flag is off — which is
+    // what the matching route guard does too. The flag only ever refuses a build
+    // that SHOWS locked affordances, i.e. a `"lock"` build of an un-entitled edition.
     const syncGatedMenuEntry = (
       name: string,
       featureKey: "incidents" | "workflows",
