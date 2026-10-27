@@ -134,7 +134,7 @@ const contrastRatio = (hexA: string, hexB: string): number => {
  * Pick label text for a button whose background is theme-color derived, across
  * ALL fills the single label token rides: rest (600), hover (700), active (800).
  * Predefined dark-mode theme colors are deliberately light/pastel — which can
- * drop hardcoded white well below readable, e.g. O2 Signature's dark accent
+ * drop hardcoded white well below readable — e.g. a light pastel accent like
  * #8B8DF0 with white text lands at 2.93:1. The floor is 3:1, not the strict
  * 4.5:1 AA bar: every saturated brand color (O2 Lens light #4682FA at 3.60:1)
  * already ships with white just under it, and the bar move would flip text

@@ -91,8 +91,15 @@ describe("applyThemeColors button-primary-foreground contrast", () => {
     document.body.removeAttribute("style");
   });
 
-  it("switches to dark text when the theme color is too light for white text (O2 Signature dark, #8B8DF0 vs white = 2.93:1)", () => {
+  it("falls through to pure black when neither white nor grey-900 survives every state (#8B8DF0 vs white = 2.93:1 rest, grey-900 = 2.62:1 on active #535590, black = 3.07:1)", () => {
     applyThemeColors("#8B8DF0", "dark", false);
+    expect(
+      document.documentElement.style.getPropertyValue("--color-button-primary-foreground"),
+    ).toBe("#000000");
+  });
+
+  it("picks grey-900 whenever it clears the 3:1 floor before black is considered (O2 Signature dark #E6E6E6, grey-900 = 5.19:1)", () => {
+    applyThemeColors("#E6E6E6", "dark", false);
     expect(
       document.documentElement.style.getPropertyValue("--color-button-primary-foreground"),
     ).toBe("#171717");
