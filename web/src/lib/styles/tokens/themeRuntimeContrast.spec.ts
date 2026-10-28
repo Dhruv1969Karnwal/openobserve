@@ -1331,14 +1331,33 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
 
   it("measures every template label painted on the raw accent fill, both modes", () => {
     const sites = accentFillSites();
-    // Anti-vacuity: the accent-fill enumeration (two focused confirm branches, three wrap
-    // toggles, two gradient heroes) must still be there for this to mean anything.
+    // Anti-vacuity, and this time on the SHAPE of the matrix, not its size. The old
+    // `>= 7` was satisfiable by any 7 matches, so a scan that had silently lost every
+    // solid accent-filled label and kept the two gradient heroes plus five unrelated
+    // tints still passed. Three floors that a degenerate matrix cannot clear:
+    //   1. both ground families are still found (5 solid + 2 gradient at this head),
+    //   2. every foreground the LEDGER books on this ground is still seen by the scan,
+    //      so the ledger cannot drift into booking pairs nothing renders,
+    //   3. the count itself.
     expect(sites.length, `only ${sites.length} accent-fill labels scanned`).toBeGreaterThanOrEqual(
       7,
     );
+    const solidSites = sites.filter((site) => site.ground === "solid");
+    const gradientSites = sites.filter((site) => site.ground === "gradient");
+    expect(solidSites.length, "no solid bg-theme-accent label scanned").toBeGreaterThanOrEqual(5);
+    expect(gradientSites.length, "no gradient accent hero scanned").toBeGreaterThanOrEqual(2);
     const booked = new Set(
       BOOKED_GROUND_PAIRS.filter((pair) => pair.bg === "--color-theme-accent").map((p) => p.fg),
     );
+    const scannedInks = new Set(sites.flatMap((site) => site.inks));
+    for (const token of booked) {
+      expect(
+        scannedInks.has(token),
+        `the ledger books ${token} on the accent fill but the scan no longer finds it`,
+      ).toBe(true);
+    }
+    expect(booked.size).toBeGreaterThanOrEqual(1);
+    expect(scannedInks.size).toBeGreaterThanOrEqual(booked.size);
     const offenders: string[] = [];
     for (const site of sites) {
       // The two gradient heroes are the only exemption, and only because their fill has
