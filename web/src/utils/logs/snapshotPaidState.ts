@@ -111,12 +111,19 @@ export interface SnapshotPaidAccess {
  *                                            (logs/DetailTable.vue);
  *                                            `TRANSIENT_SEARCH_KEYS` resets it too
  *
- *  TRANSIENT — `TRANSIENT_SEARCH_KEYS` (transientSearchKeys.ts) deletes or resets
- *  them before the merge, so a payload cannot carry them at all: `executed`,
+ *  TRANSIENT — `TRANSIENT_SEARCH_KEYS` (transientSearchKeys.ts) strips or resets
+ *  them around the merge — the strip-only entries are deleted from the payload
+ *  before it, the reset entries are overwritten after it — so no payload value
+ *  survives: `executed`,
  *  `pendingExecution`, `lastRunAttempt`, `executedPatterns` (an auto-run bookkeeping
  *  slot, NOT the paid Patterns panel), `executedPanel`, `autoRunBlocked`,
  *  `consentedScope`, `runPending`, `runOutcome`, `runCancelled`, `editorDirty`,
  *  `liveMode`, `freeTextScan`, `showDetailTab`, `resultGrid.navigation.*`.
+ *  One honesty caveat: `meta.freeTextScan` is `mode: "replace"`, which is
+ *  deliberately fed FROM the payload after the merge (payload value lands and
+ *  wins), so it is inert by construction, not by stripping — no registry key
+ *  names free-text scan and its visibility reads `zoConfig`, so no paid surface
+ *  is reachable off it.
  *
  *  FREE — a snapshot is entitled to restore these: `showTransformEditor`,
  *  `showHistogram`, `showFields`, `showQuery`, `sqlMode` (+ `sqlModeManualTrigger`,
@@ -157,14 +164,19 @@ export interface SnapshotPaidAccess {
  * claimed something stronger and false: it is an ENUMERATION, produced by sweeping
  * the READERS — every `searchObj.meta.<key>` reference under `plugins/logs/**`,
  * `composables/useLogs/**`, `composables/useLogs.ts` and `components/QueryEditor.vue`
- * (49 distinct keys at this head; the sweep also has to exclude the unrelated
+ * (49 distinct keys at this head — the count basis is DECLARED keys that have a
+ * reader; total readers are 51, the delta being the three undeclared keys named
+ * below; the sweep also has to exclude the unrelated
  * `dashboardPanelData.meta.*` object, whose `dateTime`/`streamFields` a naive
  * `.meta.` grep folds in). Keys are classified below; the table is not derived from
  * the stored shape and cannot be completed by reasoning about the stored shape. It
  * used to argue "an undeclared `meta` key is read by nothing", which the sweep
  * disproves: `meta.savedVisualizationConfig` is not in `DEFAULT_LOGS_CONFIG.meta` and
- * is still consumed. Two keys are read without being declared
- * (`savedVisualizationConfig`, `lastRunAt`) and both are classified above by
+ * is still consumed. Three keys are read without being declared
+ * (`savedVisualizationConfig`, `lastRunAt`, `runCancelled` — the last written only by
+ * the auto-run plumbing, read at `plugins/logs/Index.vue`, and safe because it is
+ * TRANSIENT with `mode: "reset"`, which overwrites whatever a payload carried) and
+ * all three are classified above by
  * name, so a payload-inventable key is inert only because the sweep found no reader
  * for it — a claim a NEW key cannot inherit, which is why adding the affordance means
  * adding a row here.
