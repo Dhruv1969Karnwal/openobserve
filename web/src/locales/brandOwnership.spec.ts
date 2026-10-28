@@ -382,6 +382,36 @@ describe("product referents name this product, upstream referents do not", () =>
     }
   });
 
+  // The rename side of the ratchet gets the same set-equality lock the keep side has (F-161i/
+  // BRD MINOR-2). Without it, a NEW en-US string could credit something to Retrace.ai while being
+  // booked nowhere — the mixed-brand lock only fires when a value ALSO names upstream, which the
+  // dangerous new-string shape does not. The eight keys below are renamed product referents pinned
+  // individually by the hero/login/passwordReset/autoobserve cells at the top of this file rather
+  // than folded into PRODUCT_REFERENT_KEYS; the population equality counts them exactly once.
+  const PRODUCT_RENAMED_PINNED_ELSEWHERE_KEYS = [
+    "autoobserve.subtitle",
+    "login.getStarted.title",
+    "login.openObserveLogoAlt",
+    "passwordReset.reasonPolicyTightened",
+    "passwordReset.reasonRotationExpired",
+    "settings.deleteOrganizationDescription",
+    "settings.deleteOrganizationRecoverable",
+    "storage_settings.heroBrand",
+  ];
+
+  it("covers every Retrace-naming English string exactly once", () => {
+    const flat: [string, string][] = [];
+    collectStrings(enUs, "", flat);
+    const population = flat
+      .filter(([, value]) => /retrace/i.test(value))
+      .map(([key]) => key)
+      .sort();
+    const ledgers = [...PRODUCT_REFERENT_KEYS, ...PRODUCT_RENAMED_PINNED_ELSEWHERE_KEYS];
+    expect(new Set(ledgers).size, "a key is booked by two product ledgers").toBe(ledgers.length);
+    expect(ledgers.sort()).toEqual(population);
+    expect(population.length).toBe(73);
+  });
+
   /**
    * The ratchet itself: the five ledgers are not a sample, they are the whole population.
    * A string that starts naming upstream without being booked here, or one booked here that
@@ -564,12 +594,22 @@ describe("raw product-name slots in components", () => {
  */
 // Compat surface, not branding — an operator has to type these identifiers verbatim, and the license
 // pair mirrors the server's own sentence (ENV_KEY_CONFLICT_MSG, api/management/src/request/license/mod.rs).
+// The five lowercase entries are the wire identifiers the case-sensitive matcher used to miss:
+// `_o2_id` is the storage-schema field (search/linePermalink copy), `#o2-help` the Slack help channel
+// placeholder, the helm release `o2` the k8s endpoint sentence's own default, and `o2syn_` the private
+// synthetics-agent token prefix (src/infra token minting) named by both token-description strings.
+// All five are compat KEEPS: renaming the copy would misname the thing the operator must type.
 const O2_COMPAT_IDENTIFIER_KEYS = [
   "about.license_status_env_key",
   "about.license_status_env_key_superseded",
   "fleet.settings.auditDisabled",
   "ingestion.setupCard.rnNavigationNote",
   "ingestion.setupCard.rnTroubleScreenNamesA",
+  "search.linePermalink.bannerAmbiguousTieHeavy",
+  "slackApp.card.helpContactPlaceholder",
+  "ingestion.setupCard.k8sTroubleEndpointA",
+  "iam.syntheticsTokensDesc",
+  "synthetics.tokens.explanation",
 ];
 
 // Kept as the feature's own proper noun rather than read as a missed rename: the component family
@@ -589,7 +629,7 @@ const O2_FEATURE_NAME_KEYS = [
   "settings.addRegexPattern.tryAiAssistant",
 ];
 
-const O2_IDENTIFIER = /O2_[A-Z_]+|O2Rum[A-Za-z]*|O2Assistant/i;
+const O2_IDENTIFIER = /O2_[A-Z_]+|O2Rum[A-Za-z]*|O2Assistant|o2syn_|_o2_id|#o2-help|release `o2`/i;
 
 describe("the O2 shorthand is booked, not invisible", () => {
   const english = (locale: Locale) => {
@@ -600,13 +640,13 @@ describe("the O2 shorthand is booked, not invisible", () => {
 
   it("covers every O2-naming English string exactly once", () => {
     const population = english(enUs)
-      .filter(([, value]) => value.includes("O2"))
+      .filter(([, value]) => value.toLowerCase().includes("o2"))
       .map(([key]) => key)
       .sort();
     const ledgers = [...O2_COMPAT_IDENTIFIER_KEYS, ...O2_FEATURE_NAME_KEYS];
     expect(new Set(ledgers).size, "a key is booked by two O2 ledgers").toBe(ledgers.length);
     expect(ledgers.sort()).toEqual(population);
-    expect(population.length).toBe(14);
+    expect(population.length).toBe(19);
   });
 
   it("keeps the five compat identifiers spelled the way the server spells them", () => {
@@ -626,7 +666,7 @@ describe("the O2 shorthand is booked, not invisible", () => {
   for (const [code, locale] of LOCALES) {
     it(`${code} never names both brands inside one O2 string`, () => {
       const mixed = english(locale).filter(
-        ([, value]) => value.includes("O2") && value.includes(PRODUCT),
+        ([, value]) => value.toLowerCase().includes("o2") && value.includes(PRODUCT),
       );
       expect(mixed.map(([key]) => key)).toEqual([]);
     });
