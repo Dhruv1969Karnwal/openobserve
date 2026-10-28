@@ -724,10 +724,11 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                 />
                 <OIcon
                   v-else
-                  name="unfold-more"
+                  :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  class="opacity-40"
+                  :class="sortDisabled ? 'text-text-secondary' : 'opacity-40'"
                   data-test="o2-table-sort-icon-inactive"
+                  :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
                 />
               </span>
@@ -802,10 +803,11 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                 />
                 <OIcon
                   v-else
-                  name="unfold-more"
+                  :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  class="opacity-40"
+                  :class="sortDisabled ? 'text-text-secondary' : 'opacity-40'"
                   data-test="o2-table-sort-icon-inactive"
+                  :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
                 />
               </button>
@@ -1168,10 +1170,11 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                 />
                 <OIcon
                   v-else
-                  name="unfold-more"
+                  :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  class="shrink-0 opacity-40"
+                  :class="sortDisabled ? 'text-text-secondary shrink-0' : 'shrink-0 opacity-40'"
                   data-test="o2-table-sort-icon-inactive"
+                  :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
                 />
               </template>
@@ -1229,10 +1232,11 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                 />
                 <OIcon
                   v-else
-                  name="unfold-more"
+                  :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  class="shrink-0 opacity-40"
+                  :class="sortDisabled ? 'text-text-secondary shrink-0' : 'shrink-0 opacity-40'"
                   data-test="o2-table-sort-icon-inactive"
+                  :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
                 />
               </button>
