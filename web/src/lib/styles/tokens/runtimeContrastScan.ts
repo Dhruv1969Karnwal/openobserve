@@ -644,6 +644,17 @@ export const literalPaintPairs = (text: string, context: ScanContext): LiteralPa
 };
 
 /**
+ * A utility that paints a hand-written colour instead of a design token: `text-white`, `text-black`
+ * and their `/NN` alphas, or an arbitrary literal (`text-[#fff]`). An arbitrary value that points
+ * at a token is NOT raw — the pairing is citable through that token like any other.
+ */
+const RAW_INK_UTILITY =
+  /^text-(?:white|black)(?:\/\d{1,3})?!?$|^text-\[(?!var\()[^\]]+\]!?(?:\/\d{1,3})?$/i;
+
+export const isRawInkUtility = (klass: string): boolean =>
+  RAW_INK_UTILITY.test(stripChain(klass).replace(/!$/, ""));
+
+/**
  * Class fragments a source builds at runtime, whether or not the family is registered. Template
  * fragments are read only inside class attributes — `:data-test` identifiers interpolate
  * hyphen-runs constantly and are not classes.
@@ -699,11 +710,19 @@ export const codeOf = (input: ScanInput): string => {
  * Runtime class literals the code can paint but NO measured pair cites — the class-from-script
  * blind spot (E-2 shape #3). Every entry must be explained in the ledger's dynamicBindings, and
  * the explanation now carries the literal's measured numbers (see runRuntimeCensus).
+ *
+ * RAW INKS ARE ATTRIBUTED PER (GROUND, INK) PAIR (F-154 / A2). Token citation still governs a
+ * literal that names only registered tokens — both sides cited means the ledger carries that
+ * pairing somewhere. But a literal that paints a HAND-WRITTEN ink over a runtime fill can never
+ * be cited by token, and that is exactly the shipped shape of F-EDGE-4: white on
+ * `--color-badge-primary-soft-bg` is 1.19:1 in O2 Lens light while the same fill passes with its
+ * designed ink, and the whole-`src` run filtered the literal out because the FILL was cited.
  */
 export const unattributedRuntimeLiterals = (
   inputs: ScanInput[],
   context: ScanContext,
   cited: Set<string>,
+  citedPairs: Set<string> = new Set(),
 ): DynamicBinding[] => {
   const out: DynamicBinding[] = [];
   for (const input of inputs) {
@@ -714,7 +733,10 @@ export const unattributedRuntimeLiterals = (
     for (const entry of scriptRuntimeClassLiterals(blanks, context)) {
       const pairs = literalPaintPairs(entry.literal, context);
       const unattributed = entry.tokens.filter((token) => !cited.has(token));
-      if (!unattributed.length) continue;
+      const rawPairs = pairs.filter(
+        (pair) => isRawInkUtility(pair.inkClass) && !citedPairs.has(pair.ground + "|" + pair.ink),
+      );
+      if (!unattributed.length && !rawPairs.length) continue;
       out.push({
         file: input.path,
         line: lineAt(input.source, Math.max(0, code.indexOf(entry.literal)) + 1),

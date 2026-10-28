@@ -450,7 +450,11 @@ export const runRuntimeCensus = (
   // --color-badge-primary-soft-bg is 1.19:1 in O2 Lens light; a measured pair that cites the same
   // FILL with a legible INK says nothing about it, and the whole-`src` run used to filter such a
   // literal out of the census entirely.
-  const unattributed = unattributedRuntimeLiterals(sources, context, cited);
+  // F-154: the citation a script class literal needs is the (ground, ink) PAIR it paints. A
+  // measured pair that cites the same FILL with a legible INK says nothing about a literal whose
+  // ink is hand-written white, and the whole-`src` run used to filter such a literal out entirely.
+  const citedPairs = new Set(scan.pairs.map((pair) => pair.ground + "|" + pair.ink));
+  const unattributed = unattributedRuntimeLiterals(sources, context, cited, citedPairs);
 
   const bookings = new Map(ledger.bookings.map((row) => [row.id, row]));
   const delegatedRows = new Map((ledger.delegated ?? []).map((row) => [row.id, row]));

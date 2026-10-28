@@ -247,6 +247,18 @@ const FIXTURES = [
     source: `<template><div :class="'bg-tone-card-' + tone + ' text-white'">7</div></template>`,
     expect: { dynamic: 1, unexpandable: 1 },
   },
+  {
+    // F-154 / F-EDGE-4. The ground is cited by a LEGIBLE measured pair two lines above, and under
+    // token-level attribution that citation used to cover this literal too — the pairing was never
+    // seen. A hand-written white ink is attributed only to its own (ground, ink) pair.
+    name: "stray text-white on a token-attributed ground",
+    source:
+      `<template><div class="bg-badge-primary-soft-bg text-badge-primary-soft-text">label</div>` +
+      `<div :class="stepNumberClass">7</div></template><script>` +
+      `const stepNumberClass = computed(() => { if (on) return "bg-badge-primary-soft-bg text-badge-primary-soft-text text-white"; return "bg-badge-primary-soft-bg text-badge-primary-soft-text text-[#fff]"; });` +
+      `</script>`,
+    expect: { dynamic: 2 },
+  },
 ];
 
 /** The SAME pipeline main() runs, over an in-memory source list (bookings + the MAX-UNBOOKED
