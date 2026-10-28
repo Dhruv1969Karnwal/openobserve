@@ -232,12 +232,46 @@ export const identifiersIn = (value: string): string[] =>
 const withAlpha = (token: string, alpha: number): string =>
   "color-mix(in oklab, var(" + token + ") " + alpha + "%, transparent)";
 
-/** A CSS gradient is measured at its accent stop: the worst one for a light ink. */
-const gradientStop = (value: string): string | null => {
-  if (!/gradient\(/.test(value)) return null;
-  const stop = /--color-(theme-accent|accent|button-primary)/.exec(value);
-  return stop ? `--color-${stop[1]}` : null;
+/**
+ * The accent stops of a CSS gradient, each as the expression it really paints. A tinted stop
+ * (`color-mix(in srgb, var(--color-theme-accent) 8%, transparent)`) must be measured AS that tint:
+ * collapsing every mention of the accent token to the raw fill invented 1.00:1 "invisible text"
+ * rows on wash-gradient buttons whose ground is an 8 % tint, not the accent. A gradient with several
+ * accent stops yields one pair per stop, because a gradient has no single ground pixel anywhere.
+ */
+/** The balanced call beginning at `start` (whose first `(` sits at `open`), name included. */
+const balancedCall = (value: string, start: number, open: number): string | null => {
+  let depth = 0;
+  for (let index = open; index < value.length; index++) {
+    if (value[index] === "(") depth++;
+    else if (value[index] === ")") {
+      depth--;
+      if (depth === 0) return value.slice(start, index + 1);
+    }
+  }
+  return null;
 };
+
+export const gradientStops = (value: string): string[] => {
+  if (!/gradient\(/.test(value)) return [];
+  const stops: string[] = [];
+  const call = /(?:color-mix|var)\s*\(/g;
+  let match: RegExpExecArray | null;
+  while ((match = call.exec(value))) {
+    const start = match.index ?? 0;
+    const open = start + match[0].length - 1;
+    const expression = balancedCall(value, start, open);
+    if (!expression) break;
+    call.lastIndex = start + expression.length;
+    if (/theme-accent|accent|button-primary/.test(expression)) stops.push(expression);
+  }
+  if (stops.length) return [...new Set(stops)];
+  const stop = /--color-(theme-accent|accent|button-primary)/.exec(value);
+  return stop ? ["--color-" + stop[1]] : [];
+};
+
+/** The single worst accent stop of a gradient, for the one-expression call sites. */
+const gradientStop = (value: string): string | null => gradientStops(value)[0] ?? null;
 
 /** The colour expression a utility paints, or null when the utility is not a colour. */
 export const expressionFor = (
@@ -418,7 +452,7 @@ const classifyBucket = (bucket: ElBucket, context: ScanContext): void => {
   bucket.gradient = gradient;
   // A gradient is measured at its accent-ish stop (the brightest one for a light ink),
   // which is what the booked hero rows in the ledger describe.
-  bucket.ground = solid ?? stop;
+  bucket.ground = solid ?? stop ?? undefined;
   bucket.ink = ink ?? undefined;
 };
 
@@ -759,21 +793,26 @@ export const scanStyleRule = (file: string, style: string, context: ScanContext)
       ?.replace(/!important$/i, "")
       .trim();
     if (!color || !ground) continue;
-    const groundValue = gradientStop(ground) ?? ground;
-    if (!isRuntimeExpression(color, context) && !isRuntimeExpression(groundValue, context))
-      continue;
-    out.push({
-      file,
-      line: lineAt(style, rule.index ?? 0),
-      ground: groundValue,
-      groundClass: selector,
-      ink: color,
-      inkClass: selector,
-      state: "",
-      bar: "text",
-      via: "style",
-      sample: "scoped css",
-    });
+    // One pair per accent stop: a gradient has no single ground pixel, and measuring a 8 % wash as
+    // if it were the raw accent produced 1.00:1 "invisible text" rows that never render.
+    const stops = gradientStops(ground);
+    const grounds = stops.length ? stops : [ground];
+    for (const groundValue of grounds) {
+      if (!isRuntimeExpression(color, context) && !isRuntimeExpression(groundValue, context))
+        continue;
+      out.push({
+        file,
+        line: lineAt(style, rule.index ?? 0),
+        ground: groundValue,
+        groundClass: selector,
+        ink: color,
+        inkClass: selector,
+        state: "",
+        bar: "text",
+        via: "style",
+        sample: "scoped css",
+      });
+    }
   }
   return out;
 };

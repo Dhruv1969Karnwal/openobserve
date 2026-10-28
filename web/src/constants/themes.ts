@@ -111,11 +111,13 @@ export const THEME_STORAGE_KEYS = {
  * stops, classes read from <script>, scoped-style paint, and element-opacity composite states —
  * and measures it across the same twelve injected scopes this file's pickers run against.
  *
- * At this head: 5135 runtime pairs in 2460 booking groups, 1876 groups measured-pass, 584 groups
- * (995 individual sites) booked with their twelve numbers, 41 script/style class literals
- * registered as runtime grounds carrying no co-bound label, MAX-UNBOOKED = MAX-DYNAMIC = 0. 121 of
- * the booked groups are icon-only sites measured at the SC 1.4.11 3:1 bar with a per-entry
- * justification; 463 are text measured at 4.5.
+ * At this head: 5137 runtime pairs in 2462 booking groups — 1876 groups measured-pass, 586 groups
+ * (997 individual sites) booked with all twelve numbers each, of which 164 groups are delegated to
+ * the tier rows tokens/contrast-manifest.ts already books as pending, 82 are icon-only sites riding
+ * SC 1.4.11's 3:1 bar with a per-entry justification, and 340 are text riding 4.5. 41 script/style
+ * class literals are registered as runtime grounds with no co-bound label. MAX-UNBOOKED = 0 and
+ * MAX-DYNAMIC = 0, both equality locks: the residue growing OR healing without the lock moving is
+ * a build failure.
  *
  * Honest limits of that claim, all restated in the ledger's reason fields: the census models class
  * bindings, not content conditionals, so 7 booked rows (the checkbox tick, the selected datepicker

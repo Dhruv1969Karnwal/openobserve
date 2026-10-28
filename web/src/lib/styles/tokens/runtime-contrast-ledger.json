@@ -748,26 +748,6 @@
       }
     },
     {
-      "id": "components/alerts/AlertSummary.vue --color-theme-accent var(--color-theme-accent) [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "var(theme-accent) painted on the raw accent fill (applyThemeColors writes themeColor at alpha 1) in components/alerts/AlertSummary.vue (1 site(s)); worst 1:1 at dark O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 1,
-        "light O2 Signature": 1,
-        "dark O2 Pulse": 1,
-        "light O2 Pulse": 1,
-        "dark O2 Horizon": 1,
-        "light O2 Horizon": 1,
-        "dark O2 Beacon": 1,
-        "light O2 Beacon": 1,
-        "dark O2 Lens": 1,
-        "light O2 Lens": 1,
-        "dark O2 Crimson Ink": 1,
-        "light O2 Crimson Ink": 1
-      }
-    },
-    {
       "id": "components/alerts/AlertSummary.vue --color-white --color-theme-accent @hover opacity-80 [non-text]",
       "kind": "non-text",
       "sites": 1,
@@ -785,6 +765,46 @@
         "light O2 Lens": 2.72,
         "dark O2 Crimson Ink": 2.51,
         "light O2 Crimson Ink": 3.75
+      }
+    },
+    {
+      "id": "components/alerts/AlertSummary.vue color-mix(in srgb, var(--color-theme-accent) 12%, transparent) var(--color-theme-accent) [text]",
+      "kind": "text",
+      "sites": 1,
+      "reason": "var(theme-accent) painted on color-mix(in srgb, var(theme-accent) 12%, transparent) (component fill) in components/alerts/AlertSummary.vue (1 site(s)); worst 3.15:1 at light O2 Lens — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "at": {
+        "dark O2 Signature": 10.63,
+        "light O2 Signature": 13.02,
+        "dark O2 Pulse": 3.33,
+        "light O2 Pulse": 4.13,
+        "dark O2 Horizon": 4.73,
+        "light O2 Horizon": 4.35,
+        "dark O2 Beacon": 6.12,
+        "light O2 Beacon": 4.33,
+        "dark O2 Lens": 4.83,
+        "light O2 Lens": 3.15,
+        "dark O2 Crimson Ink": 5.64,
+        "light O2 Crimson Ink": 3.89
+      }
+    },
+    {
+      "id": "components/alerts/AlertSummary.vue color-mix(in srgb, var(--color-theme-accent) 8%, transparent) var(--color-theme-accent) [text]",
+      "kind": "text",
+      "sites": 1,
+      "reason": "var(theme-accent) painted on color-mix(in srgb, var(theme-accent) 8%, transparent) (component fill) in components/alerts/AlertSummary.vue (1 site(s)); worst 3.29:1 at light O2 Lens — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "at": {
+        "dark O2 Signature": 11.91,
+        "light O2 Signature": 14.13,
+        "dark O2 Pulse": 3.47,
+        "light O2 Pulse": 4.34,
+        "dark O2 Horizon": 5,
+        "light O2 Horizon": 4.6,
+        "dark O2 Beacon": 6.58,
+        "light O2 Beacon": 4.57,
+        "dark O2 Lens": 5.1,
+        "light O2 Lens": 3.29,
+        "dark O2 Crimson Ink": 6.01,
+        "light O2 Crimson Ink": 4.14
       }
     },
     {
@@ -1368,23 +1388,43 @@
       }
     },
     {
-      "id": "components/anomaly_detection/AnomalySummary.vue --color-theme-accent var(--color-theme-accent) [text]",
+      "id": "components/anomaly_detection/AnomalySummary.vue color-mix(in srgb, var(--color-theme-accent) 12%, transparent) var(--color-theme-accent) [text]",
       "kind": "text",
       "sites": 1,
-      "reason": "var(theme-accent) painted on the raw accent fill (applyThemeColors writes themeColor at alpha 1) in components/anomaly_detection/AnomalySummary.vue (1 site(s)); worst 1:1 at dark O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "var(theme-accent) painted on color-mix(in srgb, var(theme-accent) 12%, transparent) (component fill) in components/anomaly_detection/AnomalySummary.vue (1 site(s)); worst 3.15:1 at light O2 Lens — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
-        "dark O2 Signature": 1,
-        "light O2 Signature": 1,
-        "dark O2 Pulse": 1,
-        "light O2 Pulse": 1,
-        "dark O2 Horizon": 1,
-        "light O2 Horizon": 1,
-        "dark O2 Beacon": 1,
-        "light O2 Beacon": 1,
-        "dark O2 Lens": 1,
-        "light O2 Lens": 1,
-        "dark O2 Crimson Ink": 1,
-        "light O2 Crimson Ink": 1
+        "dark O2 Signature": 10.63,
+        "light O2 Signature": 13.02,
+        "dark O2 Pulse": 3.33,
+        "light O2 Pulse": 4.13,
+        "dark O2 Horizon": 4.73,
+        "light O2 Horizon": 4.35,
+        "dark O2 Beacon": 6.12,
+        "light O2 Beacon": 4.33,
+        "dark O2 Lens": 4.83,
+        "light O2 Lens": 3.15,
+        "dark O2 Crimson Ink": 5.64,
+        "light O2 Crimson Ink": 3.89
+      }
+    },
+    {
+      "id": "components/anomaly_detection/AnomalySummary.vue color-mix(in srgb, var(--color-theme-accent) 8%, transparent) var(--color-theme-accent) [text]",
+      "kind": "text",
+      "sites": 1,
+      "reason": "var(theme-accent) painted on color-mix(in srgb, var(theme-accent) 8%, transparent) (component fill) in components/anomaly_detection/AnomalySummary.vue (1 site(s)); worst 3.29:1 at light O2 Lens — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "at": {
+        "dark O2 Signature": 11.91,
+        "light O2 Signature": 14.13,
+        "dark O2 Pulse": 3.47,
+        "light O2 Pulse": 4.34,
+        "dark O2 Horizon": 5,
+        "light O2 Horizon": 4.6,
+        "dark O2 Beacon": 6.58,
+        "light O2 Beacon": 4.57,
+        "dark O2 Lens": 5.1,
+        "light O2 Lens": 3.29,
+        "dark O2 Crimson Ink": 6.01,
+        "light O2 Crimson Ink": 4.14
       }
     },
     {
@@ -5431,7 +5471,7 @@
       "id": "lib/forms/Checkbox/OCheckbox.vue --color-checkbox-bg --color-checkbox-checked-fg @focus-visible [non-text]",
       "kind": "non-text",
       "sites": 2,
-      "reason": "[icon-only site] @focus-visible painted on checkbox-bg checkbox-checked-fg (component fill) in lib/forms/Checkbox/OCheckbox.vue (2 site(s)); worst 1:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] @focus-visible painted on checkbox-bg checkbox-checked-fg (component fill) in lib/forms/Checkbox/OCheckbox.vue (2 site(s)); worst 1:1 at light O2 Signature SCAN LIMITATION, stated rather than hidden: the ink is painted only while a guard holds (the tick, the selected day, the active page) and that state's fill is a DIFFERENT token (--color-checkbox-checked-bg / --color-datepicker-day-selected-bg / --color-pagination-item-active-bg, gated at 4.7+ by tokens/themeRuntimeContrast.spec.ts); the census models class bindings, not content conditionals, so this number describes a pair that does not co-occur on screen. — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 1.11,
         "light O2 Signature": 1,
@@ -5451,7 +5491,7 @@
       "id": "lib/forms/Checkbox/OCheckbox.vue --color-checkbox-bg --color-checkbox-checked-fg [non-text]",
       "kind": "non-text",
       "sites": 2,
-      "reason": "[icon-only site] checkbox-checked-fg painted on checkbox-bg (component fill) in lib/forms/Checkbox/OCheckbox.vue (2 site(s)); worst 1:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] checkbox-checked-fg painted on checkbox-bg (component fill) in lib/forms/Checkbox/OCheckbox.vue (2 site(s)); worst 1:1 at light O2 Signature SCAN LIMITATION, stated rather than hidden: the ink is painted only while a guard holds (the tick, the selected day, the active page) and that state's fill is a DIFFERENT token (--color-checkbox-checked-bg / --color-datepicker-day-selected-bg / --color-pagination-item-active-bg, gated at 4.7+ by tokens/themeRuntimeContrast.spec.ts); the census models class bindings, not content conditionals, so this number describes a pair that does not co-occur on screen. — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 1.11,
         "light O2 Signature": 1,
@@ -5791,7 +5831,7 @@
       "id": "lib/forms/DateTimeRange/ODateTimeRange.vue --color-datepicker-day-selected-bg --color-datepicker-text @focus-visible [text]",
       "kind": "text",
       "sites": 2,
-      "reason": "@focus-visible painted on datepicker-day-selected-bg datepicker-text (component fill) in lib/forms/DateTimeRange/ODateTimeRange.vue (2 site(s)); worst 1.09:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "@focus-visible painted on datepicker-day-selected-bg datepicker-text (component fill) in lib/forms/DateTimeRange/ODateTimeRange.vue (2 site(s)); worst 1.09:1 at light O2 Signature SCAN LIMITATION, stated rather than hidden: the ink is painted only while a guard holds (the tick, the selected day, the active page) and that state's fill is a DIFFERENT token (--color-checkbox-checked-bg / --color-datepicker-day-selected-bg / --color-pagination-item-active-bg, gated at 4.7+ by tokens/themeRuntimeContrast.spec.ts); the census models class bindings, not content conditionals, so this number describes a pair that does not co-occur on screen. — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 8.31,
         "light O2 Signature": 1.09,
@@ -5811,7 +5851,7 @@
       "id": "lib/forms/DateTimeRange/ODateTimeRange.vue --color-datepicker-day-selected-bg --color-datepicker-text [text]",
       "kind": "text",
       "sites": 2,
-      "reason": "the datepicker-text form tier on datepicker-day-selected-bg (component fill): one token serves every control of this family, and it is measured against the runtime wash/plate rather than the sheet value it was picked for; worst 1.09:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "the datepicker-text form tier on datepicker-day-selected-bg (component fill): one token serves every control of this family, and it is measured against the runtime wash/plate rather than the sheet value it was picked for; worst 1.09:1 at light O2 Signature SCAN LIMITATION, stated rather than hidden: the ink is painted only while a guard holds (the tick, the selected day, the active page) and that state's fill is a DIFFERENT token (--color-checkbox-checked-bg / --color-datepicker-day-selected-bg / --color-pagination-item-active-bg, gated at 4.7+ by tokens/themeRuntimeContrast.spec.ts); the census models class bindings, not content conditionals, so this number describes a pair that does not co-occur on screen. — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 8.31,
         "light O2 Signature": 1.09,
@@ -6191,7 +6231,7 @@
       "id": "lib/forms/Select/OSelect.vue --color-checkbox-bg --color-checkbox-checked-fg [non-text]",
       "kind": "non-text",
       "sites": 2,
-      "reason": "[icon-only site] checkbox-checked-fg painted on checkbox-bg (component fill) in lib/forms/Select/OSelect.vue (2 site(s)); worst 1:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] checkbox-checked-fg painted on checkbox-bg (component fill) in lib/forms/Select/OSelect.vue (2 site(s)); worst 1:1 at light O2 Signature SCAN LIMITATION, stated rather than hidden: the ink is painted only while a guard holds (the tick, the selected day, the active page) and that state's fill is a DIFFERENT token (--color-checkbox-checked-bg / --color-datepicker-day-selected-bg / --color-pagination-item-active-bg, gated at 4.7+ by tokens/themeRuntimeContrast.spec.ts); the census models class bindings, not content conditionals, so this number describes a pair that does not co-occur on screen. — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 1.11,
         "light O2 Signature": 1,
@@ -6391,7 +6431,7 @@
       "id": "lib/forms/Time/OTime.vue --color-datepicker-day-selected-bg --color-datepicker-weekday-text @focus-visible [text]",
       "kind": "text",
       "sites": 2,
-      "reason": "@focus-visible painted on datepicker-day-selected-bg datepicker-weekday-text (component fill) in lib/forms/Time/OTime.vue (2 site(s)); worst 1.53:1 at light O2 Horizon — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "@focus-visible painted on datepicker-day-selected-bg datepicker-weekday-text (component fill) in lib/forms/Time/OTime.vue (2 site(s)); worst 1.53:1 at light O2 Horizon SCAN LIMITATION, stated rather than hidden: the ink is painted only while a guard holds (the tick, the selected day, the active page) and that state's fill is a DIFFERENT token (--color-checkbox-checked-bg / --color-datepicker-day-selected-bg / --color-pagination-item-active-bg, gated at 4.7+ by tokens/themeRuntimeContrast.spec.ts); the census models class bindings, not content conditionals, so this number describes a pair that does not co-occur on screen. — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 4.15,
         "light O2 Signature": 2.12,
@@ -6411,7 +6451,7 @@
       "id": "lib/forms/Time/OTime.vue --color-datepicker-day-selected-bg --color-datepicker-weekday-text [text]",
       "kind": "text",
       "sites": 2,
-      "reason": "the datepicker-weekday-text form tier on datepicker-day-selected-bg (component fill): one token serves every control of this family, and it is measured against the runtime wash/plate rather than the sheet value it was picked for; worst 1.53:1 at light O2 Horizon — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "the datepicker-weekday-text form tier on datepicker-day-selected-bg (component fill): one token serves every control of this family, and it is measured against the runtime wash/plate rather than the sheet value it was picked for; worst 1.53:1 at light O2 Horizon SCAN LIMITATION, stated rather than hidden: the ink is painted only while a guard holds (the tick, the selected day, the active page) and that state's fill is a DIFFERENT token (--color-checkbox-checked-bg / --color-datepicker-day-selected-bg / --color-pagination-item-active-bg, gated at 4.7+ by tokens/themeRuntimeContrast.spec.ts); the census models class bindings, not content conditionals, so this number describes a pair that does not co-occur on screen. — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 4.15,
         "light O2 Signature": 2.12,
@@ -8807,5 +8847,14 @@
       }
     }
   ],
-  "note": "Structured runtime-contrast bookings shared by scripts/check-runtime-contrast.mjs and tokens/themeRuntimeContrast.spec.ts. Every number is measured by that script in the twelve injected scopes (six predefined themes x both modes) and equality-locked; regenerate with --emit, never hand-edit a ratio. kind=text rides 4.5:1 (SC 1.4.3), kind=non-text rides 3:1 (SC 1.4.11) and is an icon-only site whose justification is in its reason. delegated rows cite a tier another ledger already owns; bookings rows are this gate's owner-decision surface. id form: <file-or-pair> <ground> <ink> [@chain] [opacity-NN] [bar]."
+  "note": "Structured runtime-contrast bookings shared by scripts/check-runtime-contrast.mjs and tokens/themeRuntimeContrast.spec.ts. Every number is measured by that script in the twelve injected scopes (six predefined themes x both modes) and equality-locked; regenerate with --emit, never hand-edit a ratio. kind=text rides 4.5:1 (SC 1.4.3), kind=non-text rides 3:1 (SC 1.4.11) and is an icon-only site whose justification is in its reason. delegated rows cite a tier another ledger already owns; bookings rows are this gate's owner-decision surface. id form: <file-or-pair> <ground> <ink> [@chain] [opacity-NN] [bar].",
+  "legacyStatusFamily": {
+    "finding": "F-145",
+    "what": "raw palette status shades (text-warning / text-error-600 / bg-error-500 family) that bind base.css shades instead of the routed --color-status-*-text tiers, and which contrast.spec.ts cannot judge because the shades are not foreground candidates in its segment vocabulary",
+    "bookedGroups": 23,
+    "bookedSites": 36,
+    "resolution": "each row is booked per-scope with its twelve numbers; routing the family onto the stable --color-status-*-text tiers is the vocabulary extension this note records, and any NEW legacy-shade binding is a census finding because these rows are equality-locked",
+    "measuredPassSites": 9,
+    "countsHow": "computed by runRuntimeCensus over the twelve scopes: 45 runtime pairs are drawn with a legacy raw shade, 9 measure at or above their bar, 36 do not and are booked below"
+  }
 }

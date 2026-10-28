@@ -20,6 +20,10 @@
 // registered utility (register one in tokens/semantic.css or component.css if
 // none exists), or move the rule to base-elements.css / utilities.css. The
 // allowlists below are only for cases a utility physically CANNOT express.
+//
+// Class strings that reach a template from SCRIPT (a computed tone, a tint chosen in code) are NOT
+// this guard's blind spot any more: scripts/check-runtime-contrast.mjs enumerates every runtime class
+// literal in code and fails unless each one is explained in tokens/runtime-contrast-ledger.json.
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, extname, relative } from "node:path";
 import { fileURLToPath } from "node:url";

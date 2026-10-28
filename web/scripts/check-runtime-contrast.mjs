@@ -358,6 +358,14 @@ const main = async () => {
     console.log(`sealed MAX-UNBOOKED=${report.unbooked} MAX-DYNAMIC=${report.dynamicCount}`);
     process.exit(0);
   }
+  if (args.has("--emit-failing")) {
+    // EVERY group below its bar, booked or not: the input for regenerating the ledger after a
+    // scanner or model change, when the existing bookings are exactly what has to be re-derived.
+    const failing = report.rows.filter((row) => row.failing.length > 0);
+    console.error("emit-failing: " + failing.length + " failing groups over " + report.pairs + " pairs");
+    console.log(JSON.stringify(emitRows({ ...report, unbookedRows: failing }), null, 2));
+    process.exit(0);
+  }
   if (args.has("--emit")) {
     // Machine output only: pipe it into the ledger, keep the human summary on stderr.
     console.error(
