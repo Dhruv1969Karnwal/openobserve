@@ -708,7 +708,8 @@ describe("ServiceAccountsList Component", () => {
       // columns uses OTableColumnDef with 'id' (not 'name'). The row-index "#"
       // column is now auto-injected by OTable's show-index, so it is not part
       // of the component's own column defs. aws-exports is mocked with
-      // isEnterprise: "true", so the Roles column is included.
+      // isEnterprise: "true" and zoConfig ships without rbac_enabled:false,
+      // so rbacAccess.visible is true and the Roles column is included.
       expect(wrapper.vm.columns).toHaveLength(6);
       expect(wrapper.vm.columns[0].id).toBe("email");
       expect(wrapper.vm.columns[1].id).toBe("first_name");
@@ -716,6 +717,26 @@ describe("ServiceAccountsList Component", () => {
       expect(wrapper.vm.columns[3].id).toBe("token");
       expect(wrapper.vm.columns[4].id).toBe("created_at");
       expect(wrapper.vm.columns[5].id).toBe("actions");
+    });
+
+    it("drops the Roles column entirely when the rbac gate is not visible", async () => {
+      // Bidirectional pin for the rbacAccess.visible splice in the component:
+      // the shipped OSS build must NOT render a 'Roles' header of em dashes.
+      // rbac_enabled:false flips rbacAccess.visible to false (hide policy),
+      // so the column is absent — not present-with-dashes.
+      store.state.zoConfig.rbac_enabled = false;
+      try {
+        await nextTick();
+        const ids = wrapper.vm.columns.map((c) => c.id);
+        expect(ids).not.toContain("roles");
+        expect(wrapper.vm.columns).toHaveLength(5);
+        expect(wrapper.vm.columns[2].id).toBe("token");
+      } finally {
+        delete store.state.zoConfig.rbac_enabled;
+        await nextTick();
+      }
+      // Restored: the column comes back when the gate is visible again.
+      expect(wrapper.vm.columns.map((c) => c.id)).toContain("roles");
     });
 
     it("has correct per page options", () => {
@@ -1424,10 +1445,21 @@ describe("ServiceAccountsList Component", () => {
       expect(wrapper.vm.formatCreatedAt(undefined)).toBe("—");
     });
 
-    it("includes a 'roles' column on enterprise/cloud (aws-exports mocked isEnterprise: true)", () => {
+    it("includes a 'roles' column only while the rbac gate is visible (aws-exports mocked isEnterprise: true)", async () => {
+      // The column splice keys off `rbacAccess.visible`, same as the quick-add
+      // links: entitled build → present; flipped off → absent (not a header of dashes).
       const rolesCol = wrapper.vm.columns.find((c) => c.id === "roles");
       expect(rolesCol).toBeDefined();
       expect(rolesCol.header).toBe("Roles");
+      store.state.zoConfig.rbac_enabled = false;
+      try {
+        await nextTick();
+        expect(wrapper.vm.columns.find((c) => c.id === "roles")).toBeUndefined();
+      } finally {
+        delete store.state.zoConfig.rbac_enabled;
+        await nextTick();
+      }
+      expect(wrapper.vm.columns.find((c) => c.id === "roles")).toBeDefined();
     });
 
     it("serviceAccountRolesText joins assigned role names, else renders an em dash", () => {

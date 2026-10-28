@@ -809,7 +809,7 @@ export default defineComponent({
       }
     });
 
-    const columns: OTableColumnDef[] = [
+    const columns = computed<OTableColumnDef[]>(() => [
       {
         id: "email",
         header: t("serviceAccounts.list.col.identifier"),
@@ -831,7 +831,9 @@ export default defineComponent({
         minSize: 160,
         meta: { align: "left", flex: true },
       },
-      rolesColumn.value,
+      // Honors the comment above `rbacAccess`: the Roles column is a paid
+      // surface and must be ABSENT (not a header of dashes) under "hide".
+      ...(rbacAccess.value.visible ? [rolesColumn.value] : []),
       {
         id: "token",
         header: t("serviceAccounts.list.col.token"),
@@ -860,7 +862,7 @@ export default defineComponent({
         size: 130,
         meta: { align: "center", actionCount: 3 },
       },
-    ];
+    ]);
     const userEmail: any = ref("");
     const options = ref([{ label: t("iam.roleAdmin"), value: "admin" }]);
     const selectedRole = ref(options.value[0].value);
