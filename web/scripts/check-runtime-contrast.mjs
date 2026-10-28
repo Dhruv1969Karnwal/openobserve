@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// Copyright 2026 OpenObserve Inc.
+//
 // CI gate: the MECHANIZED runtime-contrast census (template scan + bookings ledger + selftest).
 //
 //   node scripts/check-runtime-contrast.mjs              # census over web/src
