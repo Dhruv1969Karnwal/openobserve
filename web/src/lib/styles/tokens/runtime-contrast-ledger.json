@@ -1031,26 +1031,6 @@
       }
     },
     {
-      "id": "components/common/sidebar/FolderIcon.vue --census-page-bg --color-favorite [non-text]",
-      "kind": "non-text",
-      "sites": 1,
-      "reason": "[icon-only site] non-text glyph ink favorite on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark): SC 1.4.11's 3:1 bar applies (the glyph repeats a state its adjacent label already states); worst 1.74:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 12.23,
-        "light O2 Signature": 1.74,
-        "dark O2 Pulse": 13,
-        "light O2 Pulse": 1.8,
-        "dark O2 Horizon": 12.86,
-        "light O2 Horizon": 1.79,
-        "dark O2 Beacon": 12.71,
-        "light O2 Beacon": 1.8,
-        "dark O2 Lens": 12.87,
-        "light O2 Lens": 1.81,
-        "dark O2 Crimson Ink": 12.77,
-        "light O2 Crimson Ink": 1.77
-      }
-    },
-    {
       "id": "components/dashboards/ColorSwatchPicker.vue --census-page-bg --color-black [non-text]",
       "kind": "non-text",
       "sites": 2,
@@ -1951,26 +1931,6 @@
         "light O2 Lens": 3.41,
         "dark O2 Crimson Ink": 9.76,
         "light O2 Crimson Ink": 4.35
-      }
-    },
-    {
-      "id": "components/savedViews/SavedViewsListDialog.vue --census-page-bg --color-favorite [non-text]",
-      "kind": "non-text",
-      "sites": 1,
-      "reason": "[icon-only site] non-text glyph ink favorite on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark): SC 1.4.11's 3:1 bar applies (the glyph repeats a state its adjacent label already states); worst 1.74:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 12.23,
-        "light O2 Signature": 1.74,
-        "dark O2 Pulse": 13,
-        "light O2 Pulse": 1.8,
-        "dark O2 Horizon": 12.86,
-        "light O2 Horizon": 1.79,
-        "dark O2 Beacon": 12.71,
-        "light O2 Beacon": 1.8,
-        "dark O2 Lens": 12.87,
-        "light O2 Lens": 1.81,
-        "dark O2 Crimson Ink": 12.77,
-        "light O2 Crimson Ink": 1.77
       }
     },
     {
@@ -3282,26 +3242,6 @@
       }
     },
     {
-      "id": "plugins/logs/SearchBar.vue --census-page-bg --color-favorite [non-text]",
-      "kind": "non-text",
-      "sites": 1,
-      "reason": "[icon-only site] non-text glyph ink favorite on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark): SC 1.4.11's 3:1 bar applies (the glyph repeats a state its adjacent label already states); worst 1.74:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 12.23,
-        "light O2 Signature": 1.74,
-        "dark O2 Pulse": 13,
-        "light O2 Pulse": 1.8,
-        "dark O2 Horizon": 12.86,
-        "light O2 Horizon": 1.79,
-        "dark O2 Beacon": 12.71,
-        "light O2 Beacon": 1.8,
-        "dark O2 Lens": 12.87,
-        "light O2 Lens": 1.81,
-        "dark O2 Crimson Ink": 12.77,
-        "light O2 Crimson Ink": 1.77
-      }
-    },
-    {
       "id": "plugins/logs/SearchBar.vue --color-button-primary --color-button-primary-foreground @hover opacity-90 [text]",
       "kind": "text",
       "sites": 3,
@@ -3661,26 +3601,6 @@
         "light O2 Lens": 5.52,
         "dark O2 Crimson Ink": 5.06,
         "light O2 Crimson Ink": 4.42
-      }
-    },
-    {
-      "id": "plugins/traces/TracesSavedViewsMenuItems.vue --census-page-bg --color-favorite [non-text]",
-      "kind": "non-text",
-      "sites": 1,
-      "reason": "[icon-only site] non-text glyph ink favorite on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark): SC 1.4.11's 3:1 bar applies (the glyph repeats a state its adjacent label already states); worst 1.74:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 12.23,
-        "light O2 Signature": 1.74,
-        "dark O2 Pulse": 13,
-        "light O2 Pulse": 1.8,
-        "dark O2 Horizon": 12.86,
-        "light O2 Horizon": 1.79,
-        "dark O2 Beacon": 12.71,
-        "light O2 Beacon": 1.8,
-        "dark O2 Lens": 12.87,
-        "light O2 Lens": 1.81,
-        "dark O2 Crimson Ink": 12.77,
-        "light O2 Crimson Ink": 1.77
       }
     },
     {

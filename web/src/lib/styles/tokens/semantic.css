@@ -115,11 +115,15 @@
   --color-signal-traces: var(--color-chart-series-9);
   --color-status-outdated-text: var(--color-text-secondary);
 
-  /* Favorite (filled star) — a warm yellow, deliberately distinct from the
+  /* Favorite (filled star) — a warm amber, deliberately distinct from the
      destructive error red so "starred" and "danger" never read as the same hue
      on a row that carries both. Only the FILLED star uses this; unfavorited
-     outlines stay neutral. */
-  --color-favorite: #eab308;
+     outlines stay neutral. Re-inked from the old #eab308 (1.74:1 on the lightest
+     brand page tint — a fifth of the way to invisible) to amber-700, which clears
+     SC 1.4.11's 3:1 non-text bar in every light scope; the dark override in
+     dark.css (#facc15, ~12:1) is unchanged. The shape swap (star ↔ star-outline /
+     saved-search) already carries the state; this makes the graphic perceivable. */
+  --color-favorite: #a16207;
 
   /* Alert PRIORITY — the semantic hot→cold ramp for P1…P5, so the priority
      chip and the row rail that carries the same priority are provably the same
