@@ -113,7 +113,8 @@ describe("SlackLinkingSection (row 11)", () => {
       "31 linked automatically, 7 with Link your account",
     );
     const matches = w.find('[data-test="slack-linking-matches"]');
-    expect(matches.text()).toContain("4 Slack members match OpenObserve users");
+    expect(matches.text()).toContain("4 Slack members match Retrace.ai users");
+    expect(matches.text()).not.toContain("4 Slack members match OpenObserve users");
     expect(matches.find("button").text()).toBe("Link all matches (4)");
     await matches.find("button").trigger("click");
     await flushPromises();

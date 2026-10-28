@@ -171,6 +171,20 @@ const PRODUCT_REFERENT_KEYS = [
   // this product's own pitch; both were renamed without ever being pinned.
   "alert_library.error.unsupported_version",
   "login.getStartedBannerMessage",
+  // The Slack strings whose referent is this deployment — its accounts, its administrator,
+  // its support routing, the link a thread has to it. They were held out of both ledgers while
+  // that read was contested; it is settled now: none of them names the app registered in the
+  // workspace, so they follow the deleteOrganization precedent rather than the consent keeps.
+  "slackApp.link.noAccessTitle",
+  "slackApp.link.noAccessDetail",
+  "slackApp.link.helpContactDefault",
+  "slackApp.linking.mappedReadonly",
+  "slackApp.linking.removedUsers",
+  "slackApp.linking.autoHelp",
+  "slackApp.linking.matches",
+  "slackApp.people.columnUser",
+  "slackApp.linkedAccounts.description",
+  "slackApp.channels.description",
 ];
 
 // Keys whose referent is an upstream-run artifact — editions and license banners, the Terraform
@@ -217,8 +231,10 @@ const PAYLOAD_FIDELITY_KEYS = ["alert_templates.viewAlertLinkLabel"];
  * The three ledgers above pinned 24 of the 105 English strings that still name upstream, so
  * 81 upstream-owned strings sat one blind find-and-replace away from being credited to this
  * product with the whole suite still green — exactly the failure mode the pins exist to
- * prevent. This list closes 73 of them and the list below books the remaining 8, so the five
- * ledgers together cover 105/105 (locked as a set equality below).
+ * prevent. This list closes the rest of them so the four ledgers together cover the whole
+ * upstream-naming population (locked as a set equality below). Ten Slack deployment-referent
+ * strings that used to sit here, or in the under-review booking, are in the product ledger now,
+ * which is why the locked population is ten smaller than the 105 this comment counted.
  */
 const KEPT_UPSTREAM_KEYS = [
   // about — license banners, waiver/usage notices, edition prose on the About page (9)
@@ -290,8 +306,6 @@ const KEPT_UPSTREAM_KEYS = [
   "slackApp.link.unknownDetail",
   "slackApp.linkedAccounts.emptyDetail",
   "slackApp.linkedAccounts.note",
-  "slackApp.linking.autoHelp",
-  "slackApp.linking.matches",
   "slackApp.orgAccess.otherAppTitle",
   "slackApp.people.unlinkMessage",
   "slackApp.wizard.create.socketDescription",
@@ -302,19 +316,21 @@ const KEPT_UPSTREAM_KEYS = [
 ];
 
 /**
- * Held out of BOTH directions on purpose: the referent of these eight is arguably this
- * deployment (its admins, its support routing, its user directory) rather than upstream's
- * registered app, which is an open naming question the sibling sweep left unresolved. Pinning
- * them "must keep upstream" would decide that question by accident; leaving them unlisted
- * would let a blind sweep rename them silently. So they are named, and only checked for the
- * invariant that holds either way — no string names both brands at once.
+ * The Slack strings that name this deployment — its accounts, its administrator, its support
+ * routing, the link a thread has to it. They are product referents and live in
+ * PRODUCT_REFERENT_KEYS with the rest; what stayed on the keep side names the app registered in
+ * the customer's workspace (its name, its `@OpenObserve` mention handle, its consent and scope
+ * copy, its installer tokens and manifest lifecycle), which would be a false statement if
+ * renamed: in the workspace that app really is called OpenObserve.
  */
-const REFERENT_UNDER_REVIEW_KEYS = [
+const SLACK_DEPLOYMENT_REFERENT_KEYS = [
   "slackApp.link.noAccessTitle",
   "slackApp.link.noAccessDetail",
   "slackApp.link.helpContactDefault",
   "slackApp.linking.mappedReadonly",
   "slackApp.linking.removedUsers",
+  "slackApp.linking.autoHelp",
+  "slackApp.linking.matches",
   "slackApp.people.columnUser",
   "slackApp.linkedAccounts.description",
   "slackApp.channels.description",
@@ -384,11 +400,10 @@ describe("product referents name this product, upstream referents do not", () =>
       ...AMBIGUOUS_HELD_KEYS,
       ...PAYLOAD_FIDELITY_KEYS,
       ...KEPT_UPSTREAM_KEYS,
-      ...REFERENT_UNDER_REVIEW_KEYS,
     ];
     expect(new Set(ledgers).size, "a key is booked by two ledgers").toBe(ledgers.length);
     expect(ledgers.sort()).toEqual(population);
-    expect(population.length).toBe(105);
+    expect(population.length).toBe(95);
   });
 
   for (const [code, locale] of LOCALES) {
@@ -401,15 +416,15 @@ describe("product referents name this product, upstream referents do not", () =>
     });
   }
 
-  // Not "must keep upstream" and not "must rename": these eight are only checked to name one
-  // brand, so the pending referent decision stays open without going unpinned.
-  it("keeps each under-review referent naming exactly one brand", () => {
-    for (const key of REFERENT_UNDER_REVIEW_KEYS) {
-      const value = String(atPath(enUs, key));
-      const names = [/retrace/i.test(value), /openobserve/i.test(value)];
-      expect(names.filter(Boolean).length, key).toBe(1);
-    }
-  });
+  // The Slack deployment referents are checked in both directions: naming this product in every
+  // locale here, and never naming upstream in any locale through the product ledger above.
+  for (const [code, locale] of LOCALES) {
+    it(`${code} names this product in the Slack deployment-referent strings`, () => {
+      for (const key of SLACK_DEPLOYMENT_REFERENT_KEYS) {
+        expect(String(atPath(locale, key)), key).toContain(PRODUCT);
+      }
+    });
+  }
 
   it("keeps upstream's own name in English on upstream-owned and payload-owned strings", () => {
     for (const key of [
@@ -455,6 +470,10 @@ describe("raw product-name slots in components", () => {
       't("alerts.alertSettings.helpBuiltInIntro"',
     ],
     ["src/components/settings/OrgStorageEditor.vue", 't("storage_settings.awsStsCloudInfo"'],
+    // The empty-state locale value is "{product}"-parameterised, so only the call-site fill carries the branding.
+    ["src/views/HomeNoDataState.vue", 't("logs.noData.title"'],
+    ["src/plugins/logs/LogsNoDataState.vue", 't("logs.noData.title"'],
+    ["src/plugins/traces/TracesNoDataState.vue", 't("traces.noData.title"'],
   ] as [string, string][]) {
     it(`${file} fills ${call} with this product's name`, () => {
       const source = componentSource(file);
