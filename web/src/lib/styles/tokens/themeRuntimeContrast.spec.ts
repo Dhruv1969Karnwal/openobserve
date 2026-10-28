@@ -574,7 +574,7 @@ const NON_TEXT_MIN = 3;
  * booked contrast-manifest pending rows were deleted with it.
  */
 const LIGHT_PAIR_DEFERRALS: Record<string, string> = {
-  // EMPTY as of the F-29 default-theme remediation: label/muted/placeholder moved
+  // EMPTY as of the default-theme remediation: label/muted/placeholder moved
   // off grey-300/400 onto the grey-600 text tier (5.76+ on every light wash), so
   // the light matrix defers nothing — the bidirectional lock below fails if a
   // deferral ever comes back unrecorded or these tiers sink again.
@@ -716,7 +716,7 @@ const BOOKED_GROUND_PAIRS: { fg: string; bg: string; where: string }[] = [
 
 const RUNTIME_GROUND_RESIDUALS: Record<string, { at: number; note: string }> = {
   // The six light warning-on-row-hover entries this ledger carried are GONE:
-  // the F-29 default-theme remediation darkened --color-status-warning-text to
+  // the default-theme remediation darkened --color-status-warning-text to
   // #9c4a10, which clears AA on every light wash (was 4.09–4.27).
   // The accent FILL ground. bg-theme-accent is the raw theme colour at alpha 1
   // in both modes, so the ink on it is the button label and the three failing scopes
@@ -845,7 +845,7 @@ const CONSUMER_LEDGERS: Record<"dark" | "light", Record<string, string>> = {
   light: {
     "--color-datepicker-day-disabled-text":
       "SC 1.4.3 inactive day cells: grey-400 measures 2.52 on both light hosts — same exempt disabled step as dark",
-    // --color-datepicker-label healed in the F-29 remediation (label rides grey-600 now).
+    // --color-datepicker-label healed in the default-theme remediation (label rides grey-600 now).
   },
 };
 
@@ -862,7 +862,7 @@ const CONSUMER_LEDGERS: Record<"dark" | "light", Record<string, string>> = {
  */
 const ACCENT_FILL_WHITE_BY_DESIGN: Record<string, string> = {
   "components/EnterpriseUpgradeDialog.vue":
-    "the hero fill is a two-stop gradient darkened off the raw accent in the F-145 default-theme remediation (color-mix(theme-accent 50%, black) → color-mix(theme-accent 35%, black)): white now measures 4.74–8.00 at the light stop and 8.00–19.71 at the dark one across all twelve scopes; the raw (unmixed) accent is what this scan measures, so the exemption is about the gradient, not about a sub-AA label — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+    "the hero fill is a two-stop gradient darkened off the raw accent in the default-theme remediation (color-mix(theme-accent 50%, black) → color-mix(theme-accent 35%, black)): white now measures 4.74–8.00 at the light stop and 8.00–19.71 at the dark one across all twelve scopes; the raw (unmixed) accent is what this scan measures, so the exemption is about the gradient, not about a sub-AA label — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
   "views/EnterpriseFeatures.vue":
     "same two-stop darkened hero gradient and white label as EnterpriseUpgradeDialog.vue — palette-decision: see PR decision record",
 };
@@ -1463,7 +1463,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     expect(offenders).toEqual([]);
   });
 
-  // ── The TEMPLATE census (F-142/F-143/F-145): the SAME scan and pixel model the CLI gate runs.
+  // ── The TEMPLATE census: the SAME scan and pixel model the CLI gate runs.
   // scripts/check-runtime-contrast.mjs measures these numbers from the command line and prints
   // tallies; this file is the enforcer that refuses a booking whose numbers moved, a booked site
   // that stopped existing, an unexplained dynamic class binding, or a new unbooked failure. The
@@ -1564,7 +1564,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     }
   });
 
-  // F-145's site-level catch. The token gate cannot carry this family: a `text-warning-600` binding
+  // The status-shade routing's site-level catch. The token gate cannot carry this family: a `text-warning-600` binding
   // resolves to a base shade that FOREGROUND_SEGMENTS never matched, so the pair was outside BOTH
   // gates by construction, and extending that vocabulary to the bare status words would newly
   // admit 42 base/palette tokens whose measured minimum is 39 rows of `pending` against a ratchet
@@ -1605,7 +1605,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     "views/synthetics/status-pages/StatusPageImageField.vue": 1,
   };
 
-  it("locks the legacy raw status-shade family at the sites F-145 left standing", () => {
+  it("locks the legacy raw status-shade family at the sites the status-shade routing left standing", () => {
     // `(?![\w-])` is the whole rule: `text-error-500` counts, `text-error-tag-text` does not —
     // the latter is a routed foreground tier, not one of the 186 raw-shade bindings.
     const RAW_STATUS_SHADE = /\btext-(?:warning|error|success|info)(?:-\d{2,3})?(?![\w-])/g;
@@ -1626,14 +1626,14 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
         ([file, n]) =>
           `${file}: ${n} raw status-shade text bindings, ledger allows ${LEGACY_RAW_STATUS_TEXT_SITES[file] ?? 0}`,
       ),
-      "a new raw palette status shade is bound as text — route it onto --color-status-*-text (F-145)",
+      "a new raw palette status shade is bound as text — route it onto --color-status-*-text",
     ).toEqual([]);
     const healed = Object.entries(LEGACY_RAW_STATUS_TEXT_SITES).filter(
       ([file, booked]) => (seen[file] ?? 0) < booked,
     );
     expect(
       healed.map(([file, booked]) => `${file}: ${booked} booked, ${seen[file] ?? 0} left`),
-      "the F-145 site ledger is stale: a family site was drained, shrink the ledger in the same commit",
+      "the status-shade site ledger is stale: a family site was drained, shrink the ledger in the same commit",
     ).toEqual([]);
   });
 });

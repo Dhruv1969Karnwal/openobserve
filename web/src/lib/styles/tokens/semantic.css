@@ -25,7 +25,7 @@
   ); /* de-emphasized text — grey-300 measured 1.09-1.35 light; AA has no de-emphasis exemption */
   /* disabled stays grey-400 on purpose: SC 1.4.3 exempts inactive UI components */
   --color-text-disabled: var(--color-grey-400);
-  --color-text-placeholder: var(--color-grey-600); /* placeholder text is real text (F-29) */
+  --color-text-placeholder: var(--color-grey-600); /* placeholder text is real text */
   --color-text-soft: rgba(0, 0, 0, 0.75); /* black at 75% — readable but not harsh */
   --color-text-link: var(--color-primary-600); /* clickable links */
   --color-text-link-hover: var(--color-primary-700); /* link hover state */

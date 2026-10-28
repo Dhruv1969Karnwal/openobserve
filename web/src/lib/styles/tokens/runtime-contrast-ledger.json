@@ -273,7 +273,7 @@
       "id": "components/ai-assistant/chat/O2AIChatToolCallBlock.vue --census-page-bg --color-warning [non-text]",
       "kind": "non-text",
       "sites": 1,
-      "reason": "[icon-only site] legacy palette status shade warning on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (F-145): the 1 site(s) in components/ai-assistant/chat/O2AIChatToolCallBlock.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the F-145 routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.29:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] legacy palette status shade warning on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (status-shade routing): the 1 site(s) in components/ai-assistant/chat/O2AIChatToolCallBlock.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.29:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 11.52,
         "light O2 Signature": 2.29,
@@ -394,7 +394,7 @@
       "id": "components/alerts/AlertTargetsSelect.vue --census-page-bg --color-warning-600 [non-text]",
       "kind": "non-text",
       "sites": 1,
-      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (F-145): the 1 site(s) in components/alerts/AlertTargetsSelect.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the F-145 routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (status-shade routing): the 1 site(s) in components/alerts/AlertTargetsSelect.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 6.38,
         "light O2 Signature": 2.67,
@@ -1317,7 +1317,7 @@
       "id": "components/functions/FunctionsToolbar.vue --census-page-bg --color-warning-600 [non-text]",
       "kind": "non-text",
       "sites": 1,
-      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (F-145): the 1 site(s) in components/functions/FunctionsToolbar.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the F-145 routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (status-shade routing): the 1 site(s) in components/functions/FunctionsToolbar.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 6.38,
         "light O2 Signature": 2.67,
@@ -1357,7 +1357,7 @@
       "id": "components/iam/serviceAccounts/AddServiceAccount.vue --census-page-bg --color-warning-600 [non-text]",
       "kind": "non-text",
       "sites": 1,
-      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (F-145): the 1 site(s) in components/iam/serviceAccounts/AddServiceAccount.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the F-145 routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (status-shade routing): the 1 site(s) in components/iam/serviceAccounts/AddServiceAccount.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 6.38,
         "light O2 Signature": 2.67,
@@ -2017,7 +2017,7 @@
       "id": "components/settings/General.vue --census-page-bg --color-warning-600 [non-text]",
       "kind": "non-text",
       "sites": 3,
-      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (F-145): the 3 site(s) in components/settings/General.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the F-145 routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (status-shade routing): the 3 site(s) in components/settings/General.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 6.38,
         "light O2 Signature": 2.67,
@@ -2357,7 +2357,7 @@
       "id": "components/synthetics/variables/SyntheticsInheritedVariables.vue --census-page-bg --color-warning [non-text]",
       "kind": "non-text",
       "sites": 1,
-      "reason": "[icon-only site] legacy palette status shade warning on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (F-145): the 1 site(s) in components/synthetics/variables/SyntheticsInheritedVariables.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the F-145 routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.29:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] legacy palette status shade warning on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (status-shade routing): the 1 site(s) in components/synthetics/variables/SyntheticsInheritedVariables.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.29:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 11.52,
         "light O2 Signature": 2.29,
@@ -2377,7 +2377,7 @@
       "id": "components/synthetics/variables/VariableSuggestionRow.vue --census-page-bg --color-warning [non-text]",
       "kind": "non-text",
       "sites": 1,
-      "reason": "[icon-only site] legacy palette status shade warning on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (F-145): the 1 site(s) in components/synthetics/variables/VariableSuggestionRow.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the F-145 routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.29:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] legacy palette status shade warning on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (status-shade routing): the 1 site(s) in components/synthetics/variables/VariableSuggestionRow.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.29:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 11.52,
         "light O2 Signature": 2.29,
@@ -3486,7 +3486,7 @@
       "id": "plugins/traces/LLMInsightsDashboard.vue --census-page-bg --color-warning-600 [non-text]",
       "kind": "non-text",
       "sites": 1,
-      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (F-145): the 1 site(s) in plugins/traces/LLMInsightsDashboard.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the F-145 routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (status-shade routing): the 1 site(s) in plugins/traces/LLMInsightsDashboard.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 6.38,
         "light O2 Signature": 2.67,
@@ -4049,7 +4049,7 @@
       "id": "views/synthetics/status-pages/StatusPageImageField.vue --census-page-bg --color-warning-600 [non-text]",
       "kind": "non-text",
       "sites": 1,
-      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (F-145): the 1 site(s) in views/synthetics/status-pages/StatusPageImageField.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the F-145 routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "[icon-only site] legacy palette status shade warning-600 on the runtime page tint (utils/themePalette runtimePageBackground: 5% theme colour over white in light, 8% theme colour into black in dark) (status-shade routing): the 1 site(s) in views/synthetics/status-pages/StatusPageImageField.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1.4.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set (the routed text tier would over-ink the glyph) and the raw shade stays; worst 2.67:1 at light O2 Signature \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 6.38,
         "light O2 Signature": 2.67,
@@ -4069,7 +4069,7 @@
       "id": "plugins/traces/SessionDetails.vue color-mix(in oklab, var(--color-error-500) 15%, transparent) --color-status-error-text [text]",
       "kind": "text",
       "sites": 1,
-      "reason": "status-error-text painted on the translucent error tint of its own chip \u2014 F-145 routing: the site moved off the raw error shade (3.88:1 at dark O2 Signature); on the matching /NN tint wash the routed tier holds every dark scope and misses only the light band named in its reason number \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "reason": "status-error-text painted on the translucent error tint of its own chip \u2014 status-shade routing: the site moved off the raw error shade (3.88:1 at dark O2 Signature); on the matching /NN tint wash the routed tier holds every dark scope and misses only the light band named in its reason number \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 6.69,
         "light O2 Signature": 5.32,
@@ -4336,11 +4336,11 @@
   ],
   "maxDynamic": 0,
   "delegated": [],
-  "note": "Structured runtime-contrast bookings shared by scripts/check-runtime-contrast.mjs and tokens/themeRuntimeContrast.spec.ts. Every number is measured by that script in the twelve injected scopes (six predefined themes x both modes) and equality-locked; regenerate with --emit, never hand-edit a ratio. kind=text rides 4.5:1 (SC 1.4.3), kind=non-text rides 3:1 (SC 1.4.11) and is an icon-only site whose justification is in its reason. delegated rows (F-29: none standing \u2014 the grey-tier light debt was paid by re-tiering) cite a tier another ledger already owns; bookings rows are this gate's owner-decision surface. Default-theme rule (F-29): no booked text pair may sit below 4.5 at light/dark O2 Signature unless its reason carries the SC 1.4.3 / SC 1.4.11 clause it rides or the conditional guard citation proving the pair never co-paints. id form: <file-or-pair> <ground> <ink> [@chain] [opacity-NN] [bar].",
+  "note": "Structured runtime-contrast bookings shared by scripts/check-runtime-contrast.mjs and tokens/themeRuntimeContrast.spec.ts. Every number is measured by that script in the twelve injected scopes (six predefined themes x both modes) and equality-locked; regenerate with --emit, never hand-edit a ratio. kind=text rides 4.5:1 (SC 1.4.3), kind=non-text rides 3:1 (SC 1.4.11) and is an icon-only site whose justification is in its reason. delegated rows (none standing \u2014 the grey-tier light debt was paid by re-tiering) cite a tier another ledger already owns; bookings rows are this gate's owner-decision surface. Default-theme rule: no booked text pair may sit below 4.5 at light/dark O2 Signature unless its reason carries the SC 1.4.3 / SC 1.4.11 clause it rides or the conditional guard citation proving the pair never co-paints. id form: <file-or-pair> <ground> <ink> [@chain] [opacity-NN] [bar].",
   "legacyStatusFamily": {
-    "finding": "F-145",
+    "finding": "legacy status shades bound as text",
     "what": "raw palette status shades (text-warning / text-error-600 / bg-error-500 family) binding base.css shades instead of the routed --color-status-*-text tiers",
-    "resolution": "closure leg: every failing status-TEXT binding of the family is routed onto the existing text-status-*-text vocabulary (the F-126 pattern) \u2014 13 booked rows (23 measured sites) left the ledger and 69 text sites moved across 27 files; icon-only rows are re-classified in their reasons and stay booked with their numbers; severity/series rows are re-classified out of the family; bg-*/border-* uses stay (paint, not ink). The family is now caught by site, not by token: check-runtime-contrast --selftest pins two raw-shade fixtures as census findings, and themeRuntimeContrast.spec.ts equality-locks the 49 remaining raw text-shade bindings to the reclassified glyph/consent sites that justify them. The FOREGROUND_SEGMENTS route was measured and rejected: the bare status words sweep 42 tokens of which 39 sit below the text bar and 38 have no manifest row, against MAX_PENDING already at exactly 72 \u2014 the vocabulary would go red on paint steps, not on ink.",
+    "resolution": "closure leg: every failing status-TEXT binding of the family is routed onto the existing text-status-*-text vocabulary (the status-text routing pattern) \u2014 13 booked rows (23 measured sites) left the ledger and 69 text sites moved across 27 files; icon-only rows are re-classified in their reasons and stay booked with their numbers; severity/series rows are re-classified out of the family; bg-*/border-* uses stay (paint, not ink). The family is now caught by site, not by token: check-runtime-contrast --selftest pins two raw-shade fixtures as census findings, and themeRuntimeContrast.spec.ts equality-locks the 49 remaining raw text-shade bindings to the reclassified glyph/consent sites that justify them. The FOREGROUND_SEGMENTS route was measured and rejected: the bare status words sweep 42 tokens of which 39 sit below the text bar and 38 have no manifest row, against MAX_PENDING already at exactly 72 \u2014 the vocabulary would go red on paint steps, not on ink.",
     "routedBookedRows": 13,
     "routedMeasuredSites": 23,
     "routedTextSitesTotal": 69,
@@ -4348,6 +4348,6 @@
     "keptIconSites": 11,
     "reclassifiedSeveritySeries": 4,
     "remainingFamilyBindings": 49,
-    "countsHow": "re-derived by runRuntimeCensus after the routing: the routed pairs left with their sites; the routed tier's own light residuals (4.09-4.44) first booked as the status-warning-text/status-error-text rows of the F-126 family \u2014 the F-29 default-theme wave then DARKENED those tiers (warning #9c4a10, error #b91c1c light), healing the whole light cluster: no booked text pair fails a shipped-default scope any more except conditional/guarded and 1.4.3-cited ones."
+    "countsHow": "re-derived by runRuntimeCensus after the routing: the routed pairs left with their sites; the routed tier's own light residuals (4.09-4.44) first booked as the status-warning-text/status-error-text rows of the status-text routing family \u2014 the default-theme remediation wave then DARKENED those tiers (warning #9c4a10, error #b91c1c light), healing the whole light cluster: no booked text pair fails a shipped-default scope any more except conditional/guarded and 1.4.3-cited ones."
   }
 }

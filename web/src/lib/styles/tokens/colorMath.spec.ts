@@ -414,7 +414,7 @@ describe("the real token sheets", () => {
   });
 
   describe.each([
-    // +5 per theme in the F-29 default-theme remediation: the amber-800 ladder step
+    // +5 per theme in the default-theme remediation: the amber-800 ladder step
     // and the AA text roles ai-accent-text, brand-indigo-text, series-b-text, on-fill-foreground.
     ["light", 1086, 1074],
     ["dark", 1087, 1075],

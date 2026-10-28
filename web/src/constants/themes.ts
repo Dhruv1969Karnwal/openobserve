@@ -130,7 +130,7 @@ export const THEME_STORAGE_KEYS = {
  * What this record may NO LONGER claim: that any pair "clears" a bar in all twelve scopes merely
  * because its resting state does. Element opacity (opacity-NN / hover:opacity-NN) fades ink AND
  * ground toward the plate behind the control, so a booked number for the rest state says nothing
- * about the shipped hover state; that is the specific defect F-142 found at the wrap toggles below,
+ * about the shipped hover state; that is the specific defect the hover-state audit found at the wrap toggles below,
  * and every element-opacity state the census can still find (69 booking groups over 154 sites, from
  * a 30 % disabled glyph to the 1.03:1 active pagination number) is now booked BY NUMBER instead.
  *

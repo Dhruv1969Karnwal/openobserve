@@ -253,7 +253,7 @@ export interface LedgerRow {
   plate?: string;
   /** How many sites this row covers — equality-locked, so an extra site is a finding. */
   sites?: number;
-  /** Ground and ink are reachable only under a content guard the scanner cannot read (F-145 residue 3). */
+  /** Ground and ink are reachable only under a content guard the scanner cannot read (content-guard residue). */
   conditional?: boolean;
   /** Every scope's measured ratio, 2dp — an improvement is as loud as a regression. */
   at: Record<string, number>;

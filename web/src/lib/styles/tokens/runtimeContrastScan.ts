@@ -146,7 +146,7 @@ const ICON_ELEMENTS = new Set(["i", "svg", "img", "path", "use", "canvas", "pict
 /**
  * Children that carry meaning as a glyph rather than as text. The NAME test is the part that
  * matters: this app's icon component is <OIcon>, and a scan that only recognised <QIcon> measured
- * NO icon-only control at all — which is how the booked hover:opacity sites (F-142) stayed out of
+ * NO icon-only control at all — which is how the booked hover:opacity sites stayed out of
  * every census for three waves.
  */
 export const isGlyphElement = (name: string): boolean =>

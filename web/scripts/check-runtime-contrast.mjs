@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// CI gate: the MECHANIZED runtime-contrast census (F-142 + F-143 + F-145).
+// CI gate: the MECHANIZED runtime-contrast census (template scan + bookings ledger + selftest).
 //
 //   node scripts/check-runtime-contrast.mjs              # census over web/src
 //   node scripts/check-runtime-contrast.mjs --selftest   # guard self-check (fixtures + mutations)
@@ -198,7 +198,7 @@ const FIXTURES = [
     expect: { pairs: 1, bar: "text" },
   },
   {
-    name: "hover opacity composite (F-142)",
+    name: "hover opacity composite",
     source: `<template><div class="bg-theme-accent text-button-primary-foreground hover:opacity-85">Hello</div></template>`,
     expect: { pairs: 2, alpha: 0.85 },
   },
@@ -208,12 +208,12 @@ const FIXTURES = [
     expect: { pairs: 1, bar: "non-text" },
   },
   {
-    name: "legacy raw status shade as text (F-145)",
+    name: "legacy raw status shade as text",
     source: `<template><div class="text-warning-600">Careful</div></template>`,
     expect: { pairs: 1, bar: "text", ink: "--color-warning-600" },
   },
   {
-    name: "legacy raw status shade on the runtime accent wash (F-145)",
+    name: "legacy raw status shade on the runtime accent wash",
     source: `<template><div class="bg-theme-accent/10 text-warning">Careful</div></template>`,
     expect: { pairs: 1, bar: "text", ink: "--color-warning" },
   },
