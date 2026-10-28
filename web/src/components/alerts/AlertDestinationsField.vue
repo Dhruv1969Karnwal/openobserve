@@ -43,7 +43,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         :workflow-options="workflowOptions"
         :workflows-enabled="workflowsEnabled"
         :workflows-locked="workflowsLocked"
-        :workflows-lock-message="workflowsAccess.message"
         :placeholder="placeholder"
         :error="!!error"
         @update:destinations="emit('update:destinations', $event)"

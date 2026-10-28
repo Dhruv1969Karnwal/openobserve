@@ -125,7 +125,6 @@ const props = defineProps<{
   workflowsEnabled: boolean;
   /** Family supports workflows but this edition doesn't unlock them — show the group locked instead of hiding it. */
   workflowsLocked?: boolean;
-  workflowsLockMessage?: I18nText;
   error?: boolean;
   placeholder?: I18nText;
 }>();

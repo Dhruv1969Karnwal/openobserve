@@ -364,7 +364,6 @@ describe("AlertTargetsSelect", () => {
       const wrapper = createWrapper({
         workflowsEnabled: false,
         workflowsLocked: true,
-        workflowsLockMessage: "Upgrade to unlock workflows",
       });
       // A locked button here would be dead: openUpgradeDialog() is a no-op while the policy is "hide".
       expect(wrapper.find('[data-test="create-workflow-btn"]').exists()).toBe(false);
@@ -376,7 +375,6 @@ describe("AlertTargetsSelect", () => {
       const wrapper = createWrapper({
         workflowsEnabled: false,
         workflowsLocked: true,
-        workflowsLockMessage: "Upgrade to unlock workflows",
       });
       const btn = wrapper.find('[data-test="create-workflow-btn"]');
       expect(btn.exists()).toBe(true);
