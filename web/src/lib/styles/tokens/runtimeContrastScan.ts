@@ -752,9 +752,23 @@ export const unattributedRuntimeLiterals = (
         (token) => context.isRuntime(token),
       );
       if (!site.unexpandable.length && !runtime.length) continue;
+      const line = lineAt(input.source, Math.max(0, blanks.indexOf(site.literal)) + 1);
+      const same = out.find((entry) => entry.file === input.path && entry.line === line);
+      if (same) {
+        // The fragment's own literal is usually also a runtime class literal, so the walk above
+        // has already reported it; one site is one finding, with the union of what it paints.
+        const key = (pair: LiteralPair) => pair.ground + "|" + pair.ink;
+        const seen = new Set((same.pairs ?? []).map(key));
+        same.pairs = [...(same.pairs ?? []), ...pairs.filter((pair) => !seen.has(key(pair)))];
+        same.tokens = [...new Set([...same.tokens, ...runtime])];
+        same.unexpandableStems = [
+          ...new Set([...(same.unexpandableStems ?? []), ...site.unexpandable]),
+        ];
+        continue;
+      }
       out.push({
         file: input.path,
-        line: lineAt(input.source, Math.max(0, blanks.indexOf(site.literal)) + 1),
+        line,
         literal: site.literal,
         tokens: runtime,
         pairs: pairs.length ? pairs : undefined,
