@@ -83,7 +83,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { PREDEFINED_THEMES } from "@/constants/themes";
-import { generatePrimaryPalette, libraryForegroundTokens } from "@/utils/theme";
+import { generatePrimaryPalette } from "@/utils/theme";
 
 import {
   composite,
@@ -94,7 +94,6 @@ import {
   resolveTokens,
 } from "./colorMath";
 import { createRuntimeModel, runRuntimeCensus } from "./runtimeContrast";
-import { scanSources } from "./runtimeContrastScan";
 
 const here = dirname(fileURLToPath(import.meta.url));
 

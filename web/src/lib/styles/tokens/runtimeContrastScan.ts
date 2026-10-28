@@ -230,7 +230,7 @@ export const identifiersIn = (value: string): string[] =>
 
 /** The `color-mix(… transparent)` Tailwind v4 compiles a `/NN` modifier into. */
 const withAlpha = (token: string, alpha: number): string =>
-  `color-mix(in oklab, ${token} ${alpha}%, transparent)`;
+  "color-mix(in oklab, var(" + token + ") " + alpha + "%, transparent)";
 
 /** A CSS gradient is measured at its accent stop: the worst one for a light ink. */
 const gradientStop = (value: string): string | null => {
@@ -637,6 +637,10 @@ const pairsOfElement = (file: string, stack: ElFrame[], context: ScanContext): C
     if (!isRuntimeExpression(casc.ground, context) && !isRuntimeExpression(casc.ink, context)) {
       continue;
     }
+    // An opacity-0 element is not perceivable, and WCAG contrast applies to what a user can see;
+    // measuring it produced 1.00:1 "failures" on hidden overlays (OrganizationSelector's opacity-0
+    // badge) that would have been booked as real debt.
+    if (casc.alpha === 0) continue;
     // Bounding rules (documented approximations):
     //  • neither side is bound here — the page's own default pair, which the token matrix gates,
     //  • ink bound on an ANCESTOR of the filled element — that element paints its own label,
@@ -745,8 +749,15 @@ export const scanStyleRule = (file: string, style: string, context: ScanContext)
     const selector = (rule[1] ?? "").trim().replace(/\s+/g, " ");
     const body = rule[2] ?? "";
     if (!selector || selector.startsWith("@")) continue;
-    const color = /(?:^|;)\s*(?:text-)?color\s*:\s*([^;!]+)/.exec(body)?.[1]?.trim();
-    const ground = /(?:^|;)\s*background(?:-color)?\s*:\s*([^;]+)/.exec(body)?.[1]?.trim();
+    // Trailing !important is a cascade flag, not part of the colour.
+    const color = /(?:^|;)\s*(?:text-)?color\s*:\s*([^;]+)/
+      .exec(body)?.[1]
+      ?.replace(/!important$/i, "")
+      .trim();
+    const ground = /(?:^|;)\s*background(?:-color)?\s*:\s*([^;]+)/
+      .exec(body)?.[1]
+      ?.replace(/!important$/i, "")
+      .trim();
     if (!color || !ground) continue;
     const groundValue = gradientStop(ground) ?? ground;
     if (!isRuntimeExpression(color, context) && !isRuntimeExpression(groundValue, context))

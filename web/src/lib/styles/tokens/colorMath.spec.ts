@@ -180,8 +180,33 @@ describe("color-mix", () => {
     });
   });
 
+  // oklab is NOT an optional space any more: Tailwind v4 compiles every /NN alpha modifier to
+  // color-mix(in oklab, var(--color-x) N%, transparent), so the runtime-contrast census measures
+  // the whole alpha utility family through this path. Midpoint of black↔white in oklab is the
+  // neutral #636363 (L 0.5), not the #808080 an srgb mix would give.
+  it("mixes in oklab, the space Tailwind v4 compiles /NN modifiers to", () => {
+    const mid = parseColor("color-mix(in oklab, #000000 50%, #ffffff)");
+    expect(mid).not.toBeNull();
+    expect(Math.round(mid!.r)).toBe(99);
+    expect(Math.round(mid!.g)).toBe(99);
+    expect(Math.round(mid!.b)).toBe(99);
+    expect(mid!.a).toBe(1);
+  });
+
+  // Mixing into transparent must FADE the colour (premultiplied), keeping its channels: this is
+  // exactly what bg-theme-accent/10 paints, and a naive mix toward transparent's black would
+  // measure a dark slab instead of a tint.
+  it("fades toward transparent in oklab instead of darkening", () => {
+    const tint = parseColor("color-mix(in oklab, #e56d17 10%, transparent)");
+    expect(tint).not.toBeNull();
+    expect(tint!.a).toBeCloseTo(0.1, 6);
+    expect(Math.round(tint!.r)).toBe(229);
+    expect(Math.round(tint!.g)).toBe(109);
+    expect(Math.round(tint!.b)).toBe(23);
+  });
+
   it("returns null for an interpolation space it cannot do", () => {
-    expect(parseColor("color-mix(in oklab, #000000 50%, #ffffff)")).toBeNull();
+    expect(parseColor("color-mix(in hsl, #000000 50%, #ffffff)")).toBeNull();
   });
 });
 

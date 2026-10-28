@@ -109,6 +109,7 @@ const walkExt = (dir, ext, found = []) => {
 const emitRows = (report) =>
   report.unbookedRows.map((row) => ({
     id: row.id,
+    sites: row.sites,
     kind: row.pair.bar === "non-text" ? "non-text" : "text",
     where: `${row.pair.sample}`,
     reason:
@@ -210,9 +211,18 @@ const FIXTURES = [
 const runCensus = (production, model, ledger, sources, bookings = ledger.bookings, lock = null) =>
   production.runRuntimeCensus(
     model,
+    // lock !== null is FIXTURE mode: the real ledger's other rows would all report as stale
+    // against a one-element source list, so only the rows under test stay in.
     lock === null
       ? { ...ledger, bookings }
-      : { ...ledger, bookings, maxUnbooked: lock, maxDynamic: lock },
+      : {
+          ...ledger,
+          bookings,
+          delegated: [],
+          dynamicBindings: [],
+          maxUnbooked: lock,
+          maxDynamic: lock,
+        },
     sources,
   );
 
@@ -274,6 +284,7 @@ const selfTest = async (production, model, ledger) => {
   const fixturePath = fixtureKey(target.fixture.name);
   const correct = {
     id: bookedRow.id,
+    sites: bookedRow.sites,
     kind: bookedRow.pair.bar === "non-text" ? "non-text" : "text",
     reason: "brand-by-design - palette-decision: see web/src/constants/themes.ts DECISION RECORD",
     at: bookedRow.numbers,
@@ -310,7 +321,7 @@ const selfTest = async (production, model, ledger) => {
     "mutation: a new violating template is RED",
     runCensus(production, model, ledger, violationSource(), [correct], 0).exitCode === 1,
   );
-  const staleRow = { ...correct, id: bookedRow.id + " (moved)" };
+  const staleRow = { ...correct, id: ` (moved)` };
   check(
     "mutation: stale booking (site gone) is RED",
     runCensus(production, model, ledger, fixtureSource(), [staleRow], 0).staleRows.length === 1,
@@ -345,6 +356,14 @@ const main = async () => {
     const sealed = { ...ledger, maxUnbooked: report.unbooked, maxDynamic: report.dynamicCount };
     writeFileSync(LEDGER_FILE, JSON.stringify(sealed, null, 2) + String.fromCharCode(10));
     console.log(`sealed MAX-UNBOOKED=${report.unbooked} MAX-DYNAMIC=${report.dynamicCount}`);
+    process.exit(0);
+  }
+  if (args.has("--emit")) {
+    // Machine output only: pipe it into the ledger, keep the human summary on stderr.
+    console.error(
+      "emit: " + report.unbooked + " unbooked groups over " + report.pairs + " runtime pairs",
+    );
+    console.log(JSON.stringify(emitRows(report), null, 2));
     process.exit(0);
   }
   printReport(report, args, ledger);

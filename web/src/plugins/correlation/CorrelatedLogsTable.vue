@@ -175,7 +175,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           size="icon"
           class="h-5!"
           :class="{
-            'bg-theme-accent! text-button-primary-foreground! hover:opacity-80': wrapTableCells,
+            'bg-theme-accent! text-button-primary-foreground!': wrapTableCells,
           }"
           data-test="correlated-logs-table-wrap-content-btn"
           @click="wrapTableCells = !wrapTableCells"

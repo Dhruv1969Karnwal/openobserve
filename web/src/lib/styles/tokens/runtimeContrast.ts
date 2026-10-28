@@ -42,7 +42,7 @@ import {
 } from "../../../utils/themePalette";
 
 import type { CensusPair, DynamicBinding, ScanContext, ScanInput } from "./runtimeContrastScan";
-import { pairKey, scanSources, unattributedRuntimeLiterals } from "./runtimeContrastScan";
+import { scanSources, unattributedRuntimeLiterals } from "./runtimeContrastScan";
 
 import {
   composite,
@@ -50,12 +50,21 @@ import {
   parseColor,
   relativeLuminance,
   resolveColor,
+  resolveExpression,
   resolveTokens,
   type Rgba,
 } from "./colorMath";
 
 export type { ThemeMode };
-export { composite, contrastRatio, parseColor, relativeLuminance, resolveColor, resolveTokens };
+export {
+  composite,
+  contrastRatio,
+  parseColor,
+  relativeLuminance,
+  resolveColor,
+  resolveExpression,
+  resolveTokens,
+};
 export type { Rgba };
 
 export const TEXT_MIN = 4.5;
@@ -95,18 +104,8 @@ export interface RuntimeModel {
 export const PAGE_GROUND = "--census-page-bg";
 
 /** A token name, a literal colour, or a colour expression resolved against `scope`. */
-const literalSide = (value: string, scope: Map<string, string>): Rgba | null => {
-  const direct = resolveColor(value, scope) ?? parseColor(value);
-  if (direct) return direct;
-  // An expression (`color-mix(in oklab, var(--color-x) 10%, transparent)`) is resolved by
-  // inlining every var() reference, because colorMath only folds vars through a scope map.
-  const expanded = value.replace(/var\(\s*(--[\w-]+)\s*(?:,[^)]*)?\)/g, (match, token: string) => {
-    const color = resolveColor(token, scope);
-    if (!color) return match;
-    return `rgba(${Math.round(color.r)}, ${Math.round(color.g)}, ${Math.round(color.b)}, ${color.a})`;
-  });
-  return expanded === value ? null : parseColor(expanded);
-};
+const literalSide = (value: string, scope: Map<string, string>): Rgba | null =>
+  resolveColor(value, scope) ?? resolveExpression(value, scope);
 
 /** Element opacity: `alpha` of the layer, the plate behind it for the rest. */
 const blend = (layer: Rgba, plate: Rgba, alpha: number): Rgba => ({
@@ -242,7 +241,7 @@ export const createRuntimeModel = (cssSources: string[]): RuntimeModel => {
 /** Per-theme label so a booked key reads like the ledger's ("dark O2 Lens rest"). */
 export const scopeKey = (scope: Scope): string => `${scope.mode} ${scope.theme}`;
 
-/** One booked (site, ground, ink) residual, number-locked across the twelve scopes. */
+/** One booked residual, number-locked across the twelve scopes. */
 export interface LedgerRow {
   id: string;
   /** The WCAG bar the site is measured at; a non-text row must be justified per entry. */
@@ -252,6 +251,8 @@ export interface LedgerRow {
   bookedIn?: string;
   /** Plate the ground composites over (defaults to the ledger's plate). */
   plate?: string;
+  /** How many sites this row covers — equality-locked, so an extra site is a finding. */
+  sites?: number;
   /** Every scope's measured ratio, 2dp — an improvement is as loud as a regression. */
   at: Record<string, number>;
 }
@@ -273,9 +274,14 @@ export interface CensusLedger {
 
 export interface CensusRow {
   pair: CensusPair;
+  /** Booking key: file, both sides, the state and the bar (see groupKey). */
   id: string;
   pairId: string;
+  file: string;
+  lines: number[];
+  sites: number;
   bar: number;
+  /** Key of the pair WITHOUT the file, used to cite a row booked in another ledger. */
   numbers: Record<string, number>;
   failing: Array<[string, number]>;
   unresolved: number;
@@ -286,6 +292,7 @@ export interface CensusRow {
 export interface CensusReport {
   files: number;
   pairs: number;
+  groups: number;
   measuredPass: number;
   booked: number;
   unbooked: number;
@@ -307,14 +314,50 @@ export interface CensusReport {
 
 const round2 = (value: number): number => Math.round(value * 100) / 100;
 
+/**
+ * The delegation key of a pair: the same identity as groupKey WITHOUT the file — a tier is a tier
+ * wherever it is painted, so this is what cites a row booked in another ledger (contrast-manifest).
+ */
+export const delegationKey = (pair: CensusPair): string =>
+  pair.ground +
+  " " +
+  pair.ink +
+  (pair.state ? " @" + pair.state : "") +
+  (pair.alpha !== undefined ? " opacity-" + Math.round(pair.alpha * 100) : "") +
+  " [" +
+  pair.bar +
+  "]";
+
+/**
+ * The booking key of a pair: the FILE, both sides, the variant chain, the element opacity and the
+ * bar. Deliberately no line number — a booking must survive the site moving down a file, while the
+ * row's sites count still catches every added or removed binding.
+ */
+export const groupKey = (pair: CensusPair): string =>
+  pair.file +
+  " " +
+  pair.ground +
+  " " +
+  pair.ink +
+  (pair.state ? " @" + pair.state : "") +
+  (pair.alpha !== undefined ? " opacity-" + Math.round(pair.alpha * 100) : "") +
+  " [" +
+  pair.bar +
+  "]";
+
 /** Inks a failing site could simply bind: stable foreground tokens that hold the bar everywhere. */
 const SUGGESTION_INKS = ["--color-text-heading", "--color-text-body", "--color-text-secondary"];
 
 /**
  * The census pipeline BOTH gates run: scan the sources, measure every runtime pair in all twelve
- * injected scopes, and classify each as measured-pass / booked / delegated / unbooked / drift.
- * The ledger is the only way a pair may fail its bar, and its numbers are equality-checked, so a
- * booking that stops describing the source is as loud as a brand-new failure.
+ * injected scopes, and classify each BOOKING GROUP as measured-pass / booked / delegated /
+ * unbooked / drift.
+ *
+ * A booking group is (file, ground, ink, state, opacity, bar): one site binding one failing pair is
+ * one row, and a file that binds the same pair in twelve places is still one row with sites=12 —
+ * the count is equality-locked, so the thirteenth site is a finding. The ledger is the only way a
+ * pair may fail its bar and its twelve numbers are checked exactly, so a booking that stops
+ * describing the source is as loud as a brand-new failure.
  */
 export const runRuntimeCensus = (
   model: RuntimeModel,
@@ -333,8 +376,10 @@ export const runRuntimeCensus = (
     bodyInk: ledger.bodyInk,
     pageGround: ledger.pageGround,
   };
-  const vueSources = sources.filter((source) => source.path.endsWith(".vue"));
-  const scan = scanSources(vueSources, context);
+  const scan = scanSources(
+    sources.filter((source) => source.path.endsWith(".vue")),
+    context,
+  );
   const cited = new Set(
     scan.pairs.flatMap((pair) => [pair.ground, pair.ink]).filter((value) => value.startsWith("--")),
   );
@@ -346,18 +391,24 @@ export const runRuntimeCensus = (
     (ledger.dynamicBindings ?? []).map((row) => row.file + " " + row.literal),
   );
 
-  const rows: CensusRow[] = scan.pairs.map((pair) => {
-    const id = pairKey(pair);
-    const pairId = pair.ground + " " + pair.ink;
+  const groups = new Map<string, CensusRow>();
+  for (const pair of scan.pairs) {
+    const bookingKey = groupKey(pair);
+    const existing = groups.get(bookingKey);
+    if (existing) {
+      existing.sites += 1;
+      if (existing.lines.length < 4) existing.lines.push(pair.line);
+      continue;
+    }
     const bar = pair.bar === "non-text" ? ledger.nonTextMin : ledger.textMin;
-    const booking = bookings.get(id) ?? delegatedRows.get(pairId);
-    const plate = booking?.plate ?? ledger.plate;
+    const pairId = delegationKey(pair);
+    const booking = bookings.get(bookingKey) ?? delegatedRows.get(pairId);
     const numbers: Record<string, number> = {};
     const failing: Array<[string, number]> = [];
     let unresolved = 0;
     for (const scope of model.scopes) {
       const value = model.measurePair(pair.ink, pair.ground, scope, {
-        under: plate,
+        under: booking?.plate ?? ledger.plate,
         alpha: pair.alpha,
       });
       if (value === null) {
@@ -367,25 +418,37 @@ export const runRuntimeCensus = (
       numbers[scopeKey(scope)] = round2(value);
       if (value < bar) failing.push([scopeKey(scope), round2(value)]);
     }
-    return {
+    groups.set(bookingKey, {
       pair,
-      id,
+      id: bookingKey,
       pairId,
+      file: pair.file,
+      lines: [pair.line],
+      sites: 1,
       bar,
       numbers,
       failing,
       unresolved,
       booking,
-      delegated: !bookings.has(id) && Boolean(booking),
-    };
-  });
+      delegated: !bookings.has(bookingKey) && Boolean(booking),
+    });
+  }
+  const rows = [...groups.values()];
 
   const measuredPass = rows.filter((row) => row.failing.length === 0 && row.unresolved === 0);
   const problems = rows.filter((row) => row.failing.length > 0 || row.unresolved > 0);
   const booked = problems.filter((row) => row.booking);
   const unbooked = problems.filter((row) => !row.booking);
 
+  // A delegated row covers every group that cites its pair, so its sites lock is the TOTAL,
+  // while a per-file booking locks its own count.
+  const delegatedTotals = new Map<string, number>();
+  for (const row of rows.filter((entry) => entry.delegated)) {
+    delegatedTotals.set(row.pairId, (delegatedTotals.get(row.pairId) ?? 0) + row.sites);
+  }
+
   const driftRows: string[] = [];
+  const seenDelegations = new Set<string>();
   for (const row of booked) {
     const booking = row.booking;
     if (!booking) continue;
@@ -399,6 +462,18 @@ export const runRuntimeCensus = (
     if (!row.delegated && !(booking.reason ?? "").includes("palette-decision")) {
       driftRows.push(
         row.id + ": a booked pair needs a reason carrying the palette-decision marker",
+      );
+    }
+    const covered = row.delegated ? (delegatedTotals.get(row.pairId) ?? row.sites) : row.sites;
+    if (booking.sites === undefined) {
+      driftRows.push(row.id + ": a booking must lock the number of sites it covers (sites)");
+    }
+    if (row.delegated && !seenDelegations.has(row.pairId)) {
+      seenDelegations.add(row.pairId);
+    }
+    if (booking.sites !== undefined && booking.sites !== covered) {
+      driftRows.push(
+        row.id + ": booked for " + booking.sites + " site(s), the source binds " + covered,
       );
     }
     for (const [scope, value] of Object.entries(row.numbers)) {
@@ -425,7 +500,7 @@ export const runRuntimeCensus = (
     }
   }
 
-  const staleRows = ledger.bookings.filter((entry) => !rows.some((row) => row.id === entry.id));
+  const staleRows = ledger.bookings.filter((entry) => !groups.has(entry.id));
   const staleDelegations = (ledger.delegated ?? []).filter(
     (entry) => !rows.some((row) => row.pairId === entry.id),
   );
@@ -448,7 +523,8 @@ export const runRuntimeCensus = (
 
   const counts = {
     files: scan.files,
-    pairs: rows.length,
+    pairs: scan.pairs.length,
+    groups: rows.length,
     measuredPass: measuredPass.length,
     booked: booked.length,
     unbooked: unbooked.length,
