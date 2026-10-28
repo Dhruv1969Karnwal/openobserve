@@ -25,6 +25,10 @@
   --color-button-primary-active: var(--color-primary-800);
   --color-button-primary-disabled: var(--color-primary-300);
   --color-button-primary-foreground: var(--color-white);
+  /* The only button focus-ring role with a paint site (ring-button-primary-focus-ring).
+     The ten dead siblings feef74aa6 left behind and the never-bound
+     --color-button-confirm-hover are deleted (F-161c); colorMath.spec's counts moved
+     down accordingly. Re-declare a role here when a component actually binds one. */
   --color-button-primary-focus-ring: var(--color-focus-ring-accent);
 
   /* Button — secondary */
@@ -34,7 +38,6 @@
   --color-button-secondary-hover: var(--color-surface-accent-hover);
   --color-button-secondary-active: var(--color-surface-accent-active);
   --color-button-secondary-disabled: var(--color-surface-panel);
-  --color-button-secondary-focus-ring: var(--color-focus-ring-accent);
 
   /* Button — outline */
   --color-button-outline-text: var(--color-text-heading);
@@ -48,13 +51,11 @@
   --color-button-ghost-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-active-bg: var(--color-surface-accent-active);
   --color-button-ghost-hover-ring: var(--color-primary-600);
-  --color-button-ghost-focus-ring: var(--color-focus-ring-accent);
 
   /* Button — ghost-primary (flat + primary color text) */
   --color-button-ghost-primary-text: var(--color-primary-800);
   --color-button-ghost-primary-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-primary-active-bg: var(--color-surface-accent-active);
-  --color-button-ghost-primary-focus-ring: var(--color-focus-ring-accent);
 
   /* Button — on-dark-primary (primary-colored text on a WHITE button that sits on
      a dark gradient panel). Fixed at primary-600 in BOTH themes — must NOT flip to
@@ -65,26 +66,22 @@
   --color-button-ghost-destructive-text: var(--color-error-600);
   --color-button-ghost-destructive-hover-bg: var(--color-error-50);
   --color-button-ghost-destructive-active-bg: var(--color-error-100);
-  --color-button-ghost-destructive-focus-ring: var(--color-focus-ring-danger);
 
   /* Button — ghost-success (flat + positive green text) — play/resume actions */
   --color-button-ghost-success-text: var(--color-success-600);
   --color-button-ghost-success-hover-bg: var(--color-success-50);
   --color-button-ghost-success-active-bg: var(--color-success-100);
-  --color-button-ghost-success-focus-ring: var(--color-focus-ring-success);
 
   /* Button — ghost-muted (secondary text at rest → primary text + bg on hover) */
   --color-button-ghost-muted-text: var(--color-text-secondary);
   --color-button-ghost-muted-hover-text: var(--color-primary-800);
   --color-button-ghost-muted-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-muted-active-bg: var(--color-surface-accent-active);
-  --color-button-ghost-muted-focus-ring: var(--color-focus-ring-accent);
 
   /* Button — ghost-subtle (secondary text, 60 % opacity at rest, full on hover) */
   --color-button-ghost-subtle-text: var(--color-grey-950);
   --color-button-ghost-subtle-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-subtle-active-bg: var(--color-surface-accent-active);
-  --color-button-ghost-subtle-focus-ring: var(--color-focus-ring-accent);
 
   /* Button — ghost-warning (yellow-600 text for contrast on white, faint yellow tint on hover) */
   --color-button-ghost-warning-text: var(--color-warning-600);
@@ -98,7 +95,6 @@
     var(--color-warning-400) 22%,
     transparent
   );
-  --color-button-ghost-warning-focus-ring: var(--color-focus-ring-warning);
 
   /* Button — outline-warning (transparent bg, yellow-600 border + text) */
   --color-button-outline-warning-text: var(--color-warning-600);
@@ -120,14 +116,12 @@
   --color-button-warning-active: var(--color-warning-600);
   --color-button-warning-foreground: var(--color-grey-900);
   --color-button-warning-border: var(--color-warning-400);
-  --color-button-warning-focus-ring: var(--color-focus-ring-warning);
 
   /* Button — pending (stale result: solid amber, never the theme accent) */
   --color-button-pending-bg: var(--color-amber-400);
   --color-button-pending-hover-bg: var(--color-amber-500);
   --color-button-pending-active-bg: var(--color-amber-600);
   --color-button-pending-text: var(--color-grey-950);
-  --color-button-pending-focus-ring: var(--color-focus-ring-warning);
 
   /* Button — destructive */
   --color-button-destructive: var(--color-error-600);
@@ -137,7 +131,6 @@
 
   /* Button — confirm (the affirmative twin of destructive; white holds AA on these stops) */
   --color-button-confirm: var(--color-success-700);
-  --color-button-confirm-hover: var(--color-success-900);
   --color-button-confirm-foreground: var(--color-white);
 
   /* ButtonGroup */
@@ -1379,7 +1372,6 @@
   --color-button-secondary-active: var(--color-button-secondary-active);
   --color-button-secondary-disabled: var(--color-button-secondary-disabled);
   --color-button-secondary-foreground: var(--color-button-secondary-foreground);
-  --color-button-secondary-focus-ring: var(--color-button-secondary-focus-ring);
 
   /* Button — outline */
   --color-button-outline-text: var(--color-button-outline-text);
@@ -1393,13 +1385,11 @@
   --color-button-ghost-hover-bg: var(--color-button-ghost-hover-bg);
   --color-button-ghost-active-bg: var(--color-button-ghost-active-bg);
   --color-button-ghost-hover-ring: var(--color-button-ghost-hover-ring);
-  --color-button-ghost-focus-ring: var(--color-button-ghost-focus-ring);
 
   /* Button — ghost-primary */
   --color-button-ghost-primary-text: var(--color-button-ghost-primary-text);
   --color-button-ghost-primary-hover-bg: var(--color-button-ghost-primary-hover-bg);
   --color-button-ghost-primary-active-bg: var(--color-button-ghost-primary-active-bg);
-  --color-button-ghost-primary-focus-ring: var(--color-button-ghost-primary-focus-ring);
 
   /* Button — on-dark-primary */
   --color-button-on-dark-primary-text: var(--color-button-on-dark-primary-text);
@@ -1408,32 +1398,27 @@
   --color-button-ghost-destructive-text: var(--color-button-ghost-destructive-text);
   --color-button-ghost-destructive-hover-bg: var(--color-button-ghost-destructive-hover-bg);
   --color-button-ghost-destructive-active-bg: var(--color-button-ghost-destructive-active-bg);
-  --color-button-ghost-destructive-focus-ring: var(--color-button-ghost-destructive-focus-ring);
 
   /* Button — ghost-success */
   --color-button-ghost-success-text: var(--color-button-ghost-success-text);
   --color-button-ghost-success-hover-bg: var(--color-button-ghost-success-hover-bg);
   --color-button-ghost-success-active-bg: var(--color-button-ghost-success-active-bg);
-  --color-button-ghost-success-focus-ring: var(--color-button-ghost-success-focus-ring);
 
   /* Button — ghost-muted */
   --color-button-ghost-muted-text: var(--color-button-ghost-muted-text);
   --color-button-ghost-muted-hover-text: var(--color-button-ghost-muted-hover-text);
   --color-button-ghost-muted-hover-bg: var(--color-button-ghost-muted-hover-bg);
   --color-button-ghost-muted-active-bg: var(--color-button-ghost-muted-active-bg);
-  --color-button-ghost-muted-focus-ring: var(--color-button-ghost-muted-focus-ring);
 
   /* Button — ghost-subtle */
   --color-button-ghost-subtle-text: var(--color-button-ghost-subtle-text);
   --color-button-ghost-subtle-hover-bg: var(--color-button-ghost-subtle-hover-bg);
   --color-button-ghost-subtle-active-bg: var(--color-button-ghost-subtle-active-bg);
-  --color-button-ghost-subtle-focus-ring: var(--color-button-ghost-subtle-focus-ring);
 
   /* Button — ghost-warning */
   --color-button-ghost-warning-text: var(--color-button-ghost-warning-text);
   --color-button-ghost-warning-hover-bg: var(--color-button-ghost-warning-hover-bg);
   --color-button-ghost-warning-active-bg: var(--color-button-ghost-warning-active-bg);
-  --color-button-ghost-warning-focus-ring: var(--color-button-ghost-warning-focus-ring);
 
   /* Button — outline-warning */
   --color-button-outline-warning-text: var(--color-button-outline-warning-text);
@@ -1447,14 +1432,12 @@
   --color-button-warning-active: var(--color-button-warning-active);
   --color-button-warning-foreground: var(--color-button-warning-foreground);
   --color-button-warning-border: var(--color-button-warning-border);
-  --color-button-warning-focus-ring: var(--color-button-warning-focus-ring);
 
   /* Button — pending */
   --color-button-pending-bg: var(--color-button-pending-bg);
   --color-button-pending-hover-bg: var(--color-button-pending-hover-bg);
   --color-button-pending-active-bg: var(--color-button-pending-active-bg);
   --color-button-pending-text: var(--color-button-pending-text);
-  --color-button-pending-focus-ring: var(--color-button-pending-focus-ring);
 
   /* Button — destructive */
   --color-button-destructive: var(--color-button-destructive);
@@ -1464,7 +1447,6 @@
 
   /* Button — confirm */
   --color-button-confirm: var(--color-button-confirm);
-  --color-button-confirm-hover: var(--color-button-confirm-hover);
   --color-button-confirm-foreground: var(--color-button-confirm-foreground);
 
   /* ButtonGroup */

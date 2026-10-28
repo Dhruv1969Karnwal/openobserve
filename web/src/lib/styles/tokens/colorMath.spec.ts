@@ -414,10 +414,14 @@ describe("the real token sheets", () => {
   });
 
   describe.each([
-    // +5 per theme in the default-theme remediation: the amber-800 ladder step
-    // and the AA text roles ai-accent-text, brand-indigo-text, series-b-text, on-fill-foreground.
-    ["light", 1086, 1074],
-    ["dark", 1087, 1075],
+    // Honesty note on these counts: 3fa9a4e95 added two tokens (stepper-indicator-error-fg,
+    // toast-loading-fg) WITHOUT re-pinning, so the sheets sat at 1088/1076 and 1089/1077
+    // while this pin still read 1086/1074 — the stale number, not a lost token.
+    // −11 here is F-161c: the ten dead `--color-button-*-focus-ring` roles left behind by
+    // feef74aa6 (only button-primary-focus-ring has a paint site) and the unbound
+    // --color-button-confirm-hover deleted from component.css; counts move DOWN on purpose.
+    ["light", 1077, 1065],
+    ["dark", 1078, 1066],
   ] as const)("%s theme", (theme, total, resolved) => {
     const scope = THEMES[theme];
     const names = colorTokens(scope);
