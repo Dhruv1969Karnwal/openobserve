@@ -25,22 +25,23 @@
   color: #6d28d9;
 
 }
-/* AA floor on the plate these classes actually paint on. No gate reads this sheet:
-   the runtime-contrast census walks `.vue`/`.ts` only, and a v-html payload is
-   invisible to a template scan, so the ratios below are stated here and were
-   computed with lib/styles/tokens/colorMath over white, --color-surface-subtle
-   (#f5f5f5) and the default light page tint (#f4f4f4) in light, #121212/#171717 in
-   dark. Sub-AA light values here are PRE-EXISTING pixels (unchanged since the
-   redesign's base commit), not Darknight regressions; each note quotes the value
-   it replaces. After this file the whole sheet measures >= 4.57 in light and
-   >= 6.09 in dark. */
+/* AA floor on the resting surfaces the log JSON sits on — light #ffffff / #fafafa /
+   #f6f8fa / #f5f5f5, dark the --d-* ladder #15171a (= --color-syntax-bg) through
+   #282c33 (= --d-overlay) — recomputed with colorMath's WCAG math: >= 4.61 in light
+   (.log-ip on #f5f5f5), >= 4.92 in dark (#999 on #282c33; >= 6.30 on the canvas). No
+   gate reads this sheet (the census walks `.vue`/`.ts` only, and a v-html payload is
+   invisible to a template scan), so the numbers live here. Light accent row washes
+   (--color-primary-50/100 under --color-table-row-hover-bg / -selected-bg) are NOT in
+   that set — the mid-tone hues drop below 4.5 there, which needs a ramp-aware re-ink
+   of the whole sheet and is not a claim this sheet makes. Sub-AA values here are
+   PRE-EXISTING pixels, not Darknight regressions; each note quotes what it replaces. */
 .log-null {
-  /* was #6b7280 (4.40); grey-600 is the sheet's AA text tier */
+  /* was #6b7280 (4.43); grey-600 is the sheet's AA text tier */
   color: var(--color-text-secondary);
 
 }
 .log-separator {
-  /* was #9ca3af (2.31): braces and colons are visible JSON text, not decoration */
+  /* was #9ca3af (2.33): braces and colons are visible JSON text, not decoration */
   color: var(--color-text-muted);
 
 }
@@ -52,14 +53,14 @@
   font-weight: normal;
 }
 .log-object-brace {
-  /* was #9ca3af (2.31) — see the note on .log-null */
+  /* was #9ca3af (2.33) — see the note on .log-null */
   color: var(--color-text-muted);
 
 }
 
 /* Semantic type classes - colors from keyValueParser.ts */
 .log-ip {
-  /* was #D97706 (2.90): amber-700 is the same hue at 4.57 */
+  /* was #D97706 (2.92): amber-700 is the same hue at 4.61 */
   color: var(--color-amber-700);
 
 }
@@ -76,12 +77,12 @@
 
 }
 .log-http-method {
-  /* was #388e3c (3.74): the routed success tier, 4.93 on the worst light plate */
+  /* was #388e3c (3.77): the routed success tier, 4.97 on the worst light plate */
   color: var(--color-status-success-text); /* Green for HTTP methods (not in keyValueParser) */
 
 }
 .log-status-code {
-  /* was #f57c00 (2.46): orange-700 keeps the hue at 4.71 */
+  /* was #f57c00 (2.48): orange-700 keeps the hue at 4.75 */
   color: var(--color-orange-700); /* Orange for status codes (not in keyValueParser) */
 
 }
@@ -116,6 +117,11 @@
 
 }
 .dark .log-separator {
+  color: #999;
+}
+/* Structural punctuation is text, not decoration: braces ride the separator's dark ink
+   (4.92 on --d-overlay, 6.30 on the canvas) — F-160 residual, verifier-report-11. */
+.dark .log-object-brace {
   color: #999;
 }
 .dark .log-number {
@@ -171,7 +177,7 @@
 
 }
 /* Pre-existing gap: no dark variant existed, so the light blue painted 3.47:1 on the
-   dark plate. Same value .dark .log-number and .log-timestamp already ride. */
+   --d-base canvas. Same value .dark .log-number and .log-timestamp already ride. */
 .dark .log-file-size {
   color: #60A5FA;
 
