@@ -189,8 +189,8 @@ const onNativeCopy = () => {
         v-else-if="chrome === 'editor'"
         class="o2-code-head bg-theme-tab-bg inline-flex min-w-0 items-center gap-2"
       >
-        <OIcon name="code" size="xs" class="opacity-60" />
-        <span class="font-mono text-xs font-semibold tracking-[0.01em] opacity-75">{{
+        <OIcon name="code" size="xs" />
+        <span class="font-mono text-xs font-semibold tracking-[0.01em]">{{
           filename || lang || t("common.plainText")
         }}</span>
       </span>

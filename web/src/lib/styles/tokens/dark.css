@@ -341,7 +341,9 @@
 
   /* Collapsible */
   --color-collapsible-trigger-hover-bg: var(--color-surface-accent-hover);
-  --color-collapsible-trigger-active-bg: var(--color-surface-accent-active);
+  /* Pressed step darkened off --color-surface-accent-active (#39404a): the caption/icon
+     secondary ink measured 4.15 there, under AA; this step holds 4.5+ for it. */
+  --color-collapsible-trigger-active-bg: #252a32;
   --color-collapsible-trigger-open-bg: var(--color-surface-accent-hover);
   --color-collapsible-open-accent: var(--color-primary-400);
   --color-collapsible-icon-open: var(--color-primary-400);
@@ -492,6 +494,10 @@
   --color-input-placeholder: var(--color-text-placeholder);
   --color-input-error-text: var(--color-error-400);
   --color-input-border-error: var(--color-error-400);
+  /* Slider/option-group error inks had no dark override and rode the light step
+     (error-600/700 measures 3.88 on the dark page) — same fix input/select carry. */
+  --color-slider-error-text: var(--color-error-400);
+  --color-option-group-error-text: var(--color-error-400);
 
   /* Select (OSelect) — same surface-matching bg + disabled strategy as input. */
   --color-select-bg: var(--color-surface-base);
@@ -559,6 +565,7 @@
   --color-file-disabled-border: var(--color-border-default);
   --color-file-error-text: var(--color-error-400);
   --color-file-error-border: var(--color-error-400);
+  --color-file-placeholder: var(--color-text-placeholder);
   --color-file-chip-bg: var(--color-primary-900);
   --color-file-chip-text: var(--color-primary-200);
   --color-file-chip-remove: var(--color-primary-200);
@@ -957,6 +964,13 @@
 .dark :root,
 .dark {
   --color-actions-column-shadow: rgba(125, 125, 125, 0.694);
+  /* AA text roles minted for the shipped-default remediation (light values in
+     base.css/semantic.css; these steps clear 4.5 on the dark page). */
+  --color-ai-accent-text: #a798ff;
+  /* never painted (libraryForegroundTokens injects the pick in both modes); static sheet stand-in */
+  --color-on-fill-foreground: var(--color-grey-100);
+  --color-brand-indigo-text: #8f96e8;
+  --color-series-b-text: var(--color-series-b);
   --color-bg-gray: color-mix(in srgb, var(--color-theme-accent) 5%, rgb(42, 42, 42));
   /* Form field label — dark steps. #c4c4c4 has no palette equivalent. */
   --color-input-label-text: var(--color-grey-200);
@@ -965,7 +979,14 @@
   --color-scrollbar-thumb: var(--color-grey-700);
   --color-scrollbar-thumb-hover: var(--color-grey-600);
   /* Lighter teal step so the VRL section bar stays visible on dark surfaces.
-     (--color-promo-* is deliberately NOT overridden — promo art is theme-independent.) */
+     (Promo fills stay theme-independent; only the badge text role brightens — the
+     home banner ground follows --color-surface-base, so amber-800 sank to 3.73 in dark.) */
+  --color-promo-webinar-accent-text: var(--color-amber-300);
+  --color-promo-webinar-home-bg: color-mix(
+    in srgb,
+    var(--color-promo-webinar-accent) 6%,
+    var(--color-surface-base)
+  );
   --color-section-accent-secondary: var(--color-teal-400);
   --color-card-glass-border: rgba(255, 255, 255, 0.4);
   --color-card-glass-bg: var(--color-surface-base);
@@ -1106,7 +1127,7 @@
   --color-cancel-query-bg: #7a3838;
   --color-cancel-query-foreground: var(--color-white);
   --color-highlight-bg: #747474;
-  --color-icon-color: #5e5e5e;
+  --color-icon-color: #9a9ea6; /* was #5e5e5e: 2.89 on the page, under both the text and 3:1 glyph bars */
 
   /* eslint-disable local/no-hardcoded-px -- optical: the 1px contact shadow must stay one device pixel */
   --shadow-ai-focus:

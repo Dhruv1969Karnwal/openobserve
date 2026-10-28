@@ -34,12 +34,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       >
         <div class="flex flex-col gap-1">
           <div class="text-2xl font-bold">{{ dialogConfig.heroTitle }}</div>
-          <div class="text-sm italic opacity-90">{{ dialogConfig.offerText }}</div>
+          <div class="text-sm italic">{{ dialogConfig.offerText }}</div>
         </div>
         <div class="flex flex-wrap items-center gap-4">
           <div
             v-if="!isLoadingLicense"
-            class="rounded-default bg-success-500 px-4 py-2 text-base font-bold text-white"
+            class="rounded-default bg-success-500 text-on-status-fill-text px-4 py-2 text-base font-bold"
           >
             {{ dialogConfig.badgeText }}
           </div>
@@ -47,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             v-if="dialogConfig.showPrimaryButton"
             variant="on-dark-primary"
             data-test="enterprise-features-primary-btn"
-            class="text-theme-accent! bg-white!"
+            class="bg-white!"
             @click="handlePrimaryButtonClick"
           >
             {{ dialogConfig.primaryButtonText }}

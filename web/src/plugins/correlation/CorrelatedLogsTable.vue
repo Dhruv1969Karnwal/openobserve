@@ -101,7 +101,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   @drop="handleDrop($event, index)"
                   :class="[
                     'group hover:bg-interactive-hover-bg cursor-grab transition-colors duration-200',
-                    { 'cursor-grabbing! opacity-50': draggedIndex === index },
+                    { 'cursor-grabbing!': draggedIndex === index },
                   ]"
                   :data-test="`column-item-${field}`"
                   @select="

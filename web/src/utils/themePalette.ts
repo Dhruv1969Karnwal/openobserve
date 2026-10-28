@@ -178,6 +178,10 @@ export const libraryForegroundTokens = (
   const tokens: Record<string, string> = {
     "--color-checkbox-checked-fg": pickReadableForeground(checkboxFill),
     "--color-button-primary-foreground": pickButtonForeground(palette),
+    // The on-dark-primary CTA is a WHITE pill on the dark hero in BOTH modes, so its
+    // accent-as-text label is picked for AA on literal white (primary-600 on white sinks
+    // to 1.25 under Signature dark, whose theme colour is near-white).
+    "--color-button-on-dark-primary-text": pickReadableShade(palette, "#FFFFFF"),
     // The toast action chip is filled with the ramp on BOTH modes but with opposite-signed
     // shades (light 600/700, dark 400/300), so its label must be picked per scope.
     "--color-toast-action-foreground": pickReadableForeground(
@@ -185,6 +189,13 @@ export const libraryForegroundTokens = (
     ),
     "--color-toast-action-foreground-hover": pickReadableForeground(
       mode === "dark" ? palette["300"] : palette["700"],
+    ),
+    // Generic ink for small glyphs painted directly on a runtime ramp fill
+    // (toast info badge, drag handle on the accent dot): always full AA —
+    // pickButtonForeground's 3:1 compromise is reserved for button state fills.
+    // Dark runs those fills off primary-400 (dark.css), light off primary-600.
+    "--color-on-fill-foreground": pickReadableForeground(
+      mode === "dark" ? palette["400"] : palette["600"],
     ),
   };
   if (mode === "light") {

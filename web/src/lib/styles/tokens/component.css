@@ -359,7 +359,7 @@
   --color-badge-warning-ol-border: var(--color-warning-600);
   --color-badge-warning-ol-text: var(--color-warning-700);
   --color-badge-warning-soft-bg: var(--color-warning-50);
-  --color-badge-warning-soft-text: var(--color-warning-700);
+  --color-badge-warning-soft-text: #9c4a10; /* warning-700 measured 4.47 on the light page */
   /* warning-quiet in LIGHT is the soft treatment: pale wash, deep text. */
   --color-badge-warning-quiet-bg: var(--color-warning-50);
   --color-badge-warning-quiet-text: var(--color-warning-700);
@@ -596,12 +596,14 @@
   --color-input-disabled-text: var(--color-text-secondary);
   --color-input-focus-ring: var(--color-focus-ring-accent);
   --color-input-text: var(--color-text-heading);
-  --color-input-placeholder: var(--color-text-disabled);
+  --color-input-placeholder: var(
+    --color-text-placeholder
+  ); /* placeholder is real text, not disabled UI */
   /* text-heading (not text-secondary) so labels don't read as disabled/hint text */
   --color-input-label: var(--color-text-heading);
   --color-input-hint: var(--color-text-secondary);
   --color-input-help-text: var(--color-text-secondary);
-  --color-input-error-text: var(--color-error-600);
+  --color-input-error-text: var(--color-error-700); /* error-600 measured 4.38 on the light page */
   --color-input-addon-bg: var(--color-surface-panel);
   --color-input-addon-text: var(--color-text-secondary);
   --color-input-clear-btn: var(--color-text-secondary);
@@ -618,11 +620,11 @@
   --color-select-disabled-bg: var(--color-grey-200);
   --color-select-disabled-text: var(--color-text-secondary);
   --color-select-text: var(--color-text-soft);
-  --color-select-placeholder: var(--color-text-disabled);
+  --color-select-placeholder: var(--color-text-placeholder);
   /* text-heading, not text-secondary (same as input-label) */
   --color-select-label: var(--color-text-heading);
   --color-select-icon: var(--color-text-secondary);
-  --color-select-error-text: var(--color-error-600);
+  --color-select-error-text: var(--color-error-700);
   --color-select-content-bg: var(--color-surface-overlay);
   --color-select-content-border: var(--color-border-default);
   --color-select-item-text: var(--color-text-heading);
@@ -689,7 +691,7 @@
   --color-slider-focus-ring: var(--color-focus-ring-accent);
   --color-slider-label: var(--color-text-heading);
   --color-slider-value: var(--color-text-secondary);
-  --color-slider-error-text: var(--color-error-600);
+  --color-slider-error-text: var(--color-error-700);
 
   /* File (OFile) */
   --color-file-bg: var(--color-surface-base);
@@ -700,10 +702,10 @@
   --color-file-disabled-bg: var(--color-surface-subtle);
   --color-file-disabled-border: var(--color-border-default);
   --color-file-text: var(--color-text-heading);
-  --color-file-placeholder: var(--color-text-disabled);
+  --color-file-placeholder: var(--color-text-placeholder);
   --color-file-label: var(--color-text-secondary);
   --color-file-icon: var(--color-text-secondary);
-  --color-file-error-text: var(--color-error-600);
+  --color-file-error-text: var(--color-error-700);
   --color-file-error-border: var(--color-error-500);
   --color-file-chip-bg: var(--color-primary-100);
   --color-file-chip-text: var(--color-primary-700);
@@ -729,7 +731,7 @@
   --color-datepicker-placeholder: var(--color-grey-600);
   --color-datepicker-label: var(--color-text-label);
   --color-datepicker-icon: var(--color-text-secondary);
-  --color-datepicker-error-text: var(--color-error-600);
+  --color-datepicker-error-text: var(--color-error-700);
   --color-datepicker-error-border: var(--color-error-500);
   --color-datepicker-segment-focus-bg: var(--color-primary-600);
   --color-datepicker-segment-focus-text: var(--color-white);
@@ -779,7 +781,7 @@
   /* Option Group (OOptionGroup) */
   --color-option-group-label: var(--color-text-heading);
   --color-option-group-label-disabled: var(--color-text-disabled);
-  --color-option-group-error-text: var(--color-error-600);
+  --color-option-group-error-text: var(--color-error-700);
 
   /* OTable */
   /* Near-white header, barely distinct from the white body, not a grey band. */
@@ -2138,6 +2140,7 @@
   --color-banner-warning-border: var(--color-banner-warning-border);
   --color-banner-warning-text: var(--color-banner-warning-text);
   --color-ai-accent: var(--color-ai-accent);
+  --color-ai-accent-text: var(--color-ai-accent-text);
   --color-sql-accent: var(--color-sql-accent);
   --color-function-accent: var(--color-function-accent);
   --color-brand-slack: var(--color-brand-slack);
@@ -2153,6 +2156,7 @@
   --color-promo-webinar-link: var(--color-promo-webinar-link);
   --color-promo-webinar-link-hover: var(--color-promo-webinar-link-hover);
   --color-promo-webinar-accent: var(--color-promo-webinar-accent);
+  --color-promo-webinar-home-bg: var(--color-promo-webinar-home-bg);
   --color-promo-webinar-accent-text: var(--color-promo-webinar-accent-text);
   --color-promo-webinar-text: var(--color-promo-webinar-text);
   --color-promo-webinar-sep: var(--color-promo-webinar-sep);
@@ -2166,6 +2170,8 @@
   --color-bg-gray: var(--color-bg-gray);
   --color-cancel-query-bg: var(--color-cancel-query-bg);
   --color-cancel-query-foreground: var(--color-cancel-query-foreground);
+  --color-on-fill-foreground: var(--color-on-fill-foreground);
+  --color-on-status-fill-text: var(--color-on-status-fill-text);
   --color-card-glass-bg: var(--color-card-glass-bg);
   --color-card-glass-border: var(--color-card-glass-border);
   --color-card-glass-solid: var(--color-card-glass-solid);
@@ -2302,6 +2308,7 @@
   /* Domain tokens */
   --color-highlight-bg: var(--color-highlight-bg);
   --color-brand-indigo: var(--color-brand-indigo);
+  --color-brand-indigo-text: var(--color-brand-indigo-text);
 
   /* Ring-3 categorical shades consumed as utilities by the RUM event-type badges
      (useEventFormatters.ts: action=blue, resource=purple). Values equal Tailwind's,

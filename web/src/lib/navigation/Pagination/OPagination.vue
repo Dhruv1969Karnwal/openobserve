@@ -68,7 +68,7 @@ const navigate = (page: number) => {
       class="o-pagination__btn rounded-default flex size-7 items-center justify-center transition-colors"
       :class="[
         isFirst || disable
-          ? 'text-pagination-nav-disabled-text cursor-not-allowed opacity-50'
+          ? 'text-pagination-nav-disabled-text cursor-not-allowed'
           : 'text-pagination-nav-text hover:bg-pagination-nav-hover-bg cursor-pointer',
       ]"
       :disabled="isFirst || disable"
@@ -89,7 +89,7 @@ const navigate = (page: number) => {
         page === modelValue
           ? 'bg-pagination-item-active-bg text-pagination-item-active-text cursor-default'
           : disable
-            ? 'text-pagination-item-disabled-text cursor-not-allowed opacity-50'
+            ? 'text-pagination-item-disabled-text cursor-not-allowed'
             : 'text-pagination-item-text hover:bg-pagination-item-hover-bg cursor-pointer',
       ]"
       :disabled="disable && page !== modelValue"
@@ -109,7 +109,7 @@ const navigate = (page: number) => {
       class="o-pagination__btn rounded-default flex size-7 items-center justify-center transition-colors"
       :class="[
         isLast || disable
-          ? 'text-pagination-nav-disabled-text cursor-not-allowed opacity-50'
+          ? 'text-pagination-nav-disabled-text cursor-not-allowed'
           : 'text-pagination-nav-text hover:bg-pagination-nav-hover-bg cursor-pointer',
       ]"
       :disabled="isLast || disable"

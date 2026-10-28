@@ -34,7 +34,7 @@
         size="sm"
         aria-hidden="true"
         class="text-text-secondary w-3 shrink-0 self-center opacity-0 transition-opacity duration-150"
-        :class="canMove(index) ? 'cursor-grab group-hover:opacity-50 hover:opacity-100' : ''"
+        :class="canMove(index) ? 'cursor-grab' : ''"
         :title="t('aiObservability.playground.dragMessage')"
         :data-test="`ai-playground-message-drag-${message.id}`"
         @mousedown="canMove(index) && armDrag(message.id)"

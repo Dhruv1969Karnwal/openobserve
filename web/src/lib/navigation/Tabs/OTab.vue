@@ -35,10 +35,7 @@ const isDraggable = computed<boolean>(() => isReorderable.value && !props.disabl
 // on mouseup/dragend), so grabbing the tab body just clicks/selects — text on
 // the label stays selectable-feeling and accidental drags can't happen.
 const { arm: armDrag, isArmed: isDragArmed } = useDragHandle();
-/** This tab is the one being dragged → dim it. */
-const isDragging = computed<boolean>(
-  () => isReorderable.value && context?.value.draggingName === props.name,
-);
+// no self-dim while dragging: the opacity fade pushed status-coloured tab labels under AA; the insertion line (isDropTarget) carries the affordance
 /** Pointer is hovering this tab as a drop target → show an insertion line. */
 const isDropTarget = computed<boolean>(
   () =>
@@ -162,7 +159,7 @@ const heightClasses = computed<string>(() => {
       :aria-disabled="disable || undefined"
       :id="`tab-${name}`"
       :aria-controls="`tab-panel-${name}`"
-      :class="[baseClasses, stateClasses, heightClasses, isDragging ? 'opacity-40' : '']"
+      :class="[baseClasses, stateClasses, heightClasses]"
       :draggable="(isDraggable && isDragArmed()) || undefined"
       :data-otab-name="name"
       v-bind="$attrs"

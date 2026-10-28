@@ -198,7 +198,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </div>
       <div
         v-else-if="testStatus === 'ok'"
-        class="wf-test-badge wf-test-pop nodrag bg-status-positive cursor-pointer text-white transition-transform duration-150 hover:scale-110"
+        class="wf-test-badge wf-test-pop nodrag bg-status-positive cursor-pointer text-black transition-transform duration-150 hover:scale-110"
         :data-test="`workflow-node-${data?.node_type}-test-ok`"
         @pointerdown.stop
         @click.stop="openResult"
@@ -248,13 +248,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </div>
       <div
         v-else-if="testStatus === 'error'"
-        class="wf-test-badge wf-test-pop nodrag bg-status-negative cursor-pointer text-white transition-transform duration-150 hover:scale-110"
+        class="wf-test-badge wf-test-pop nodrag bg-status-negative cursor-pointer text-black transition-transform duration-150 hover:scale-110"
         :data-test="`workflow-node-${data?.node_type}-test-error`"
         @pointerdown.stop
         @click.stop="openResult"
       >
         <OIcon name="error" size="xs" />
-        <span v-if="errorCount > 1" class="wf-test-count text-status-error-text bg-white">{{
+        <span v-if="errorCount > 1" class="wf-test-count bg-white text-black">{{
           errorCount
         }}</span>
         <OTooltip side="top" align="center" :side-offset="8" max-width="22.5rem">

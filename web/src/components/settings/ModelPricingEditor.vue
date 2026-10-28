@@ -85,7 +85,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OButton
                   variant="ghost"
                   size="icon-xs-sq"
-                  class="text-theme-accent opacity-50 hover:opacity-100"
+                  class="text-theme-accent"
                   data-test="model-pricing-pattern-examples-btn"
                   @click="showExamples = true"
                 >
@@ -171,7 +171,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OButton
                   variant="ghost"
                   size="icon-xs-sq"
-                  class="opacity-40 hover:opacity-100"
+                  class=""
                   :data-test="`model-pricing-example-copy-btn-${ex.name}`"
                   @click="copyPattern(ex.match_pattern)"
                 >

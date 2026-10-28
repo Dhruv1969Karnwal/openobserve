@@ -97,9 +97,7 @@
                     @mousedown="armDrag()"
                     :class="[
                       'text-field-list-drag-icon inline-flex w-4 shrink-0 items-center justify-center',
-                      isDragEnabled(row, row._index ?? 0)
-                        ? 'cursor-grab'
-                        : 'cursor-not-allowed opacity-40',
+                      isDragEnabled(row, row._index ?? 0) ? 'cursor-grab' : 'cursor-not-allowed',
                     ]"
                     data-test="o-field-list-drag-indicator"
                   />

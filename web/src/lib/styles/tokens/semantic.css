@@ -17,13 +17,15 @@
   --color-text-secondary: var(
     --color-grey-600
   ); /* supporting text, descriptions, captions — grey-500 (4.74) sank to 3.49-4.45 on the runtime primary-50/100 washes; grey-600 holds 5.76+ on every ramp's tint */
-  --color-text-label: var(--color-grey-400); /* form labels, metadata, badges */
-  --color-text-muted: var(--color-grey-300); /* disabled, placeholder, de-emphasized */
-  /* label / disabled / placeholder (+ border-strong, scrollbar-thumb-hover) are
-     intentionally equal for now: all route through the grey-400 primitive so any one
-     can diverge later. Distinct intents kept as distinct tokens on purpose, NOT aliases. */
+  --color-text-label: var(
+    --color-grey-600
+  ); /* form labels, metadata, badges — grey-400 measured 1.86-2.29 on the light page/washes */
+  --color-text-muted: var(
+    --color-grey-600
+  ); /* de-emphasized text — grey-300 measured 1.09-1.35 light; AA has no de-emphasis exemption */
+  /* disabled stays grey-400 on purpose: SC 1.4.3 exempts inactive UI components */
   --color-text-disabled: var(--color-grey-400);
-  --color-text-placeholder: var(--color-grey-400);
+  --color-text-placeholder: var(--color-grey-600); /* placeholder text is real text (F-29) */
   --color-text-soft: rgba(0, 0, 0, 0.75); /* black at 75% — readable but not harsh */
   --color-text-link: var(--color-primary-600); /* clickable links */
   --color-text-link-hover: var(--color-primary-700); /* link hover state */
@@ -104,6 +106,8 @@
      series token (chart-series-6) rather than minting a new hue, so it stays in
      sync with the dashboard chart palette. */
   --color-series-b: var(--color-chart-series-6);
+  /* AA text tier of series B — the amber itself measures 1.51 on the light page. */
+  --color-series-b-text: #965300;
 
   /* One hue per telemetry signal; aliases the chart palette so dark mode follows dark.css. */
   --color-signal-logs: var(--color-chart-series-1);
@@ -249,6 +253,7 @@
 
   /* Series B (paired secondary series identity, see :root above) */
   --color-series-b: var(--color-series-b);
+  --color-series-b-text: var(--color-series-b-text);
 
   /* Telemetry signals (see :root above) */
   --color-signal-logs: var(--color-signal-logs);
@@ -497,7 +502,9 @@
      + any custom semantic theme, e.g. Crimson Ink) */
   --color-status-negative: #db3b4b;
   --color-status-positive: #208a3c;
-  --color-status-error-text: #cc3645;
+  /* Darkened from #cc3645 (4.40 on the runtime light accent tint) to the error-700
+     step; clears 4.5 on every light state surface the census paints it on. */
+  --color-status-error-text: #b91c1c;
   --color-status-error-bg: #fff7f7;
   /* Stable success ink: genuine text (diff tables, checklists, KPI values) and
      the routed status labels sit on the wash, the page and grey panels —

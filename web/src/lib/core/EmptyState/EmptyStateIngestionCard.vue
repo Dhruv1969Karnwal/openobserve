@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </span>
     <span
       v-else
-      class="es-ing-card__icon rounded-default group-hover:bg-button-primary inline-flex h-10 w-10 shrink-0 items-center justify-center transition-[background-color,color] duration-150 group-hover:text-white max-md:size-8"
+      class="es-ing-card__icon rounded-default group-hover:bg-button-primary group-hover:text-button-primary-foreground inline-flex h-10 w-10 shrink-0 items-center justify-center transition-[background-color,color] duration-150 max-md:size-8"
       :class="iconClass"
     >
       <OIcon v-if="icon" :name="icon" size="md" />

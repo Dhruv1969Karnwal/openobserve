@@ -61,7 +61,7 @@ const badgeColorClasses: Record<NonNullable<ToastProps["variant"]>, string> = {
   success: "bg-toast-success-icon text-white",
   error: "bg-toast-error-icon text-white",
   warning: "bg-toast-warning-icon text-white",
-  info: "bg-toast-info-icon text-white",
+  info: "bg-toast-info-icon text-on-fill-foreground",
   loading: "bg-toast-loading-icon text-white",
   default: "bg-toast-default-border text-toast-fg",
 };

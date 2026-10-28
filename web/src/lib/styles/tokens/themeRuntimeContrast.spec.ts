@@ -569,23 +569,15 @@ const NON_TEXT_MIN = 3;
  * The ONLY pairs the light matrix defers, each with its measured number. Not
  * name patterns — an exact pair list, pinned by the equality check below: a
  * pair that stops failing must be deleted from this ledger (or the debt it
- * describes is still open), and no unbooked pair may fail. The booked text
- * tiers (--color-text-label/-muted/-placeholder on light — grey-400/300
- * booked PENDING rows of contrast-manifest, "WCAG-AA colour remediation
- * (follow-up PR)") ride surfaces this wave did not re-ink; the numbers below
- * are the live measurements under the six injected light ramps.
+ * describes is still open), and no unbooked pair may fail. The grey-400/300
+ * light debt this ledger carried is PAID: the tiers now ride grey-600 and the
+ * booked contrast-manifest pending rows were deleted with it.
  */
 const LIGHT_PAIR_DEFERRALS: Record<string, string> = {
-  "--color-text-label on --color-table-row-hover-bg":
-    "grey-400: 2.29 on the runtime primary-50 wash, 2.52 on the page — booked light-pending text-label row in contrast-manifest",
-  "--color-text-label on --color-table-row-selected-bg":
-    "grey-400: 1.86 on the runtime primary-100 wash — same booked row",
-  "--color-text-muted on --color-table-row-hover-bg":
-    "grey-300: 1.35 on the runtime wash — booked light-pending text-muted row",
-  "--color-text-muted on --color-table-row-selected-bg":
-    "grey-300: 1.09 on the runtime wash — booked light-pending text-muted row",
-  "--color-text-placeholder on --color-table-row-hover-bg":
-    "grey-400: 2.29 on the runtime wash — booked light-pending text-placeholder row (the DATEPICKER placeholder role was fixed to grey-600; the global role still folds here)",
+  // EMPTY as of the F-29 default-theme remediation: label/muted/placeholder moved
+  // off grey-300/400 onto the grey-600 text tier (5.76+ on every light wash), so
+  // the light matrix defers nothing — the bidirectional lock below fails if a
+  // deferral ever comes back unrecorded or these tiers sink again.
 };
 
 /**
@@ -723,30 +715,9 @@ const BOOKED_GROUND_PAIRS: { fg: string; bg: string; where: string }[] = [
 ];
 
 const RUNTIME_GROUND_RESIDUALS: Record<string, { at: number; note: string }> = {
-  "light O2 Signature --color-status-warning-text on --color-table-row-hover-bg": {
-    at: 4.1,
-    note: "warning ink #be5a13 on the runtime primary-50 wash: the raw palette step it replaced measured 4.48 but 3.44 in dark, so the routed tier trades a dark AA miss for a light one — palette-decision: see PR decision record",
-  },
-  "light O2 Pulse --color-status-warning-text on --color-table-row-hover-bg": {
-    at: 4.22,
-    note: "same tier on the Pulse wash (#f5f8fa) — palette-decision: see PR decision record",
-  },
-  "light O2 Horizon --color-status-warning-text on --color-table-row-hover-bg": {
-    at: 4.21,
-    note: "same tier on the Horizon wash (#f3f8f9) — palette-decision: see PR decision record",
-  },
-  "light O2 Beacon --color-status-warning-text on --color-table-row-hover-bg": {
-    at: 4.23,
-    note: "same tier on the Beacon wash (#f5f8fd) — palette-decision: see PR decision record",
-  },
-  "light O2 Lens --color-status-warning-text on --color-table-row-hover-bg": {
-    at: 4.27,
-    note: "same tier on the Lens wash (#f6f9ff), the lightest of the six — palette-decision: see PR decision record",
-  },
-  "light O2 Crimson Ink --color-status-warning-text on --color-table-row-hover-bg": {
-    at: 4.18,
-    note: "same tier on the Crimson wash (#fef4f6); dark measures 10.40 on #1a1d21 — palette-decision: see PR decision record",
-  },
+  // The six light warning-on-row-hover entries this ledger carried are GONE:
+  // the F-29 default-theme remediation darkened --color-status-warning-text to
+  // #9c4a10, which clears AA on every light wash (was 4.09–4.27).
   // The accent FILL ground. bg-theme-accent is the raw theme colour at alpha 1
   // in both modes, so the ink on it is the button label and the three failing scopes
   // are numerically the booked `rest` states of BUTTON_LABEL_RESIDUALS (same ink, same
@@ -874,8 +845,7 @@ const CONSUMER_LEDGERS: Record<"dark" | "light", Record<string, string>> = {
   light: {
     "--color-datepicker-day-disabled-text":
       "SC 1.4.3 inactive day cells: grey-400 measures 2.52 on both light hosts — same exempt disabled step as dark",
-    "--color-datepicker-label":
-      "folds to --color-text-label (grey-400, booked light-PENDING row of contrast-manifest): 2.52 on popup and trigger — the remediation PR owns the tier, not this gate",
+    // --color-datepicker-label healed in the F-29 remediation (label rides grey-600 now).
   },
 };
 

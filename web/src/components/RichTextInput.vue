@@ -763,7 +763,7 @@ export default defineComponent({
 
 .rich-text-input :deep(.reference-chip .chip-remove:hover) {
   transform: scale(1.1);
-  color: var(--color-status-negative);
+  color: var(--color-status-error-text);
   background: var(--color-button-ghost-destructive-hover-bg);
 }
 

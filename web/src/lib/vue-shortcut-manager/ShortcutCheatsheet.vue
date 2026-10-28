@@ -213,7 +213,7 @@
           >
           <span>{{ t("shortcuts.footerReopen") }}</span>
         </div>
-        <div class="opacity-60">{{ t("shortcuts.footerMacHint") }}</div>
+        <div>{{ t("shortcuts.footerMacHint") }}</div>
       </div>
     </template>
   </ODialog>

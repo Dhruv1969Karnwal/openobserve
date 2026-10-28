@@ -99,7 +99,7 @@ const formatTimestamp = (timestamp: number) => formatToolCallTimestamp(timestamp
         v-if="hasToolCallDetails(block) && !block.pendingConfirmation"
         :name="isExpanded ? 'expand-less' : 'expand-more'"
         size="sm"
-        class="expand-icon opacity-60 transition-transform duration-200"
+        class="expand-icon transition-transform duration-200"
       />
     </div>
     <!-- Expandable details -->
@@ -205,7 +205,7 @@ const formatTimestamp = (timestamp: number) => formatToolCallTimestamp(timestamp
           <OButton
             variant="ghost"
             size="icon-xs-circle"
-            class="copy-btn opacity-60 hover:opacity-100"
+            class="copy-btn"
             @click.stop="copyToClipboard(getToolCallDisplayData(block.context)?.query, t)"
           >
             <OIcon name="content-copy" size="sm" />
@@ -310,7 +310,7 @@ const formatTimestamp = (timestamp: number) => formatToolCallTimestamp(timestamp
           <OButton
             variant="ghost"
             size="icon-xs-circle"
-            class="copy-btn opacity-60 hover:opacity-100"
+            class="copy-btn"
             @click.stop="copyToClipboard(getToolCallDisplayData(block.context)?.vrl, t)"
           >
             <OIcon name="content-copy" size="sm" />
@@ -333,7 +333,7 @@ const formatTimestamp = (timestamp: number) => formatToolCallTimestamp(timestamp
           <OButton
             variant="ghost"
             size="icon-xs-circle"
-            class="copy-btn opacity-60 hover:opacity-100"
+            class="copy-btn"
             @click.stop="copyToClipboard(getToolCallDisplayData(block.context)?.command, t)"
           >
             <OIcon name="content-copy" size="sm" />
@@ -355,7 +355,7 @@ const formatTimestamp = (timestamp: number) => formatToolCallTimestamp(timestamp
             <OButton
               variant="ghost"
               size="icon-xs-circle"
-              class="copy-btn opacity-60 hover:opacity-100"
+              class="copy-btn"
               @click.stop="copyToClipboard(JSON.stringify(block.response.hits, null, 2), t)"
             >
               <OIcon name="content-copy" size="sm" />
@@ -469,7 +469,7 @@ const formatTimestamp = (timestamp: number) => formatToolCallTimestamp(timestamp
             <OButton
               variant="ghost"
               size="icon-xs-circle"
-              class="copy-btn opacity-60 hover:opacity-100"
+              class="copy-btn"
               @click.stop="copyToClipboard(JSON.stringify(block.response.items, null, 2), t)"
             >
               <OIcon name="content-copy" size="sm" />
@@ -505,7 +505,7 @@ const formatTimestamp = (timestamp: number) => formatToolCallTimestamp(timestamp
           <OButton
             variant="ghost"
             size="icon-xs-circle"
-            class="copy-btn opacity-60 hover:opacity-100"
+            class="copy-btn"
             @click.stop="
               copyToClipboard(
                 typeof block.response === 'string'

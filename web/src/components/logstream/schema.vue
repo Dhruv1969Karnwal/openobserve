@@ -438,7 +438,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             "
                           >
                             <span
-                              class="text-brand-indigo cursor-pointer"
+                              class="text-brand-indigo-text cursor-pointer"
                               :data-test="`schema-field-${row.name}-pattern-action`"
                               @click="openPatternAssociationDialog(row.name)"
                             >

@@ -414,10 +414,10 @@ describe("the real token sheets", () => {
   });
 
   describe.each([
-    // +6 per theme in the F-145 remediation: the picked toast-action labels, the
-    // routed cancel-query label, and the confirm-button fill trio.
-    ["light", 1079, 1067],
-    ["dark", 1080, 1068],
+    // +5 per theme in the F-29 default-theme remediation: the amber-800 ladder step
+    // and the AA text roles ai-accent-text, brand-indigo-text, series-b-text, on-fill-foreground.
+    ["light", 1086, 1074],
+    ["dark", 1087, 1075],
   ] as const)("%s theme", (theme, total, resolved) => {
     const scope = THEMES[theme];
     const names = colorTokens(scope);
