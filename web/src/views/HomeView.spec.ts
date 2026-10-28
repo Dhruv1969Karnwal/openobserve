@@ -149,7 +149,8 @@ describe("HomeView", () => {
       const hero = wrapper.find('[data-test="home-first-data-hero"]');
       expect(hero.exists()).toBe(true);
       expect(hero.find('[data-test="first-data-panel"]').exists()).toBe(true);
-      expect(hero.text()).toContain("Start sending data to OpenObserve");
+      expect(hero.text()).toContain("Start sending data to Retrace.ai");
+      expect(hero.text()).not.toContain("Start sending data to OpenObserve");
       expect(hero.text()).toContain("Incidents, anomalies and service health show here");
       expect(has("home-no-data-all-sources-link")).toBe(true);
       expect(has("overview-tab-stub")).toBe(false);
