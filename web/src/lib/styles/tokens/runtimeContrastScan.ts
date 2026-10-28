@@ -105,6 +105,7 @@ interface ElBucket {
   ground?: string;
   ink?: string;
   alpha?: number;
+  gradient?: boolean;
 }
 
 interface ElFrame {
@@ -114,6 +115,8 @@ interface ElFrame {
   unresolved: string[];
   text: string;
   glyph: boolean;
+  /** An icon somewhere below: the control carries state, so the 3:1 (SC 1.4.11) bar applies. */
+  hasGlyphDescendant: boolean;
 }
 
 /** The state key of a class: its variant chain plus the condition its binding puts it under. */
@@ -138,17 +141,17 @@ const VOID_ELEMENTS = new Set([
 ]);
 
 /** Children that carry meaning as a glyph rather than as text. */
-const ICON_ELEMENTS = new Set([
-  "q-icon",
-  "qicon",
-  "q-img",
-  "qimg",
-  "i",
-  "svg",
-  "img",
-  "path",
-  "use",
-]);
+const ICON_ELEMENTS = new Set(["i", "svg", "img", "path", "use", "canvas", "picture"]);
+
+/**
+ * Children that carry meaning as a glyph rather than as text. The NAME test is the part that
+ * matters: this app's icon component is <OIcon>, and a scan that only recognised <QIcon> measured
+ * NO icon-only control at all — which is how the booked hover:opacity sites (F-142) stayed out of
+ * every census for three waves.
+ */
+export const isGlyphElement = (name: string): boolean =>
+  ICON_ELEMENTS.has(name) ||
+  /(?:icon|icons|glyph|image|img|avatar|spinner|logo|symbol|svg)$/.test(name);
 
 /** Chains the census models as painted states; anything else stays on the resting chain. */
 const STATE_CHAINS = new Set([
@@ -370,20 +373,53 @@ const readClasses = (
       const chain = chainOf(klass);
       const bucket = bucketOf(el, stateKey(chain, condition), chain);
       if (!bucket.classes.includes(klass)) bucket.classes.push(klass);
-      const opacity = /(?::|^)opacity-(\d{1,3})!?$/.exec(klass);
-      if (opacity) {
-        bucket.alpha = Number(opacity[1]) / 100;
-        continue;
-      }
-      const ground = expressionFor(klass, "ground", context);
-      if (ground) {
-        bucket.ground = ground;
-        continue;
-      }
-      const ink = expressionFor(klass, "ink", context);
-      if (ink) bucket.ink = ink;
     }
+    // Classify per bucket rather than per class: a gradient ground may be written as
+    // bg-gradient-to-b from-theme-accent in either order.
+    for (const bucket of el.states.values()) classifyBucket(bucket, context);
   }
+};
+
+const classifyBucket = (bucket: ElBucket, context: ScanContext): void => {
+  bucket.ground = undefined;
+  bucket.ink = undefined;
+  bucket.alpha = undefined;
+  let gradient = false;
+  let solid: string | null = null;
+  let stop: string | null = null;
+  let ink: string | null = null;
+  for (const klass of bucket.classes) {
+    const bare = stripChain(klass).replace(/!$/, "");
+    const opacity = /(?::|^)opacity-(\d{1,3})!?$/.exec(klass);
+    if (opacity) {
+      bucket.alpha = Number(opacity[1]) / 100;
+      continue;
+    }
+    if (/^(?:bg|from)-(?:linear|radial|conic|repeating-linear)-to-/.test(bare)) {
+      gradient = true;
+      continue;
+    }
+    const ground = expressionFor(klass, "ground", context);
+    if (ground) {
+      solid = ground;
+      continue;
+    }
+    if (gradient || /^(?:from|via|to)-/.test(bare)) {
+      const stopExpression = expressionFor(
+        "bg-" + bare.replace(/^(?:from|via|to)-/, ""),
+        "ground",
+        context,
+      );
+      if (stopExpression) stop = stopExpression;
+    }
+    const inkExpression = expressionFor(klass, "ink", context);
+    if (inkExpression) ink = inkExpression;
+  }
+  bucket.gradient = gradient;
+  // A gradient is measured at its accent-ish stop (the brightest one for a light ink),
+  // which is what the booked hero rows in the ledger describe.
+  bucket.ground = solid ?? stop;
+  bucket.ink = ink ?? undefined;
 };
 
 /** `const X = "…"`, `ref("…")`, `computed(() => "…")`, `{ X: "…" }` → the classes X can hold. */
@@ -502,7 +538,7 @@ const bucketsFor = (el: ElFrame, chain: string, condition: string): ElBucket[] =
   return found;
 };
 
-/** Walk the stack outward for the ground, ink and element opacity this element paints with. */
+/** Walk the stack INWARD-OUT for the ground, ink and opacity this element actually paints with. */
 const cascade = (
   stack: ElFrame[],
   chain: string,
@@ -516,10 +552,11 @@ const cascade = (
   let inkDepth = -1;
   let groundClass = "";
   let inkClass = "";
-  stack.forEach((el, index) => {
+  for (let index = stack.length - 1; index >= 0; index--) {
+    const el = stack[index]!;
     const depth = stack.length - 1 - index;
     const buckets = bucketsFor(el, chain, condition);
-    if (!buckets.length) return;
+    if (!buckets.length) continue;
     if (alpha === undefined) {
       const faded = buckets.find((bucket) => bucket.alpha !== undefined);
       if (faded) alpha = faded.alpha;
@@ -540,7 +577,8 @@ const cascade = (
         inkClass = labelFor(holder, holder.ink, "ink", context);
       }
     }
-  });
+    if (ground !== null && ink !== null) break;
+  }
   return {
     ground: ground ?? context.pageGround,
     groundClass: ground === null ? "page" : groundClass,
@@ -589,7 +627,7 @@ const pairsOfElement = (file: string, stack: ElFrame[], context: ScanContext): C
   const el = stack[stack.length - 1];
   if (!el) return [];
   const painted = el.text.trim().length > 0;
-  const glyph = !painted && el.glyph;
+  const glyph = !painted && (el.glyph || el.hasGlyphDescendant);
   if (!painted && !glyph) return [];
   const out: CensusPair[] = [];
   for (const state of statesFor(stack)) {
@@ -666,11 +704,13 @@ export const scanTemplate = (
         for (const id of frame.unresolved) unresolved.push({ line: frame.line, ids: [id] });
         pairs.push(...pairsOfElement(file, stack.slice(0, j + 1), context));
       }
+      if (index > 0 && (stack[index]?.glyph || stack[index]?.hasGlyphDescendant))
+        stack[index - 1]!.hasGlyphDescendant = true;
       stack.length = index;
       continue;
     }
     const parent = stack[stack.length - 1];
-    if (parent && ICON_ELEMENTS.has(name)) parent.glyph = true;
+    if (parent && isGlyphElement(name)) parent.glyph = true;
     const el: ElFrame = {
       name,
       line: lineAt(template, match.index),
@@ -678,11 +718,14 @@ export const scanTemplate = (
       unresolved: [],
       text: "",
       glyph: false,
+      hasGlyphDescendant: false,
     };
     readClasses(el, body, context, scriptClasses);
-    if (selfClosing || VOID_ELEMENTS.has(name)) {
+    if (selfClosing || VOID_ELEMENTS.has(name) || isGlyphElement(name)) {
+      el.glyph = el.glyph || isGlyphElement(name);
       for (const id of el.unresolved) unresolved.push({ line: el.line, ids: [id] });
       pairs.push(...pairsOfElement(file, [...stack, el], context));
+      if (!selfClosing && !VOID_ELEMENTS.has(name)) stack.push(el);
       continue;
     }
     stack.push(el);
