@@ -1512,6 +1512,44 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     expect(PINNED_MAX_DYNAMIC).toBe(0);
   });
 
+  it("keeps the themes.ts DECISION RECORD census paragraph equal to the gate's own numbers", () => {
+    // F-157 single truth source: the paragraph that once claimed 586/164 while the gate measured
+    // 205/0 now has every figure it quotes re-derived from THIS census, every test run.
+    const ledger = JSON.parse(readFileSync(join(here, "runtime-contrast-ledger.json"), "utf8"));
+    const report = runRuntimeCensus(RUNTIME, ledger, censusSources());
+    const prose = readFileSync(join(here, "../../../constants/themes.ts"), "utf8")
+      .replace(/\s+/g, " ")
+      .replace(/ \* /g, " "); // unwrap the block-comment line breaks so fragments can span lines
+    const sites = ledger.bookings.reduce(
+      (sum: number, row: { sites: number }) => sum + row.sites,
+      0,
+    );
+    const nonText = ledger.bookings.filter(
+      (row: { kind?: string }) => row.kind === "non-text",
+    ).length;
+    const text = ledger.bookings.filter((row: { kind?: string }) => row.kind === "text").length;
+    const opacity = ledger.bookings.filter((row: { id: string }) => row.id.includes("opacity-"));
+    const opacityWorst = Math.min(
+      ...opacity.flatMap((row: { at: Record<string, number> }) => Object.values(row.at)),
+    );
+    const quoted = [
+      `${report.pairs} runtime pairs in ${report.groups} booking groups`,
+      `${report.measuredPass} groups measured-pass`,
+      `${report.booked} groups (${sites} individual sites)`,
+      `${report.unbooked} groups unbooked`,
+      `${(ledger.delegated ?? []).length} groups delegated`,
+      `${nonText} are icon-only sites`,
+      `${text} are text riding 4.5`,
+      `${report.conditionalCount} of all bookings tagged conditional`,
+      `the ${report.conditionalCount} guard-cited conditional rows`,
+      `${ledger.dynamicBindings.length} script/style class literals are registered`,
+      `MAX-UNBOOKED = ${ledger.maxUnbooked} and MAX-DYNAMIC = ${ledger.maxDynamic}`,
+      `(${opacity.length} booking groups over ${opacity.reduce((sum: number, row: { sites: number }) => sum + row.sites, 0)} sites, the worst booked number ${opacityWorst}:1)`,
+    ];
+    for (const fragment of quoted)
+      expect(prose, "the census paragraph drifted from the gate: " + fragment).toContain(fragment);
+  });
+
   it("keeps the emitted TODO placeholder outside the justification vocabulary", () => {
     // RS10-01: --emit prints rows whose reason is EMIT_PLACEHOLDER_REASON; that string may book
     // nothing. If it ever matches a registered template, the vocabulary is a substring test again.

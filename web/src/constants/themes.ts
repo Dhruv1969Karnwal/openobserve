@@ -111,19 +111,23 @@ export const THEME_STORAGE_KEYS = {
  * stops, classes read from <script>, scoped-style paint, and element-opacity composite states —
  * and measures it across the same twelve injected scopes this file's pickers run against.
  *
- * At this head: 5137 runtime pairs in 2462 booking groups — 1876 groups measured-pass, 586 groups
- * (997 individual sites) booked with all twelve numbers each, of which 164 groups are delegated to
- * the tier rows tokens/contrast-manifest.ts already books as pending, 82 are icon-only sites riding
- * SC 1.4.11's 3:1 bar with a per-entry justification, and 340 are text riding 4.5. 41 script/style
- * class literals are registered as runtime grounds with no co-bound label. MAX-UNBOOKED = 0 and
- * MAX-DYNAMIC = 0, both equality locks: the residue growing OR healing without the lock moving is
- * a build failure.
+ * At this head — these figures are the gate's own output, transcribed 2026-10-28 at reviewed head
+ * 07698e801 (identical when re-run after the gate-integrity fixes, which change enforcement, not
+ * measurement): 5123 runtime pairs in 2426 booking groups — 2221 groups measured-pass, 205 groups
+ * (281 individual sites) booked with all twelve numbers each, 0 groups unbooked, and 0 groups
+ * delegated to tokens/contrast-manifest.ts (none stand — the grey-tier light debt was paid by
+ * re-tiering), of the bookings 38 are icon-only sites riding SC 1.4.11's 3:1 bar with a per-entry
+ * justification and 167 are text riding 4.5, with 19 of all bookings tagged conditional and
+ * guard-cited, 0 booking drift and 0 stale bookings. 41 script/style class literals are registered
+ * as runtime grounds with no co-bound label. MAX-UNBOOKED = 0 and MAX-DYNAMIC = 0, both equality
+ * locks, hard-pinned spec-side too: the residue growing OR healing without the lock moving is a
+ * build failure.
  *
  * Honest limits of that claim, all restated in the ledger's reason fields: the census models class
- * bindings, not content conditionals, so 7 booked rows (the checkbox tick, the selected datepicker
- * day and weekday, the active page number) describe a pair that does not co-occur on screen — the
- * guard renders the ink only while a different fill token paints, and those fills are gated at
- * 4.7+ by tokens/themeRuntimeContrast.spec.ts. Translucent grounds are composited over the plate
+ * bindings, not content conditionals, so the 19 guard-cited conditional rows (checkbox ticks, the
+ * selected datepicker day and weekday, the active page number, mode-exclusive ternary arms)
+ * describe a pair that does not co-occur on screen — the guard renders the ink only while a
+ * different fill token paints, and those fills are gated at 4.7+ by tokens/themeRuntimeContrast.spec.ts. Translucent grounds are composited over the plate
  * the ledger names (--color-surface-base by default), which is the page plate, not necessarily the
  * card a component actually sits on. Cascade inheritance is walked one level for page-default text.
  *
@@ -131,8 +135,8 @@ export const THEME_STORAGE_KEYS = {
  * because its resting state does. Element opacity (opacity-NN / hover:opacity-NN) fades ink AND
  * ground toward the plate behind the control, so a booked number for the rest state says nothing
  * about the shipped hover state; that is the specific defect the hover-state audit found at the wrap toggles below,
- * and every element-opacity state the census can still find (69 booking groups over 154 sites, from
- * a 30 % disabled glyph to the 1.03:1 active pagination number) is now booked BY NUMBER instead.
+ * and every element-opacity state the census can still find (17 booking groups over 26 sites, the
+ * worst booked number 1.23:1) is now booked BY NUMBER instead.
  *
  * ── THE ACCENT FILL ITSELF ──
  * One tier heavier sits the raw brand fill: applyThemeColors paints
