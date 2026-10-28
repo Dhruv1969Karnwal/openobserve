@@ -36,7 +36,7 @@ test.describe('Get started dialog', () => {
     }, async ({ page }) => {
         await gs.openAsFirstLogin(homeUrl(orgId), { orgId });
 
-        await expect(gs.title).toHaveText('Welcome to OpenObserve');
+        await expect(gs.title).toHaveText('Welcome to Retrace.ai');
         await expect(gs.subtitle).toContainText('Your 14-day trial has started');
         expect(await gs.sourceIds()).toEqual(GetStartedPage.SOURCE_IDS);
         await expect(gs.grid.locator('img')).toHaveCount(7);

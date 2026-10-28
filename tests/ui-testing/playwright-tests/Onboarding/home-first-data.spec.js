@@ -120,7 +120,7 @@ const SCREENS = [
         async run({ page, orgId }) {
             await openHome(page, orgId, 'overview');
             const hero = tid(page, 'home-first-data-hero');
-            await expect(hero).toContainText('Start sending data to OpenObserve', { timeout: 30000 });
+            await expect(hero).toContainText('Start sending data to Retrace.ai', { timeout: 30000 });
             await expect(hero.locator('[data-test="first-event-status"]')).toHaveAttribute('data-state', 'waiting');
             await expect(hero.locator('[data-test="home-no-data-description"]')).not.toContainText(orgId);
             await expect(tid(page, 'home-no-data-logs-card')).toBeVisible();
@@ -298,7 +298,7 @@ const SCREENS = [
             await openHome(page, orgId, 'overview');
             const hero = tid(page, 'home-first-data-hero');
             await expect(hero).toBeVisible({ timeout: 30000 });
-            await expect(hero).toContainText('Start sending data to OpenObserve');
+            await expect(hero).toContainText('Start sending data to Retrace.ai');
             await expect(hero).toContainText('Alerts and recent events show here once it arrives. Pick how you want to start.');
             await expect(hero).not.toContainText(orgId);
             for (const id of ['logs-card', 'traces-card', 'metrics-card', 'otel-btn', 'kubernetes-btn', 'aws-btn', 'all-sources-link']) {
