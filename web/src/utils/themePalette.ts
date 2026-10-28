@@ -65,9 +65,14 @@ export const hexToRgba = (hex: string, opacity: number): string => {
  */
 const relativeLuminance = (hex: string): number => {
   hex = hex.replace("#", "");
+  // The knee as PUBLISHED by WCAG 2.x (0.04045), not the legacy pre-publication value
+  // this file used before A8 unified the two halves of the system. Duplicated from
+  // SRGB_LINEAR_KNEE in lib/styles/tokens/colorMath.ts because this module must import
+  // nothing (the census gate transpiles it standalone); colorMath.spec locks the values.
+  const srgbLinearKnee = 0.04045;
   const channel = (v: number) => {
     const c = v / 255;
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    return c <= srgbLinearKnee ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   };
   const r = channel(parseInt(hex.substring(0, 2), 16));
   const g = channel(parseInt(hex.substring(2, 4), 16));

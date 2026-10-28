@@ -70,8 +70,18 @@ const clamp = (value: number, low: number, high: number): number =>
 
 const collapseSpace = (value: string): string => value.replace(/\s+/g, " ").trim();
 
+/**
+ * The sRGB linearization knee as PUBLISHED by WCAG 2.x (0.04045, per IEC 61966-2-1).
+ * The legacy pre-publication 0.03928 used to live in utils/themePalette's
+ * relativeLuminance — two knees drifting apart in one system (A8). The two copies are
+ * forced (both modules are import-free pure transpile targets of
+ * scripts/check-runtime-contrast.mjs's PURE_MODULES map), and colorMath.spec's
+ * "the two knee constants are one constant" cell locks the values together.
+ */
+export const SRGB_LINEAR_KNEE = 0.04045;
+
 const srgbToLinear = (channel: number): number =>
-  channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  channel <= SRGB_LINEAR_KNEE ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
 
 const linearToSrgb = (channel: number): number =>
   channel <= 0.0031308 ? 12.92 * channel : 1.055 * channel ** (1 / 2.4) - 0.055;

@@ -42,6 +42,7 @@ import { describe, expect, it } from "vitest";
 import {
   composite,
   contrastRatio,
+  SRGB_LINEAR_KNEE,
   parseColor,
   relativeLuminance,
   resolveColor,
@@ -457,5 +458,19 @@ describe("the real token sheets", () => {
         .map(([name]) => name);
       expect(offenders).toEqual([]);
     });
+  });
+});
+
+describe("the sRGB knee is ONE constant across the two halves of the system (A8)", () => {
+  it("picker and measurer agree on the published value", () => {
+    // utils/themePalette's relativeLuminance picks the inks the app injects at runtime;
+    // this file's srgbToLinear measures them. Before F-161h the picker knee was the
+    // legacy 0.03928 while the measurer used the published 0.04045 — a knife-edge for a
+    // future mid-tone brand colour. themePalette must import nothing (the census gate
+    // transpiles it standalone), so the values are locked here at the source level.
+    const palette = readFileSync(join(here, "../../../utils/themePalette.ts"), "utf8");
+    expect(SRGB_LINEAR_KNEE).toBe(0.04045);
+    expect(palette).toContain("0.04045");
+    expect(palette).not.toContain("0.03928");
   });
 });
