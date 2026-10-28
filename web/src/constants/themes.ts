@@ -13,7 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { PREDEFINED_THEME_COLORS } from "@/constants/themeRegistry";
 import { raw } from "@/types/i18n";
+import type { PredefinedThemeColors } from "@/constants/themeRegistry";
 import type { SemanticColors } from "@/utils/theme";
 
 /**
@@ -29,21 +31,10 @@ import type { SemanticColors } from "@/utils/theme";
  *                       so editing O2 Signature's colors also changes the default.
  */
 
-export interface ThemeModeColors {
-  // Hex color used for buttons/toggles/borders and to derive the primary palette
-  themeColor: string;
-  // Optional multi-color semantic palette (errors/success/secondary button, etc.)
-  semanticColors?: SemanticColors;
-}
+export type { PredefinedThemeColors, ThemeModeColors } from "@/constants/themeRegistry";
 
-export interface PredefinedTheme {
-  // Stable numeric id — kept only for legacy localStorage migration.
-  id: number;
-  // Stable display name — this is the persisted key for theme selection.
-  name: string;
-  light: ThemeModeColors;
-  dark: ThemeModeColors;
-}
+/** A predefined theme: registry colours plus the i18n-wrapped display name. */
+export interface PredefinedTheme extends PredefinedThemeColors {}
 
 /** Marker stored in `appliedXThemeName` when the user picked a custom color. */
 export const CUSTOM_THEME_NAME = "__custom__";
@@ -147,97 +138,11 @@ export const THEME_STORAGE_KEYS = {
  * Both panels also hardcode white on three nested elements plus translucent-white plates,
  * which assume a dark ground — that is a repaint decision, booked in the same ledger.
  */
-/** Predefined themes with both light and dark mode colors. */
-export const PREDEFINED_THEMES: PredefinedTheme[] = [
-  {
-    id: 10,
-    name: raw("O2 Signature"),
-    light: {
-      themeColor: "#1C1F23",
-    },
-    dark: {
-      themeColor: "#E6E6E6",
-    },
-  },
-  {
-    id: 2,
-    name: raw("O2 Pulse"),
-    light: {
-      themeColor: "#3F7994",
-    },
-    dark: {
-      themeColor: "#3F7994",
-    },
-  },
-  {
-    id: 4,
-    name: raw("O2 Horizon"),
-    light: {
-      themeColor: "#077A7F",
-    },
-    dark: {
-      themeColor: "#588CF3",
-    },
-  },
-  {
-    id: 5,
-    name: raw("O2 Beacon"),
-    light: {
-      themeColor: "#3369D6",
-    },
-    dark: {
-      themeColor: "#6EA8FE",
-    },
-  },
-  {
-    id: 8,
-    name: raw("O2 Lens"),
-    light: {
-      themeColor: "#4682FA",
-    },
-    dark: {
-      themeColor: "#E56D17",
-    },
-  },
-  {
-    id: 14,
-    name: raw("O2 Crimson Ink"),
-    light: {
-      themeColor: "#E11D48",
-      semanticColors: {
-        error: "#F97316",
-        errorBg: "#FFF7ED",
-        errorText: "#C2410C",
-        success: "#6366F1",
-        successBg: "#EEF2FF",
-        successText: "#3730A3",
-        secondaryBtnBg: "#FFE4E6",
-        secondaryBtnText: "#BE123C",
-        secondaryBtnBorder: "#FECDD3",
-        outlineText: "#BE123C",
-        outlineBorder: "#FECDD3",
-        ghostText: "#BE123C",
-      },
-    },
-    dark: {
-      themeColor: "#FB7185",
-      semanticColors: {
-        error: "#FB923C",
-        errorBg: "#3A1A08",
-        errorText: "#FB923C",
-        success: "#818CF8",
-        successBg: "#1E1B4B",
-        successText: "#A5B4FC",
-        secondaryBtnBg: "#3D0617",
-        secondaryBtnText: "#FECDD3",
-        secondaryBtnBorder: "#9F1239",
-        outlineText: "#FECDD3",
-        outlineBorder: "#9F1239",
-        ghostText: "#FECDD3",
-      },
-    },
-  },
-];
+/** Predefined themes with both light and dark mode colors, names wrapped for i18n. */
+export const PREDEFINED_THEMES: PredefinedTheme[] = PREDEFINED_THEME_COLORS.map((theme) => ({
+  ...theme,
+  name: raw(theme.name),
+}));
 
 /** A light/dark background pair an announcement banner can be painted with. */
 export interface BannerColorPreset {

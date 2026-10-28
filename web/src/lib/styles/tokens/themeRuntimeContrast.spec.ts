@@ -93,6 +93,8 @@ import {
   resolveColor,
   resolveTokens,
 } from "./colorMath";
+import { createRuntimeModel, runRuntimeCensus } from "./runtimeContrast";
+import { scanSources } from "./runtimeContrastScan";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -102,73 +104,26 @@ const SHEETS = TOKEN_FILES.map((file) => readFileSync(join(here, file), "utf8"))
 const SHEET_DARK = resolveTokens(SHEETS).dark;
 const SHEET_LIGHT = resolveTokens(SHEETS).light;
 
-const PALETTE_SHADES = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"];
-
-/** The `semanticColors` overlay, keyed as applyThemeColors() writes it. */
-const SEMANTIC_TOKEN_MAP: Record<string, string> = {
-  error: "--color-status-negative",
-  errorText: "--color-status-error-text",
-  errorBg: "--color-status-error-bg",
-  success: "--color-status-positive",
-  successText: "--color-status-success-text",
-  successBg: "--color-status-success-bg",
-  secondaryBtnBg: "--color-button-secondary",
-  secondaryBtnText: "--color-button-secondary-foreground",
-  secondaryBtnBorder: "--color-button-secondary-border",
-  outlineText: "--color-button-outline-text",
-  outlineBorder: "--color-button-outline-border",
-  ghostText: "--color-button-ghost-text",
-};
-
-const runtimeScope = (
-  sheet: Map<string, string>,
-  mode: "light" | "dark",
-  themeColor: string,
-  semanticColors?: Record<string, string>,
-): Map<string, string> => {
-  const scope = new Map(sheet);
-  const palette = generatePrimaryPalette(themeColor);
-  for (const shade of PALETTE_SHADES) {
-    scope.set(`--color-primary-${shade}`, palette[shade]);
-  }
-  // applyThemeColors writes --color-theme-accent with the raw theme colour at alpha 1
-  // (hexToRgba(themeColor, 10)) in BOTH modes, so `bg-theme-accent` paints themeColor
-  // — the sheet value below it is only the pre-injection default the gate would
-  // otherwise keep measuring. It is the same pixel as the ramp's 600 step.
-  scope.set("--color-theme-accent", themeColor);
-  // The gate measures production's own injected map, not a transcription of it.
-  for (const [token, hex] of Object.entries(libraryForegroundTokens(mode, palette))) {
-    scope.set(token, hex);
-  }
-  for (const [key, hex] of Object.entries(semanticColors ?? {})) {
-    const token = SEMANTIC_TOKEN_MAP[key];
-    if (token) scope.set(token, hex);
-  }
-  return scope;
-};
+/**
+ * The twelve injected scopes come from tokens/runtimeContrast — the SAME model
+ * scripts/check-runtime-contrast.mjs measures the template census with. A second implementation of
+ * "what applyThemeColors writes" is exactly the drift this program has been chasing, so this file
+ * no longer builds scopes, it consumes the shared ones.
+ */
+const RUNTIME = createRuntimeModel(SHEETS);
 
 /** One entry per predefined theme: the dark scope, injected as syncO2LibraryTokens writes it. */
-const RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => ({
-  name: String(theme.name),
-  themeColor: theme.dark.themeColor,
-  scope: runtimeScope(
-    SHEET_DARK,
-    "dark",
-    theme.dark.themeColor,
-    theme.dark.semanticColors as unknown as Record<string, string> | undefined,
-  ),
+const RUNTIME_SCOPES = RUNTIME.darkScopes.map((scope) => ({
+  name: scope.theme,
+  themeColor: scope.themeColor,
+  scope: scope.tokens,
 }));
 
 /** The LIGHT mirror: the light sheet under each theme's light ramp. */
-const LIGHT_RUNTIME_SCOPES = PREDEFINED_THEMES.map((theme) => ({
-  name: String(theme.name),
-  themeColor: theme.light.themeColor,
-  scope: runtimeScope(
-    SHEET_LIGHT,
-    "light",
-    theme.light.themeColor,
-    theme.light.semanticColors as unknown as Record<string, string> | undefined,
-  ),
+const LIGHT_RUNTIME_SCOPES = RUNTIME.lightScopes.map((scope) => ({
+  name: scope.theme,
+  themeColor: scope.themeColor,
+  scope: scope.tokens,
 }));
 
 /** Bare-var()-alias chain a role token folds through in `scope` (self first). */
@@ -945,6 +900,17 @@ const ACCENT_FILL_WHITE_BY_DESIGN: Record<string, string> = {
 
 const SRC_ROOT = join(here, "../../..");
 
+/** Every .vue file under dir (the census input). */
+const walkFiles = (dir: string, ext: string, found: string[] = []): string[] => {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) walkFiles(path, ext, found);
+    else if (entry.name.endsWith(ext) && !entry.name.endsWith(".spec.ts")) found.push(path);
+  }
+  return found;
+};
+
 const walkVue = (dir: string, found: string[] = []): string[] => {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
@@ -1526,5 +1492,80 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
       ).toEqual([...Object.keys(CONSUMER_LEDGERS[mode])].sort());
     }
     expect(offenders).toEqual([]);
+  });
+
+  // ── The TEMPLATE census (F-142/F-143/F-145): the SAME scan and pixel model the CLI gate runs.
+  // scripts/check-runtime-contrast.mjs measures these numbers from the command line and prints
+  // tallies; this file is the enforcer that refuses a booking whose numbers moved, a booked site
+  // that stopped existing, an unexplained dynamic class binding, or a new unbooked failure. The
+  // booking file is shared, so the two gates cannot describe different realities.
+  const censusSources = () => [
+    ...walkVue(SRC_ROOT).map((path) => ({
+      path: path
+        .slice(SRC_ROOT.length + 1)
+        .split("\\")
+        .join("/"),
+      source: readFileSync(path, "utf8"),
+    })),
+    ...walkFiles(SRC_ROOT, ".ts").map((path) => ({
+      path: path
+        .slice(SRC_ROOT.length + 1)
+        .split("\\")
+        .join("/"),
+      source: readFileSync(path, "utf8"),
+    })),
+  ];
+
+  it("measures the whole template census in the shared model, with nothing unexplained", () => {
+    const ledger = JSON.parse(readFileSync(join(here, "runtime-contrast-ledger.json"), "utf8"));
+    const report = runRuntimeCensus(RUNTIME, ledger, censusSources());
+    // Anti-vacuity: the scan must really have enumerated the app, not silently found nothing.
+    expect(report.files).toBeGreaterThan(1000);
+    expect(report.pairs).toBeGreaterThan(1000);
+    expect(report.measuredPass).toBeGreaterThan(500);
+    expect(report.unbooked, "a new sub-AA runtime pair appeared").toBe(ledger.maxUnbooked);
+    expect(report.dynamicCount).toBe(ledger.maxDynamic);
+    expect(report.driftRows, "a booked pair no longer measures what the ledger says").toEqual([]);
+    expect(
+      report.staleRows.map((row) => row.id),
+      "a booking names a site that is gone",
+    ).toEqual([]);
+    expect(
+      report.staleDelegations.map((row) => row.id),
+      "a delegation matches no measured pair any more",
+    ).toEqual([]);
+    // Every unattributed runtime class literal is equality-locked by count above; the residue is
+    // driven to zero (and each remaining binding individually justified in ledger.dynamicBindings)
+    // as the census bookings land, at which point this list is the assertion.
+    expect(
+      ledger.maxDynamic === 0
+        ? report.unbookedDynamic.map((row) => row.file + ":" + row.literal)
+        : [],
+      "a runtime class literal in script paints a colour no measured pair cites",
+    ).toEqual([]);
+    expect(report.exitCode).toBe(0);
+  });
+
+  it("keeps every booked census pair justified, and every non-text booking an actual glyph", () => {
+    const ledger = JSON.parse(readFileSync(join(here, "runtime-contrast-ledger.json"), "utf8"));
+    const report = runRuntimeCensus(RUNTIME, ledger, censusSources());
+    const byId = new Map(report.rows.map((row) => [row.id, row]));
+    for (const booking of ledger.bookings) {
+      const row = byId.get(booking.id);
+      expect(
+        row,
+        "the ledger books a pair the scanner no longer sees: " + booking.id,
+      ).toBeDefined();
+      expect(booking.reason ?? "", "a booked pair has no reason: " + booking.id).toContain(
+        "palette-decision",
+      );
+      expect(
+        Object.keys(booking.at).length,
+        "a booking must state all twelve scopes: " + booking.id,
+      ).toBe(12);
+      if (row!.pair.bar === "non-text") {
+        expect(booking.kind, "an icon-only booking must say so: " + booking.id).toBe("non-text");
+      }
+    }
   });
 });

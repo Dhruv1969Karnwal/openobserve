@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "textMin": 4.5,
+  "nonTextMin": 3,
+  "maxUnbooked": 739,
+  "plate": "--color-surface-base",
+  "bodyInk": "--color-text-body",
+  "pageGround": "--census-page-bg",
+  "bookings": [],
+  "dynamicBindings": [],
+  "maxDynamic": 69
+}

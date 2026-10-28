@@ -42,8 +42,13 @@ const TS_HEX_ALLOWLIST = [
   // categorical / series palettes + theme source
   "utils/dashboard/colorPalette.ts",
   "constants/themes.ts",
+  // The theme source was SPLIT, not widened: these two modules hold the exact hex literals
+  // utils/theme.ts and constants/themes.ts carried before (48 + 61 before, 48 + 61 after), and a
+  // pure module cannot read a CSS custom property — that is why they are pure.
+  "constants/themeRegistry.ts",
   "utils/traces/traceColors.ts",
   "utils/theme.ts",
+  "utils/themePalette.ts",
   "utils/themeManager.ts",
   "utils/chartTheme.ts", // sanctioned seam: light-theme fallback constants for jsdom/pre-CSS
   // ECharts / canvas / geo chart builders — options are serialised, no var() resolves
