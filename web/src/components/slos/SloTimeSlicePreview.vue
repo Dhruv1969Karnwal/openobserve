@@ -138,6 +138,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { chartColor } from "@/utils/chartTheme";
 import { useI18nTyped } from "@/types/i18n";
 import { useStore } from "vuex";
 import { format } from "date-fns";
@@ -287,14 +288,6 @@ const onRangeChange = (value: unknown) => {
   load();
 };
 
-/** Read a design token for the chart renderer, which takes colour STRINGS and
- *  cannot be handed a utility class. */
-const resolveToken = (token: string, fallback: string): string => {
-  if (typeof window === "undefined") return fallback;
-  const value = getComputedStyle(document.body).getPropertyValue(token).trim();
-  return value || fallback;
-};
-
 /**
  * `histogram()` returns its bucket as `"2026-08-02T12:00:00"` — UTC, with no
  * zone marker. A browser parses that as LOCAL time, which silently shifts the
@@ -322,10 +315,10 @@ const labels = computed(() =>
 
 const chartOptions = computed(() => {
   void store.state.theme; // getComputedStyle is not reactive — re-resolve on flip.
-  const accent = resolveToken("--color-accent", "#5960b2");
-  const danger = resolveToken("--color-severity-error-color", "#ea1a17");
-  const axisColor = resolveToken("--color-text-secondary", "#6b7280");
-  const gridColor = resolveToken("--color-border-default", "#e5e7eb");
+  const accent = chartColor("--color-accent");
+  const danger = chartColor("--color-severity-error-color");
+  const axisColor = chartColor("--color-text-secondary");
+  const gridColor = chartColor("--color-border-default");
 
   return {
     grid: { left: 8, right: 12, top: 16, bottom: 8, containLabel: true },

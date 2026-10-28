@@ -129,6 +129,9 @@ const FALLBACKS: Record<string, string> = {
   "--color-status-warning-text": "#9c4a10",
   // Error series in canvas charts (light value from base.css).
   "--color-severity-error-color": "#c8100e",
+  // SLO warning budget line (light value from base.css) — the four hand-rolled
+  // resolveToken() seams were resynced onto chartColor(), which needs the mirror.
+  "--color-severity-warning-color": "#965300",
   // Status accents used by SLO / health charts (light values from semantic.css, base.css).
   "--color-status-negative": "#db3b4b",
   "--color-status-success-bg": "#f2fcf3",

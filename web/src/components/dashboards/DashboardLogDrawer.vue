@@ -201,9 +201,9 @@ const timelineChartOptions = computed(() => {
     rootStyle.getPropertyValue(name).trim() || fallback;
   // Touch the theme so colors recompute when it toggles.
   void store.state.theme;
-  const accent = readVar("--color-accent", "#7c6cf6");
-  const axisText = readVar("--color-text-secondary", "#9ca3af");
-  const axisLine = readVar("--color-border-default", "#e5e7eb");
+  const accent = readVar("--color-accent", "#3f7994");
+  const axisText = readVar("--color-text-secondary", "#525252");
+  const axisLine = readVar("--color-border-default", "#d4d4d4");
 
   const times = timeline.value.map((b) => b.keyMs);
   const counts = timeline.value.map((b) => b.num);

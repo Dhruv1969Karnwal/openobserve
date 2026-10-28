@@ -54,6 +54,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from "vue";
+import { chartColor } from "@/utils/chartTheme";
 import { format } from "date-fns";
 import { useStore } from "vuex";
 import { useI18nTyped } from "@/types/i18n";
@@ -86,12 +87,6 @@ const labelFormat = computed(() => {
   return bucketSpan < 60_000_000 ? "HH:mm:ss" : "HH:mm";
 });
 
-const resolveToken = (token: string, fallback: string): string => {
-  if (typeof window === "undefined") return fallback;
-  const value = getComputedStyle(document.body).getPropertyValue(token).trim();
-  return value || fallback;
-};
-
 /** Bucket holding the event the page was opened on, so the user can see where
  *  in the issue's life this particular occurrence sits. */
 const currentIndex = computed(() => {
@@ -106,7 +101,7 @@ const chartOptions = computed(() => {
   // Read the theme so token colors re-resolve when it flips —
   // getComputedStyle alone is not reactive.
   void store.state.theme;
-  const errorColor = resolveToken("--color-severity-error-color", "#ea1a17");
+  const errorColor = chartColor("--color-severity-error-color");
   const labels = props.buckets.map((bucket) =>
     format(new Date(Math.floor(bucket.ts / 1000)), labelFormat.value),
   );

@@ -143,6 +143,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onBeforeUnmount, ref, watch } from "vue";
+import { chartColor } from "@/utils/chartTheme";
 import { useI18nTyped } from "@/types/i18n";
 import { useStore } from "vuex";
 import { format } from "date-fns";
@@ -219,15 +220,6 @@ const SPARSE_BUCKET_SHARE = 0.25;
 const sparse = computed(
   () => hasData.value && measuredBuckets.value < points.value.length * SPARSE_BUCKET_SHARE,
 );
-
-/** Read a design token for the chart renderer, which takes colour STRINGS and
- *  cannot be handed a utility class. Resolved at build time rather than
- *  hardcoded so the charts follow the theme. */
-const resolveToken = (token: string, fallback: string): string => {
-  if (typeof window === "undefined") return fallback;
-  const value = getComputedStyle(document.body).getPropertyValue(token).trim();
-  return value || fallback;
-};
 
 /** Span decides the label format: "14:05" is useless across 90 days. */
 const labelFormat = computed(() => (props.windowSecs > 2 * 86400 ? "MM-dd" : "MM-dd HH:mm"));
@@ -402,10 +394,10 @@ const correctedAreas = computed(() => {
 
 const budgetOptions = computed(() => {
   void store.state.theme; // getComputedStyle is not reactive — re-resolve on flip.
-  const accent = resolveToken("--color-accent", "#5960b2");
-  const danger = resolveToken("--color-severity-error-color", "#ea1a17");
-  const axisColor = resolveToken("--color-text-secondary", "#6b7280");
-  const gridColor = resolveToken("--color-border-default", "#e5e7eb");
+  const accent = chartColor("--color-accent");
+  const danger = chartColor("--color-severity-error-color");
+  const axisColor = chartColor("--color-text-secondary");
+  const gridColor = chartColor("--color-border-default");
 
   return {
     ...baseOptions(
@@ -484,10 +476,10 @@ const budgetOptions = computed(() => {
 
 const burnOptions = computed(() => {
   void store.state.theme;
-  const accent = resolveToken("--color-accent", "#5960b2");
-  const warning = resolveToken("--color-severity-warning-color", "#b16300");
-  const axisColor = resolveToken("--color-text-secondary", "#6b7280");
-  const gridColor = resolveToken("--color-border-default", "#e5e7eb");
+  const accent = chartColor("--color-accent");
+  const warning = chartColor("--color-severity-warning-color");
+  const axisColor = chartColor("--color-text-secondary");
+  const gridColor = chartColor("--color-border-default");
 
   return {
     ...baseOptions(
