@@ -95,3 +95,29 @@ describe("the design guard's script names say what they run", () => {
     expect(source).not.toMatch(/is accepted and ignored/);
   });
 });
+
+describe("the runtime-contrast gate's script names run the gate", () => {
+  const RUNTIME_SCRIPT = "scripts/check-runtime-contrast.mjs";
+  const strict = String(pkg.scripts["lint:runtime-contrast:strict"]);
+  const base = String(pkg.scripts["lint:runtime-contrast"]);
+
+  it("runs the census script under BOTH names, --strict only under the strict one", () => {
+    expect(base).toContain(RUNTIME_SCRIPT);
+    expect(strict).toContain(RUNTIME_SCRIPT);
+    expect(strict).toContain("--strict");
+    expect(base).not.toContain("--strict");
+    expect(base).not.toContain("--selftest");
+  });
+
+  it("--strict runs the FULL census, not only the selftest (RS10-03)", () => {
+    // Behavior, not grep: the census line and the self-spec line must BOTH appear, in order.
+    const out = execFileSync(process.execPath, [RUNTIME_SCRIPT, "--strict"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    expect(out).toContain("runtime contrast:");
+    expect(out).toContain("self-spec OK");
+    expect(out.indexOf("runtime contrast:")).toBeLessThan(out.indexOf("self-spec OK"));
+  }, 180_000);
+});

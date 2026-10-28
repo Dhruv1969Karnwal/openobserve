@@ -93,7 +93,12 @@ import {
   resolveColor,
   resolveTokens,
 } from "./colorMath";
-import { createRuntimeModel, runRuntimeCensus } from "./runtimeContrast";
+import {
+  createRuntimeModel,
+  runRuntimeCensus,
+  isRegisteredJustification,
+  EMIT_PLACEHOLDER_REASON,
+} from "./runtimeContrast";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -1485,6 +1490,35 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     })),
   ];
 
+  // Hard pin (F-156/RS10-04, F-02): the ceiling must not live only in the JSON that --seal can
+  // rewrite. Raising a cap means editing THIS pin in a reviewed diff — the CLI's --raise-cap alone
+  // turns the census gate red here even when it turns the ledger green. Values: the real residue
+  // at the pinning head (zero on both axes).
+  const PINNED_MAX_UNBOOKED = 0;
+  const PINNED_MAX_DYNAMIC = 0;
+
+  it("hard-pins the ledger ceilings below which the JSON side may never climb", () => {
+    const ledger = JSON.parse(readFileSync(join(here, "runtime-contrast-ledger.json"), "utf8"));
+    expect(
+      ledger.maxUnbooked,
+      "MAX-UNBOOKED was raised in the ledger without moving this spec-side pin",
+    ).toBeLessThanOrEqual(PINNED_MAX_UNBOOKED);
+    expect(
+      ledger.maxDynamic,
+      "MAX-DYNAMIC was raised in the ledger without moving this spec-side pin",
+    ).toBeLessThanOrEqual(PINNED_MAX_DYNAMIC);
+    // The content assertion below self-disables once a cap is nonzero; with the cap pinned at
+    // zero it must therefore run, which is exactly why the pin and this check live together.
+    expect(PINNED_MAX_DYNAMIC).toBe(0);
+  });
+
+  it("keeps the emitted TODO placeholder outside the justification vocabulary", () => {
+    // RS10-01: --emit prints rows whose reason is EMIT_PLACEHOLDER_REASON; that string may book
+    // nothing. If it ever matches a registered template, the vocabulary is a substring test again.
+    expect(isRegisteredJustification(EMIT_PLACEHOLDER_REASON)).toBe(false);
+    expect(EMIT_PLACEHOLDER_REASON.startsWith("TODO ")).toBe(true);
+  });
+
   it("measures the whole template census in the shared model, with nothing unexplained", () => {
     const ledger = JSON.parse(readFileSync(join(here, "runtime-contrast-ledger.json"), "utf8"));
     const report = runRuntimeCensus(RUNTIME, ledger, censusSources());
@@ -1505,9 +1539,10 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     ).toEqual([]);
     // Every unattributed runtime class literal is equality-locked by count above; the residue is
     // driven to zero (and each remaining binding individually justified in ledger.dynamicBindings)
-    // as the census bookings land, at which point this list is the assertion.
+    // as the census bookings land. Keyed on the SPEC-side pin, not the ledger's own cap (F-02):
+    // raising maxDynamic in the JSON used to convert this list check into expect([]).toEqual([]).
     expect(
-      ledger.maxDynamic === 0
+      PINNED_MAX_DYNAMIC === 0
         ? report.unbookedDynamic.map((row) => row.file + ":" + row.literal)
         : [],
       "a runtime class literal in script paints a colour no measured pair cites",
@@ -1525,9 +1560,10 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
         row,
         "the ledger books a pair the scanner no longer sees: " + booking.id,
       ).toBeDefined();
-      expect(booking.reason ?? "", "a booked pair has no reason: " + booking.id).toContain(
-        "palette-decision",
-      );
+      expect(
+        isRegisteredJustification(booking.reason ?? ""),
+        "a booked pair has no registered-template reason: " + booking.id,
+      ).toBe(true);
       expect(
         Object.keys(booking.at).length,
         "a booking must state all twelve scopes: " + booking.id,

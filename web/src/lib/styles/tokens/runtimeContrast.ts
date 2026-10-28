@@ -318,6 +318,55 @@ export interface CensusReport {
 const round2 = (value: number): number => Math.round(value * 100) / 100;
 
 /**
+ * The registered justification vocabulary (F-156/RS10-01): a booked row's reason must match ONE
+ * of these anchored templates EXACTLY. The shapes are the decision families this branch's review
+ * panel actually accepted, each citing the DECISION RECORD and its measured worst pair; a new
+ * family is admitted by registering its template HERE (a reviewed code change), never by prose
+ * drift. The old rule — a bare `includes("palette-decision")` — was satisfiable by the census's
+ * own `--emit` placeholder, so a machine paste could book unlimited sub-AA pairs with every gate
+ * green; `EMIT_PLACEHOLDER_REASON` below matches NO template, by design and by selftest mutation.
+ */
+const escapeRe = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const THEME_ALT = `(?:${PREDEFINED_THEME_COLORS.map((theme) => theme.name)
+  .sort((a, b) => b.length - a.length)
+  .map(escapeRe)
+  .join("|")})`;
+const JUST_N = String.raw`\d+(?:\.\d+)?`;
+const JUST_AT = `at (?:light|dark) ${THEME_ALT}`;
+const JUST_WORST = `worst ${JUST_N}:${JUST_N} ${JUST_AT}`;
+const JUST_TAIL = " \u2014 palette-decision: see web/src/constants/themes\\.ts DECISION RECORD";
+const PAGE_TINT = String.raw`\(utils/themePalette runtimePageBackground: \d+% theme colour over white in light, \d+% theme colour into black in dark\)`;
+const ICON_PREFIX = String.raw`(?:\[icon-only site\] )?`;
+
+export const JUSTIFICATION_VOCABULARY: RegExp[] = [
+  `${ICON_PREFIX}accent used AS TEXT on .+: the runtime re-derives this ink from the selected theme's colour \\(raw themeColor at alpha ${JUST_N}, or a primary-ramp step\\), and for these predefined palettes no single step holds AA on this ground \u2014 ${JUST_N}:${JUST_N} worst ${JUST_AT}.*?${JUST_TAIL}`,
+  `${ICON_PREFIX}literal (?:white|black) label on the runtime page tint ${PAGE_TINT} \u2014 brand-by-design fill \\(hero panels, badges, toast actions\\): the ground is the runtime colour itself, so no static ink survives it; routing every one of these labels through a picked token is the owner decision, not a class swap; ${JUST_WORST}.*?${JUST_TAIL}`,
+  `literal text-inverse label on the accent ramp step \\(--color-accent: primary-${JUST_N} dark / primary-${JUST_N} light\\) \u2014 brand-by-design fill \\(hero panels, badges, toast actions\\): the ground is the runtime colour itself, so no static ink survives it; routing every one of these labels through a picked token is the owner decision, not a class swap; ${JUST_WORST}.*?${JUST_TAIL}`,
+  `${ICON_PREFIX}.+ painted on .+ in [\\w./-]+\\.vue \\(${JUST_N} site\\(s\\)\\); ${JUST_WORST}.*?${JUST_TAIL}`,
+  `${ICON_PREFIX}legacy palette status shade [\\w-]+ on the runtime page tint ${PAGE_TINT} \\(status-shade routing\\): the ${JUST_N} site\\(s\\) in [\\w./-]+\\.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1\\.4\\.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set \\(the routed text tier would over-ink the glyph\\) and the raw shade stays; ${JUST_WORST}.*?${JUST_TAIL}`,
+  `${ICON_PREFIX}the grey-${JUST_N} [\\w -]*tier painted on .+: the tier has no pending row in contrast-manifest yet, so this is the surface where it is worst; ${JUST_WORST}.*?${JUST_TAIL}`,
+  `${ICON_PREFIX}non-text glyph ink [\\w-]+ on the runtime page tint ${PAGE_TINT}: SC 1\\.4\\.11's 3:1 bar applies \\(the glyph repeats a state its adjacent label already states\\); ${JUST_WORST}.*?${JUST_TAIL}`,
+  `status-error-text painted on the translucent error tint of its own chip \u2014 status-shade routing: the site moved off the raw error shade \\(${JUST_N}:${JUST_N} ${JUST_AT}\\); on the matching /[A-Z0-9]+ tint wash the routed tier holds every dark scope and misses only the light band named in its reason number${JUST_TAIL}`,
+  `picked button-primary-foreground painted on count-badge-bg \\(component fill\\): the badge fill is the ramp's ${JUST_N} step, the same pixel as the accent fill, so the picked label holds ${JUST_N}:${JUST_N} ${JUST_AT} and rides the booked button-label residuals \\(worst ${JUST_N}:${JUST_N} ${JUST_AT}${JUST_TAIL}`,
+  `the page-number ink on the active-page fill \\(component fill\\): SCAN LIMITATION, stated rather than hidden \u2014 both classes live in one :class ternary in lib/navigation/Pagination/OPagination\\.vue; .* guard: lib/navigation/Pagination/OPagination\\.vue:${JUST_N} active arm vs :${JUST_N} item-text arm\\.${JUST_TAIL}`,
+  `the datepicker-[\\w-]+ [\\w -]*tier on [\\w-]+ \\(component fill\\): one token serves every control of this family, and it is measured against the runtime wash/plate rather than the sheet value it was picked for; ${JUST_WORST}.*?${JUST_TAIL}`,
+].map((template) => new RegExp(`^${template}$`));
+
+export const isRegisteredJustification = (reason: string): boolean =>
+  JUSTIFICATION_VOCABULARY.some((template) => template.test(reason));
+
+/** The SC clause a sub-AA default-theme row must cite for its exemption claim (RS10-02). */
+export const SC_CLAUSE = /SC 1\.4\.(3|11)/;
+
+/**
+ * The starting point `--emit` prints for a human to rewrite. It is deliberately NOT a member of
+ * the justification vocabulary: pasting emitted rows back into the ledger is RED until someone
+ * writes the actual decision (the loophole RS10-01 demonstrated).
+ */
+export const EMIT_PLACEHOLDER_REASON =
+  "TODO palette-decision: why this pair is not re-inked (brand-by-design / owner call, name the file)";
+
+/**
  * The delegation key of a pair: the same identity as groupKey WITHOUT the file — a tier is a tier
  * wherever it is painted, so this is what cites a row booked in another ledger (contrast-manifest).
  */
@@ -462,15 +511,31 @@ export const runRuntimeCensus = (
     if (row.delegated && !booking.bookedIn) {
       driftRows.push(row.pairId + ": a delegated row must name the ledger that carries it");
     }
-    if (!row.delegated && !(booking.reason ?? "").includes("palette-decision")) {
+    if (!row.delegated && !isRegisteredJustification(booking.reason ?? "")) {
       driftRows.push(
-        row.id + ": a booked pair needs a reason carrying the palette-decision marker",
+        row.id +
+          ": a booked pair needs a reason matching one of the registered justification templates" +
+          " (runtimeContrast.ts JUSTIFICATION_VOCABULARY) — the --emit TODO placeholder is not one",
       );
     }
     if (booking.conditional === true && !/guard: [\w/.-]+:\d+/.test(booking.reason ?? "")) {
       driftRows.push(
         row.id + ": a conditional row must cite its guard expression (guard: <file>:<line>)",
       );
+    }
+    // The Default-theme rule the ledger note states (RS10-02), now machine-checked: a booked text
+    // pair below 4.5:1 on the shipped default theme must cite the SC clause it rides.
+    if (row.pair.bar === "text" && booking.conditional !== true) {
+      const defaultThemeSubAA = ["light O2 Signature", "dark O2 Signature"].some(
+        (scope) => row.numbers[scope] !== undefined && row.numbers[scope] < ledger.textMin,
+      );
+      if (defaultThemeSubAA && !SC_CLAUSE.test(booking.reason ?? "")) {
+        driftRows.push(
+          row.id +
+            ": a booked text pair below the 4.5 bar at the default O2 Signature theme must cite" +
+            " the SC 1.4.3 / SC 1.4.11 clause it rides, or be tagged conditional with its guard cited",
+        );
+      }
     }
     const covered = row.delegated ? (delegatedTotals.get(row.pairId) ?? row.sites) : row.sites;
     if (booking.sites === undefined) {

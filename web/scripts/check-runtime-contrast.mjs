@@ -3,8 +3,15 @@
 //
 //   node scripts/check-runtime-contrast.mjs              # census over web/src
 //   node scripts/check-runtime-contrast.mjs --selftest   # guard self-check (fixtures + mutations)
+//   node scripts/check-runtime-contrast.mjs --strict     # FULL census, then the selftest
 //   node scripts/check-runtime-contrast.mjs --list       # print every unbooked / drifted pair
-//   node scripts/check-runtime-contrast.mjs --emit       # print ready ledger rows for the unbooked
+//   node scripts/check-runtime-contrast.mjs --emit       # print ledger-row SHELLS for the unbooked
+//                                                        # (reason is a TODO; pasting it back is RED)
+//   node scripts/check-runtime-contrast.mjs --seal       # tighten MAX-UNBOOKED/MAX-DYNAMIC to the
+//                                                        # measured residue — LOWERS ONLY, never raises
+//   node scripts/check-runtime-contrast.mjs --seal --raise-cap
+//                                                        # explicit human raise; the spec-side hard
+//                                                        # pin fails until the pin is edited too
 //
 // WHAT IT MEASURES. utils/themePalette re-derives the whole --color-primary-* ramp, the
 // --color-theme-* injections and a set of picked inks from the selected theme's themeColor, and
@@ -24,7 +31,10 @@
 //
 // If this failed: do not raise a number to make it green. Re-ink the site (a per-theme pick, or a
 // stable token), or book it with its measured numbers and the reason it stays the palette owner's
-// call. --emit prints the exact rows; the reasons are the part you have to write.
+// call. --emit prints row SHELLS whose reason is a registered-vocabulary-rejected TODO; writing the
+// actual decision (a template from runtimeContrast.ts JUSTIFICATION_VOCABULARY) is the human part.
+// --seal only tightens the MAX-UNBOOKED/MAX-DYNAMIC equality locks; raising one is a deliberate
+// act: --raise-cap here plus the hard pin in themeRuntimeContrast.spec.ts in the same reviewed diff.
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { stripTypeScriptTypes } from "node:module";
 import { tmpdir } from "node:os";
@@ -106,18 +116,17 @@ const walkExt = (dir, ext, found = []) => {
   return found;
 };
 
-const emitRows = (report) =>
+const emitRows = (report, placeholderReason) =>
   report.unbookedRows.map((row) => ({
     id: row.id,
     sites: row.sites,
     kind: row.pair.bar === "non-text" ? "non-text" : "text",
     where: `${row.pair.sample}`,
-    reason:
-      "TODO palette-decision: why this pair is not re-inked (brand-by-design / owner call, name the file)",
+    reason: placeholderReason,
     at: row.numbers,
   }));
 
-const printReport = (report, args, ledger) => {
+const printReport = (report, args, ledger, placeholderReason) => {
   console.log(
     `runtime contrast: ${report.files} .vue files → ${report.pairs} runtime (ground, ink) pairs × 12 injected scopes`,
   );
@@ -145,7 +154,7 @@ const printReport = (report, args, ledger) => {
     }
   }
   if (args.has("--emit")) {
-    console.log(JSON.stringify(emitRows(report), null, 2));
+    console.log(JSON.stringify(emitRows(report, placeholderReason), null, 2));
   }
   if (report.exitCode) {
     console.log(
@@ -300,11 +309,23 @@ const selfTest = async (production, model, ledger) => {
   const target = scanned.find((entry) => entry.fixture.name.startsWith("self attribute"));
   const bookedRow = target.report.rows[0];
   const fixturePath = fixtureKey(target.fixture.name);
+  // A registered-vocabulary reason (the brand-label family) carrying the SC clause the fixture's
+  // white-on-accent pair needs at dark O2 Signature — the selftest books the pair the way the gate
+  // demands, so every mutation below fails for exactly ONE reason.
+  const registeredReason =
+    "literal white label on the runtime page tint (utils/themePalette runtimePageBackground: " +
+    "5% theme colour over white in light, 8% theme colour into black in dark) \u2014 brand-by-design " +
+    "fill (hero panels, badges, toast actions): the ground is the runtime colour itself, so no " +
+    "static ink survives it; routing every one of these labels through a picked token is the owner " +
+    "decision, not a class swap; worst 1.25:1 at dark O2 Signature; SC 1.4.11: the fixture glyph is " +
+    "measured at the 3:1 bar it rides \u2014 palette-decision: see web/src/constants/themes.ts " +
+    "DECISION RECORD";
+  const unregisteredReason = production.EMIT_PLACEHOLDER_REASON;
   const correct = {
     id: bookedRow.id,
     sites: bookedRow.sites,
     kind: bookedRow.pair.bar === "non-text" ? "non-text" : "text",
-    reason: "brand-by-design - palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+    reason: registeredReason,
     at: bookedRow.numbers,
   };
   const fixtureSource = () => [{ path: fixturePath, source: target.fixture.source }];
@@ -344,6 +365,40 @@ const selfTest = async (production, model, ledger) => {
     "mutation: stale booking (site gone) is RED",
     runCensus(production, model, ledger, fixtureSource(), [staleRow], 0).staleRows.length === 1,
   );
+  // RS10-01's demonstrated loophole: the emitted TODO row must NOT be an accepted justification.
+  const todoReport = runCensus(
+    production,
+    model,
+    ledger,
+    fixtureSource(),
+    [{ ...correct, reason: unregisteredReason }],
+    0,
+  );
+  check(
+    "mutation: the --emit TODO placeholder as a booking reason is RED",
+    todoReport.exitCode === 1 &&
+      todoReport.driftRows.some((line) => line.includes("justification templates")),
+  );
+  check(
+    "mutation: the emitted placeholder is outside the justification vocabulary",
+    !production.isRegisteredJustification(unregisteredReason),
+  );
+  // RS10-02's unenforced note: the fixture pair is sub-4.5 at dark O2 Signature, so the SC clause
+  // its reason cites is now load-bearing — deleting it (vocabulary still satisfied) must be RED.
+  const noScReport = runCensus(
+    production,
+    model,
+    ledger,
+    fixtureSource(),
+    [{ ...correct, reason: registeredReason.replace(/SC 1\.4\.11:[^—]*/, "") }],
+    0,
+  );
+  check(
+    "mutation: a sub-AA default-theme booking without its SC clause is RED",
+    noScReport.exitCode === 1 &&
+      noScReport.driftRows.some((line) => line.includes("SC 1.4")) &&
+      !noScReport.driftRows.some((line) => line.includes("justification templates")),
+  );
   console.log(
     failures === 0
       ? String.fromCharCode(10) +
@@ -362,18 +417,55 @@ const main = async () => {
     TOKEN_FILES.map((file) => readFileSync(join(TOKEN_DIR, file), "utf8")),
   );
   const ledger = JSON.parse(readFileSync(LEDGER_FILE, "utf8"));
+  const placeholderReason = production.EMIT_PLACEHOLDER_REASON;
   if (args.has("--selftest")) {
     process.exit((await selfTest(production, model, ledger)) ? 0 : 1);
   }
-  const report = runCensus(production, model, ledger, [
-    ...readSources(SRC, ".vue"),
-    ...readSources(SRC, ".ts"),
-  ]);
+  const censusSources = [...readSources(SRC, ".vue"), ...readSources(SRC, ".ts")];
+  // --strict is the CI name (F-156/RS10-03): the FULL census first, then the selftest. A strict
+  // mode that only ran the selftest was a name promising more assurance than it delivered.
+  if (args.has("--strict")) {
+    const census = runCensus(production, model, ledger, censusSources);
+    printReport(census, args, ledger, placeholderReason);
+    const selfOk = await selfTest(production, model, ledger);
+    process.exit(census.exitCode === 0 && selfOk ? 0 : 1);
+  }
+  const report = runCensus(production, model, ledger, censusSources);
   if (args.has("--seal")) {
-    // Ratchet values are what the census measured, never typed by hand.
-    const sealed = { ...ledger, maxUnbooked: report.unbooked, maxDynamic: report.dynamicCount };
+    // Ratchet values move DOWN only (F-156/RS10-04): --seal records the residue the census
+    // actually measured when that is tighter than the current lock. Raising a lock is a human
+    // decision with a second veto — the hard pin in themeRuntimeContrast.spec.ts.
+    const raising = args.has("--raise-cap");
+    const maxUnbooked = raising ? report.unbooked : Math.min(report.unbooked, ledger.maxUnbooked);
+    const maxDynamic = raising
+      ? report.dynamicCount
+      : Math.min(report.dynamicCount, ledger.maxDynamic ?? 0);
+    if (
+      !raising &&
+      (report.unbooked > ledger.maxUnbooked || report.dynamicCount > (ledger.maxDynamic ?? 0))
+    ) {
+      console.error(
+        `FAIL — refusing to seal: the census measured MAX-UNBOOKED ${report.unbooked} ` +
+          `(lock ${ledger.maxUnbooked}) / MAX-DYNAMIC ${report.dynamicCount} ` +
+          `(lock ${ledger.maxDynamic ?? 0}) — --seal only lowers caps. Fix the residue, or raise ` +
+          `them deliberately: --seal --raise-cap plus the new value pinned in ` +
+          `themeRuntimeContrast.spec.ts in the same reviewed change.`,
+      );
+      process.exit(1);
+    }
+    const sealed = { ...ledger, maxUnbooked, maxDynamic };
+    if (
+      sealed.maxUnbooked === ledger.maxUnbooked &&
+      sealed.maxDynamic === (ledger.maxDynamic ?? 0)
+    ) {
+      // Caps already at the measured residue: say so instead of re-encoding 4,300 JSON lines.
+      console.log(
+        `seal is a no-op: MAX-UNBOOKED=${ledger.maxUnbooked} MAX-DYNAMIC=${ledger.maxDynamic ?? 0}`,
+      );
+      process.exit(0);
+    }
     writeFileSync(LEDGER_FILE, JSON.stringify(sealed, null, 2) + String.fromCharCode(10));
-    console.log(`sealed MAX-UNBOOKED=${report.unbooked} MAX-DYNAMIC=${report.dynamicCount}`);
+    console.log(`sealed MAX-UNBOOKED=${maxUnbooked} MAX-DYNAMIC=${maxDynamic}`);
     process.exit(0);
   }
   if (args.has("--emit-failing")) {
@@ -383,18 +475,21 @@ const main = async () => {
     console.error(
       "emit-failing: " + failing.length + " failing groups over " + report.pairs + " pairs",
     );
-    console.log(JSON.stringify(emitRows({ ...report, unbookedRows: failing }), null, 2));
+    console.log(
+      JSON.stringify(emitRows({ ...report, unbookedRows: failing }, placeholderReason), null, 2),
+    );
     process.exit(0);
   }
   if (args.has("--emit")) {
-    // Machine output only: pipe it into the ledger, keep the human summary on stderr.
+    // Machine output only: row SHELLS whose TODO reason the gate rejects — a human writes the
+    // registered-template reason before this can enter the ledger. Human summary stays on stderr.
     console.error(
       "emit: " + report.unbooked + " unbooked groups over " + report.pairs + " runtime pairs",
     );
-    console.log(JSON.stringify(emitRows(report), null, 2));
+    console.log(JSON.stringify(emitRows(report, placeholderReason), null, 2));
     process.exit(0);
   }
-  printReport(report, args, ledger);
+  printReport(report, args, ledger, placeholderReason);
   process.exit(report.exitCode);
 };
 
