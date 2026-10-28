@@ -892,9 +892,9 @@ const CONSUMER_LEDGERS: Record<"dark" | "light", Record<string, string>> = {
  */
 const ACCENT_FILL_WHITE_BY_DESIGN: Record<string, string> = {
   "components/EnterpriseUpgradeDialog.vue":
-    "the hero fill is a two-stop gradient (theme-accent → color-mix(theme-accent 85%, black)) and the panel hardcodes white on three nested elements plus rgba(255,255,255,.1-.2) plates that assume a dark ground: white caps at 1.25–3.60 at the light stop in 6 of 12 scopes, while the near-black inversion to 1.03–1.21 is O2 Signature light alone (its accent is #1C1F23; the five chromatic light ramps hold their dark inks at 2.74–4.43) — the fill (or a per-stop ink) is the owner's call, not a class swap — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+    "the hero fill is a two-stop gradient darkened off the raw accent in the F-145 default-theme remediation (color-mix(theme-accent 50%, black) → color-mix(theme-accent 35%, black)): white now measures 4.74–8.00 at the light stop and 8.00–19.71 at the dark one across all twelve scopes; the raw (unmixed) accent is what this scan measures, so the exemption is about the gradient, not about a sub-AA label — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
   "views/EnterpriseFeatures.vue":
-    "same two-stop hero gradient and white label as EnterpriseUpgradeDialog.vue — palette-decision: see PR decision record",
+    "same two-stop darkened hero gradient and white label as EnterpriseUpgradeDialog.vue — palette-decision: see PR decision record",
 };
 
 const SRC_ROOT = join(here, "../../..");

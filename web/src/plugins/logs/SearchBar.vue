@@ -989,7 +989,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   :title="t('search.cancel')"
                   variant="ghost"
                   size="sm-toolbar"
-                  class="bg-cancel-query-bg! text-button-primary-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
+                  class="bg-cancel-query-bg! text-cancel-query-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
                   @click="cancelVisualizeQueries"
                   >{{ t("search.cancel") }}</OButton
                 >
@@ -1015,7 +1015,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       data-test="logs-search-bar-refresh-cache-dropdown-trigger"
                       :class="[
                         config.isEnterprise == 'true' && visualizeSearchRequestTraceIds.length
-                          ? 'bg-cancel-query-bg! text-button-primary-foreground!'
+                          ? 'bg-cancel-query-bg! text-cancel-query-foreground!'
                           : 'bg-button-primary! text-button-primary-foreground! hover:shadow-button-primary/70 hover:opacity-90 hover:shadow-md',
                         'rounded-e-default! rounded-s-none!',
                       ]"
@@ -1045,7 +1045,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   variant="ghost"
                   :title="t('search.cancel')"
                   size="sm-toolbar"
-                  class="bg-cancel-query-bg! text-button-primary-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
+                  class="bg-cancel-query-bg! text-cancel-query-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
                   @click="cancelVisualizeQueries"
                   >{{ t("search.cancel") }}</OButton
                 >
@@ -1072,7 +1072,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       data-test="logs-search-bar-refresh-cache-dropdown-trigger"
                       :class="[
                         config.isEnterprise == 'true' && visualizeSearchRequestTraceIds.length
-                          ? 'bg-cancel-query-bg! text-button-primary-foreground!'
+                          ? 'bg-cancel-query-bg! text-cancel-query-foreground!'
                           : 'bg-button-primary! text-button-primary-foreground! hover:shadow-button-primary/70 hover:opacity-90 hover:shadow-md',
                         'rounded-e-default! rounded-s-none!',
                       ]"
@@ -1103,7 +1103,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 variant="ghost"
                 :title="t('search.cancel')"
                 size="sm-toolbar"
-                class="bg-cancel-query-bg! text-button-primary-foreground! element-box-shadow rounded-default h-[1.875rem]! w-[5.875rem]! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
+                class="bg-cancel-query-bg! text-cancel-query-foreground! element-box-shadow rounded-default h-[1.875rem]! w-[5.875rem]! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
                 @click="autoRun.engine.cancelGeneration(null, { cause: 'user' })"
                 >{{ t("search.cancel") }}</OButton
               >
@@ -1114,7 +1114,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 variant="primary"
                 :title="t('search.cancel')"
                 size="sm-toolbar"
-                class="bg-cancel-query-bg! text-button-primary-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
+                class="bg-cancel-query-bg! text-cancel-query-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
                 @click="cancelRun"
                 >{{ t("search.cancel") }}</OButton
               >
@@ -1173,7 +1173,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     data-test="logs-search-bar-refresh-cache-dropdown-trigger"
                     :class="[
                       isRunQueryCancelShown
-                        ? 'bg-cancel-query-bg! text-button-primary-foreground!'
+                        ? 'bg-cancel-query-bg! text-cancel-query-foreground!'
                         : !showRunQueryPending
                           ? 'bg-button-primary! text-button-primary-foreground! hover:shadow-button-primary/70 hover:opacity-90 hover:shadow-md'
                           : showRunQueryPending

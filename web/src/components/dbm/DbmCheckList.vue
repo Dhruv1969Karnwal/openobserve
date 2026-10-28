@@ -50,7 +50,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     >
       <div class="flex items-center gap-2">
         <span
-          class="text-3xs text-text-inverse grid size-3.5 shrink-0 place-items-center rounded-full leading-none font-bold"
+          class="text-3xs grid size-3.5 shrink-0 place-items-center rounded-full leading-none font-bold"
           :class="STATUS_TONES[check.status]"
         >
           {{ STATUS_GLYPHS[check.status] }}
@@ -88,9 +88,9 @@ defineProps<{
 }>();
 
 const STATUS_TONES: Record<DbmCheckStatus, string> = {
-  ok: "bg-status-success-text",
-  fail: "bg-status-error-text",
-  note: "bg-status-warning-text",
+  ok: "bg-button-confirm text-button-confirm-foreground",
+  fail: "bg-button-destructive text-button-destructive-foreground",
+  note: "bg-button-warning text-button-warning-foreground",
 };
 
 const STATUS_GLYPHS: Record<DbmCheckStatus, I18nText> = {

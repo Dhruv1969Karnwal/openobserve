@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <!-- White labels here are booked, not oversight: see ACCENT_FILL_WHITE_BY_DESIGN in lib/styles/tokens/themeRuntimeContrast.spec.ts and the DECISION RECORD in constants/themes.ts. -->
       <div
         data-test="enterprise-features-banner"
-        class="rounded-surface flex flex-wrap items-center justify-between gap-4 bg-[linear-gradient(135deg,var(--color-theme-accent)_0%,color-mix(in_srgb,var(--color-theme-accent)_85%,black_15%)_100%)] px-8 py-6 text-white"
+        class="rounded-surface flex flex-wrap items-center justify-between gap-4 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-theme-accent)_50%,black)_0%,color-mix(in_srgb,var(--color-theme-accent)_35%,black)_100%)] px-8 py-6 text-white"
       >
         <div class="flex flex-col gap-1">
           <div class="text-2xl font-bold">{{ dialogConfig.heroTitle }}</div>

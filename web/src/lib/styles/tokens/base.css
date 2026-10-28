@@ -421,6 +421,7 @@
   --color-bg-gray: color-mix(in srgb, var(--color-theme-accent) 10%, rgb(237, 237, 237));
   --color-card-glass-border: rgba(0, 0, 0, 0.12);
   --color-cancel-query-bg: #f67a7a;
+  --color-cancel-query-foreground: var(--color-grey-900);
   --color-highlight-bg: #e7e6e6; /* syntax-guide highlight chip (dark: #747474) */
   --color-brand-indigo: #5960b2; /* brand indigo — loading bar, AI accents (theme-independent) */
   --color-card-glass-bg: rgba(255, 255, 255, 0.8);

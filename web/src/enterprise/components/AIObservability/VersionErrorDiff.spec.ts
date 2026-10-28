@@ -60,7 +60,7 @@ describe("VersionErrorDiff", () => {
     // fullDiff default: count_a=5, count_b=2, delta=+3 → B has fewer errors → better.
     const wrapper = mountDiff(fullDiff());
     const delta = wrapper.find('[data-test="version-error-diff-delta-auth_error"]');
-    expect(delta.classes()).toContain("text-success-600");
+    expect(delta.classes()).toContain("text-status-success-text");
     expect(delta.text()).toBe("▼");
   });
 
@@ -70,7 +70,7 @@ describe("VersionErrorDiff", () => {
       fullDiff({ shared: [{ fail_class: "auth_error", count_a: 1, count_b: 4, delta: -3 }] }),
     );
     const delta = wrapper.find('[data-test="version-error-diff-delta-auth_error"]');
-    expect(delta.classes()).toContain("text-error-600");
+    expect(delta.classes()).toContain("text-status-error-text");
     expect(delta.text()).toBe("▲");
   });
 

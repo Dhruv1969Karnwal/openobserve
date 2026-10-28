@@ -135,6 +135,11 @@
   --color-button-destructive-disabled: var(--color-error-300);
   --color-button-destructive-foreground: var(--color-white);
 
+  /* Button — confirm (the affirmative twin of destructive; white holds AA on these stops) */
+  --color-button-confirm: var(--color-success-700);
+  --color-button-confirm-hover: var(--color-success-900);
+  --color-button-confirm-foreground: var(--color-white);
+
   /* ButtonGroup */
   --color-button-group-divider: var(--color-border-default);
 
@@ -513,6 +518,8 @@
   --color-toast-fg-secondary: var(--color-text-secondary);
   --color-toast-action-text: var(--color-primary-600);
   --color-toast-action-hover: var(--color-primary-700);
+  --color-toast-action-foreground: var(--color-white);
+  --color-toast-action-foreground-hover: var(--color-white);
   --shadow-toast: var(--shadow-lg);
 
   /* Spinner */
@@ -1451,6 +1458,11 @@
   --color-button-destructive-disabled: var(--color-button-destructive-disabled);
   --color-button-destructive-foreground: var(--color-button-destructive-foreground);
 
+  /* Button — confirm */
+  --color-button-confirm: var(--color-button-confirm);
+  --color-button-confirm-hover: var(--color-button-confirm-hover);
+  --color-button-confirm-foreground: var(--color-button-confirm-foreground);
+
   /* ButtonGroup */
   --color-button-group-divider: var(--color-button-group-divider);
 
@@ -1913,6 +1925,8 @@
   --color-toast-fg-secondary: var(--color-toast-fg-secondary);
   --color-toast-action-text: var(--color-toast-action-text);
   --color-toast-action-hover: var(--color-toast-action-hover);
+  --color-toast-action-foreground: var(--color-toast-action-foreground);
+  --color-toast-action-foreground-hover: var(--color-toast-action-foreground-hover);
   --shadow-toast: var(--shadow-toast);
 
   /* Stepper */
@@ -2151,6 +2165,7 @@
   --color-section-accent-secondary: var(--color-section-accent-secondary);
   --color-bg-gray: var(--color-bg-gray);
   --color-cancel-query-bg: var(--color-cancel-query-bg);
+  --color-cancel-query-foreground: var(--color-cancel-query-foreground);
   --color-card-glass-bg: var(--color-card-glass-bg);
   --color-card-glass-border: var(--color-card-glass-border);
   --color-card-glass-solid: var(--color-card-glass-solid);

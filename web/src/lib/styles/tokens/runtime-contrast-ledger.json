@@ -168,46 +168,6 @@
       }
     },
     {
-      "id": "components/O2AIConfirmDialog.vue --color-status-negative --color-white [text]",
-      "kind": "text",
-      "sites": 2,
-      "reason": "literal white label on the error status fill — brand-by-design fill (hero panels, badges, toast actions): the ground is the runtime colour itself, so no static ink survives it; routing every one of these labels through a picked token is the owner decision, not a class swap; worst 2.26:1 at dark O2 Crimson Ink — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.93,
-        "light O2 Signature": 4.43,
-        "dark O2 Pulse": 2.93,
-        "light O2 Pulse": 4.43,
-        "dark O2 Horizon": 2.93,
-        "light O2 Horizon": 4.43,
-        "dark O2 Beacon": 2.93,
-        "light O2 Beacon": 4.43,
-        "dark O2 Lens": 2.93,
-        "light O2 Lens": 4.43,
-        "dark O2 Crimson Ink": 2.26,
-        "light O2 Crimson Ink": 2.8
-      }
-    },
-    {
-      "id": "components/O2AIConfirmDialog.vue --color-status-positive --color-white [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "literal white label on the success status fill — brand-by-design fill (hero panels, badges, toast actions): the ground is the runtime colour itself, so no static ink survives it; routing every one of these labels through a picked token is the owner decision, not a class swap; worst 1.89:1 at dark O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 1.89,
-        "light O2 Signature": 4.41,
-        "dark O2 Pulse": 1.89,
-        "light O2 Pulse": 4.41,
-        "dark O2 Horizon": 1.89,
-        "light O2 Horizon": 4.41,
-        "dark O2 Beacon": 1.89,
-        "light O2 Beacon": 4.41,
-        "dark O2 Lens": 1.89,
-        "light O2 Lens": 4.41,
-        "dark O2 Crimson Ink": 2.98,
-        "light O2 Crimson Ink": 4.47
-      }
-    },
-    {
       "id": "components/O2AIConfirmDialog.vue --color-theme-accent --color-button-primary-foreground [text]",
       "kind": "text",
       "sites": 2,
@@ -528,50 +488,10 @@
       }
     },
     {
-      "id": "components/ai-assistant/chat/O2AIChatToolCallBlock.vue --census-page-bg --color-status-error-text opacity-60 [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "opacity-60 painted on --census-page-bg status-error-text (component fill) in components/ai-assistant/chat/O2AIChatToolCallBlock.vue (1 site(s)); worst 2.47:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 3.67,
-        "light O2 Signature": 2.47,
-        "dark O2 Pulse": 3.82,
-        "light O2 Pulse": 2.53,
-        "dark O2 Horizon": 3.79,
-        "light O2 Horizon": 2.52,
-        "dark O2 Beacon": 3.76,
-        "light O2 Beacon": 2.52,
-        "dark O2 Lens": 3.8,
-        "light O2 Lens": 2.54,
-        "dark O2 Crimson Ink": 3.82,
-        "light O2 Crimson Ink": 2.5
-      }
-    },
-    {
       "id": "components/ai-assistant/chat/O2AIChatToolCallBlock.vue --census-page-bg --color-text-secondary opacity-60 [non-text]",
       "kind": "non-text",
       "sites": 13,
       "reason": "[icon-only site] opacity-60 painted on --census-page-bg text-secondary (component fill) in components/ai-assistant/chat/O2AIChatToolCallBlock.vue (13 site(s)); worst 2.75:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 3.46,
-        "light O2 Signature": 2.75,
-        "dark O2 Pulse": 3.6,
-        "light O2 Pulse": 2.81,
-        "dark O2 Horizon": 3.58,
-        "light O2 Horizon": 2.8,
-        "dark O2 Beacon": 3.54,
-        "light O2 Beacon": 2.8,
-        "dark O2 Lens": 3.58,
-        "light O2 Lens": 2.82,
-        "dark O2 Crimson Ink": 3.56,
-        "light O2 Crimson Ink": 2.78
-      }
-    },
-    {
-      "id": "components/ai-assistant/chat/O2AIChatToolCallBlock.vue --census-page-bg --color-text-secondary opacity-60 [text]",
-      "kind": "text",
-      "sites": 28,
-      "reason": "opacity-60 painted on --census-page-bg text-secondary (component fill) in components/ai-assistant/chat/O2AIChatToolCallBlock.vue (28 site(s)); worst 2.75:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
       "at": {
         "dark O2 Signature": 3.46,
         "light O2 Signature": 2.75,
@@ -805,46 +725,6 @@
         "light O2 Lens": 2.78,
         "dark O2 Crimson Ink": 6.66,
         "light O2 Crimson Ink": 2.72
-      }
-    },
-    {
-      "id": "components/alerts/DependencyEntityRow.vue --color-interactive-hover-bg --color-text-body @hover opacity-50 [non-text]",
-      "kind": "non-text",
-      "sites": 3,
-      "reason": "[icon-only site] opacity-50 painted on interactive-hover-bg text-body (component fill) in the @hover state in components/alerts/DependencyEntityRow.vue (3 site(s)); worst 2.27:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.8,
-        "light O2 Signature": 2.27,
-        "dark O2 Pulse": 3.3,
-        "light O2 Pulse": 2.4,
-        "dark O2 Horizon": 3.18,
-        "light O2 Horizon": 2.38,
-        "dark O2 Beacon": 3.07,
-        "light O2 Beacon": 2.38,
-        "dark O2 Lens": 3.21,
-        "light O2 Lens": 2.42,
-        "dark O2 Crimson Ink": 3.14,
-        "light O2 Crimson Ink": 2.34
-      }
-    },
-    {
-      "id": "components/alerts/DependencyEntityRow.vue --color-interactive-hover-bg --color-text-body @hover opacity-50 [text]",
-      "kind": "text",
-      "sites": 3,
-      "reason": "opacity-50 painted on interactive-hover-bg text-body (component fill) in the @hover state in components/alerts/DependencyEntityRow.vue (3 site(s)); worst 2.27:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.8,
-        "light O2 Signature": 2.27,
-        "dark O2 Pulse": 3.3,
-        "light O2 Pulse": 2.4,
-        "dark O2 Horizon": 3.18,
-        "light O2 Horizon": 2.38,
-        "dark O2 Beacon": 3.07,
-        "light O2 Beacon": 2.38,
-        "dark O2 Lens": 3.21,
-        "light O2 Lens": 2.42,
-        "dark O2 Crimson Ink": 3.14,
-        "light O2 Crimson Ink": 2.34
       }
     },
     {
@@ -1948,26 +1828,6 @@
       }
     },
     {
-      "id": "components/dashboards/addPanel/DashboardQueryBuilder.vue --color-theme-accent --color-text-body opacity-70 [text]",
-      "kind": "text",
-      "sites": 4,
-      "reason": "opacity-70 painted on theme-accent text-body (component fill) in components/dashboards/addPanel/DashboardQueryBuilder.vue (4 site(s)); worst 1.16:1 at dark O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 1.16,
-        "light O2 Signature": 1.41,
-        "dark O2 Pulse": 2.63,
-        "light O2 Pulse": 1.56,
-        "dark O2 Horizon": 1.94,
-        "light O2 Horizon": 1.46,
-        "dark O2 Beacon": 1.52,
-        "light O2 Beacon": 1.48,
-        "dark O2 Lens": 1.95,
-        "light O2 Lens": 1.83,
-        "dark O2 Crimson Ink": 1.68,
-        "light O2 Crimson Ink": 1.34
-      }
-    },
-    {
       "id": "components/dashboards/addPanel/DashboardQueryEditor.vue --color-section-header-bg --color-text-muted [text]",
       "kind": "text",
       "sites": 1,
@@ -2048,26 +1908,6 @@
       }
     },
     {
-      "id": "components/dbm/DbmDeadlockSide.vue --census-page-bg --color-text-secondary opacity-45 [text]",
-      "kind": "text",
-      "sites": 2,
-      "reason": "opacity-45 painted on --census-page-bg text-secondary (component fill) in components/dbm/DbmDeadlockSide.vue (2 site(s)); worst 2.05:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.49,
-        "light O2 Signature": 2.05,
-        "dark O2 Pulse": 2.57,
-        "light O2 Pulse": 2.08,
-        "dark O2 Horizon": 2.56,
-        "light O2 Horizon": 2.08,
-        "dark O2 Beacon": 2.54,
-        "light O2 Beacon": 2.08,
-        "dark O2 Lens": 2.56,
-        "light O2 Lens": 2.09,
-        "dark O2 Crimson Ink": 2.55,
-        "light O2 Crimson Ink": 2.07
-      }
-    },
-    {
       "id": "components/dbm/DbmInsightStrip.vue --color-surface-accent-active --color-text-secondary [text]",
       "kind": "text",
       "sites": 1,
@@ -2085,26 +1925,6 @@
         "light O2 Lens": 6.58,
         "dark O2 Crimson Ink": 4.15,
         "light O2 Crimson Ink": 6.16
-      }
-    },
-    {
-      "id": "components/dbm/DbmQueryCell.vue --census-page-bg --color-text-secondary opacity-45 [text]",
-      "kind": "text",
-      "sites": 2,
-      "reason": "opacity-45 painted on --census-page-bg text-secondary (component fill) in components/dbm/DbmQueryCell.vue (2 site(s)); worst 2.05:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.49,
-        "light O2 Signature": 2.05,
-        "dark O2 Pulse": 2.57,
-        "light O2 Pulse": 2.08,
-        "dark O2 Horizon": 2.56,
-        "light O2 Horizon": 2.08,
-        "dark O2 Beacon": 2.54,
-        "light O2 Beacon": 2.08,
-        "dark O2 Lens": 2.56,
-        "light O2 Lens": 2.09,
-        "dark O2 Crimson Ink": 2.55,
-        "light O2 Crimson Ink": 2.07
       }
     },
     {
@@ -2145,26 +1965,6 @@
         "light O2 Lens": 1.06,
         "dark O2 Crimson Ink": 19.56,
         "light O2 Crimson Ink": 1.08
-      }
-    },
-    {
-      "id": "components/fleet/FleetFlowEdge.vue --census-page-bg --color-status-error-text opacity-30 [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "opacity-30 painted on --census-page-bg status-error-text (component fill) in components/fleet/FleetFlowEdge.vue (1 site(s)); worst 1.53:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 1.82,
-        "light O2 Signature": 1.53,
-        "dark O2 Pulse": 1.87,
-        "light O2 Pulse": 1.55,
-        "dark O2 Horizon": 1.86,
-        "light O2 Horizon": 1.55,
-        "dark O2 Beacon": 1.85,
-        "light O2 Beacon": 1.55,
-        "dark O2 Lens": 1.86,
-        "light O2 Lens": 1.55,
-        "dark O2 Crimson Ink": 1.86,
-        "light O2 Crimson Ink": 1.54
       }
     },
     {
@@ -4448,26 +4248,6 @@
       }
     },
     {
-      "id": "enterprise/components/AIObservability/PlaygroundMessageList.vue --census-page-bg --color-text-secondary opacity-50 [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "opacity-50 painted on --census-page-bg text-secondary (component fill) in enterprise/components/AIObservability/PlaygroundMessageList.vue (1 site(s)); worst 2.25:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.78,
-        "light O2 Signature": 2.25,
-        "dark O2 Pulse": 2.89,
-        "light O2 Pulse": 2.29,
-        "dark O2 Horizon": 2.87,
-        "light O2 Horizon": 2.29,
-        "dark O2 Beacon": 2.85,
-        "light O2 Beacon": 2.29,
-        "dark O2 Lens": 2.87,
-        "light O2 Lens": 2.3,
-        "dark O2 Crimson Ink": 2.86,
-        "light O2 Crimson Ink": 2.27
-      }
-    },
-    {
       "id": "enterprise/components/AIObservability/PlaygroundScorersMenu.vue --census-page-bg --color-status-warning-text [text]",
       "kind": "text",
       "sites": 1,
@@ -5128,26 +4908,6 @@
       }
     },
     {
-      "id": "lib/core/Table/sub-components/OTableColumnToggle.vue --color-count-badge-bg --color-white [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "literal white label on count-badge-bg (component fill) — brand-by-design fill (hero panels, badges, toast actions): the ground is the runtime colour itself, so no static ink survives it; routing every one of these labels through a picked token is the owner decision, not a class swap; worst 1.25:1 at dark O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 1.25,
-        "light O2 Signature": 16.54,
-        "dark O2 Pulse": 4.8,
-        "light O2 Pulse": 4.8,
-        "dark O2 Horizon": 3.25,
-        "light O2 Horizon": 5.12,
-        "dark O2 Beacon": 2.42,
-        "light O2 Beacon": 5.08,
-        "dark O2 Lens": 3.22,
-        "light O2 Lens": 3.6,
-        "dark O2 Crimson Ink": 2.69,
-        "light O2 Crimson Ink": 4.7
-      }
-    },
-    {
       "id": "lib/core/Table/sub-components/OTableHeader.vue --color-table-header-bg --color-table-sort-icon-active opacity-60 [non-text]",
       "kind": "non-text",
       "sites": 8,
@@ -5225,66 +4985,6 @@
         "light O2 Lens": 2.56,
         "dark O2 Crimson Ink": 4.11,
         "light O2 Crimson Ink": 2.53
-      }
-    },
-    {
-      "id": "lib/feedback/Toast/OToast.vue --color-toast-action-hover --color-white @hover [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "@hover painted on toast-action-hover white (component fill) in lib/feedback/Toast/OToast.vue (1 site(s)); worst 1.11:1 at dark O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 1.11,
-        "light O2 Signature": 17.65,
-        "dark O2 Pulse": 2,
-        "light O2 Pulse": 6.76,
-        "dark O2 Horizon": 1.72,
-        "light O2 Horizon": 7.13,
-        "dark O2 Beacon": 1.51,
-        "light O2 Beacon": 7.12,
-        "dark O2 Lens": 1.77,
-        "light O2 Lens": 5.27,
-        "dark O2 Crimson Ink": 1.64,
-        "light O2 Crimson Ink": 6.72
-      }
-    },
-    {
-      "id": "lib/feedback/Toast/OToast.vue --color-toast-action-text --color-white @focus-visible [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "@focus-visible painted on toast-action-text white (component fill) in lib/feedback/Toast/OToast.vue (1 site(s)); worst 1.16:1 at dark O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 1.16,
-        "light O2 Signature": 16.54,
-        "dark O2 Pulse": 2.77,
-        "light O2 Pulse": 4.8,
-        "dark O2 Horizon": 2.2,
-        "light O2 Horizon": 5.12,
-        "dark O2 Beacon": 1.82,
-        "light O2 Beacon": 5.08,
-        "dark O2 Lens": 2.25,
-        "light O2 Lens": 3.6,
-        "dark O2 Crimson Ink": 2,
-        "light O2 Crimson Ink": 4.7
-      }
-    },
-    {
-      "id": "lib/feedback/Toast/OToast.vue --color-toast-action-text --color-white [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "literal white label on the toast action fill — brand-by-design fill (hero panels, badges, toast actions): the ground is the runtime colour itself, so no static ink survives it; routing every one of these labels through a picked token is the owner decision, not a class swap; worst 1.16:1 at dark O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 1.16,
-        "light O2 Signature": 16.54,
-        "dark O2 Pulse": 2.77,
-        "light O2 Pulse": 4.8,
-        "dark O2 Horizon": 2.2,
-        "light O2 Horizon": 5.12,
-        "dark O2 Beacon": 1.82,
-        "light O2 Beacon": 5.08,
-        "dark O2 Lens": 2.25,
-        "light O2 Lens": 3.6,
-        "dark O2 Crimson Ink": 2,
-        "light O2 Crimson Ink": 4.7
       }
     },
     {
@@ -6535,26 +6235,6 @@
       }
     },
     {
-      "id": "lib/vue-shortcut-manager/ShortcutCheatsheet.vue --census-page-bg --color-text-secondary opacity-40 [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "opacity-40 painted on --census-page-bg text-secondary (component fill) in lib/vue-shortcut-manager/ShortcutCheatsheet.vue (1 site(s)); worst 1.87:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.23,
-        "light O2 Signature": 1.87,
-        "dark O2 Pulse": 2.29,
-        "light O2 Pulse": 1.9,
-        "dark O2 Horizon": 2.28,
-        "light O2 Horizon": 1.89,
-        "dark O2 Beacon": 2.27,
-        "light O2 Beacon": 1.89,
-        "dark O2 Lens": 2.29,
-        "light O2 Lens": 1.9,
-        "dark O2 Crimson Ink": 2.28,
-        "light O2 Crimson Ink": 1.89
-      }
-    },
-    {
       "id": "lib/vue-shortcut-manager/ShortcutCheatsheet.vue --census-page-bg --color-text-secondary opacity-60 [text]",
       "kind": "text",
       "sites": 1,
@@ -6672,26 +6352,6 @@
         "light O2 Lens": 3.6,
         "dark O2 Crimson Ink": 7.8,
         "light O2 Crimson Ink": 4.7
-      }
-    },
-    {
-      "id": "plugins/logs/SearchBar.vue --color-cancel-query-bg --color-button-primary-foreground [text]",
-      "kind": "text",
-      "sites": 4,
-      "reason": "button-primary-foreground painted on the cancel-query chip fill in plugins/logs/SearchBar.vue (4 site(s)); worst 2.09:1 at dark O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.09,
-        "light O2 Signature": 2.63,
-        "dark O2 Pulse": 8.57,
-        "light O2 Pulse": 2.63,
-        "dark O2 Horizon": 8.57,
-        "light O2 Horizon": 2.63,
-        "dark O2 Beacon": 2.45,
-        "light O2 Beacon": 2.63,
-        "dark O2 Lens": 8.57,
-        "light O2 Lens": 2.63,
-        "dark O2 Crimson Ink": 2.45,
-        "light O2 Crimson Ink": 2.63
       }
     },
     {
@@ -7052,46 +6712,6 @@
         "light O2 Lens": 3.6,
         "dark O2 Crimson Ink": 7.8,
         "light O2 Crimson Ink": 4.7
-      }
-    },
-    {
-      "id": "plugins/traces/SearchBar.vue --color-cancel-query-bg --color-button-primary-foreground [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "button-primary-foreground painted on the cancel-query chip fill in plugins/traces/SearchBar.vue (1 site(s)); worst 2.09:1 at dark O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.09,
-        "light O2 Signature": 2.63,
-        "dark O2 Pulse": 8.57,
-        "light O2 Pulse": 2.63,
-        "dark O2 Horizon": 8.57,
-        "light O2 Horizon": 2.63,
-        "dark O2 Beacon": 2.45,
-        "light O2 Beacon": 2.63,
-        "dark O2 Lens": 8.57,
-        "light O2 Lens": 2.63,
-        "dark O2 Crimson Ink": 2.45,
-        "light O2 Crimson Ink": 2.63
-      }
-    },
-    {
-      "id": "plugins/traces/ServiceGraph.vue --census-page-bg --color-text-label opacity-55 [text]",
-      "kind": "text",
-      "sites": 2,
-      "reason": "opacity-55 painted on --census-page-bg text-label (component fill) in plugins/traces/ServiceGraph.vue (2 site(s)); worst 1.52:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.79,
-        "light O2 Signature": 1.52,
-        "dark O2 Pulse": 2.9,
-        "light O2 Pulse": 1.55,
-        "dark O2 Horizon": 2.88,
-        "light O2 Horizon": 1.54,
-        "dark O2 Beacon": 2.86,
-        "light O2 Beacon": 1.54,
-        "dark O2 Lens": 2.89,
-        "light O2 Lens": 1.55,
-        "dark O2 Crimson Ink": 2.87,
-        "light O2 Crimson Ink": 1.53
       }
     },
     {
@@ -7635,66 +7255,6 @@
       }
     },
     {
-      "id": "views/DatabaseMonitoring/BlockedQueriesPage.vue --census-page-bg --color-text-secondary opacity-45 [text]",
-      "kind": "text",
-      "sites": 3,
-      "reason": "opacity-45 painted on --census-page-bg text-secondary (component fill) in views/DatabaseMonitoring/BlockedQueriesPage.vue (3 site(s)); worst 2.05:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.49,
-        "light O2 Signature": 2.05,
-        "dark O2 Pulse": 2.57,
-        "light O2 Pulse": 2.08,
-        "dark O2 Horizon": 2.56,
-        "light O2 Horizon": 2.08,
-        "dark O2 Beacon": 2.54,
-        "light O2 Beacon": 2.08,
-        "dark O2 Lens": 2.56,
-        "light O2 Lens": 2.09,
-        "dark O2 Crimson Ink": 2.55,
-        "light O2 Crimson Ink": 2.07
-      }
-    },
-    {
-      "id": "views/DatabaseMonitoring/DatabasesPage.vue --census-page-bg --color-text-secondary opacity-45 [text]",
-      "kind": "text",
-      "sites": 2,
-      "reason": "opacity-45 painted on --census-page-bg text-secondary (component fill) in views/DatabaseMonitoring/DatabasesPage.vue (2 site(s)); worst 2.05:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.49,
-        "light O2 Signature": 2.05,
-        "dark O2 Pulse": 2.57,
-        "light O2 Pulse": 2.08,
-        "dark O2 Horizon": 2.56,
-        "light O2 Horizon": 2.08,
-        "dark O2 Beacon": 2.54,
-        "light O2 Beacon": 2.08,
-        "dark O2 Lens": 2.56,
-        "light O2 Lens": 2.09,
-        "dark O2 Crimson Ink": 2.55,
-        "light O2 Crimson Ink": 2.07
-      }
-    },
-    {
-      "id": "views/DatabaseMonitoring/DeadlocksPage.vue --census-page-bg --color-text-secondary opacity-45 [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "opacity-45 painted on --census-page-bg text-secondary (component fill) in views/DatabaseMonitoring/DeadlocksPage.vue (1 site(s)); worst 2.05:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.49,
-        "light O2 Signature": 2.05,
-        "dark O2 Pulse": 2.57,
-        "light O2 Pulse": 2.08,
-        "dark O2 Horizon": 2.56,
-        "light O2 Horizon": 2.08,
-        "dark O2 Beacon": 2.54,
-        "light O2 Beacon": 2.08,
-        "dark O2 Lens": 2.56,
-        "light O2 Lens": 2.09,
-        "dark O2 Crimson Ink": 2.55,
-        "light O2 Crimson Ink": 2.07
-      }
-    },
-    {
       "id": "views/DatabaseMonitoring/QueriesPage.vue --census-page-bg --color-status-warning-text [text]",
       "kind": "text",
       "sites": 1,
@@ -7712,26 +7272,6 @@
         "light O2 Lens": 4.26,
         "dark O2 Crimson Ink": 12.03,
         "light O2 Crimson Ink": 4.17
-      }
-    },
-    {
-      "id": "views/DatabaseMonitoring/QueriesPage.vue --census-page-bg --color-text-secondary opacity-45 [text]",
-      "kind": "text",
-      "sites": 2,
-      "reason": "opacity-45 painted on --census-page-bg text-secondary (component fill) in views/DatabaseMonitoring/QueriesPage.vue (2 site(s)); worst 2.05:1 at light O2 Signature — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 2.49,
-        "light O2 Signature": 2.05,
-        "dark O2 Pulse": 2.57,
-        "light O2 Pulse": 2.08,
-        "dark O2 Horizon": 2.56,
-        "light O2 Horizon": 2.08,
-        "dark O2 Beacon": 2.54,
-        "light O2 Beacon": 2.08,
-        "dark O2 Lens": 2.56,
-        "light O2 Lens": 2.09,
-        "dark O2 Crimson Ink": 2.55,
-        "light O2 Crimson Ink": 2.07
       }
     },
     {
@@ -8353,6 +7893,26 @@
         "dark O2 Crimson Ink": 12.03,
         "light O2 Crimson Ink": 4.17
       }
+    },
+    {
+      "id": "lib/core/Table/sub-components/OTableColumnToggle.vue --color-count-badge-bg --color-button-primary-foreground [text]",
+      "kind": "text",
+      "sites": 1,
+      "reason": "picked button-primary-foreground painted on count-badge-bg (component fill): the badge fill is the ramp's 600 step, the same pixel as the accent fill, so the picked label holds 14.36:1 at dark O2 Signature and rides the booked button-label residuals (worst 3.22:1 at dark O2 Lens) at the two-sided-squeeze palettes — palette-decision: see web/src/constants/themes.ts DECISION RECORD",
+      "at": {
+        "dark O2 Signature": 14.36,
+        "light O2 Signature": 16.54,
+        "dark O2 Pulse": 4.8,
+        "light O2 Pulse": 4.8,
+        "dark O2 Horizon": 3.25,
+        "light O2 Horizon": 5.12,
+        "dark O2 Beacon": 8.7,
+        "light O2 Beacon": 5.08,
+        "dark O2 Lens": 3.22,
+        "light O2 Lens": 3.6,
+        "dark O2 Crimson Ink": 7.8,
+        "light O2 Crimson Ink": 4.7
+      }
     }
   ],
   "dynamicBindings": [
@@ -8568,8 +8128,8 @@
       "id": "--census-page-bg --color-icon-color [non-text]",
       "kind": "non-text",
       "sites": 23,
-      "bookedIn": "tokens/contrast-manifest.ts pending rows (MAX_PENDING ratchet, WCAG-AA colour remediation follow-up PR)",
-      "reason": "delegated: icon-color measured through the runtime page tint — the SAME tier that contrast-manifest.ts already books as a failing pending row on the sheet ground, so the owner is the remediation PR, not this gate; worst 2.89:1 at dark O2 Signature in the twelve injected scopes",
+      "bookedIn": "tokens/contrast-manifest.ts pending row --color-icon-color pending row, themes:[dark]",
+      "reason": "delegated: --color-icon-color measured through the runtime page tint (1.4.11 bar 3.0). The exact manifest counterpart is --color-icon-color pending row, themes:[dark] (the manifest already owns the dark miss this row measures at 2.89; light holds the 3.0 glyph bar at 3.58) — the owner is the WCAG-AA colour remediation that ledger records, not this gate.",
       "at": {
         "dark O2 Signature": 2.89,
         "light O2 Signature": 3.58,
@@ -8589,8 +8149,8 @@
       "id": "--census-page-bg --color-icon-color [text]",
       "kind": "text",
       "sites": 9,
-      "bookedIn": "tokens/contrast-manifest.ts pending rows (MAX_PENDING ratchet, WCAG-AA colour remediation follow-up PR)",
-      "reason": "delegated: icon-color measured through the runtime page tint — the SAME tier that contrast-manifest.ts already books as a failing pending row on the sheet ground, so the owner is the remediation PR, not this gate; worst 2.89:1 at dark O2 Signature in the twelve injected scopes",
+      "bookedIn": "tokens/contrast-manifest.ts pending row --color-icon-color pending row, themes:[dark]",
+      "reason": "delegated: --color-icon-color measured through the runtime page tint (text bar 4.5). The exact manifest counterpart is --color-icon-color pending row, themes:[dark] (the manifest already owns the dark miss this row measures at 2.89; light holds the 3.0 glyph bar at 3.58) — the owner is the WCAG-AA colour remediation that ledger records, not this gate.",
       "at": {
         "dark O2 Signature": 2.89,
         "light O2 Signature": 3.58,
@@ -8607,32 +8167,11 @@
       }
     },
     {
-      "id": "--census-page-bg --color-text-inverse [text]",
-      "kind": "text",
-      "sites": 1,
-      "bookedIn": "tokens/contrast-manifest.ts pending rows (MAX_PENDING ratchet, WCAG-AA colour remediation follow-up PR)",
-      "reason": "delegated: text-inverse measured through the runtime page tint — the SAME tier that contrast-manifest.ts already books as a failing pending row on the sheet ground, so the owner is the remediation PR, not this gate; worst 1.04:1 at dark O2 Signature in the twelve injected scopes",
-      "at": {
-        "dark O2 Signature": 1.04,
-        "light O2 Signature": 1.1,
-        "dark O2 Pulse": 1.11,
-        "light O2 Pulse": 1.06,
-        "dark O2 Horizon": 1.1,
-        "light O2 Horizon": 1.07,
-        "dark O2 Beacon": 1.09,
-        "light O2 Beacon": 1.07,
-        "dark O2 Lens": 1.1,
-        "light O2 Lens": 1.06,
-        "dark O2 Crimson Ink": 1.09,
-        "light O2 Crimson Ink": 1.08
-      }
-    },
-    {
       "id": "--census-page-bg --color-text-label [non-text]",
       "kind": "non-text",
       "sites": 3,
-      "bookedIn": "tokens/contrast-manifest.ts pending rows (MAX_PENDING ratchet, WCAG-AA colour remediation follow-up PR)",
-      "reason": "delegated: grey-400 label tier measured through the runtime page tint — the SAME tier that contrast-manifest.ts already books as a failing pending row on the sheet ground, so the owner is the remediation PR, not this gate; worst 2.29:1 at light O2 Signature in the twelve injected scopes",
+      "bookedIn": "tokens/contrast-manifest.ts pending row --color-text-label pending row, themes:[light]",
+      "reason": "delegated: --color-text-label measured through the runtime page tint (1.4.11 bar 3.0). The exact manifest counterpart is --color-text-label pending row, themes:[light] (grey-400 2.29; dark passes at 6.36) — the owner is the WCAG-AA colour remediation that ledger records, not this gate.",
       "at": {
         "dark O2 Signature": 6.36,
         "light O2 Signature": 2.29,
@@ -8652,8 +8191,8 @@
       "id": "--census-page-bg --color-text-label [text]",
       "kind": "text",
       "sites": 54,
-      "bookedIn": "tokens/contrast-manifest.ts pending rows (MAX_PENDING ratchet, WCAG-AA colour remediation follow-up PR)",
-      "reason": "delegated: grey-400 label tier measured through the runtime page tint — the SAME tier that contrast-manifest.ts already books as a failing pending row on the sheet ground, so the owner is the remediation PR, not this gate; worst 2.29:1 at light O2 Signature in the twelve injected scopes",
+      "bookedIn": "tokens/contrast-manifest.ts pending row --color-text-label pending row, themes:[light]",
+      "reason": "delegated: --color-text-label measured through the runtime page tint (text bar 4.5). The exact manifest counterpart is --color-text-label pending row, themes:[light] (grey-400 2.29; dark passes at 6.36) — the owner is the WCAG-AA colour remediation that ledger records, not this gate.",
       "at": {
         "dark O2 Signature": 6.36,
         "light O2 Signature": 2.29,
@@ -8673,8 +8212,8 @@
       "id": "--census-page-bg --color-text-muted [non-text]",
       "kind": "non-text",
       "sites": 35,
-      "bookedIn": "tokens/contrast-manifest.ts pending rows (MAX_PENDING ratchet, WCAG-AA colour remediation follow-up PR)",
-      "reason": "delegated: grey-300 de-emphasis tier measured through the runtime page tint — the SAME tier that contrast-manifest.ts already books as a failing pending row on the sheet ground, so the owner is the remediation PR, not this gate; worst 1.35:1 at light O2 Signature in the twelve injected scopes",
+      "bookedIn": "tokens/contrast-manifest.ts pending row --color-text-muted pending row, themes:[light]",
+      "reason": "delegated: --color-text-muted measured through the runtime page tint (1.4.11 bar 3.0). The exact manifest counterpart is --color-text-muted pending row, themes:[light] (grey-300 1.35 on the sheet page; dark measures 6.36 and passes, the failure this row carries is the SAME light debt) — the owner is the WCAG-AA colour remediation that ledger records, not this gate.",
       "at": {
         "dark O2 Signature": 6.36,
         "light O2 Signature": 1.35,
@@ -8694,8 +8233,8 @@
       "id": "--census-page-bg --color-text-muted [text]",
       "kind": "text",
       "sites": 220,
-      "bookedIn": "tokens/contrast-manifest.ts pending rows (MAX_PENDING ratchet, WCAG-AA colour remediation follow-up PR)",
-      "reason": "delegated: grey-300 de-emphasis tier measured through the runtime page tint — the SAME tier that contrast-manifest.ts already books as a failing pending row on the sheet ground, so the owner is the remediation PR, not this gate; worst 1.35:1 at light O2 Signature in the twelve injected scopes",
+      "bookedIn": "tokens/contrast-manifest.ts pending row --color-text-muted pending row, themes:[light]",
+      "reason": "delegated: --color-text-muted measured through the runtime page tint (text bar 4.5). The exact manifest counterpart is --color-text-muted pending row, themes:[light] (grey-300 1.35 on the sheet page; dark measures 6.36 and passes, the failure this row carries is the SAME light debt) — the owner is the WCAG-AA colour remediation that ledger records, not this gate.",
       "at": {
         "dark O2 Signature": 6.36,
         "light O2 Signature": 1.35,
@@ -8715,8 +8254,8 @@
       "id": "--census-page-bg --color-text-placeholder [non-text]",
       "kind": "non-text",
       "sites": 2,
-      "bookedIn": "tokens/contrast-manifest.ts pending rows (MAX_PENDING ratchet, WCAG-AA colour remediation follow-up PR)",
-      "reason": "delegated: grey-400 placeholder tier measured through the runtime page tint — the SAME tier that contrast-manifest.ts already books as a failing pending row on the sheet ground, so the owner is the remediation PR, not this gate; worst 2.29:1 at light O2 Signature in the twelve injected scopes",
+      "bookedIn": "tokens/contrast-manifest.ts pending row --color-text-placeholder pending row, themes:[light]",
+      "reason": "delegated: --color-text-placeholder measured through the runtime page tint (1.4.11 bar 3.0). The exact manifest counterpart is --color-text-placeholder pending row, themes:[light] (2.29; dark passes) — the owner is the WCAG-AA colour remediation that ledger records, not this gate.",
       "at": {
         "dark O2 Signature": 6.36,
         "light O2 Signature": 2.29,
@@ -8736,8 +8275,8 @@
       "id": "--census-page-bg --color-text-placeholder [text]",
       "kind": "text",
       "sites": 3,
-      "bookedIn": "tokens/contrast-manifest.ts pending rows (MAX_PENDING ratchet, WCAG-AA colour remediation follow-up PR)",
-      "reason": "delegated: grey-400 placeholder tier measured through the runtime page tint — the SAME tier that contrast-manifest.ts already books as a failing pending row on the sheet ground, so the owner is the remediation PR, not this gate; worst 2.29:1 at light O2 Signature in the twelve injected scopes",
+      "bookedIn": "tokens/contrast-manifest.ts pending row --color-text-placeholder pending row, themes:[light]",
+      "reason": "delegated: --color-text-placeholder measured through the runtime page tint (text bar 4.5). The exact manifest counterpart is --color-text-placeholder pending row, themes:[light] (2.29; dark passes) — the owner is the WCAG-AA colour remediation that ledger records, not this gate.",
       "at": {
         "dark O2 Signature": 6.36,
         "light O2 Signature": 2.29,

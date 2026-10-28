@@ -66,7 +66,7 @@ describe("VersionDeltaStrip", () => {
     ]);
     const wrapper = mountStrip(r);
     const delta = wrapper.find('[data-test="version-delta-strip-delta-errorRate"]');
-    expect(delta.classes()).toContain("text-error-600");
+    expect(delta.classes()).toContain("text-status-error-text");
   });
 
   it("colors a clear improvement (verdict=lower, up-worse metric) as good", () => {
@@ -83,7 +83,7 @@ describe("VersionDeltaStrip", () => {
     ]);
     const wrapper = mountStrip(r);
     const delta = wrapper.find('[data-test="version-delta-strip-delta-p95"]');
-    expect(delta.classes()).toContain("text-success-600");
+    expect(delta.classes()).toContain("text-status-success-text");
   });
 
   it("colors every delta by DIRECTION — a drop is green regardless of CI significance", () => {
@@ -102,7 +102,7 @@ describe("VersionDeltaStrip", () => {
     ]);
     const wrapper = mountStrip(r);
     const delta = wrapper.find('[data-test="version-delta-strip-delta-cost"]');
-    expect(delta.classes()).toContain("text-success-600"); // fell → better
+    expect(delta.classes()).toContain("text-status-success-text"); // fell → better
     expect(wrapper.find('[data-test="version-delta-strip-indicative-cost"]').exists()).toBe(false);
   });
 
@@ -145,7 +145,7 @@ describe("VersionDeltaStrip", () => {
     ]);
     const wrapper = mountStrip(r);
     const delta = wrapper.find('[data-test="version-delta-strip-delta-p99"]');
-    expect(delta.classes()).toContain("text-success-600");
+    expect(delta.classes()).toContain("text-status-success-text");
     expect(wrapper.find('[data-test="version-delta-strip-values-p99"]').text()).toContain("500");
   });
 

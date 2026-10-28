@@ -923,6 +923,8 @@
   --color-toast-loading-border: var(--color-border-default);
   --color-toast-action-text: var(--color-primary-400);
   --color-toast-action-hover: var(--color-primary-300);
+  --color-toast-action-foreground: var(--color-grey-900);
+  --color-toast-action-foreground-hover: var(--color-grey-900);
 
   /* OTable (dark) */
   --color-table-header-bg: var(--d-overlay); /* header band lifts off rows */
@@ -1102,6 +1104,7 @@
 
   /* Misc dark overrides. */
   --color-cancel-query-bg: #7a3838;
+  --color-cancel-query-foreground: var(--color-white);
   --color-highlight-bg: #747474;
   --color-icon-color: #5e5e5e;
 

@@ -414,11 +414,10 @@ describe("the real token sheets", () => {
   });
 
   describe.each([
-    // -2 per theme vs the previous pin: the dead --color-badge-primary-solid-bg
-    // and -text pair (zero consumers web-wide; ledger honesty) left the
-    // sheets with this wave.
-    ["light", 1073, 1061],
-    ["dark", 1074, 1062],
+    // +6 per theme in the F-145 remediation: the picked toast-action labels, the
+    // routed cancel-query label, and the confirm-button fill trio.
+    ["light", 1079, 1067],
+    ["dark", 1080, 1068],
   ] as const)("%s theme", (theme, total, resolved) => {
     const scope = THEMES[theme];
     const names = colorTokens(scope);

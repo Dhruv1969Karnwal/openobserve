@@ -178,6 +178,14 @@ export const libraryForegroundTokens = (
   const tokens: Record<string, string> = {
     "--color-checkbox-checked-fg": pickReadableForeground(checkboxFill),
     "--color-button-primary-foreground": pickButtonForeground(palette),
+    // The toast action chip is filled with the ramp on BOTH modes but with opposite-signed
+    // shades (light 600/700, dark 400/300), so its label must be picked per scope.
+    "--color-toast-action-foreground": pickReadableForeground(
+      mode === "dark" ? palette["400"] : palette["600"],
+    ),
+    "--color-toast-action-foreground-hover": pickReadableForeground(
+      mode === "dark" ? palette["300"] : palette["700"],
+    ),
   };
   if (mode === "light") {
     const fillFg = pickSelectedFillForeground(palette["600"]);
@@ -211,6 +219,8 @@ export const libraryForegroundTokenNames = (): string[] => {
   const probe = {
     "50": "#e5e5e5",
     "100": "#cccccc",
+    "300": "#aaaaaa",
+    "400": "#999999",
     "500": "#888888",
     "600": "#888888",
     "700": "#444444",

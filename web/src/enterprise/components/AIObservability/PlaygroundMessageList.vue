@@ -15,7 +15,10 @@
       v-for="(message, index) in variant.messages"
       :key="message.id"
       class="border-border-default rounded-default focus-within:border-input-border-focus group relative flex items-start gap-1.5 border px-1.5 py-1"
-      :class="[dragIndex === index ? 'opacity-50' : '', dropIndex === index ? 'border-accent' : '']"
+      :class="[
+        dragIndex === index ? 'text-text-secondary' : '',
+        dropIndex === index ? 'border-accent' : '',
+      ]"
       :draggable="canMove(index) && isDragArmed(message.id)"
       :data-test="`ai-playground-message-${message.role}`"
       @dragstart="onDragStart(index)"

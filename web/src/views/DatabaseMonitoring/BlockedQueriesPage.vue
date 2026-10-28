@@ -204,7 +204,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <div class="text-text-secondary text-3xs flex min-w-0 items-center gap-1">
                 <OTag type="dbSystem" :value="row.db_system" size="xs" />
                 <template v-if="row.application || row.db_instance || row.waitingOnPid != null">
-                  <span class="opacity-45">·</span>
+                  <span class="text-text-secondary">·</span>
                   <OTruncatedText
                     :tooltip="
                       raw(
@@ -224,11 +224,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       raw(row.application)
                     }}</span>
                     <template v-if="row.db_instance">
-                      <span v-if="row.application" class="px-1 opacity-45">·</span>
+                      <span v-if="row.application" class="text-text-secondary px-1">·</span>
                       <span>{{ raw(row.db_instance) }}</span>
                     </template>
                     <template v-if="row.waitingOnPid != null">
-                      <span v-if="row.application || row.db_instance" class="px-1 opacity-45"
+                      <span
+                        v-if="row.application || row.db_instance"
+                        class="text-text-secondary px-1"
                         >·</span
                       >
                       <span>{{ t("dbm.blocked.waitingOn", { pid: row.waitingOnPid }) }}</span>

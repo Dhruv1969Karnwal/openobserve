@@ -937,6 +937,24 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     why: "a filled button's label sits on the button",
   },
   {
+    fg: "--color-toast-action-foreground",
+    bg: "--color-toast-action-text",
+    category: "text",
+    why: "the label of a chip filled with the ramp on both modes; utils/themePalette re-picks it for the step each mode paints (light 600, dark 400) and the sheets pin the matching fallbacks",
+  },
+  {
+    fg: "--color-toast-action-foreground-hover",
+    bg: "--color-toast-action-hover",
+    category: "text",
+    why: "the hover twin of the toast action chip (light 700, dark 300); picked per mode by the same pass that books the resting chip",
+  },
+  {
+    fg: "--color-button-confirm-foreground",
+    bg: "--color-button-confirm",
+    category: "text",
+    why: "a filled button's label sits on the button (success-700: white measures 5.02:1, theme-independent)",
+  },
+  {
     fg: "--color-button-primary-foreground",
     bg: "--color-button-primary",
     category: "text",

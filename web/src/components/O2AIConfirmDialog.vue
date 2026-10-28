@@ -45,7 +45,7 @@
             class="confirmation-btn rounded-default text-status-success-text border-border-default bg-surface-base hover:bg-button-ghost-success-hover-bg hover:border-status-positive w-full border-2 text-sm font-semibold tracking-normal normal-case transition-all duration-200"
             :class="
               isFocusedAlways
-                ? 'bg-status-positive! border-status-positive! ring-status-positive/40 text-white! ring-3'
+                ? 'bg-button-confirm! border-status-positive! ring-status-positive/40 text-button-confirm-foreground! ring-3'
                 : ''
             "
             tabindex="1"
@@ -61,7 +61,7 @@
             class="confirmation-btn rounded-default text-text-body border-border-default bg-surface-base hover:bg-button-ghost-destructive-hover-bg hover:border-status-negative w-full border-2 text-sm font-semibold tracking-normal normal-case transition-all duration-200"
             :class="
               isFocusedNo
-                ? 'bg-status-negative! border-status-negative! ring-status-negative/40 text-white! ring-3'
+                ? 'bg-button-destructive! border-status-negative! ring-status-negative/40 text-button-destructive-foreground! ring-3'
                 : ''
             "
             tabindex="2"
@@ -97,7 +97,7 @@
             class="confirmation-btn rounded-default text-text-body border-border-default bg-surface-base hover:bg-button-ghost-destructive-hover-bg hover:border-status-negative w-full border-2 text-sm font-semibold tracking-normal normal-case transition-all duration-200"
             :class="
               isFocusedNo
-                ? 'bg-status-negative! border-status-negative! ring-status-negative/40 text-white! ring-3'
+                ? 'bg-button-destructive! border-status-negative! ring-status-negative/40 text-button-destructive-foreground! ring-3'
                 : ''
             "
             tabindex="1"
