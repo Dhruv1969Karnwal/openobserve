@@ -3538,19 +3538,21 @@ export default defineComponent({
         .then(async (res) => {
           if (res.status == 200) {
             store.dispatch("setSavedViewFlag", true);
-            const extractedObj = res.data.data;
-
             // A saved view is org-stored client-writable JSON, so everything it
             // says about PAID state is sanitized here, before either merge below
             // (both `applySearchSnapshot` sites live in this one function):
             // `meta`'s shape, the gated panel toggle and every key of
-            // PAID_SNAPSHOT_META_KEYS — the paid-dialog trigger and the Ask-AI bar's
-            // external control. TRANSIENT_SEARCH_KEYS is the
+            // PAID_SNAPSHOT_META_KEYS — the paid-dialog trigger, the Ask-AI bar's
+            // external control and the scheduled-result job context. The boundary
+            // returns a sanitized COPY and never writes the payload, so this
+            // assignment is the wiring: dropping it silently restores unsanitized
+            // state instead of failing loudly. TRANSIENT_SEARCH_KEYS is the
             // wrong mechanism for the toggle — views legitimately persist the free
             // values — but the boundary is the same one for all three.
-            sanitizeSearchSnapshotMeta(extractedObj, {
+            const extractedObj = sanitizeSearchSnapshotMeta(res.data.data, {
               patternsAllowed: patternsAccess.value.allowed,
               aiAssistantAllowed: aiAssistantAllowed.value,
+              scheduledSearchAllowed: scheduledSearchAccess.value.allowed,
             });
 
             // A saved view's columns are an explicit user choice, not a system

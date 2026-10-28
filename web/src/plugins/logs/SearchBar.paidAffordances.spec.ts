@@ -21,6 +21,7 @@ import { createRouter, createMemoryHistory } from "vue-router";
 import config from "@/aws-exports";
 import SearchBar from "@/plugins/logs/SearchBar.vue";
 import { resetLogsAutoRunForTests } from "@/composables/useLogs/logsAutoRun";
+import { DEFAULT_LOGS_CONFIG } from "@/utils/logs/constants";
 
 const { openUpgradeDialog, toastMock, scheduleSearch, getViewDetail } = vi.hoisted(() => ({
   openUpgradeDialog: vi.fn(),
@@ -404,8 +405,9 @@ describe("SearchBar — a stored view cannot open paid UI through the apply path
 
   /**
    * What an entitled build used to store (a legacy view), or what anyone who can
-   * write to the org's saved views can store today. A fresh object per call: the
-   * sanitizer mutates the payload it is handed.
+   * write to the org's saved views can store today. A fresh object per call, and
+   * none of them is ever written by the boundary — it returns a sanitized COPY, so a
+   * second apply of the same object sees the payload exactly as it was stored.
    */
   const paidStateView = () => ({
     meta: {
@@ -413,6 +415,8 @@ describe("SearchBar — a stored view cannot open paid UI through the apply path
       showSearchScheduler: true,
       logsVisualizeToggle: "patterns",
       jobId: "job-of-another-session",
+      jobRecords: "250000",
+      showHistogram: true,
       sqlMode: true,
     },
     data: {
@@ -493,14 +497,42 @@ describe("SearchBar — a stored view cannot open paid UI through the apply path
     expect(w.vm.searchObj.meta.logsVisualizeToggle).toBe("logs");
   });
 
-  it("still restores what the view is entitled to persist, execution state included", async () => {
+  /**
+   * The job context is NOT execution-neutral on a free build: a payload `jobId`
+   * re-points the next search at the scheduled-result endpoint (which the OSS backend
+   * answers 403) and the two `immediate` watchers in this component turn it into
+   * visible UI, one of them shutting the free histogram panel. So it is reset here,
+   * and the toast that announces scheduled-search state never fires.
+   */
+  it("drops the job context a stored view carried, and the UI state it announces", async () => {
+    const w = await mountOnLogsRoute();
+    await applyView();
+
+    expect(w.vm.searchObj.meta.jobId).toBe("");
+    expect(w.vm.searchObj.meta.jobRecords).toBe(DEFAULT_LOGS_CONFIG.meta.jobRecords);
+    expect(w.vm.searchObj.meta.showHistogram).toBe(true);
+    const jobToasts = toastMock.mock.calls
+      .map((call: any[]) => String(call?.[0]?.message ?? ""))
+      .filter((message: string) => /job|scheduled/i.test(message));
+    expect(jobToasts).toEqual([]);
+  });
+
+  /** The entitled mirror: an org with scheduled search keeps the job it saved. */
+  it("keeps the job context for an org that has scheduled search", async () => {
+    (config as any).isEnterprise = "true";
+    const w = await mountOnLogsRoute();
+    await applyView();
+
+    expect(w.vm.searchObj.meta.jobId).toBe("job-of-another-session");
+    expect(w.vm.searchObj.meta.jobRecords).toBe("250000");
+  });
+
+  /** What the view IS entitled to persist stays intact — the reset is not a wipe. */
+  it("still restores the free state of the same view", async () => {
     const w = await mountOnLogsRoute();
     await applyView();
 
     expect(w.vm.searchObj.meta.sqlMode).toBe(true);
     expect(w.vm.searchObj.data.query).toBe("SELECT * FROM app_logs");
-    // jobId/jobRecords are documented pass-through: execution state behind a gate
-    // the route already answers for, not an affordance (see the table's EXECUTION row).
-    expect(w.vm.searchObj.meta.jobId).toBe("job-of-another-session");
   });
 });
