@@ -82,7 +82,7 @@
              promise a reading the SLO will refuse to give. -->
         <div
           v-if="preview?.would_freeze"
-          class="border-border-default text-warning border-t px-2 py-1 text-xs"
+          class="border-border-default text-status-warning-text border-t px-2 py-1 text-xs"
           data-test="slos-sloalertpreview-would-freeze"
         >
           {{ t("slos.alertSli.preview.wouldFreeze") }}

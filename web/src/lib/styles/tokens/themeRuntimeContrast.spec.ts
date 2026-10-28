@@ -1567,4 +1567,103 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
       }
     }
   });
+
+  it("tags every cannot-co-paint booking conditional, with its guard cited, numbers still locked", () => {
+    const ledger = JSON.parse(readFileSync(join(here, "runtime-contrast-ledger.json"), "utf8"));
+    const report = runRuntimeCensus(RUNTIME, ledger, censusSources());
+    const byId = new Map(report.rows.map((row) => [row.id, row]));
+    const conditionals = ledger.bookings.filter((booking: { conditional?: boolean }) =>
+      Boolean(booking.conditional),
+    );
+    // The tag never shrinks the measured count: every conditional row is still a booked
+    // failing pair, and the report states them separately so green does not read "never fails".
+    expect(report.conditionalCount).toBe(conditionals.length);
+    for (const booking of conditionals) {
+      expect(
+        byId.has(booking.id),
+        "a conditional row must still be a measured pair: " + booking.id,
+      ).toBe(true);
+      expect(
+        booking.reason,
+        "a conditional row must cite the guard expression: " + booking.id,
+      ).toMatch(/guard: [\w/.-]+:\d+/);
+      expect(
+        Object.keys(booking.at).length,
+        "a conditional row still books all twelve numbers: " + booking.id,
+      ).toBe(12);
+    }
+  });
+
+  // F-145's site-level catch. The token gate cannot carry this family: a `text-warning-600` binding
+  // resolves to a base shade that FOREGROUND_SEGMENTS never matched, so the pair was outside BOTH
+  // gates by construction, and extending that vocabulary to the bare status words would newly
+  // admit 42 base/palette tokens whose measured minimum is 39 rows of `pending` against a ratchet
+  // that is already exactly full. So the family is caught where the sites are: the census books a
+  // new raw-shade binding as a runtime pair (and its selftest pins a raw shade as a census ink),
+  // and this ledger locks every remaining binding, so a re-bound raw shade is a finding even on a
+  // ground the census cannot see. Genuine status text binds a routed --color-status-*-text tier.
+  const LEGACY_RAW_STATUS_TEXT_SITES: Record<string, number> = {
+    "components/Header.vue": 1,
+    "components/PaidOverageConsentBody.vue": 1,
+    "components/ai-assistant/chat/O2AIChatToolCallBlock.vue": 1,
+    "components/alerts/AlertList.vue": 1,
+    "components/alerts/AlertTargetsSelect.vue": 1,
+    "components/alerts/DependencyImpactDialog.vue": 2,
+    "components/alerts/IncidentDetailDrawer.vue": 3,
+    "components/alerts/QueryEditorDialog.vue": 2,
+    "components/dashboards/DashboardLogDrawer.vue": 1,
+    "components/flow/NodePalette.vue": 1,
+    "components/functions/FunctionsToolbar.vue": 1,
+    "components/iam/serviceAccounts/AddServiceAccount.vue": 1,
+    "components/oncall/OnCallRuleEditor.vue": 1,
+    "components/oncall/OnCallScopePicker.vue": 1,
+    "components/settings/General.vue": 5,
+    "components/synthetics/configure/CheckVariablesPanel.vue": 1,
+    "components/synthetics/variables/SyntheticsInheritedVariables.vue": 1,
+    "components/synthetics/variables/VariableSuggestionRow.vue": 1,
+    "lib/core/Icon/OIcon.vue": 1,
+    "plugins/logs/SearchResult.vue": 1,
+    "plugins/metrics/explorer/FunctionConfigDialog.vue": 1,
+    "plugins/metrics/explorer/MetricCard.vue": 2,
+    "plugins/metrics/explorer/MetricChartTile.vue": 1,
+    "plugins/metrics/explorer/MetricDetailView.vue": 1,
+    "plugins/traces/LLMInsightsDashboard.vue": 1,
+    "plugins/traces/SessionDetails.vue": 2,
+    "plugins/traces/TraceDetails.vue": 1,
+    "views/About.vue": 5,
+    "views/OverviewTab.vue": 6,
+    "views/synthetics/status-pages/StatusPageImageField.vue": 1,
+  };
+
+  it("locks the legacy raw status-shade family at the sites F-145 left standing", () => {
+    // `(?![\w-])` is the whole rule: `text-error-500` counts, `text-error-tag-text` does not —
+    // the latter is a routed foreground tier, not one of the 186 raw-shade bindings.
+    const RAW_STATUS_SHADE = /\btext-(?:warning|error|success|info)(?:-\d{2,3})?(?![\w-])/g;
+    const seen: Record<string, number> = {};
+    for (const path of walkVue(SRC_ROOT)) {
+      const rel = path
+        .slice(SRC_ROOT.length + 1)
+        .split("\\")
+        .join("/");
+      const hits = (readFileSync(path, "utf8").match(RAW_STATUS_SHADE) ?? []).length;
+      if (hits) seen[rel] = hits;
+    }
+    const grew = Object.entries(seen).filter(
+      ([file, n]) => n > (LEGACY_RAW_STATUS_TEXT_SITES[file] ?? 0),
+    );
+    expect(
+      grew.map(
+        ([file, n]) =>
+          `${file}: ${n} raw status-shade text bindings, ledger allows ${LEGACY_RAW_STATUS_TEXT_SITES[file] ?? 0}`,
+      ),
+      "a new raw palette status shade is bound as text — route it onto --color-status-*-text (F-145)",
+    ).toEqual([]);
+    const healed = Object.entries(LEGACY_RAW_STATUS_TEXT_SITES).filter(
+      ([file, booked]) => (seen[file] ?? 0) < booked,
+    );
+    expect(
+      healed.map(([file, booked]) => `${file}: ${booked} booked, ${seen[file] ?? 0} left`),
+      "the F-145 site ledger is stale: a family site was drained, shrink the ledger in the same commit",
+    ).toEqual([]);
+  });
 });

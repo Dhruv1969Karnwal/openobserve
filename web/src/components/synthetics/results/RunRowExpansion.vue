@@ -144,10 +144,10 @@ function worstStatus(statuses: RunStatus[]): RunStatus {
 }
 
 const STATUS_COLOR: Record<RunStatus | "pending", string> = {
-  passed: "text-success-500",
+  passed: "text-status-success-text",
   warning: "text-status-flaky",
-  failed: "text-error-500",
-  error: "text-warning-500",
+  failed: "text-status-error-text",
+  error: "text-status-warning-text",
   pending: "text-text-muted",
 };
 

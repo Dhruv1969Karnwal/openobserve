@@ -253,6 +253,8 @@ export interface LedgerRow {
   plate?: string;
   /** How many sites this row covers — equality-locked, so an extra site is a finding. */
   sites?: number;
+  /** Ground and ink are reachable only under a content guard the scanner cannot read (F-145 residue 3). */
+  conditional?: boolean;
   /** Every scope's measured ratio, 2dp — an improvement is as loud as a regression. */
   at: Record<string, number>;
 }
@@ -300,6 +302,7 @@ export interface CensusReport {
   driftCount: number;
   staleCount: number;
   dynamicCount: number;
+  conditionalCount: number;
   rows: CensusRow[];
   unbookedRows: CensusRow[];
   driftRows: string[];
@@ -464,6 +467,11 @@ export const runRuntimeCensus = (
         row.id + ": a booked pair needs a reason carrying the palette-decision marker",
       );
     }
+    if (booking.conditional === true && !/guard: [\w/.-]+:\d+/.test(booking.reason ?? "")) {
+      driftRows.push(
+        row.id + ": a conditional row must cite its guard expression (guard: <file>:<line>)",
+      );
+    }
     const covered = row.delegated ? (delegatedTotals.get(row.pairId) ?? row.sites) : row.sites;
     if (booking.sites === undefined) {
       driftRows.push(row.id + ": a booking must lock the number of sites it covers (sites)");
@@ -521,6 +529,7 @@ export const runRuntimeCensus = (
       ) ?? null,
   }));
 
+  const conditionalRows = booked.filter((row) => row.booking?.conditional === true);
   const counts = {
     files: scan.files,
     pairs: scan.pairs.length,
@@ -532,6 +541,7 @@ export const runRuntimeCensus = (
     driftCount: driftRows.length,
     staleCount: staleRows.length + staleDelegations.length,
     dynamicCount: unbookedDynamic.length,
+    conditionalCount: conditionalRows.length,
   };
   const overCap = counts.unbooked > ledger.maxUnbooked;
   const underRatchet = counts.unbooked < ledger.maxUnbooked;

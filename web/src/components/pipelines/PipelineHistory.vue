@@ -183,7 +183,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <OIcon
               v-if="row.is_partial !== null && row.is_partial !== undefined"
               :name="row.is_partial ? 'warning' : 'check-circle'"
-              :class="row.is_partial ? 'text-warning' : 'text-status-success-text'"
+              :class="row.is_partial ? 'text-status-warning-text' : 'text-status-success-text'"
               size="xs"
             >
               <OTooltip
@@ -349,7 +349,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       :name="selectedRow.is_partial ? 'warning' : 'check-circle'"
                       :class="[
                         'me-1',
-                        selectedRow.is_partial ? 'text-warning' : 'text-status-success-text',
+                        selectedRow.is_partial
+                          ? 'text-status-warning-text'
+                          : 'text-status-success-text',
                       ]"
                       size="xs"
                     />

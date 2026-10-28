@@ -831,7 +831,7 @@ function openInLogs() {
       <!-- ── Error ────────────────────────────────────────────────────── -->
       <div v-if="errorMsg" class="flex shrink-0 items-start gap-2 px-4 py-3">
         <OIcon name="error-outline" size="sm" class="text-error-500 mt-0.5 shrink-0" />
-        <code class="text-error-500 font-mono text-xs break-all whitespace-pre-wrap">{{
+        <code class="text-status-error-text font-mono text-xs break-all whitespace-pre-wrap">{{
           errorMsg
         }}</code>
       </div>

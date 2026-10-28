@@ -69,7 +69,7 @@
         class="text-3xs flex items-center gap-1 font-medium max-lg:hidden"
         :class="{
           'text-status-success-text': (delta != null ? trendSentiment : 'neutral') === 'good',
-          'text-error-600': (delta != null ? trendSentiment : 'neutral') === 'bad',
+          'text-status-error-text': (delta != null ? trendSentiment : 'neutral') === 'bad',
           'text-text-muted': (delta != null ? trendSentiment : 'neutral') === 'neutral',
         }"
       >

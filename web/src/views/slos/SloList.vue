@@ -217,7 +217,10 @@
       </template>
 
       <template #cell-coverage="{ row }">
-        <span class="tabular-nums" :class="isLowCoverage(row) ? 'text-warning font-semibold' : ''">
+        <span
+          class="tabular-nums"
+          :class="isLowCoverage(row) ? 'text-status-warning-text font-semibold' : ''"
+        >
           {{ formatCoverage(row.status?.coverage) }}
         </span>
       </template>

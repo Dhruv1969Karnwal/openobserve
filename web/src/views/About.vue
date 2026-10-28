@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 class="text-text-body rounded-default border-info/28 bg-card-glass-tint-info-soft inline-flex items-center gap-1.5 border px-3.5 py-2 text-sm whitespace-nowrap max-md:min-w-0"
               >
                 <OIcon name="code" size="sm" class="text-info shrink-0" />
-                <span class="text-info text-xs font-semibold tracking-wide uppercase">{{
+                <span class="text-status-info-text text-xs font-semibold tracking-wide uppercase">{{
                   t("about.commit_lbl")
                 }}</span>
                 <OText variant="mono" class="max-md:max-w-28 max-md:truncate">{{
@@ -72,9 +72,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 class="text-text-body rounded-default border-warning/28 bg-card-glass-tint-warning inline-flex items-center gap-1.5 border px-3.5 py-2 text-sm whitespace-nowrap"
               >
                 <OIcon name="event" size="sm" class="text-warning shrink-0" />
-                <span class="text-warning text-xs font-semibold tracking-wide uppercase">{{
-                  t("about.build_lbl")
-                }}</span>
+                <span
+                  class="text-status-warning-text text-xs font-semibold tracking-wide uppercase"
+                  >{{ t("about.build_lbl") }}</span
+                >
                 {{
                   store.state.zoConfig.build_date ? formatDate(store.state.zoConfig.build_date) : ""
                 }}

@@ -124,6 +124,9 @@ const printReport = (report, args, ledger) => {
   console.log(
     `  measured-pass ${report.measuredPass} | booked ${report.booked} | unbooked ${report.unbooked} (fixable by an existing ink: ${report.fixable}) | booking drift ${report.driftCount} | stale bookings ${report.staleCount} | unattributed script class literals ${report.dynamicCount}`,
   );
+  console.log(
+    `  conditional pairs: ${report.conditionalCount} (measured when painted; guard rows do not promise they can never fail)`,
+  );
   console.log(`  MAX-UNBOOKED (equality lock): ${ledger.maxUnbooked}`);
   if (args.has("--list") || args.has("--emit")) {
     for (const row of report.unbookedRows) {
@@ -204,6 +207,16 @@ const FIXTURES = [
     source: `<template><div class="bg-theme-accent text-white"><q-icon name="check" /></div></template>`,
     expect: { pairs: 1, bar: "non-text" },
   },
+  {
+    name: "legacy raw status shade as text (F-145)",
+    source: `<template><div class="text-warning-600">Careful</div></template>`,
+    expect: { pairs: 1, bar: "text", ink: "--color-warning-600" },
+  },
+  {
+    name: "legacy raw status shade on the runtime accent wash (F-145)",
+    source: `<template><div class="bg-theme-accent/10 text-warning">Careful</div></template>`,
+    expect: { pairs: 1, bar: "text", ink: "--color-warning" },
+  },
 ];
 
 /** The SAME pipeline main() runs, over an in-memory source list (bookings + the MAX-UNBOOKED
@@ -256,6 +269,11 @@ const selfTest = async (production, model, ledger) => {
     const row = pairs[0];
     if (row && want.via) check(`${fixture.name}: via ${row.pair.via}`, row.pair.via === want.via);
     if (row && want.bar) check(`${fixture.name}: bar ${row.pair.bar}`, row.pair.bar === want.bar);
+    if (row && want.ink)
+      check(
+        `${fixture.name}: ink ${row.pair.ink} (a raw legacy shade is a census ink like any other)`,
+        row.pair.ink === want.ink,
+      );
     if (want.alpha !== undefined) {
       const faded = pairs.filter((entry) => entry.pair.alpha === want.alpha);
       check(
@@ -362,7 +380,9 @@ const main = async () => {
     // EVERY group below its bar, booked or not: the input for regenerating the ledger after a
     // scanner or model change, when the existing bookings are exactly what has to be re-derived.
     const failing = report.rows.filter((row) => row.failing.length > 0);
-    console.error("emit-failing: " + failing.length + " failing groups over " + report.pairs + " pairs");
+    console.error(
+      "emit-failing: " + failing.length + " failing groups over " + report.pairs + " pairs",
+    );
     console.log(JSON.stringify(emitRows({ ...report, unbookedRows: failing }), null, 2));
     process.exit(0);
   }

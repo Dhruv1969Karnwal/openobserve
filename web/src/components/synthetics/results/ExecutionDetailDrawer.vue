@@ -35,10 +35,10 @@ const props = defineProps<{
 const emit = defineEmits<{ close: [] }>();
 
 const STATUS_COLOR: Record<string, string> = {
-  passed: "text-success-600",
-  warning: "text-warning-500",
-  failed: "text-error-500",
-  error: "text-warning-600",
+  passed: "text-status-success-text",
+  warning: "text-status-warning-text",
+  failed: "text-status-error-text",
+  error: "text-status-warning-text",
 };
 
 const DEVICE_ICON: Record<string, string> = {
@@ -139,10 +139,12 @@ function fmtDuration(ms: number) {
             v-if="execution.error && !execution.steps.length"
             class="rounded-default border-warning-500/30 bg-warning-500/10 mx-5 mt-4 shrink-0 border px-4 py-3"
           >
-            <p class="text-warning-600 mb-1 text-xs font-semibold">
+            <p class="text-status-warning-text mb-1 text-xs font-semibold">
               {{ t("synthetics.executionDetail.probeError") }}
             </p>
-            <p class="text-warning-600 font-mono text-xs leading-relaxed whitespace-pre-wrap">
+            <p
+              class="text-status-warning-text font-mono text-xs leading-relaxed whitespace-pre-wrap"
+            >
               {{ execution.error }}
             </p>
           </div>
@@ -196,7 +198,9 @@ function fmtDuration(ms: number) {
                   v-if="execution.startLoad.error"
                   class="border-error-500/20 bg-error-500/5 border-t px-3 py-2"
                 >
-                  <p class="text-error-600 font-mono text-xs leading-relaxed whitespace-pre-wrap">
+                  <p
+                    class="text-status-error-text font-mono text-xs leading-relaxed whitespace-pre-wrap"
+                  >
                     {{ execution.startLoad.error }}
                   </p>
                 </div>
@@ -255,7 +259,9 @@ function fmtDuration(ms: number) {
                   v-if="step.error"
                   class="border-error-500/20 bg-error-500/5 border-t px-3 py-2"
                 >
-                  <p class="text-error-600 font-mono text-xs leading-relaxed whitespace-pre-wrap">
+                  <p
+                    class="text-status-error-text font-mono text-xs leading-relaxed whitespace-pre-wrap"
+                  >
                     {{ step.error }}
                   </p>
                 </div>
