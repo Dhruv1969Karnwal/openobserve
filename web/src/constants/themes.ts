@@ -119,7 +119,11 @@ export const THEME_STORAGE_KEYS = {
  * re-tiering), of the bookings 38 are icon-only sites riding SC 1.4.11's 3:1 bar with a per-entry
  * justification and 167 are text riding 4.5, with 19 of all bookings tagged conditional and
  * guard-cited, 0 booking drift and 0 stale bookings. 41 script/style class literals are registered
- * as runtime grounds with no co-bound label. MAX-UNBOOKED = 0 and MAX-DYNAMIC = 0, both equality
+ * as runtime grounds; 11 of them co-bind a measurable (ground, ink) pair inside their own class
+ * string and must carry that pair's twelve numbers (2 of the 11 state an SC 1.4.3
+ * inactive-component exemption with its guard cited), and the other 30 paint one side only, which
+ * is the only case left where prose is the honest registration.
+ * MAX-UNBOOKED = 0 and MAX-DYNAMIC = 0, both equality
  * locks, hard-pinned spec-side too: the residue growing OR healing without the lock moving is a
  * build failure.
  *
