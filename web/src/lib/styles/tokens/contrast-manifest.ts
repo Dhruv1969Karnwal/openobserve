@@ -261,8 +261,20 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
   {
     fg: "--color-stepper-indicator-fg",
     bg: "--color-stepper-indicator-active",
-    category: "non-text",
-    why: "the step number is drawn inside the indicator",
+    category: "text",
+    why: "the step NUMBER is the indicator's content — text-sm font-semibold, below the large-text line, so the 4.5 bar applies to it and to the done/check glyph alike; the fill is the injected ramp (primary-600 light, primary-500 dark) so utils/theme.ts picks the ink per theme (4.70-16.54 across the twelve scopes, themeRuntimeContrast measures); the sheet fallbacks measure 4.80 light / 5.13 dark",
+  },
+  {
+    fg: "--color-stepper-indicator-error-fg",
+    bg: "--color-stepper-indicator-error",
+    category: "text",
+    why: "the error circle's glyph is white on the STATIC error-600 fill in both modes (4.83 in all twelve scopes); its own token exists so the picked step-number ink above never lands here (dark grey on the red fill would sink to 3.71)",
+  },
+  {
+    fg: "--color-toast-loading-fg",
+    bg: "--color-toast-loading-icon",
+    category: "text",
+    why: "the loading spinner sits inside its badge fill, which is primary-600 in BOTH modes; utils/theme.ts picks the ink against that shade (AA by construction), and the sheet fallback is 4.80",
   },
   {
     fg: "--color-timeline-dot-fg",

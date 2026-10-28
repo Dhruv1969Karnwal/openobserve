@@ -1364,6 +1364,17 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     expect(
       floor("--color-checkbox-checked-fg", "--color-checkbox-checked-bg"),
     ).toBeGreaterThanOrEqual(TEXT_MIN);
+    // The step indicator shipped white-on-ramp at 1.20:1 in this very scope (F-153); the digit
+    // and the done/check glyph share the ink, and both are now picked off the injected ramp.
+    expect(
+      floor("--color-stepper-indicator-fg", "--color-stepper-indicator-active"),
+    ).toBeGreaterThanOrEqual(TEXT_MIN);
+    expect(
+      floor("--color-stepper-indicator-fg", "--color-stepper-indicator-done"),
+    ).toBeGreaterThanOrEqual(TEXT_MIN);
+    expect(floor("--color-toast-loading-fg", "--color-toast-loading-icon")).toBeGreaterThanOrEqual(
+      TEXT_MIN,
+    );
     // The mid-grey the injected ramp used to paint through, now unreachable.
     expect(hexOf("--d-hover", signature.scope)).not.toBe("#5c5c5c");
     expect(hexOf("--color-surface-accent-active", signature.scope)).not.toBe("#8a8a8a");
@@ -1385,6 +1396,8 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
       ],
       ["--color-pagination-item-active-text", "--color-pagination-item-active-bg"],
       ["--color-checkbox-checked-fg", "--color-checkbox-checked-bg"],
+      ["--color-stepper-indicator-fg", "--color-stepper-indicator-active"],
+      ["--color-stepper-indicator-fg", "--color-stepper-indicator-done"],
     ];
     for (const [fg, bg] of pairs) {
       expect(ratio(fg, bg, lens.scope), `lens ${fg}`).toBeGreaterThanOrEqual(TEXT_MIN);

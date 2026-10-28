@@ -177,6 +177,14 @@ export const libraryForegroundTokens = (
   const checkboxFill = mode === "dark" ? palette["500"] : palette["600"];
   const tokens: Record<string, string> = {
     "--color-checkbox-checked-fg": pickReadableForeground(checkboxFill),
+    // The step indicator's circle is the same runtime fill as the checkbox tick
+    // (component.css names primary-600, dark.css moves it onto primary-500), and
+    // its content is the step NUMBER in `text-sm font-semibold` — small text, so
+    // the 4.5 bar, never the 3:1 large-text bar.
+    "--color-stepper-indicator-fg": pickReadableForeground(checkboxFill),
+    // The toast loading badge is filled with primary-600 in BOTH modes (no dark.css
+    // override), so its spinner ink is picked against that one shade.
+    "--color-toast-loading-fg": pickReadableForeground(palette["600"]),
     "--color-button-primary-foreground": pickButtonForeground(palette),
     // The on-dark-primary CTA is a WHITE pill on the dark hero in BOTH modes, so its
     // accent-as-text label is picked for AA on literal white (primary-600 on white sinks

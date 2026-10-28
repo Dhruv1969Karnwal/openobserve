@@ -147,9 +147,15 @@ const printReport = (report, args, ledger, placeholderReason) => {
     for (const row of report.staleRows) console.log(`  STALE booking with no live site: ${row.id}`);
     for (const row of report.staleDelegations)
       console.log(`  STALE delegation with no live pair: ${row.id}`);
+    for (const row of report.staleDynamic)
+      console.log(`  STALE dynamic row with no live literal: ${row.file} ${row.literal}`);
     for (const binding of report.unbookedDynamic) {
+      const fragment = (binding.unexpandableStems ?? []).length
+        ? ` — UNEXPANDABLE class fragment (${binding.unexpandableStems.join(", ")}): register ` +
+          `its state enum in runtimeContrastScan.ts CLASS_FRAGMENT_FAMILIES or write the classes out`
+        : "";
       console.log(
-        `  LITERAL ${binding.file}:${binding.line} "${binding.literal}" paints ${binding.tokens.join(", ")} — no measured pair cites it`,
+        `  LITERAL ${binding.file}:${binding.line} "${binding.literal}" paints ${binding.tokens.join(", ")} — no measured pair cites it${fragment}`,
       );
     }
   }
@@ -226,6 +232,21 @@ const FIXTURES = [
     source: `<template><div class="bg-theme-accent/10 text-warning">Careful</div></template>`,
     expect: { pairs: 1, bar: "text", ink: "--color-warning" },
   },
+  {
+    // F-153 / F-EDGE-1 attack S4. A class built by concatenation names no complete utility, so
+    // the pair scan and the string-literal backstop both used to miss it. The family's state enum
+    // is registered in runtimeContrastScan.ts, so the census expands and MEASURES the family.
+    name: "interpolated class fragment, registered family",
+    source: `<template><div :class="'bg-stepper-indicator-' + state + ' text-stepper-indicator-fg'">7</div></template>`,
+    expect: { dynamic: 1, expandedPairs: 4 },
+  },
+  {
+    // Same shape, unknown family: nothing to measure, so nothing may book it. The literal counts
+    // toward MAX-DYNAMIC and a ledger row cannot silence it (see the mutation battery).
+    name: "interpolated class fragment, unregistered family",
+    source: `<template><div :class="'bg-tone-card-' + tone + ' text-white'">7</div></template>`,
+    expect: { dynamic: 1, unexpandable: 1 },
+  },
 ];
 
 /** The SAME pipeline main() runs, over an in-memory source list (bookings + the MAX-UNBOOKED
@@ -273,6 +294,22 @@ const selfTest = async (production, model, ledger) => {
       check(
         `${fixture.name}: ${report.dynamicCount} unattributed class literal(s)`,
         report.dynamicCount === want.dynamic,
+      );
+    }
+    if (want.expandedPairs !== undefined) {
+      const pairs = report.unbookedDynamic.flatMap((binding) => binding.pairs ?? []);
+      check(
+        `${fixture.name}: ${pairs.length} expanded pair(s) measured across the family`,
+        pairs.length >= want.expandedPairs,
+        pairs.map((pair) => `${pair.groundClass}+${pair.inkClass}`).join(" | "),
+      );
+    }
+    if (want.unexpandable !== undefined) {
+      const stems = report.unbookedDynamic.flatMap((b) => b.unexpandableStems ?? []);
+      check(
+        `${fixture.name}: ${stems.length} unexpandable fragment stem(s)`,
+        stems.length >= want.unexpandable,
+        stems.join(", "),
       );
     }
     const row = pairs[0];
@@ -398,6 +435,99 @@ const selfTest = async (production, model, ledger) => {
     noScReport.exitCode === 1 &&
       noScReport.driftRows.some((line) => line.includes("SC 1.4")) &&
       !noScReport.driftRows.some((line) => line.includes("justification templates")),
+  );
+  // F-153: the dynamicBindings side-door. A row that registers a literal WITHOUT its numbers used
+  // to be the whole booking, which is how a 1.20:1 stepper pair sat in the ledger behind prose
+  // claiming there was nothing to measure.
+  const expanded = scanned.find((entry) =>
+    entry.fixture.name.startsWith("interpolated class fragment, registered"),
+  );
+  const expandedSite = expanded.report.unbookedDynamic[0];
+  const expandedSource = () => [
+    { path: fixtureKey(expanded.fixture.name), source: expanded.fixture.source },
+  ];
+  const proseDynamicRow = {
+    file: expandedSite.file,
+    literal: expandedSite.literal,
+    reason: "the census found no label co-bound with that fill, so there is no ratio to book",
+  };
+  const proseCensus = production.runRuntimeCensus(
+    model,
+    {
+      ...ledger,
+      bookings: [],
+      delegated: [],
+      dynamicBindings: [proseDynamicRow],
+      maxUnbooked: 0,
+      maxDynamic: 0,
+    },
+    expandedSource(),
+  );
+  check(
+    "mutation: a prose-only dynamicBindings row over a measurable pair is RED",
+    proseCensus.exitCode === 1 &&
+      proseCensus.driftRows.some((line) => line.includes("twelve numbers")),
+    proseCensus.driftRows.join(" / ").slice(0, 120),
+  );
+  const numberedDynamicRow = {
+    ...proseDynamicRow,
+    at: Object.fromEntries(
+      Object.entries(
+        Object.fromEntries(
+          model.scopes.map((scope) => [
+            production.scopeKey(scope),
+            Math.min(
+              ...expandedSite.pairs.map(
+                (pair) =>
+                  model.measurePair(pair.ink, pair.ground, scope, { under: ledger.plate }) ?? 1,
+              ),
+            ).toFixed(2) * 1,
+          ]),
+        ),
+      ).filter(([, value]) => value >= 4.5),
+    ),
+  };
+  check(
+    "mutation: a dynamic row missing even one scope of its numbers is RED",
+    production
+      .runRuntimeCensus(
+        model,
+        {
+          ...ledger,
+          bookings: [],
+          delegated: [],
+          dynamicBindings: [numberedDynamicRow],
+          maxUnbooked: 0,
+          maxDynamic: 0,
+        },
+        expandedSource(),
+      )
+      .driftRows.some((line) => line.includes("nothing booked")),
+  );
+  // An unexpandable fragment paints an unknown set of classes, so no registration may cover it:
+  // the shape stays inside the MAX-DYNAMIC hard pin (themeRuntimeContrast.spec.ts).
+  const unexpanded = scanned.find((entry) =>
+    entry.fixture.name.startsWith("interpolated class fragment, unregistered"),
+  );
+  const unexpandedSite = unexpanded.report.unbookedDynamic[0];
+  const unexpandedCensus = production.runRuntimeCensus(
+    model,
+    {
+      ...ledger,
+      bookings: [],
+      delegated: [],
+      dynamicBindings: [
+        { file: unexpandedSite.file, literal: unexpandedSite.literal, reason: "registered anyway" },
+      ],
+      maxUnbooked: 0,
+      maxDynamic: 0,
+    },
+    [{ path: fixtureKey(unexpanded.fixture.name), source: unexpanded.fixture.source }],
+  );
+  check(
+    "mutation: an UNEXPANDABLE class fragment cannot be quieted by registering it",
+    unexpandedCensus.exitCode === 1 && unexpandedCensus.dynamicCount >= 1,
+    `dynamic=${unexpandedCensus.dynamicCount}`,
   );
   console.log(
     failures === 0

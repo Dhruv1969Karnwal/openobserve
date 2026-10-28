@@ -76,6 +76,19 @@ export interface DynamicBinding {
   literal: string;
   /** Runtime colour tokens that string paints, which NO measured pair cites. */
   tokens: string[];
+  /** The (ground, ink) the literal paints with itself — the numbers its row must book. */
+  pairs?: LiteralPair[];
+  /** Class fragments no registered family can expand; prose can never cover these. */
+  unexpandableStems?: string[];
+}
+
+/** One (ground, ink) pairing a single class string paints with itself. */
+export interface LiteralPair {
+  ground: string;
+  groundClass: string;
+  ink: string;
+  inkClass: string;
+  bar: Bar;
 }
 
 export interface ScanResult {
@@ -500,6 +513,180 @@ export const scriptRuntimeClassLiterals = (
   return out;
 };
 
+/**
+ * INTERPOLATED CLASS FRAGMENTS (F-153/F-EDGE-1 attack S4).
+ *
+ * `'bg-stepper-indicator-' + state` and `` bg-stepper-indicator-${state} `` name no complete
+ * utility, so neither the pair scan nor the string-literal backstop could see them: the census
+ * stayed green over a shape that paints any member of the family. A fragment is therefore a
+ * first-class finding. When the script knows the enum a variable ranges over — registered below,
+ * one reviewed line per family — the fragment is EXPANDED into its members and measured like any
+ * other class string; when it does not, the binding is reported `unexpandableStems` and can never
+ * be quieted by a ledger row, which is what keeps the shape inside the MAX-DYNAMIC hard pin.
+ *
+ * A family is registered by its state suffixes, never derived from the token sheet: enumerating
+ * `--color-stepper-indicator-*` would invent `bg-stepper-indicator-fg` (the white ink as a ground)
+ * and book phantoms the UI cannot paint.
+ */
+export const CLASS_FRAGMENT_FAMILIES: Record<string, string[]> = {
+  "bg-stepper-indicator-": ["default", "active", "done", "error"],
+  "text-stepper-indicator-": ["fg", "default-text"],
+};
+
+/**
+ * An interpolated class fragment ('bg-x-' + state, or bg-x-${state}) names no complete utility, so
+ * neither the pair scan nor the literal backstop sees the classes it paints. A fragment must START
+ * a class value: the `:data-test` identifiers scattered through the templates interpolate
+ * hyphen-runs too and are not classes, so the boundary set below is load-bearing.
+ */
+const FRAGMENT_UTILITY = "(?:bg|text|border|ring)";
+const FRAGMENT_QUOTE = "[\\'\\\"`]";
+const FRAGMENT_BOUNDARY = "[\\s\\'\\\"`({,=]";
+/** concat, template hole, bare trailing stem; capture group 1 is always the family stem. */
+const CLASS_FRAGMENT_PATTERNS: RegExp[] = [
+  new RegExp(
+    "(?:^|" +
+      FRAGMENT_BOUNDARY +
+      ")" +
+      FRAGMENT_QUOTE +
+      "((?:" +
+      FRAGMENT_UTILITY +
+      ")-[a-z0-9-]*-)" +
+      FRAGMENT_QUOTE +
+      "\\s*\\+",
+    "g",
+  ),
+  new RegExp("(?:^|" + FRAGMENT_BOUNDARY + ")((?:" + FRAGMENT_UTILITY + ")-[a-z0-9-]*)\\$\\{", "g"),
+  new RegExp(
+    "(?:^|" +
+      FRAGMENT_BOUNDARY +
+      ")((?:" +
+      FRAGMENT_UTILITY +
+      ")-[a-z0-9-]*-)(?=$|" +
+      FRAGMENT_QUOTE +
+      ")",
+    "g",
+  ),
+];
+
+/** The family stems a class-bearing text builds at runtime. */
+export const classFragmentsIn = (text: string): string[] => {
+  const stems = new Set<string>();
+  for (const pattern of CLASS_FRAGMENT_PATTERNS) {
+    pattern.lastIndex = 0;
+    for (const match of text.matchAll(pattern)) stems.add(match[1] ?? "");
+  }
+  return [...stems].filter((stem) => stem.length > 5);
+};
+
+/** Every class a registered fragment family can paint (empty when the family is unknown). */
+export const expandClassFragment = (stem: string): string[] =>
+  (CLASS_FRAGMENT_FAMILIES[stem] ?? []).map((state) => stem + state);
+
+/** Block and line comment runs, blanked at equal length so every index survives. */
+export const blankComments = (code: string): string =>
+  code
+    .replace(/\/\*[\s\S]*?\*\//g, (run) => " ".repeat(run.length))
+    .replace(/^[ \t]*\/\/.*$/gm, (run) => " ".repeat(run.length));
+
+/**
+ * The (ground, ink) a class string paints ON ITS OWN ELEMENT, resolved the way `classifyBucket`
+ * resolves one: the last utility per side wins, and only the REST chain counts (a `hover:` arm is
+ * a different state, which the template walker books through its own chain key). A registered
+ * interpolated fragment enumerates one pair per family member — that is the measurement of the
+ * expanded family the ledger row has to carry.
+ */
+export const literalPaintPairs = (text: string, context: ScanContext): LiteralPair[] => {
+  const fragments = classFragmentsIn(text);
+  // Quotes are the JS around the class value, not part of it; `classesIn` would drop a token
+  // written as `'bg-x'` and leave the fragment's neighbour invisible. Arbitrary values
+  // (`text-[#fff]`) are equally invisible to `classesIn` and are exactly the hand-written ink
+  // shape this scan exists to catch, so they are collected alongside it.
+  const clean = text.replace(/["'`]/g, " ");
+  const arbitrary = [...clean.matchAll(/(?:^|\s)((?:bg|text)-\[[^\]\s]+\])/g)].map(
+    (m) => m[1] ?? "",
+  );
+  const rests = [...classesIn(clean), ...arbitrary]
+    .filter((klass) => !klass.endsWith("-"))
+    .filter((klass) => chainOf(klass) === "");
+  const side = (
+    kind: "ground" | "ink",
+    fromFamily: (stem: string) => boolean,
+  ): Array<{ expression: string; klass: string }> => {
+    const family = fragments.filter(fromFamily);
+    if (family.length) {
+      return family
+        .flatMap(expandClassFragment)
+        .map((klass) => ({ expression: expressionFor(klass, kind, context) ?? "", klass }))
+        .filter((entry) => entry.expression !== "");
+    }
+    const found: Array<{ expression: string; klass: string }> = [];
+    for (const klass of rests) {
+      const expression = expressionFor(klass, kind, context);
+      if (expression) found.push({ expression, klass });
+    }
+    return found.slice(-1);
+  };
+  const out: LiteralPair[] = [];
+  for (const ground of side("ground", (stem) => stem.startsWith("bg-"))) {
+    for (const ink of side("ink", (stem) => stem.startsWith("text-"))) {
+      if (!context.isRuntime(ground.expression) && !context.isRuntime(ink.expression)) continue;
+      out.push({
+        ground: ground.expression,
+        groundClass: ground.klass,
+        ink: ink.expression,
+        inkClass: ink.klass,
+        bar: "text",
+      });
+    }
+  }
+  return out;
+};
+
+/**
+ * Class fragments a source builds at runtime, whether or not the family is registered. Template
+ * fragments are read only inside class attributes — `:data-test` identifiers interpolate
+ * hyphen-runs constantly and are not classes.
+ */
+export interface ClassFragmentSite {
+  line: number;
+  literal: string;
+  stems: string[];
+  expandable: string[];
+  unexpandable: string[];
+}
+
+export const classFragmentSites = (input: ScanInput): ClassFragmentSite[] => {
+  const sites: ClassFragmentSite[] = [];
+  const seen = new Set<string>();
+  const note = (source: string, index: number, text: string): void => {
+    const stems = classFragmentsIn(text);
+    if (!stems.length) return;
+    const literal = text.replace(/\s+/g, " ").trim().slice(0, 120);
+    const key = `|`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    sites.push({
+      line: lineAt(source, index),
+      literal,
+      stems,
+      expandable: stems.filter((stem) => (CLASS_FRAGMENT_FAMILIES[stem] ?? []).length > 0),
+      unexpandable: stems.filter((stem) => !(CLASS_FRAGMENT_FAMILIES[stem] ?? []).length),
+    });
+  };
+  const code = blankComments(codeOf(input));
+  for (const match of code.matchAll(/(["'`])((?:[^"'`]|\$\{[^}]*\})*?)\1/g)) {
+    note(input.source, match.index ?? 0, match[2] ?? "");
+  }
+  if (input.path.endsWith(".vue")) {
+    const template = block(input.source, "template");
+    for (const match of template.matchAll(/(?::class|v-bind:class)\s*=\s*(["'])([\s\S]*?)\1/g)) {
+      note(template, match.index ?? 0, match[2] ?? "");
+    }
+  }
+  return sites;
+};
+
 /** The code (non-template) of a source: SFC `<script>` blocks, or a whole .ts module. */
 export const codeOf = (input: ScanInput): string => {
   if (!input.path.endsWith(".vue")) return input.source;
@@ -510,7 +697,8 @@ export const codeOf = (input: ScanInput): string => {
 
 /**
  * Runtime class literals the code can paint but NO measured pair cites — the class-from-script
- * blind spot (E-2 shape #3). Every entry must be explained in the ledger's dynamicBindings.
+ * blind spot (E-2 shape #3). Every entry must be explained in the ledger's dynamicBindings, and
+ * the explanation now carries the literal's measured numbers (see runRuntimeCensus).
  */
 export const unattributedRuntimeLiterals = (
   inputs: ScanInput[],
@@ -520,7 +708,11 @@ export const unattributedRuntimeLiterals = (
   const out: DynamicBinding[] = [];
   for (const input of inputs) {
     const code = codeOf(input);
-    for (const entry of scriptRuntimeClassLiterals(code, context)) {
+    const blanks = blankComments(code);
+    // Comments are blanked for the whole walk: a doc example that quotes a real pair
+    // (`bg-theme-accent text-white` in this very file) is prose, not paint.
+    for (const entry of scriptRuntimeClassLiterals(blanks, context)) {
+      const pairs = literalPaintPairs(entry.literal, context);
       const unattributed = entry.tokens.filter((token) => !cited.has(token));
       if (!unattributed.length) continue;
       out.push({
@@ -528,6 +720,23 @@ export const unattributedRuntimeLiterals = (
         line: lineAt(input.source, Math.max(0, code.indexOf(entry.literal)) + 1),
         literal: entry.literal,
         tokens: [...new Set(unattributed)],
+        pairs: pairs.length ? pairs : undefined,
+      });
+    }
+    // An interpolated fragment paints a whole family; the ledger row explains the expanded enum.
+    for (const site of classFragmentSites(input)) {
+      const pairs = literalPaintPairs(site.literal, context);
+      const runtime = [...new Set(pairs.flatMap((pair) => [pair.ground, pair.ink]))].filter(
+        (token) => context.isRuntime(token),
+      );
+      if (!site.unexpandable.length && !runtime.length) continue;
+      out.push({
+        file: input.path,
+        line: lineAt(input.source, Math.max(0, blanks.indexOf(site.literal)) + 1),
+        literal: site.literal,
+        tokens: runtime,
+        pairs: pairs.length ? pairs : undefined,
+        unexpandableStems: site.unexpandable.length ? site.unexpandable : undefined,
       });
     }
   }

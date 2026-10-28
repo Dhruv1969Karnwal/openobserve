@@ -271,7 +271,15 @@ export interface CensusLedger {
   pageGround: string;
   bookings: LedgerRow[];
   delegated?: LedgerRow[];
-  dynamicBindings: Array<{ file: string; literal: string; reason: string }>;
+  dynamicBindings: Array<{
+    file: string;
+    literal: string;
+    reason: string;
+    /** The literal's measured pair; required whenever the census can measure one (F-153). */
+    at?: Record<string, number>;
+    /** The pair paints only behind a guard the scanner cannot read; must cite `guard: file:line`. */
+    conditional?: boolean;
+  }>;
 }
 
 export interface CensusRow {
@@ -308,6 +316,8 @@ export interface CensusReport {
   driftRows: string[];
   staleRows: LedgerRow[];
   staleDelegations: LedgerRow[];
+  /** dynamicBindings rows whose literal is no longer in the source (F-153 staleness check). */
+  staleDynamic: Array<{ file: string; literal: string }>;
   unbookedDynamic: DynamicBinding[];
   suggestions: Array<{ row: CensusRow; ink: string | null }>;
   exitCode: number;
@@ -435,13 +445,45 @@ export const runRuntimeCensus = (
   const cited = new Set(
     scan.pairs.flatMap((pair) => [pair.ground, pair.ink]).filter((value) => value.startsWith("--")),
   );
+  // PAIR-LEVEL ATTRIBUTION (F-153/F-154): the citation a script class literal needs is the very
+  // (ground, ink) it paints, not its two tokens cited by unrelated pairs. White on
+  // --color-badge-primary-soft-bg is 1.19:1 in O2 Lens light; a measured pair that cites the same
+  // FILL with a legible INK says nothing about it, and the whole-`src` run used to filter such a
+  // literal out of the census entirely.
   const unattributed = unattributedRuntimeLiterals(sources, context, cited);
 
   const bookings = new Map(ledger.bookings.map((row) => [row.id, row]));
   const delegatedRows = new Map((ledger.delegated ?? []).map((row) => [row.id, row]));
-  const dynamicBooked = new Set(
-    (ledger.dynamicBindings ?? []).map((row) => row.file + " " + row.literal),
+  const dynamicKey = (binding: { file: string; literal: string }): string =>
+    binding.file + " " + binding.literal;
+  const dynamicBooked = new Map(
+    (ledger.dynamicBindings ?? []).map((row) => [dynamicKey(row), row]),
   );
+
+  /**
+   * The numbers a dynamic row owes the census (F-153). A class string that co-binds a ground and
+   * an ink paints THAT pair, in every scope, whether or not the template walker can reach the
+   * element; the expanded fragment family is measured the same way and the worst member wins.
+   * Returns null when the literal paints no measurable pair, which is the only honest prose row.
+   */
+  const dynamicNumbers = (
+    binding: DynamicBinding,
+  ): { at: Record<string, number>; bar: number } | null => {
+    const pairs = binding.pairs ?? [];
+    if (!pairs.length) return null;
+    const at: Record<string, number> = {};
+    for (const scope of model.scopes) {
+      let worst: number | null = null;
+      for (const pair of pairs) {
+        const value = model.measurePair(pair.ink, pair.ground, scope, { under: ledger.plate });
+        if (value === null) continue;
+        worst = worst === null ? value : Math.min(worst, value);
+      }
+      if (worst === null) return null;
+      at[scopeKey(scope)] = round2(worst);
+    }
+    return { at, bar: ledger.textMin };
+  };
 
   const groups = new Map<string, CensusRow>();
   for (const pair of scan.pairs) {
@@ -577,8 +619,85 @@ export const runRuntimeCensus = (
   const staleDelegations = (ledger.delegated ?? []).filter(
     (entry) => !rows.some((row) => row.pairId === entry.id),
   );
+  // DYNAMIC ROWS CARRY NUMBERS (F-153). A registration used to be pure prose: the stepper family
+  // sat behind rows claiming the census had "found no label co-bound with that fill", while the
+  // same class string carried `text-stepper-indicator-fg` and painted 1.20:1 in the shipped
+  // default theme. A row whose literal co-binds a measurable pair now books that pair's twelve
+  // numbers, and a pair below its bar cannot hide in this list at all — it must be re-inked or
+  // made visible to the template census, where the justification vocabulary governs it.
   const unbookedDynamic = unattributed.filter(
-    (binding) => !dynamicBooked.has(binding.file + " " + binding.literal),
+    (binding) => binding.unexpandableStems?.length || !dynamicBooked.has(dynamicKey(binding)),
+  );
+  for (const binding of unattributed) {
+    const row = dynamicBooked.get(dynamicKey(binding));
+    if (!row) continue;
+    const measured = dynamicNumbers(binding);
+    if (!measured) continue;
+    if (!row.at) {
+      driftRows.push(
+        dynamicKey(binding) +
+          ": the literal co-binds a measurable (ground, ink) pair (" +
+          (binding.pairs?.[0]?.ground ?? "?") +
+          " on " +
+          (binding.pairs?.[0]?.ink ?? "?") +
+          "), so the row must carry its twelve numbers — prose cannot cover a pair the census " +
+          "can measure",
+      );
+      continue;
+    }
+    for (const [scope, value] of Object.entries(measured.at)) {
+      if (row.at[scope] === undefined)
+        driftRows.push(
+          dynamicKey(binding) + " @ " + scope + ": measures " + value + ", nothing booked",
+        );
+      else if (round2(row.at[scope]) !== value)
+        driftRows.push(
+          dynamicKey(binding) +
+            " @ " +
+            scope +
+            ": measures " +
+            value +
+            ", booked " +
+            round2(row.at[scope]),
+        );
+    }
+    for (const scope of Object.keys(row.at)) {
+      if (measured.at[scope] === undefined)
+        driftRows.push(dynamicKey(binding) + " @ " + scope + ": booked a scope the pair left");
+    }
+    if (Object.values(measured.at).some((value) => value < measured.bar)) {
+      // A sub-bar pair may only stay if the row states why, exactly as a booking must: the
+      // inactive-component exemption (SC 1.4.3) and the guard that holds the class string back.
+      const guarded = row.conditional === true && /guard: [\w/.-]+:\d+/.test(row.reason ?? "");
+      const defaultSubAA = ["light O2 Signature", "dark O2 Signature"].some(
+        (scope) => measured.at[scope] !== undefined && measured.at[scope] < measured.bar,
+      );
+      if (!guarded || (defaultSubAA && !SC_CLAUSE.test(row.reason ?? ""))) {
+        const worst = Object.entries(measured.at).sort((a, b) => a[1] - b[1])[0];
+        const pair = binding.pairs?.[0];
+        driftRows.push(
+          dynamicKey(binding) +
+            ": the class string co-binds " +
+            (pair?.ground ?? "?") +
+            " on " +
+            (pair?.ink ?? "?") +
+            " at " +
+            worst[1] +
+            " (" +
+            worst[0] +
+            ") — below the " +
+            measured.bar +
+            " bar, so prose cannot cover it: re-ink the site, or state the exemption" +
+            " (conditional + guard: <file>:<line> + the SC clause it rides)",
+        );
+        continue;
+      }
+    }
+  }
+
+  const liveDynamic = new Set(unattributed.map((binding) => dynamicKey(binding)));
+  const staleDynamic = (ledger.dynamicBindings ?? []).filter(
+    (row) => !liveDynamic.has(dynamicKey(row)),
   );
   const suggestions = unbooked.map((row) => ({
     row,
@@ -604,7 +723,7 @@ export const runRuntimeCensus = (
     unbooked: unbooked.length,
     fixable: suggestions.filter((entry) => entry.ink).length,
     driftCount: driftRows.length,
-    staleCount: staleRows.length + staleDelegations.length,
+    staleCount: staleRows.length + staleDelegations.length + staleDynamic.length,
     dynamicCount: unbookedDynamic.length,
     conditionalCount: conditionalRows.length,
   };
@@ -627,6 +746,7 @@ export const runRuntimeCensus = (
     driftRows,
     staleRows,
     staleDelegations,
+    staleDynamic,
     unbookedDynamic,
     suggestions,
     exitCode,

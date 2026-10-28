@@ -242,6 +242,7 @@
   --color-stepper-indicator-done: var(--color-primary-600);
   --color-stepper-indicator-error: var(--color-error-600);
   --color-stepper-indicator-fg: var(--color-white);
+  --color-stepper-indicator-error-fg: var(--color-white);
   --color-stepper-connector: var(--color-border-default);
   --color-stepper-connector-done: var(--color-primary-300);
   --color-stepper-title-default: var(--color-text-secondary);
@@ -510,6 +511,7 @@
   --color-toast-loading-bg: var(--color-surface-overlay);
   --color-toast-loading-border: var(--color-border-default);
   --color-toast-loading-icon: var(--color-primary-600);
+  --color-toast-loading-fg: var(--color-white);
   --color-toast-default-bg: var(--color-surface-overlay);
   --color-toast-default-border: var(--color-border-default);
 
@@ -1921,6 +1923,7 @@
   --color-toast-loading-bg: var(--color-toast-loading-bg);
   --color-toast-loading-border: var(--color-toast-loading-border);
   --color-toast-loading-icon: var(--color-toast-loading-icon);
+  --color-toast-loading-fg: var(--color-toast-loading-fg);
   --color-toast-default-bg: var(--color-toast-default-bg);
   --color-toast-default-border: var(--color-toast-default-border);
   --color-toast-fg: var(--color-toast-fg);
@@ -1938,6 +1941,7 @@
   --color-stepper-indicator-done: var(--color-stepper-indicator-done);
   --color-stepper-indicator-error: var(--color-stepper-indicator-error);
   --color-stepper-indicator-fg: var(--color-stepper-indicator-fg);
+  --color-stepper-indicator-error-fg: var(--color-stepper-indicator-error-fg);
   --color-stepper-connector: var(--color-stepper-connector);
   --color-stepper-connector-done: var(--color-stepper-connector-done);
   --color-stepper-title-default: var(--color-stepper-title-default);
