@@ -10,38 +10,50 @@
 
 /* Syntax highlighting classes */
 .log-key {
+  /* worst pair here: 4.84 on the darkest wash (#ddddde), 6.03 on the base plate */
   color: #B71C1C;
 
 }
 .log-string {
-  color: #047857;
+  /* was #047857 (4.04 wash): no emerald token exists; success-900 is the AA step */
+  color: var(--color-success-900);
 
 }
 .log-number {
-  color: #2563eb;
+  /* was #2563eb (3.81 on the accent wash): blue-800 keeps the hue at 6.43 */
+  color: var(--color-blue-800);
 
 }
 .log-boolean {
+  /* audited: 5.23 on the darkest accent wash */
   color: #6d28d9;
 
 }
-/* AA floor on the resting surfaces the log JSON sits on — light #ffffff / #fafafa /
-   #f6f8fa / #f5f5f5, dark the --d-* ladder #15171a (= --color-syntax-bg) through
-   #282c33 (= --d-overlay) — recomputed with colorMath's WCAG math: >= 4.61 in light
-   (.log-ip on #f5f5f5), >= 4.92 in dark (#999 on #282c33; >= 6.30 on the canvas). No
-   gate reads this sheet (the census walks `.vue`/`.ts` only, and a v-html payload is
-   invisible to a template scan), so the numbers live here. Light accent row washes
-   (--color-primary-50/100 under --color-table-row-hover-bg / -selected-bg) are NOT in
-   that set — the mid-tone hues drop below 4.5 there, which needs a ramp-aware re-ink
-   of the whole sheet and is not a claim this sheet makes. Sub-AA values here are
-   PRE-EXISTING pixels, not Darknight regressions; each note quotes what it replaces. */
+/* AA floor on BOTH light plates the log JSON is painted on — the resting sheet
+   (#ffffff / #fafafa / #f6f8fa / #f5f5f5) and the accent row wash a hovered or
+   selected table row puts under it (--color-primary-50/-100 via
+   --color-table-row-hover-bg / -selected-bg, OTableBodyRow.vue) — and on both dark
+   plates: the --d-* ladder #15171a (= --color-syntax-bg) through #282c33
+   (= --d-overlay), plus the theme-invariant dark row washes #1a1d21 (--d-hover)
+   and #22262d (--d-selected). Measured with WCAG math over every predefined
+   theme's injected light ramp (utils/themePalette#generatePrimaryPalette), because
+   applyThemeColors beats the sheet: worst pair light base 6.03 (.log-key on
+   #f5f5f5), worst pair on the accent wash 4.84 (.log-key on #ddddde, O2
+   Signature's injected primary-100; 5.43 on the default sheet ramp's #e2ebef),
+   worst pair dark 4.92 (#999 on #282c33; 5.33 on --d-selected). No gate reads
+   this sheet (the census walks `.vue`/`.ts` only, and a v-html payload is
+   invisible to a template scan), so the numbers live here. Hues that only cleared
+   the base plate are re-inked one step down their own family — 800 tier where the
+   palette has an 800 token, else the family's 900 token; no new tokens. Sub-AA
+   pixels here were PRE-EXISTING, not Darknight regressions; each note quotes what
+   it replaces. */
 .log-null {
-  /* was #6b7280 (4.43); grey-600 is the sheet's AA text tier */
+  /* was #6b7280 (4.43); grey-600 is the AA tier: 5.76 on the darkest accent wash */
   color: var(--color-text-secondary);
 
 }
 .log-separator {
-  /* was #9ca3af (2.33): braces and colons are visible JSON text, not decoration */
+  /* was #9ca3af (2.33): colons/braces are JSON text; 5.76 on the darkest wash */
   color: var(--color-text-muted);
 
 }
@@ -53,61 +65,70 @@
   font-weight: normal;
 }
 .log-object-brace {
-  /* was #9ca3af (2.33) — see the note on .log-null */
+  /* was #9ca3af (2.33) — see the note on .log-null (5.76 on the darkest wash) */
   color: var(--color-text-muted);
 
 }
 
 /* Semantic type classes - colors from keyValueParser.ts */
 .log-ip {
-  /* was #D97706 (2.92): amber-700 is the same hue at 4.61 */
-  color: var(--color-amber-700);
+  /* was #D97706 (2.92), then amber-700 (3.70 wash): amber-800 holds 5.22 */
+  color: var(--color-amber-800);
 
 }
 .log-url {
+  /* audited: blue-700 clears both plates (4.94 on the darkest wash) */
   color: #1D4ED8; /* Strong blue for URLs */
 
 }
 .log-email {
-  color: #9333EA; /* Vivid purple for emails */
+  /* was #9333EA (3.96 wash): purple-700 is the palette's AA step, at 5.14 */
+  color: var(--color-purple-700); /* Vivid purple for emails */
 
 }
 .log-timestamp {
-  color: #2563EB; /* Blue for timestamps */
+  /* was #2563EB (3.81 wash): same re-ink as .log-number */
+  color: var(--color-blue-800); /* Blue for timestamps */
 
 }
 .log-http-method {
-  /* was #388e3c (3.77): the routed success tier, 4.97 on the worst light plate */
-  color: var(--color-status-success-text); /* Green for HTTP methods (not in keyValueParser) */
+  /* was #388e3c (3.77), then success-text (3.99 wash): success-900 holds 6.71 */
+  color: var(--color-success-900); /* Green for HTTP methods (not in keyValueParser) */
 
 }
 .log-status-code {
-  /* was #f57c00 (2.48): orange-700 keeps the hue at 4.75 */
-  color: var(--color-orange-700); /* Orange for status codes (not in keyValueParser) */
+  /* was #f57c00 (2.48), then orange-700 (3.82 wash): no 800 token; 900 holds 6.90 */
+  color: var(--color-orange-900); /* Orange for status codes (not in keyValueParser) */
 
 }
 .log-path {
+  /* audited: indigo-700 clears both plates (5.82 on the darkest wash) */
   color: #4338CA; /* Deep indigo for file paths */
 
 }
 .log-uuid {
-  color: #047857; /* Dark teal for UUIDs */
+  /* was #047857 (4.04 wash): same re-ink as .log-string */
+  color: var(--color-success-900); /* Deep green for UUIDs */
 
 }
 .log-file-size {
-  color: #2563eb; /* Blue for file sizes (not in keyValueParser) */
+  /* was #2563eb (3.81 wash): same re-ink as .log-number */
+  color: var(--color-blue-800); /* Blue for file sizes (not in keyValueParser) */
 
 }
 .log-object-value {
+  /* audited: grey-600 clears both plates (5.57 on the darkest wash) */
   color: #4b5563; /* Neutral gray for objects */
 
 }
 .log-array-value {
-  color: #0E7490; /* Calm teal for arrays */
+  /* was #0E7490 (3.95 wash): no cyan-800 token; cyan-900 keeps the hue at 6.72 */
+  color: var(--color-cyan-900); /* Calm teal for arrays */
 
 }
 
 /* Dark theme variants - colors from keyValueParser.ts */
+/* audited on the theme-invariant dark washes too: #999 rides 5.33 on --d-selected */
 .dark .log-key {
   color: #f67a7aff; /* Lighter red for dark mode */
 
