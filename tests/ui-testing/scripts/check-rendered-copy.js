@@ -25,6 +25,14 @@ const PRODUCT = 'Retrace.ai';
 const UPSTREAM = 'OpenObserve';
 const BRAND_PLACEHOLDERS = ['product', 'brand', 'appName'];
 const ASSERTION = /(?:toContainText|toHaveText|getByText|byText|hasText|includeText)\(\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
+// Any call of an assertion shape is a coverage denominator site, whether or not its argument is a
+// literal this line-based scanner can read: dynamic, interpolated and multiline shapes count
+// against coverage instead of passing silently (F-161/F-155).
+const ASSERTION_SITE = /(?:toContainText|toHaveText|getByText|byText|hasText|includeText)\s*\(/g;
+// Coverage floor: measured honest coverage at pinning time is 593/1138 = 52.1% of assertion sites
+// carry a statically resolvable literal; pinned slightly below so today's shape passes with a
+// small margin while a fresh wave of dynamic assertions (unchecked by construction) trips the gate.
+const MIN_COVERAGE_PCT = 50;
 
 const flatten = (node, prefix, into) => {
     for (const [key, value] of Object.entries(node)) {
@@ -63,16 +71,22 @@ for (const root of roots.length ? roots : defaults) collect(path.resolve(root));
 
 const problems = [];
 let checked = 0;
+let sites = 0;
+let skipped = 0;
 for (const file of files) {
     const lines = fs.readFileSync(file, 'utf8').split('\n');
     lines.forEach((line, index) => {
         const trimmed = line.trimStart();
         if (trimmed.startsWith('//') || trimmed.startsWith('*')) return;
+        sites += (line.match(ASSERTION_SITE) || []).length;
         for (const match of line.matchAll(ASSERTION)) {
             const literal = match[2];
-            // URLs, package specifiers and SDK hosts name upstream on purpose; no locale renders them.
-            if (literal.length < 12 || /https?:|www\.|npm i |@[a-z0-9-]+\//i.test(literal)) continue;
             checked += 1;
+            // URLs, package specifiers and SDK hosts name upstream on purpose; no locale renders them.
+            if (literal.length < 12 || /https?:|www\.|npm i |@[a-z0-9-]+\//i.test(literal)) {
+                skipped += 1;
+                continue;
+            }
             const inShipped = shipped.some((text) => text.includes(literal));
             const inStale = stale.some((text) => text.includes(literal));
             const where = `${path.relative(HERE, file)}:${index + 1}`;
@@ -83,9 +97,20 @@ for (const file of files) {
     });
 }
 
+const coveragePct = sites === 0 ? 100 : (checked / sites) * 100;
+if (coveragePct < MIN_COVERAGE_PCT)
+    problems.push(
+        `coverage floor broken: ${checked}/${sites} assertion sites (${coveragePct.toFixed(1)}%) ` +
+            `carry a resolvable literal, below the pinned ${MIN_COVERAGE_PCT}% — dynamic, ` +
+            `interpolated or multiline assertions are invisible to this gate and must not grow`,
+    );
+
 for (const problem of problems) console.error(`FAIL ${problem}`);
 console.log(
-    `checked ${checked} quoted literals against ${entries.length} en-US strings ` +
-        `(${shipped.length} shipped / ${stale.length} pre-rename) in ${files.length} scanned files`,
+    `checked ${checked} quoted literals (${skipped} static skips under 12 chars/URL-shaped) ` +
+        `against ${entries.length} en-US strings ` +
+        `(${shipped.length} shipped / ${stale.length} pre-rename) in ${files.length} scanned files; ` +
+        `coverage ${checked}/${sites} assertion sites (${coveragePct.toFixed(1)}%, floor ` +
+        `${MIN_COVERAGE_PCT}%)`,
 );
 process.exit(problems.length ? 1 : 0);
