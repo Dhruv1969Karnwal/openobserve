@@ -122,7 +122,7 @@ const FEATURE_GATES: Record<FeatureKey, FeatureGateDefinition> = {
   // `--mode=production` — so the predicate shapes that lean on it are pinned at the
   // level that IS testable: a pure-Cloud context (isCloud&&!isEnterprise) may only ever
   // LOSE affordances, never gain one (enterpriseFeatures.spec.ts, "the unpinnable Cloud
-  // premise"). Consequence if the premise ever breaks: the 18 keys whose predicate is the
+  // premise"). Consequence if the premise ever breaks: the 17 keys whose predicate is the
   // bare `isEnterprise` bit stop answering to a Cloud build and disappear from its UI — a
   // lost affordance, not a paid leak.
   // Generic "this needs Enterprise" gate — e.g. the Traces Service Graph tab,

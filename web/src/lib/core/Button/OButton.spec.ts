@@ -1,8 +1,61 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import { h, nextTick } from "vue";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import OButton from "./OButton.vue";
 import type { ButtonVariant } from "./OButton.types";
+
+const ALL_VARIANTS = [
+  "primary",
+  "secondary",
+  "outline",
+  "ghost",
+  "ghost-primary",
+  "ghost-muted",
+  "ghost-subtle",
+  "ghost-destructive",
+  "ghost-success",
+  "destructive",
+  "filter-exclude",
+  "ghost-warning",
+  "warning",
+  "pending",
+  "ghost-neutral",
+  "outline-destructive",
+  "cancel-query",
+  "panel-collapse",
+  "sidebar-button",
+  "sidebar-toggle",
+  "ai-gradient",
+  "on-dark-primary",
+  "on-dark-ghost",
+  "preview-slack",
+  "preview-teams",
+  "preview-email",
+  "preview-opsgenie",
+  "preview-action",
+  "webinar-dismiss",
+  "banner-dismiss",
+  "outline-primary",
+  "dashed",
+  "pricing-chip",
+] satisfies ButtonVariant[];
+
+const buttonSource = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), "OButton.vue"),
+  "utf8",
+);
+
+const variantMapSource = (() => {
+  const start = buttonSource.indexOf("const variantClasses");
+  return buttonSource.slice(start, buttonSource.indexOf("\n};", start));
+})();
+
+const declaredVariants = [...variantMapSource.matchAll(/^ {2}"?([a-z][\w-]*)"?:/gm)].map(
+  ([, name]) => name,
+);
 
 describe("OButton", () => {
   // --- Slots ---
@@ -344,20 +397,7 @@ describe("OButton", () => {
    * that does paint is --color-focus-ring-accent: 4.40–6.47 measured live on the dark
    * Pulse-class surfaces). The dead declarations are gone; this cell is what keeps them gone.
    */
-  it.each([
-    "primary",
-    "secondary",
-    "outline",
-    "ghost",
-    "ghost-primary",
-    "destructive",
-    "filter-exclude",
-    "pending",
-    "cancel-query",
-    "ai-gradient",
-    "on-dark-primary",
-    "on-dark-ghost",
-  ] as const)("declares exactly the unified focus ring on the %s variant", (variant) => {
+  it.each(ALL_VARIANTS)("declares exactly the unified focus ring on the %s variant", (variant) => {
     const rings = mount(OButton, { props: { variant } })
       .classes()
       .filter((value) => value.startsWith("focus-visible:ring-"));
@@ -365,6 +405,17 @@ describe("OButton", () => {
       "focus-visible:ring-[0.125rem]!",
       "focus-visible:ring-focus-ring-accent!",
     ]);
+  });
+
+  // The ring lock above is only as wide as this list, so the list is pinned to the variant map.
+  it("locks the focus ring on every variant the component declares", () => {
+    expect(declaredVariants.length).toBeGreaterThan(30);
+    expect([...ALL_VARIANTS].sort()).toEqual([...declaredVariants].sort());
+  });
+
+  // The dead declarations were deleted, not just overridden: the map itself paints no ring at all.
+  it("keeps focus-ring classes out of the variant map", () => {
+    expect(variantMapSource.match(/focus-visible:ring-/g) ?? []).toEqual([]);
   });
 
   // --- Loading ---
@@ -404,70 +455,33 @@ describe("OButton", () => {
     const wrapper = mount(OButton);
     expect(wrapper.attributes("data-o2-variant")).toBe("primary");
   });
-  it.each([
-    "primary",
-    "secondary",
-    "outline",
-    "ghost",
-    "ghost-primary",
-    "ghost-muted",
-    "ghost-subtle",
-    "ghost-destructive",
-    "ghost-success",
-    "destructive",
-    "filter-exclude",
-    "ghost-warning",
-    "warning",
-    "pending",
-    "ghost-neutral",
-    "outline-destructive",
-    "cancel-query",
-    "panel-collapse",
-    "sidebar-button",
-    "sidebar-toggle",
-    "ai-gradient",
-    "on-dark-primary",
-    "on-dark-ghost",
-    "preview-slack",
-    "preview-teams",
-    "preview-email",
-    "preview-opsgenie",
-    "preview-action",
-    "webinar-dismiss",
-    "banner-dismiss",
-    "outline-primary",
-    "dashed",
-    "pricing-chip",
-  ] satisfies ButtonVariant[])(
-    "preserves native disabled styling for %s when unavailable",
-    (variant) => {
-      const disabled = mount(OButton, { props: { variant, disabled: true } });
-      const unavailable = mount(OButton, {
-        props: { variant, disabled: true, focusableUnavailable: true },
-      });
-      const disabledClasses = disabled
+  it.each(ALL_VARIANTS)("preserves native disabled styling for %s when unavailable", (variant) => {
+    const disabled = mount(OButton, { props: { variant, disabled: true } });
+    const unavailable = mount(OButton, {
+      props: { variant, disabled: true, focusableUnavailable: true },
+    });
+    const disabledClasses = disabled
+      .classes()
+      .filter((value) => value.startsWith("disabled:") && value !== "disabled:cursor-not-allowed")
+      .map((value) => value.slice("disabled:".length));
+    expect(disabledClasses.length).toBeGreaterThan(0);
+    for (const value of disabledClasses) expect(unavailable.classes()).toContain(value);
+    const groups = disabledClasses.map((value) => value.split("-")[0]);
+    expect(
+      unavailable
         .classes()
-        .filter((value) => value.startsWith("disabled:") && value !== "disabled:cursor-not-allowed")
-        .map((value) => value.slice("disabled:".length));
-      expect(disabledClasses.length).toBeGreaterThan(0);
-      for (const value of disabledClasses) expect(unavailable.classes()).toContain(value);
-      const groups = disabledClasses.map((value) => value.split("-")[0]);
-      expect(
-        unavailable
-          .classes()
-          .filter(
-            (value) =>
-              groups.includes(value.split("-")[0]) &&
-              !/^text-(xs|sm|base|lg|compact|inherit)$/.test(value),
-          )
-          .sort(),
-      ).toEqual(disabledClasses.sort());
-      expect(unavailable.classes().some((value) => value.startsWith("enabled:"))).toBe(false);
-      expect(unavailable.attributes("disabled")).toBeUndefined();
-      disabled.unmount();
-      unavailable.unmount();
-    },
-  );
+        .filter(
+          (value) =>
+            groups.includes(value.split("-")[0]) &&
+            !/^text-(xs|sm|base|lg|compact|inherit)$/.test(value),
+        )
+        .sort(),
+    ).toEqual(disabledClasses.sort());
+    expect(unavailable.classes().some((value) => value.startsWith("enabled:"))).toBe(false);
+    expect(unavailable.attributes("disabled")).toBeUndefined();
+    disabled.unmount();
+    unavailable.unmount();
+  });
 
   it("keeps an unavailable action focusable and connects its reason", async () => {
     const wrapper = mount(OButton, {

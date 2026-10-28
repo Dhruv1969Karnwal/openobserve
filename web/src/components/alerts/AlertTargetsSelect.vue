@@ -23,11 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   validation, and backend contract are unchanged.
 
   `workflowsEnabled` (interactive) and `workflowsLocked` (visible, disabled) are
-  two different reasons the Workflows group might not be pickable: an edition
-  that doesn't unlock workflows at all shows the group LOCKED (so it stays
-  discoverable); an entitled deployment with the backend `/config` flag
-  `workflows_enabled` off just HIDES it, same as before. Only when neither is
-  true does the control fall back to a plain Destinations dropdown.
+  two different reasons the Workflows group might not be pickable: an edition that
+  doesn't unlock workflows at all shows the group LOCKED (so it stays discoverable)
+  only in a "lock" build — under the shipped "hide" policy it is omitted; an
+  entitled deployment with the backend `/config` flag `workflows_enabled` off just
+  HIDES it, same as before. Only when neither is true does the control fall back to
+  a plain Destinations dropdown.
   Only the control row lives here; the field label + inline required-error stay
   in the parent (AlertSettings) so the two alert-type layouts keep their chrome.
 -->

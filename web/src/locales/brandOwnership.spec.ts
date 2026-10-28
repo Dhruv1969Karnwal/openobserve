@@ -555,3 +555,119 @@ describe("raw product-name slots in components", () => {
     }
   });
 });
+
+/**
+ * The other identifier this product answers to: the `O2` shorthand. The population above is keyed on
+ * the brand *spelling*, so these 14 English strings sat outside every ledger and a sweep could rename
+ * or keep each of them with the whole suite green. Booked here with its verdict, so either flip is a
+ * red test from now on.
+ */
+// Compat surface, not branding — an operator has to type these identifiers verbatim, and the license
+// pair mirrors the server's own sentence (ENV_KEY_CONFLICT_MSG, api/management/src/request/license/mod.rs).
+const O2_COMPAT_IDENTIFIER_KEYS = [
+  "about.license_status_env_key",
+  "about.license_status_env_key_superseded",
+  "fleet.settings.auditDisabled",
+  "ingestion.setupCard.rnNavigationNote",
+  "ingestion.setupCard.rnTroubleScreenNamesA",
+];
+
+// Kept as the feature's own proper noun rather than read as a missed rename: the component family
+// (O2AIChat, O2AIConfirmDialog), the `o2-ai-*` data-test hooks and the session header the server
+// tracks turns by (src/api/common/src/lib.rs:25) all carry the same shorthand, so renaming only what
+// renders would split the assistant's name from every identifier around it — across 16 locales.
+// Renaming it stays possible and stays cheap; it simply can no longer happen quietly.
+const O2_FEATURE_NAME_KEYS = [
+  "about.enterprise_offer.enterprise_features.ai_assistant.name",
+  "home.tabAiAssistant",
+  "aiAssistant.welcome.taglineHighlight",
+  "aiAssistant.autoNavigation.enabledTooltip",
+  "aiAssistant.autoNavigation.disabledTooltip",
+  "aiAssistant.aiChat.navigateConfirmQuestion",
+  "aiAssistant.aiChat.allowAssistantTo",
+  "aiAssistant.aiChat.allowAssistantNavigateTo",
+  "settings.addRegexPattern.tryAiAssistant",
+];
+
+const O2_IDENTIFIER = /O2_[A-Z_]+|O2Rum[A-Za-z]*|O2Assistant/i;
+
+describe("the O2 shorthand is booked, not invisible", () => {
+  const english = (locale: Locale) => {
+    const flat: [string, string][] = [];
+    collectStrings(locale, "", flat);
+    return flat;
+  };
+
+  it("covers every O2-naming English string exactly once", () => {
+    const population = english(enUs)
+      .filter(([, value]) => value.includes("O2"))
+      .map(([key]) => key)
+      .sort();
+    const ledgers = [...O2_COMPAT_IDENTIFIER_KEYS, ...O2_FEATURE_NAME_KEYS];
+    expect(new Set(ledgers).size, "a key is booked by two O2 ledgers").toBe(ledgers.length);
+    expect(ledgers.sort()).toEqual(population);
+    expect(population.length).toBe(14);
+  });
+
+  it("keeps the five compat identifiers spelled the way the server spells them", () => {
+    for (const key of O2_COMPAT_IDENTIFIER_KEYS) {
+      const value = String(atPath(enUs, key));
+      expect(value, key).toMatch(O2_IDENTIFIER);
+      expect(value, key).not.toContain(PRODUCT);
+    }
+  });
+
+  it("keeps the assistant booked under its feature name in English", () => {
+    for (const key of O2_FEATURE_NAME_KEYS) {
+      expect(String(atPath(enUs, key)), key).toContain("O2");
+    }
+  });
+
+  for (const [code, locale] of LOCALES) {
+    it(`${code} never names both brands inside one O2 string`, () => {
+      const mixed = english(locale).filter(
+        ([, value]) => value.includes("O2") && value.includes(PRODUCT),
+      );
+      expect(mixed.map(([key]) => key)).toEqual([]);
+    });
+  }
+});
+
+const BRAND_ARTICLE_ERRORS: [RegExp, string][] = [
+  [/\ban\s+(Retrace(\.ai)?|O2)\b/i, '"an" in front of a name that starts with a consonant sound'],
+  [/\ba\s+OpenObserve\b/i, '"a" in front of a name that starts with a vowel sound'],
+];
+
+/**
+ * Article agreement is English grammar, so it applies to English strings: everything en-US renders,
+ * plus every locale value that is byte-identical to its English one — a translated value follows its
+ * own language, where "an"/"a" before a name mean something else (German "an Retrace.ai" is a
+ * preposition, Spanish "a OpenObserve" is the personal a).
+ */
+describe("brand-adjacent English articles", () => {
+  const articleErrors = (flat: [string, string][]) =>
+    flat
+      .filter(([, value]) => BRAND_ARTICLE_ERRORS.some(([pattern]) => pattern.test(value)))
+      .map(([key]) => key);
+
+  it("agrees with the noun in every English string", () => {
+    const flat: [string, string][] = [];
+    collectStrings(enUs, "", flat);
+    expect(flat.length).toBeGreaterThan(1000);
+    expect(articleErrors(flat), BRAND_ARTICLE_ERRORS.map(([, why]) => why).join("; ")).toEqual([]);
+  });
+
+  it("says a Retrace.ai user in the Slack match count, which the rename broke", () => {
+    expect(enUs.slackApp.linking.matches).toContain(`a ${PRODUCT} user`);
+    expect(enUs.slackApp.linking.matches).not.toMatch(/\ban\s+Retrace/i);
+  });
+
+  for (const [code, locale] of LOCALES) {
+    it(`${code} keeps English articles in the strings it never translated`, () => {
+      const flat: [string, string][] = [];
+      collectStrings(locale, "", flat);
+      const carried = flat.filter(([key, value]) => value === atPath(enUs, key));
+      expect(articleErrors(carried)).toEqual([]);
+    });
+  }
+});

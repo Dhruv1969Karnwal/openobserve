@@ -300,7 +300,7 @@ const TEXT_PAIRS: { fg: string; bg: string; where: string }[] = [
   },
   // ── The rest of the runtime-accent-ground sweep. Every text/utility
   // class binding that lands on an accent wash, a selected fill or a runtime
-  // tint, read out of the consumer source (see fixer notes for the matrix).
+  // tint, read out of the consumer source and booked pair by pair in this array.
   // The reported pair was `text-text-link` here (3.03 light O2 Lens / 3.77 dark
   // O2 Pulse); the affordance now binds the per-theme accent label instead.
   {

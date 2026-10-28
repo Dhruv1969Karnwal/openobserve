@@ -25866,7 +25866,7 @@
       "domainsHelp": "Your company's own domains only. Public email domains such as gmail.com or outlook.com are never accepted.",
       "publicDomain": "{domain} is a public email domain; use your company's domain",
       "counts": "{auto} linked automatically, {oidc} with Link your account",
-      "matches": "{count} Slack member matches an Retrace.ai user | {count} Slack members match Retrace.ai users",
+      "matches": "{count} Slack member matches a Retrace.ai user | {count} Slack members match Retrace.ai users",
       "matchesHelp": "Joined before automatic linking was on · each gets one DM",
       "linkAllMatches": "Link all matches ({count})",
       "linkAllDone": "Linked {count} person | Linked {count} people",
