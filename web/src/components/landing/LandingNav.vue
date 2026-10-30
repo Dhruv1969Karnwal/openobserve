@@ -132,7 +132,7 @@ onBeforeUnmount(() => {
           >
           <a
             :href="`${base}login`"
-            class="rounded-default bg-button-primary text-button-primary-foreground focus-visible:ring-text-heading mt-2 inline-flex h-12 items-center justify-center px-6 text-base font-medium outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            class="rounded-default bg-button-primary text-button-primary-foreground focus-visible:ring-text-heading mt-4 inline-flex h-12 items-center justify-center px-6 text-base font-medium outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             data-landing-cta="signin-sheet"
             data-test="landing-sheet-signin"
             >{{ t("welcome.hero.cta") }}</a

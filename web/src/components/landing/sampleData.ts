@@ -27,7 +27,7 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:08.398",
     level: "debug",
-    message: "cache miss key=org:default:streams",
+    message: "cache miss key=stream-7",
     duration: "0ms",
     status: 200,
   },

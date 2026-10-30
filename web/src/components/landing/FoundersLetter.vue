@@ -10,10 +10,10 @@ const { t } = useI18nTyped();
 
 <template>
   <section id="open-source" aria-labelledby="letter-h" class="scroll-mt-24">
-    <div class="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-20">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 px-6 py-14 md:px-10 md:py-16 lg:grid-cols-12">
       <h2 id="letter-h" class="sr-only">{{ t("welcome.letter.heading") }}</h2>
       <article
-        class="rounded-surface bg-surface-subtle p-6 md:p-10 lg:ms-[8.333%] lg:w-[58.333%]"
+        class="rounded-surface bg-surface-subtle p-6 md:p-10 lg:col-span-6 lg:col-start-2"
         data-reveal
       >
         <svg

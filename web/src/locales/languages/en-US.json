@@ -26809,7 +26809,7 @@
     "fragment": {
       "aria": "Product preview: log search view",
       "signal": "Signal",
-      "rowsShown": "showing {shown} of {total}",
+      "rowsShown": "{shown}/{total}",
       "filter": "Filter rows",
       "filterPlaceholder": "filter this stream",
       "level": "level:",
@@ -26831,13 +26831,14 @@
       "liveNote": "Click the row \u2014 that toggle is the product\u2019s own expand, not an animation.",
       "alertName": "alert 5xx-spike",
       "alertCond": "count(level:\u2019error\u2019) >= 2 in 5m",
-      "alertFired": "Fired 14:32:11 \u00b7 evaluation on the same engine",
+      "alertFired": "alert fired \u00b7 email + webhook",
       "notify": "notify",
       "arrivesNote": "One POST, indexed the moment it lands.",
       "lookNote": "Open the row: every field, one click.",
       "warnsNote": "A condition on the same rows fires it.",
       "alertRun": "Run check",
-      "alertMetric": "events / min"
+      "alertMetric": "events / min",
+      "alertResult": null
     },
     "bands": {
       "heading": "Capabilities",
@@ -26852,7 +26853,9 @@
       "b4": "Alerts run on the query engine itself",
       "b4c": "Conditions fire to email or any webhook you point at \u2014 no sidecar to trust.",
       "b5": "The whole stack is one Rust binary",
-      "b5c": "Docker run it on a laptop, or put it behind your load balancer. It answers on :5080."
+      "b5c": "Docker run it on a laptop, or put it behind your load balancer. It answers on :5080.",
+      "b1note": "14 rows \u00b7 3 streams \u00b7 one schema",
+      "b2note": "level \u00b7 3 rows \u00b7 37 ms"
     },
     "stages": {
       "heading": "Ingestion in minutes",
@@ -26885,7 +26888,11 @@
       "tWebhook": "webhook \u00b7 ops-oncall",
       "nodeAria": "Go to stage {n}: {label}",
       "termTag": "HTTP JSON API",
-      "p4b": null
+      "p4b": null,
+      "out0": "connection accepted \u00b7 token ok",
+      "out1": "HTTP 200 \u00b7 21 ms \u00b7 indexed",
+      "out2": "query served \u00b7 7 rows",
+      "out3": "alert fired \u00b7 email sent"
     },
     "letter": {
       "heading": "Open source, and why this exists",
@@ -26921,6 +26928,7 @@
     },
     "view": {
       "skip": "Skip to content"
-    }
+    },
+    "alert": {}
   }
 }

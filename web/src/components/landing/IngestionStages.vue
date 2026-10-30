@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // Copyright 2026 OpenObserve Inc.
 
-// Ingestion section: the literal first command, and a connected four-segment
-// control that walks the product through what happens to that one request.
+// Ingestion section: the literal first command, and a four-segment control
+// that walks the same request through connect, arrival, search and alert.
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { useI18nTyped } from "@/types/i18n";
 import { CURL } from "./sampleData";
@@ -12,6 +12,10 @@ const { t } = useI18nTyped();
 const STAGES = ["c0", "c1", "c2", "c3"] as const;
 const stage = ref(0);
 let timer: ReturnType<typeof setInterval> | undefined;
+
+const ZWSP = "​";
+const curlUrl = CURL.url.replace(/[/:]/g, (m) => m + ZWSP);
+const curlBody = CURL.body.replace(/,/g, "," + ZWSP);
 
 const go = (i: number) => {
   stage.value = ((i % STAGES.length) + STAGES.length) % STAGES.length;
@@ -65,46 +69,51 @@ onBeforeUnmount(() => {
 
 <template>
   <section id="how-it-works" aria-labelledby="how-h" class="bg-surface-subtle scroll-mt-24">
-    <div ref="sectionEl" class="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-20">
+    <div ref="sectionEl" class="mx-auto max-w-7xl px-6 py-14 md:px-10 md:py-16">
       <h2
         id="how-h"
-        class="text-text-heading text-2xl font-semibold tracking-tight text-balance md:text-3xl"
+        class="text-text-heading text-2xl font-semibold tracking-tight md:text-3xl"
         data-reveal
       >
         {{ t("welcome.stages.heading") }}
       </h2>
 
-      <div class="mt-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
-        <p class="stage-clause text-text-heading text-balance" data-reveal>
-          {{ t("welcome.stages.c" + stage) }}
-        </p>
+      <div class="mt-10 grid grid-cols-1 items-start gap-x-10 gap-y-8 lg:grid-cols-2">
+        <div data-reveal>
+          <p class="stage-clause text-text-heading text-balance">
+            {{ t("welcome.stages." + STAGES[stage]) }}
+          </p>
+          <p class="text-compact text-text-body mt-3 max-w-md">
+            {{ t("welcome.stages.n" + stage) }}
+          </p>
+        </div>
         <div class="rounded-surface border-border-subtle bg-surface-panel border" data-reveal>
-          <div
-            class="border-border-subtle flex items-center justify-between gap-4 border-b px-4 py-2"
-          >
+          <div class="border-border-subtle flex items-center border-b px-4 py-2">
             <p class="text-text-secondary font-mono text-xs">{{ t("welcome.stages.terminal") }}</p>
           </div>
+          <!-- eslint-disable vue/no-bare-strings-in-template -->
           <pre
-            class="text-text-code overflow-x-auto px-4 py-4 font-mono text-xs leading-6 break-all whitespace-pre-wrap"
+            class="text-text-code overflow-hidden px-4 py-4 font-mono text-xs leading-6 break-words whitespace-pre-wrap"
             data-test="landing-curl"
-          ><!-- eslint-disable vue/no-bare-strings-in-template --><code>curl -u [EMAIL]:[PASSCODE] -k \
-  {{ CURL.url }} \
-  -d '{{ CURL.body }}'</code><!-- eslint-enable vue/no-bare-strings-in-template --></pre>
+          ><code>curl -u [EMAIL]:[PASSCODE] -k \
+  {{ curlUrl }} \
+  -d '{{ curlBody }}'</code></pre>
+          <!-- eslint-enable vue/no-bare-strings-in-template -->
           <div class="border-border-subtle flex items-center gap-2 border-t px-4 py-2">
-            <span class="text-text-secondary font-mono" aria-hidden="true">→</span>
+            <span class="text-text-secondary font-mono text-xs" aria-hidden="true">→</span>
             <p class="text-text-heading font-mono text-xs" data-test="landing-stage-outcome">
-              {{ t("welcome.stages.ok") }}
+              {{ t("welcome.stages.out" + stage) }}
             </p>
           </div>
         </div>
       </div>
 
-      <div class="mt-12" data-reveal>
+      <div class="mt-10" data-reveal>
         <div
-          class="rounded-surface border-border-strong grid grid-cols-2 gap-px overflow-hidden border md:grid-cols-4"
           role="tablist"
           @focusin="stop()"
           :aria-label="t('welcome.stages.heading')"
+          class="bg-surface-panel border-border-subtle rounded-surface flex flex-col gap-1 border p-1 md:grid md:grid-cols-4"
           data-test="landing-steps"
           data-stages="4"
           :data-stage="stage"
@@ -114,11 +123,11 @@ onBeforeUnmount(() => {
             :key="st"
             type="button"
             role="tab"
-            class="text-compact focus-visible:ring-text-heading flex min-h-12 items-center justify-center gap-2 rounded-none px-3 py-3 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset"
+            class="rounded-default text-compact focus-visible:ring-text-heading flex min-h-11 items-center gap-2 px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 md:justify-center"
             :class="
               i === stage
-                ? 'bg-surface-active text-text-heading'
-                : 'bg-surface-panel text-text-body hover:bg-surface-subtle'
+                ? 'bg-text-heading text-surface-panel'
+                : 'text-text-body hover:bg-surface-subtle'
             "
             :aria-selected="i === stage"
             :tabindex="i === stage ? 0 : -1"
@@ -126,9 +135,12 @@ onBeforeUnmount(() => {
             @click="((stage = i), stop())"
             @keydown="onKey"
           >
-            <span class="text-text-secondary font-mono text-xs tabular-nums" aria-hidden="true">{{
-              String(i + 1).padStart(2, "0")
-            }}</span>
+            <span
+              class="font-mono text-xs tabular-nums"
+              :class="i === stage ? 'text-surface-panel' : 'text-text-secondary'"
+              aria-hidden="true"
+              >{{ String(i + 1).padStart(2, "0") }}</span
+            >
             {{ t("welcome.stages." + st) }}
           </button>
         </div>

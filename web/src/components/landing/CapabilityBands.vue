@@ -36,7 +36,7 @@ const F = {
 
 <template>
   <section id="capabilities" aria-labelledby="capabilities-h" class="scroll-mt-24">
-    <div class="mx-auto max-w-7xl px-6 pt-16 md:px-10 md:pt-20">
+    <div class="mx-auto max-w-7xl px-6 pt-14 md:px-10 md:pt-16">
       <h2
         id="capabilities-h"
         class="text-text-heading text-2xl font-semibold tracking-tight text-balance md:text-3xl"
@@ -50,7 +50,7 @@ const F = {
     <div class="mt-8 flex flex-col">
       <div v-for="b in BANDS" :key="b.n" class="border-border-subtle border-t" data-reveal>
         <div
-          class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-x-10 gap-y-6 px-6 py-8 md:grid-cols-12 md:px-10"
+          class="mx-auto grid max-w-7xl grid-cols-1 items-start gap-x-10 gap-y-6 px-6 py-8 md:grid-cols-12 md:px-10"
         >
           <div class="min-w-0 md:col-span-7">
             <p class="band-sentence text-text-heading text-balance">{{ t(b.s) }}</p>
@@ -72,6 +72,9 @@ const F = {
                   F.streams[2]
                 }}</span>
               </div>
+              <p class="text-compact border-border-subtle text-text-body mt-3 border-t pt-2">
+                {{ t("welcome.bands.b1note") }}
+              </p>
               <p class="text-text-secondary mt-2 font-mono text-xs">{{ F.oneStore }}</p>
             </div>
             <div
@@ -79,6 +82,7 @@ const F = {
               class="rounded-surface border-border-subtle bg-surface-panel border p-4"
             >
               <p class="text-text-code font-mono text-xs leading-6 whitespace-pre">{{ F.sql }}</p>
+              <p class="text-compact text-text-body mt-2">{{ t("welcome.bands.b2note") }}</p>
             </div>
             <div
               v-else-if="b.n === 3"

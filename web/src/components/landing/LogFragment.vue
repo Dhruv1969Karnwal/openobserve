@@ -149,9 +149,7 @@ const spark = computed(() => {
         />
       </label>
       <div class="mt-2 flex flex-wrap items-center gap-1.5">
-        <span class="text-2xs text-text-secondary font-medium">{{
-          t("welcome.fragment.level")
-        }}</span>
+        <span class="text-text-body text-xs font-medium">{{ t("welcome.fragment.level") }}</span>
         <button
           v-for="lv in LEVELS"
           :key="lv"
@@ -200,12 +198,9 @@ const spark = computed(() => {
                 :class="chipStyles[row.level]"
                 >{{ row.level }}</span
               >
+              <span class="text-compact text-text-body min-w-0 truncate">{{ row.message }}</span>
               <span
-                class="text-compact text-text-body line-clamp-2 min-w-0 lg:line-clamp-none lg:truncate"
-                >{{ row.message }}</span
-              >
-              <span
-                class="text-text-secondary hidden text-end font-mono text-xs tabular-nums lg:block"
+                class="text-text-body hidden text-end font-mono text-xs tabular-nums lg:block"
                 >{{ row.duration }}</span
               >
             </button>

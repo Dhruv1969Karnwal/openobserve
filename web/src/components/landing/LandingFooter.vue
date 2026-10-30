@@ -47,7 +47,7 @@ function go(href: string) {
       </div>
 
       <nav :aria-label="t('welcome.footer.navAria')" class="md:col-span-3">
-        <p class="text-compact text-text-secondary uppercase">{{ t("welcome.footer.eyebrow") }}</p>
+        <p class="text-compact text-text-body uppercase">{{ t("welcome.footer.eyebrow") }}</p>
         <ul class="mt-4 flex flex-col items-start gap-3 font-mono text-sm">
           <li v-for="l in LINKS" :key="l.href">
             <a

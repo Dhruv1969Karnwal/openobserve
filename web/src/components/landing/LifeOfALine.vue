@@ -1,25 +1,31 @@
 <script setup lang="ts">
 // Copyright 2026 OpenObserve Inc.
 
-// "What one line does": three product fragments shown as a single-column
-// stack — label above each fragment, left-aligned on the page grid.
+// "What one line does": three quiet labeled fragments, each showing one phase
+// of a line's life. The arrival card is a static receipt, not a second copy
+// of the hero explorer.
 import { ref } from "vue";
 import { useI18nTyped } from "@/types/i18n";
 import { LOG_ROWS } from "./sampleData";
-import LogFragment from "./LogFragment.vue";
 
 const { t } = useI18nTyped();
 
 const LEVELS = ["info", "warn", "error"] as const;
 const level = ref<number>(2);
-const metric = ref(42);
-const WIDTHS = [72, 40, 88];
-const barStyle = (i: number) => ({ width: WIDTHS[i] + "%" });
+
+const F = {
+  stream: "app_logs",
+  post: "POST · 200",
+  q: "/app_logs/_search?q=error",
+  ms: "21 ms",
+  cond: "count(level='error') >= 2 in 5m",
+};
+const fired = ref(false);
 </script>
 
 <template>
   <section id="one-line" aria-labelledby="live-h" class="scroll-mt-24">
-    <div class="mx-auto max-w-7xl px-6 pt-16 md:px-10 md:pt-20">
+    <div class="mx-auto max-w-7xl px-6 pt-12 md:px-10 md:pt-14">
       <h2
         id="live-h"
         class="text-text-heading text-2xl font-semibold tracking-tight md:text-3xl"
@@ -28,31 +34,30 @@ const barStyle = (i: number) => ({ width: WIDTHS[i] + "%" });
         {{ t("welcome.oneLine.heading") }}
       </h2>
 
-      <div class="mt-10 flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-10">
+      <div class="mt-8 flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-10">
         <div class="min-w-0 lg:w-1/2" data-reveal>
-          <p class="text-compact text-text-secondary uppercase">
-            {{ t("welcome.oneLine.arrives") }}
-          </p>
-          <LogFragment :rows="LOG_ROWS.slice(0, 4)" show-toolbar="false" class="mt-3" />
-        </div>
-
-        <div class="min-w-0 space-y-12 lg:w-1/2">
-          <div data-reveal>
-            <p class="text-compact text-text-secondary uppercase">
-              {{ t("welcome.oneLine.look") }}
-            </p>
-            <div class="rounded-surface border-border-subtle bg-surface-panel mt-3 border p-5">
-              <div class="space-y-3">
-                <div
-                  v-for="(r, i) in LOG_ROWS.slice(0, 3)"
-                  :key="r.id"
-                  class="grid grid-cols-[5.5rem_minmax(0,1fr)_3rem] items-center gap-3"
+          <p class="text-compact text-text-body">{{ t("welcome.oneLine.arrives") }}</p>
+          <div class="rounded-surface border-border-subtle bg-surface-panel mt-3 border p-4">
+            <div class="flex items-center justify-between gap-3">
+              <p class="text-text-heading font-mono text-xs">{{ F.stream }}</p>
+              <p class="text-text-secondary font-mono text-xs">{{ F.post }}</p>
+            </div>
+            <ul
+              class="divide-border-subtle border-border-subtle mt-3 flex flex-col divide-y border-t"
+            >
+              <li
+                v-for="r in LOG_ROWS.slice(0, 3)"
+                :key="r.id"
+                class="flex items-baseline gap-3 py-2"
+              >
+                <span class="text-text-secondary shrink-0 font-mono text-xs tabular-nums">{{
+                  r.time
+                }}</span>
+                <span
+                  class="rounded-default bg-surface-subtle text-text-heading inline-flex h-5 shrink-0 items-center gap-1.5 px-1.5 font-mono text-xs"
                 >
-                  <span class="text-text-secondary font-mono text-xs tabular-nums"
-                    >{{ r.time.slice(-12, -7) }}:{{ String(i).padStart(2, "0") }}</span
-                  >
                   <span
-                    class="h-2 rounded-none"
+                    class="size-1.5 rounded-full"
                     :class="
                       r.level === 'error'
                         ? 'bg-severity-error'
@@ -60,32 +65,54 @@ const barStyle = (i: number) => ({ width: WIDTHS[i] + "%" });
                           ? 'bg-severity-warn'
                           : 'bg-severity-info'
                     "
-                    :style="barStyle(i)"
-                  />
-                  <span class="text-text-secondary text-end font-mono text-xs tabular-nums">{{
-                    [142, 96, 58][i]
-                  }}</span>
-                </div>
+                    aria-hidden="true"
+                  />{{ r.level }}</span
+                >
+                <span class="text-text-body min-w-0 truncate text-sm">{{ r.message }}</span>
+              </li>
+            </ul>
+            <p class="text-compact text-text-body mt-3">{{ t("welcome.oneLine.arrivesNote") }}</p>
+          </div>
+        </div>
+
+        <div class="min-w-0 space-y-10 lg:w-1/2">
+          <div data-reveal>
+            <p class="text-compact text-text-body">{{ t("welcome.oneLine.look") }}</p>
+            <div class="rounded-surface border-border-subtle bg-surface-panel mt-3 border p-4">
+              <div class="flex items-baseline justify-between gap-3">
+                <p class="text-text-heading font-mono text-xs">{{ F.q }}</p>
+                <p class="text-text-secondary font-mono text-xs tabular-nums">{{ F.ms }}</p>
               </div>
+              <ul
+                class="divide-border-subtle border-border-subtle mt-3 flex flex-col divide-y border-t"
+              >
+                <li
+                  v-for="r in LOG_ROWS.filter((x) => x.level === 'error').slice(0, 3)"
+                  :key="r.id"
+                  class="flex items-baseline gap-3 py-2"
+                >
+                  <span class="text-text-secondary shrink-0 font-mono text-xs tabular-nums">{{
+                    r.time
+                  }}</span>
+                  <span class="text-text-body min-w-0 truncate text-sm">{{ r.message }}</span>
+                </li>
+              </ul>
+              <p class="text-compact text-text-body mt-3">{{ t("welcome.oneLine.lookNote") }}</p>
             </div>
           </div>
 
           <div data-reveal>
-            <p class="text-compact text-text-secondary uppercase">
-              {{ t("welcome.oneLine.warns") }}
-            </p>
+            <p class="text-compact text-text-body">{{ t("welcome.oneLine.warns") }}</p>
             <div
-              class="rounded-surface border-border-strong bg-surface-panel mt-3 border p-5"
+              class="rounded-surface border-border-subtle bg-surface-panel mt-3 border p-4"
               data-test="landing-alert-demo"
             >
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="text-compact text-text-secondary">{{
-                  t("welcome.oneLine.alertCond")
-                }}</span>
+              <p class="text-text-code font-mono text-xs">{{ F.cond }}</p>
+              <div class="mt-3 grid grid-cols-3 gap-2">
                 <span
                   v-for="(lv, i) in LEVELS"
                   :key="lv"
-                  class="rounded-default inline-flex items-center gap-1.5 px-2 py-1 font-mono text-xs"
+                  class="rounded-default inline-flex items-center justify-center gap-1.5 px-2 py-1 font-mono text-xs whitespace-nowrap"
                   :class="
                     i === level
                       ? 'bg-text-heading text-surface-panel'
@@ -105,35 +132,33 @@ const barStyle = (i: number) => ({ width: WIDTHS[i] + "%" });
                   />{{ lv }}
                 </span>
               </div>
-              <div class="mt-4 flex items-center gap-4">
+              <div class="mt-4 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
-                  class="rounded-surface border-border-strong text-compact text-text-heading focus-visible:ring-text-heading hover:bg-surface-subtle inline-flex h-10 shrink-0 items-center gap-2 border px-4 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                  class="rounded-default border-border-strong text-compact text-text-heading hover:bg-surface-subtle focus-visible:ring-text-heading inline-flex h-9 shrink-0 items-center border px-3 transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                   data-test="landing-alert-trigger"
-                  @click="
-                    ((level = (level + 1) % 3), (metric = 30 + Math.round(Math.random() * 60)))
-                  "
+                  @click="((level = (level + 1) % 3), (fired = level === 2))"
                 >
                   {{ t("welcome.oneLine.alertRun") }}
                 </button>
-                <div class="min-w-0">
-                  <div class="flex items-baseline justify-between gap-4">
-                    <p class="text-compact text-text-secondary">
-                      {{ t("welcome.oneLine.alertMetric") }}
-                    </p>
-                    <p class="text-text-heading font-mono text-sm tabular-nums">{{ metric }}</p>
-                  </div>
-                  <div
-                    class="bg-surface-subtle mt-1.5 h-2"
-                    role="img"
-                    :aria-label="t('welcome.fragment.eventsChart')"
-                  >
-                    <div
-                      class="bg-text-heading h-2 transition-[width] duration-300 motion-reduce:transition-none"
-                      :style="{ width: `${metric}%` }"
-                    />
-                  </div>
-                </div>
+                <p
+                  v-if="fired"
+                  class="text-text-heading inline-flex items-center gap-2 font-mono text-xs"
+                  data-test="landing-alert-state"
+                  role="status"
+                >
+                  <span class="bg-text-heading size-1.5 rounded-full" aria-hidden="true" />{{
+                    t("welcome.oneLine.alertFired")
+                  }}
+                </p>
+                <p
+                  v-else
+                  class="text-text-body font-mono text-xs"
+                  data-test="landing-alert-state"
+                  role="status"
+                >
+                  {{ t("welcome.oneLine.notify") }}
+                </p>
               </div>
             </div>
           </div>
