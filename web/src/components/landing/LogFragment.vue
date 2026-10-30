@@ -63,6 +63,10 @@ function quoted(v: string): string {
   return QUOTE + v + QUOTE;
 }
 
+function shortTime(t: string): string {
+  return t.length > 8 ? t.slice(0, 8) : t;
+}
+
 function jsonClass(kind: string): string {
   return kind === "bool" ? "log-boolean" : `log-${kind}`;
 }
@@ -173,12 +177,15 @@ const spark = computed(() => {
           <li v-for="(row, i) in filtered" :key="row.time + i">
             <button
               type="button"
-              class="hover:bg-surface-subtle focus-visible:outline-focus-ring-accent grid w-full grid-cols-[3.9rem_auto_1fr] items-baseline gap-x-2.5 gap-y-0.5 px-2.5 py-2 text-start transition-colors duration-100 focus-visible:outline-2 focus-visible:-outline-offset-2 lg:grid-cols-[5rem_auto_1fr_4.5rem]"
+              class="hover:bg-surface-subtle focus-visible:outline-focus-ring-accent grid w-full grid-cols-[4.5rem_auto_1fr] items-baseline gap-x-2.5 gap-y-0.5 px-2.5 py-2 text-start transition-colors duration-100 focus-visible:outline-2 focus-visible:-outline-offset-2 lg:grid-cols-[5rem_auto_1fr_4.5rem]"
               :aria-expanded="openRow === rowKey(row)"
               data-test="landing-fragment-row"
               @click="openRow = openRow === rowKey(row) ? null : rowKey(row)"
             >
-              <span class="text-2xs text-text-secondary font-mono tabular-nums">{{
+              <span class="text-2xs text-text-secondary font-mono tabular-nums lg:hidden">{{
+                shortTime(row.time)
+              }}</span>
+              <span class="text-2xs text-text-secondary hidden font-mono tabular-nums lg:inline">{{
                 row.time
               }}</span>
               <span

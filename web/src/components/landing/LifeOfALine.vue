@@ -21,6 +21,10 @@ const ROW = {
 const QUOTE = String.fromCharCode(34);
 const SEP = ": ";
 
+function shortTime(t: string): string {
+  return t.length > 8 ? t.slice(0, 8) : t;
+}
+
 function quoted(v: string): string {
   return QUOTE + v + QUOTE;
 }
@@ -60,7 +64,9 @@ function jsonClass(kind: string): string {
           <div
             class="grid grid-cols-[4.6rem_auto_1fr] items-baseline gap-x-2.5 px-3 py-2.5 lg:grid-cols-[5.6rem_auto_1fr_3.5rem]"
           >
-            <span class="text-2xs text-text-secondary font-mono tabular-nums">{{ ROW.time }}</span>
+            <span class="text-2xs text-text-secondary font-mono tabular-nums">{{
+              shortTime(ROW.time)
+            }}</span>
             <span
               class="border-log-severity-error-indicator bg-surface-subtle text-2xs text-log-severity-error-indicator rounded-xs border-s-2 px-1.5 py-px font-mono leading-4"
             >
@@ -98,7 +104,9 @@ function jsonClass(kind: string): string {
             data-test="landing-line-row"
             @click="openMid = !openMid"
           >
-            <span class="text-2xs text-text-secondary font-mono tabular-nums">{{ ROW.time }}</span>
+            <span class="text-2xs text-text-secondary font-mono tabular-nums">{{
+              shortTime(ROW.time)
+            }}</span>
             <span
               class="border-log-severity-error-indicator bg-surface-subtle text-2xs text-log-severity-error-indicator rounded-xs border-s-2 px-1.5 py-px font-mono leading-4"
             >
