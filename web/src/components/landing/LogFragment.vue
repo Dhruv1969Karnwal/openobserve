@@ -222,7 +222,7 @@ const spark = computed(() => {
           </li>
           <li
             v-if="moreRows > 0"
-            class="text-text-secondary px-3 py-2 text-center font-mono text-xs"
+            class="text-text-body px-3 py-2 text-center font-mono text-xs"
             data-test="landing-more-rows"
           >
             +{{ moreRows }} {{ t("welcome.fragment.moreRows") }}

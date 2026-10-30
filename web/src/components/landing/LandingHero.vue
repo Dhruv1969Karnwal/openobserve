@@ -63,7 +63,7 @@ function scrollToSection(id: string) {
           >
         </div>
         <p
-          class="text-compact text-text-secondary mt-8 leading-relaxed"
+          class="text-compact text-text-body mt-8 leading-relaxed"
           data-reveal
           data-reveal-step="3"
           data-test="landing-hero-facts"
@@ -74,7 +74,7 @@ function scrollToSection(id: string) {
 
       <div data-reveal data-reveal-step="1">
         <LogFragment />
-        <p class="text-compact text-text-secondary mt-3" data-test="landing-fragment-caption">
+        <p class="text-compact text-text-body mt-3" data-test="landing-fragment-caption">
           {{ t("welcome.hero.caption") }}
         </p>
       </div>
