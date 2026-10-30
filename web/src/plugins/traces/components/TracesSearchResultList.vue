@@ -118,6 +118,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
                 </template>
 
+                <template #cell-trace_id="{ row }">
+                  <TraceIdCell :item="row" />
+                </template>
+
                 <template #cell-duration="{ row }">
                   <span class="text-text-body font-mono text-xs" data-test="trace-row-duration">
                     {{ formatTimeWithSuffix(row.duration) || raw("0us") }}
@@ -261,6 +265,7 @@ import TraceTimestampCell from "./TraceTimestampCell.vue";
 import TraceServiceCell from "./TraceServiceCell.vue";
 import TraceLatencyCell from "./TraceLatencyCell.vue";
 import TraceStatusCell from "./TraceStatusCell.vue";
+import TraceIdCell from "./TraceIdCell.vue";
 import SpanStatusPill from "./SpanStatusPill.vue";
 import SpanStatusCodeBadge from "./SpanStatusCodeBadge.vue";
 import { isLLMTrace, extractLLMData, formatCost, formatTokens } from "../../../utils/llmUtils";
