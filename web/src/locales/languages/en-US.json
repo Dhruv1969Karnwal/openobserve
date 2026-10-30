@@ -26873,7 +26873,7 @@
       "alertPanel": "alert · 5xx-spike",
       "alertCond": "count(level:’error’) >= 2 in 5m",
       "notifyLabel": "notify",
-      "tEmail": "email · ops@corp.example",
+      "tEmail": "email · ops\\@corp.example",
       "tWebhook": "webhook · ops-oncall"
     },
     "letter": {

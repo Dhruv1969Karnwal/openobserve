@@ -30,7 +30,11 @@ export function useLandingReveal(root: Ref<HTMLElement | null>) {
           observer?.unobserve(t);
         }
       },
-      { threshold: 0.15, rootMargin: "0rem 0rem -3rem 0rem" },
+      {
+      threshold: 0.15,
+      // eslint-disable-next-line local/no-hardcoded-px -- IntersectionObserver rootMargin accepts only px/percent, not rem
+      rootMargin: "0px 0px -48px 0px",
+    },
     );
 
     for (const t of targets) {
