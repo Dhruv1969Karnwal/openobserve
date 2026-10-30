@@ -80,7 +80,6 @@ function go(href: string) {
       </nav>
 
       <div class="md:col-span-4">
-        <p class="text-compact text-text-secondary uppercase">{{ t("welcome.footer.eyebrow") }}</p>
         <p class="text-text-heading mt-4 text-xl font-medium" data-test="landing-author">
           {{ t("welcome.footer.author") }}
         </p>
