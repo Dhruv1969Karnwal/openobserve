@@ -13,7 +13,7 @@ const { t } = useI18nTyped();
     <div class="mx-auto grid max-w-7xl grid-cols-1 px-6 py-14 md:px-10 md:py-16 lg:grid-cols-12">
       <h2 id="letter-h" class="sr-only">{{ t("welcome.letter.heading") }}</h2>
       <article
-        class="rounded-surface bg-surface-subtle p-6 md:p-10 lg:col-span-6 lg:col-start-2"
+        class="rounded-surface bg-surface-subtle p-6 md:p-10 lg:col-span-8 lg:col-start-2"
         data-reveal
       >
         <svg
@@ -58,29 +58,30 @@ const { t } = useI18nTyped();
           </p>
           <p class="text-compact text-text-secondary mt-1">{{ t("welcome.letter.role") }}</p>
         </div>
+        <aside class="border-border-subtle mt-10 border-t pt-6" data-reveal>
+          <p class="text-compact text-text-body uppercase">{{ t("welcome.letter.factsTitle") }}</p>
+          <dl
+            class="divide-border-subtle border-border-subtle mt-4 flex flex-col divide-y border-t"
+          >
+            <div class="flex flex-col gap-1 py-1">
+              <dt class="text-text-body text-sm">{{ t("welcome.letter.f1") }}</dt>
+              <dd class="text-text-heading font-mono text-xs">OpenObserve</dd>
+            </div>
+            <div class="flex flex-col gap-1 py-1">
+              <dt class="text-text-body text-sm">{{ t("welcome.letter.f2") }}</dt>
+              <dd class="text-text-heading font-mono text-xs">AGPL-3.0</dd>
+            </div>
+            <div class="flex flex-col gap-1 py-1">
+              <dt class="text-text-body text-sm">{{ t("welcome.letter.f3") }}</dt>
+              <dd class="text-text-heading font-mono text-xs">1 binary</dd>
+            </div>
+            <div class="flex flex-col gap-1 py-1">
+              <dt class="text-text-body text-sm">{{ t("welcome.letter.f4") }}</dt>
+              <dd class="text-text-heading font-mono text-xs">:5080</dd>
+            </div>
+          </dl>
+        </aside>
       </article>
-
-      <aside class="mt-8 lg:col-span-3 lg:col-start-8 lg:mt-0" data-reveal>
-        <p class="text-compact text-text-body uppercase">{{ t("welcome.letter.factsTitle") }}</p>
-        <dl class="divide-border-subtle border-border-subtle mt-4 flex flex-col divide-y border-t">
-          <div class="flex items-baseline justify-between gap-4 py-3">
-            <dt class="text-text-body text-sm">{{ t("welcome.letter.f1") }}</dt>
-            <dd class="text-text-heading font-mono text-xs">OpenObserve</dd>
-          </div>
-          <div class="flex items-baseline justify-between gap-4 py-3">
-            <dt class="text-text-body text-sm">{{ t("welcome.letter.f2") }}</dt>
-            <dd class="text-text-heading font-mono text-xs">AGPL-3.0</dd>
-          </div>
-          <div class="flex items-baseline justify-between gap-4 py-3">
-            <dt class="text-text-body text-sm">{{ t("welcome.letter.f3") }}</dt>
-            <dd class="text-text-heading font-mono text-xs">1 binary</dd>
-          </div>
-          <div class="flex items-baseline justify-between gap-4 py-3">
-            <dt class="text-text-body text-sm">{{ t("welcome.letter.f4") }}</dt>
-            <dd class="text-text-heading font-mono text-xs">:5080</dd>
-          </div>
-        </dl>
-      </aside>
     </div>
   </section>
 </template>

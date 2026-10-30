@@ -26854,8 +26854,7 @@
       "b4c": "Conditions fire to email or any webhook you point at \u2014 no sidecar to trust.",
       "b5": "The whole stack is one Rust binary",
       "b5c": "Docker run it on a laptop or put it behind your load balancer. The UI answers on port 5080.",
-      "b1note": "14 rows \u00b7 3 streams \u00b7 one schema",
-      "b2note": "level \u00b7 3 rows \u00b7 37 ms"
+      "b1note": "14 rows \u00b7 3 streams \u00b7 one schema"
     },
     "stages": {
       "heading": "Ingestion in minutes",
@@ -26892,7 +26891,11 @@
       "out0": "connection accepted \u00b7 token ok",
       "out1": "HTTP 200 \u00b7 21 ms \u00b7 indexed",
       "out2": "query served \u00b7 7 rows",
-      "out3": "alert fired \u00b7 email sent"
+      "out3": "alert fired \u00b7 email sent",
+      "nm0": "Connect",
+      "nm1": "Arrival",
+      "nm2": "Search",
+      "nm3": "Alert"
     },
     "letter": {
       "heading": "Open source, and why this exists",

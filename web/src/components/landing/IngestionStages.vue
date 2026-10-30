@@ -50,7 +50,7 @@ const onKey = (e: KeyboardEvent) => {
           :key="st"
           type="button"
           role="tab"
-          class="rounded-default text-compact focus-visible:ring-text-heading flex min-h-11 items-center gap-2 px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 md:justify-center"
+          class="rounded-default text-compact focus-visible:ring-text-heading flex min-h-11 items-center gap-2 px-3 py-2 whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-offset-2 md:justify-center"
           :class="
             i === stage
               ? 'bg-text-heading text-surface-panel'
@@ -68,7 +68,7 @@ const onKey = (e: KeyboardEvent) => {
             aria-hidden="true"
             >{{ String(i + 1).padStart(2, "0") }}</span
           >
-          {{ t("welcome.stages." + st) }}
+          {{ t("welcome.stages." + st.replace("c", "nm")) }}
         </button>
       </div>
 
@@ -76,9 +76,6 @@ const onKey = (e: KeyboardEvent) => {
         <div data-reveal>
           <p class="stage-clause text-text-heading text-balance">
             {{ t("welcome.stages." + STAGES[stage]) }}
-          </p>
-          <p class="text-compact text-text-body mt-3 max-w-md">
-            {{ t("welcome.stages.n" + stage) }}
           </p>
         </div>
         <div class="rounded-surface border-border-subtle bg-surface-panel border" data-reveal>

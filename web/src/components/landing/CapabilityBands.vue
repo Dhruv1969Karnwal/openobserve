@@ -31,6 +31,11 @@ const F = {
   dockerA: "docker run -p 5080:5080 \\",
   dockerB: "  retrace/retrace:latest",
   ready: ":5080 ready",
+  sqlRes: [
+    ["info", "1,204"],
+    ["warn", "142"],
+    ["error", "37"],
+  ] as Array<[string, string]>,
 };
 </script>
 
@@ -50,7 +55,7 @@ const F = {
     <div class="mt-8 flex flex-col">
       <div v-for="b in BANDS" :key="b.n" class="border-border-subtle border-t" data-reveal>
         <div
-          class="mx-auto grid max-w-7xl grid-cols-1 items-start gap-x-10 gap-y-6 px-6 py-8 md:grid-cols-12 md:px-10"
+          class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-x-10 gap-y-6 px-6 py-8 md:grid-cols-12 md:px-10"
         >
           <div class="min-w-0 md:col-span-7">
             <p class="band-sentence text-text-heading text-balance">{{ t(b.s) }}</p>
@@ -81,8 +86,17 @@ const F = {
               v-else-if="b.n === 2"
               class="rounded-surface border-border-subtle bg-surface-panel border p-4"
             >
-              <p class="text-text-code font-mono text-xs leading-6 whitespace-pre">{{ F.sql }}</p>
-              <p class="text-compact text-text-body mt-2">{{ t("welcome.bands.b2note") }}</p>
+              <div class="grid grid-cols-2 gap-4 font-mono text-xs">
+                <p class="text-text-code whitespace-pre">{{ F.sql }}</p>
+                <table class="text-text-body w-full border-collapse self-end">
+                  <tbody>
+                    <tr v-for="row in F.sqlRes" :key="row[0]" class="border-border-subtle border-b">
+                      <td>{{ row[0] }}</td>
+                      <td class="text-end tabular-nums">{{ row[1] }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
             <div
               v-else-if="b.n === 3"

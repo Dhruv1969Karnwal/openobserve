@@ -145,7 +145,7 @@ const spark = computed(() => {
           type="search"
           :placeholder="t('welcome.fragment.filterPlaceholder')"
           data-test="landing-fragment-search"
-          class="rounded-default border-border-control bg-surface-base text-compact text-text-body placeholder:text-text-placeholder focus-visible:ring-text-heading h-8 w-full border ps-8 pe-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
+          class="rounded-default border-border-subtle bg-surface-base text-compact text-text-body placeholder:text-text-placeholder focus-visible:ring-text-heading h-8 w-full border ps-8 pe-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
         />
       </label>
       <div class="mt-2 flex flex-wrap items-center gap-1.5">
@@ -198,7 +198,9 @@ const spark = computed(() => {
                 :class="chipStyles[row.level]"
                 >{{ row.level }}</span
               >
-              <span class="text-compact text-text-body min-w-0 truncate">{{ row.message }}</span>
+              <span class="text-compact text-text-body min-w-0 break-words lg:truncate">{{
+                row.message
+              }}</span>
               <span
                 class="text-text-body hidden text-end font-mono text-xs tabular-nums lg:block"
                 >{{ row.duration }}</span
