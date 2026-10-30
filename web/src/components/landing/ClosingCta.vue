@@ -29,7 +29,7 @@ const base = getPath();
       </p>
       <a
         :href="base + 'login'"
-        class="rounded-default text-text-heading hover:bg-surface-panel focus-visible:ring-offset-surface-base focus-visible:ring-surface-base mt-10 inline-flex h-12 items-center justify-center px-6 text-base font-medium transition-colors duration-150 outline-none hover:no-underline focus-visible:ring-2 focus-visible:ring-offset-2"
+        class="rounded-default bg-surface-base text-text-heading hover:bg-surface-panel focus-visible:ring-offset-surface-base focus-visible:ring-surface-base mt-10 inline-flex h-12 items-center justify-center px-6 text-base font-medium transition-colors duration-150 outline-none hover:no-underline focus-visible:ring-2 focus-visible:ring-offset-2"
         data-landing-cta="final"
         data-test="landing-cta-button"
         data-reveal
