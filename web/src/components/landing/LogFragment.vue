@@ -144,9 +144,10 @@ const spark = computed(() => {
         <input
           v-model="query"
           type="search"
+          :aria-label="t('welcome.fragment.filterPlaceholder')"
           :placeholder="t('welcome.fragment.filterPlaceholder')"
           data-test="landing-fragment-search"
-          class="rounded-default border-border-subtle bg-surface-base text-compact text-text-body placeholder:text-text-placeholder focus-visible:ring-text-heading h-8 w-full border ps-8 pe-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
+          class="rounded-default border-border-subtle bg-surface-base text-compact text-text-body placeholder:text-text-placeholder focus-visible:ring-text-heading h-8 w-full border ps-8 pe-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         />
       </label>
       <div class="mt-2 flex flex-wrap items-center gap-1.5">

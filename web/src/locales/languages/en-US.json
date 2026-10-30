@@ -26803,7 +26803,7 @@
       "sub": "Logs, metrics, traces, dashboards and alerts \u2014 one open-source binary you run on your own hardware.",
       "cta": "Run it in one command",
       "secondary": "See ingestion in one command",
-      "caption": "The log-search view \u2014 the product\u2019s own interface, running on this page with an example stream.",
+      "caption": "The log-search view \u2014 the product\u2019s own interface, shown with an example stream.",
       "facts": "Linux \u00b7 Docker \u00b7 bare metal \u2014 one binary, one port (:5080), no external services."
     },
     "fragment": {
