@@ -31,7 +31,7 @@ const { t } = useI18nTyped();
         </svg>
 
         <div
-          class="text-text-body mx-auto mt-6 flex max-w-2xl flex-col gap-4 text-base leading-relaxed md:text-lg"
+          class="text-text-body mt-6 flex max-w-2xl flex-col gap-4 text-base leading-relaxed md:text-lg"
         >
           <p>{{ t("welcome.letter.p1") }}</p>
           <p>{{ t("welcome.letter.p2") }}</p>
@@ -49,7 +49,7 @@ const { t } = useI18nTyped();
           <p>{{ t("welcome.letter.p5") }}</p>
         </div>
 
-        <div class="mx-auto mt-8 max-w-2xl">
+        <div class="mt-8 max-w-2xl">
           <p class="text-text-heading text-lg font-medium" data-test="landing-letter-signoff">
             {{ t("welcome.letter.signoff") }}
           </p>

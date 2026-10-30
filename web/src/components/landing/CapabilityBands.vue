@@ -88,9 +88,9 @@ const F = {
               v-else-if="b.n === 2"
               class="rounded-surface border-border-subtle bg-surface-panel border p-4"
             >
-              <div class="grid grid-cols-1 gap-3 font-mono text-xs sm:grid-cols-2 sm:gap-4">
+              <div class="font-mono text-xs">
                 <p class="text-text-code whitespace-pre">{{ F.sql }}</p>
-                <table class="text-text-body w-full border-collapse self-end">
+                <table class="text-text-body mt-3 w-full border-collapse">
                   <tbody>
                     <tr v-for="row in F.sqlRes" :key="row[0]" class="border-border-subtle border-b">
                       <td>{{ row[0] }}</td>

@@ -12,7 +12,7 @@ const base = getPath();
 
 <template>
   <section aria-labelledby="cta-h" class="bg-text-heading">
-    <div class="mx-auto max-w-7xl px-6 py-14 md:px-10 md:py-20">
+    <div class="mx-auto max-w-7xl px-6 py-12 md:px-10 md:py-16">
       <h2
         id="cta-h"
         class="cta-sentence text-surface-base leading-[1.04] font-semibold tracking-tight text-balance"

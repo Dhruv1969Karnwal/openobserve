@@ -26932,7 +26932,8 @@
       "inviteNote": "Sign in to reach search, dashboards and alerts on your own instance.",
       "navAria": "Links",
       "eyebrow": "Pages",
-      "created": "Created by"
+      "created": "Created by",
+      "eyebrowProduct": "Product"
     },
     "view": {
       "skip": "Skip to content"

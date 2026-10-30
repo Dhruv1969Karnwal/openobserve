@@ -54,7 +54,7 @@ const onKey = (e: KeyboardEvent) => {
           :class="
             i === stage
               ? 'bg-text-heading text-surface-panel'
-              : 'text-text-body hover:bg-surface-base'
+              : 'text-text-heading hover:bg-surface-base'
           "
           :aria-selected="i === stage"
           :tabindex="i === stage ? 0 : -1"

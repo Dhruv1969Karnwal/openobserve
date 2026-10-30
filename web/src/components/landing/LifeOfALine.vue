@@ -37,7 +37,9 @@ const fired = ref(false);
       <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3 lg:items-stretch">
         <div class="min-w-0" data-reveal>
           <p class="text-compact text-text-body">{{ t("welcome.oneLine.arrives") }}</p>
-          <div class="rounded-surface border-border-subtle bg-surface-panel mt-3 h-full border p-4">
+          <div
+            class="rounded-surface border-border-subtle bg-surface-panel mt-3 flex h-full flex-col border p-4"
+          >
             <div class="flex items-center justify-between gap-3">
               <p class="text-text-heading font-mono text-xs">{{ F.stream }}</p>
               <p class="text-text-secondary font-mono text-xs">{{ F.post }}</p>
@@ -71,7 +73,9 @@ const fired = ref(false);
                 <span class="text-text-body min-w-0 truncate text-sm">{{ r.message }}</span>
               </li>
             </ul>
-            <p class="text-compact text-text-body mt-3">{{ t("welcome.oneLine.arrivesNote") }}</p>
+            <p class="text-compact text-text-body mt-auto pt-6">
+              {{ t("welcome.oneLine.arrivesNote") }}
+            </p>
           </div>
         </div>
 
@@ -99,7 +103,9 @@ const fired = ref(false);
                   <span class="text-text-body min-w-0 truncate text-sm">{{ r.message }}</span>
                 </li>
               </ul>
-              <p class="text-compact text-text-body mt-3">{{ t("welcome.oneLine.lookNote") }}</p>
+              <p class="text-compact text-text-body mt-auto pt-6">
+                {{ t("welcome.oneLine.lookNote") }}
+              </p>
             </div>
           </div>
 

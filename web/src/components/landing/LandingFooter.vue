@@ -35,7 +35,10 @@ function go(href: string) {
       class="mx-auto grid max-w-7xl grid-cols-1 gap-x-10 gap-y-10 px-6 py-16 md:grid-cols-12 md:px-10"
     >
       <div class="md:col-span-5">
-        <p class="text-text-heading max-w-md text-xl leading-snug font-medium">
+        <p class="text-compact text-text-body uppercase">
+          {{ t("welcome.footer.eyebrowProduct") }}
+        </p>
+        <p class="text-text-heading mt-4 max-w-md text-xl leading-snug font-medium">
           {{ t("welcome.footer.statement") }}
         </p>
         <p class="text-text-body mt-8 max-w-md text-xs leading-relaxed" data-test="landing-legal">
