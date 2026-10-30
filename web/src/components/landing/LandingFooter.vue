@@ -38,10 +38,7 @@ function go(href: string) {
         <p class="text-text-heading max-w-md text-xl leading-snug font-medium">
           {{ t("welcome.footer.statement") }}
         </p>
-        <p
-          class="text-text-body mt-8 max-w-md font-mono text-xs leading-relaxed"
-          data-test="landing-legal"
-        >
+        <p class="text-text-body mt-8 max-w-md text-xs leading-relaxed" data-test="landing-legal">
           {{ t("welcome.footer.legal") }}
         </p>
       </div>

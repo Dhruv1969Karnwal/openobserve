@@ -59,6 +59,28 @@ const { t } = useI18nTyped();
           <p class="text-compact text-text-secondary mt-1">{{ t("welcome.letter.role") }}</p>
         </div>
       </article>
+
+      <aside class="mt-8 lg:col-span-3 lg:col-start-8 lg:mt-0" data-reveal>
+        <p class="text-compact text-text-body uppercase">{{ t("welcome.letter.factsTitle") }}</p>
+        <dl class="divide-border-subtle border-border-subtle mt-4 flex flex-col divide-y border-t">
+          <div class="flex items-baseline justify-between gap-4 py-3">
+            <dt class="text-text-body text-sm">{{ t("welcome.letter.f1") }}</dt>
+            <dd class="text-text-heading font-mono text-xs">OpenObserve</dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-4 py-3">
+            <dt class="text-text-body text-sm">{{ t("welcome.letter.f2") }}</dt>
+            <dd class="text-text-heading font-mono text-xs">AGPL-3.0</dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-4 py-3">
+            <dt class="text-text-body text-sm">{{ t("welcome.letter.f3") }}</dt>
+            <dd class="text-text-heading font-mono text-xs">1 binary</dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-4 py-3">
+            <dt class="text-text-body text-sm">{{ t("welcome.letter.f4") }}</dt>
+            <dd class="text-text-heading font-mono text-xs">:5080</dd>
+          </div>
+        </dl>
+      </aside>
     </div>
   </section>
 </template>

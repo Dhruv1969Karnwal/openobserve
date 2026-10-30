@@ -18,7 +18,7 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:08.412",
     level: "info",
-    message: "GET /api/search",
+    message: "GET /search",
     highlight: "/api/search",
     duration: "18ms",
     traceId: "4f2ad0c1",
@@ -27,14 +27,14 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:08.398",
     level: "debug",
-    message: "cache miss key=stream-7",
+    message: "cache miss stream-7",
     duration: "0ms",
     status: 200,
   },
   {
     time: "14:32:07.876",
     level: "info",
-    message: "POST /app_logs/_json",
+    message: "POST /app_logs",
     highlight: "_json",
     duration: "21ms",
     traceId: "b10f9e42",
@@ -43,7 +43,7 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:07.145",
     level: "warn",
-    message: "slow query took 3.2s stream=app_logs",
+    message: "slow query 3.2s",
     highlight: "3.2s",
     duration: "3.2s",
     traceId: "9ac44d01",
@@ -52,7 +52,7 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:06.902",
     level: "error",
-    message: "upstream timeout service=billing",
+    message: "upstream timeout",
     highlight: "timeout",
     duration: "5.0s",
     traceId: "04d77ba8",
@@ -61,7 +61,7 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:06.640",
     level: "info",
-    message: "PUT /api/default/alerts/5xx-spike",
+    message: "PUT /alerts/5xx",
     duration: "12ms",
     traceId: "c58e1f3b",
     status: 200,
@@ -77,13 +77,13 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:05.410",
     level: "debug",
-    message: "wal fsync segment=812 bytes=4194304",
+    message: "wal fsync 4mb",
     duration: "4ms",
   },
   {
     time: "14:32:04.886",
     level: "error",
-    message: "connection reset host=queue-1 port=5672",
+    message: "conn reset queue-1",
     highlight: "reset",
     duration: "2.1s",
     traceId: "77c2b609",
@@ -92,13 +92,13 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:04.231",
     level: "info",
-    message: "compaction stream=app_logs rows=14823",
+    message: "compaction 14.8k rows",
     duration: "110ms",
   },
   {
     time: "14:32:03.774",
     level: "warn",
-    message: "retry 1/3 send webhook target=ops-oncall",
+    message: "retry 1/3 webhook",
     duration: "340ms",
     traceId: "31b0ff7d",
     status: 200,
@@ -114,7 +114,7 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:02.995",
     level: "info",
-    message: "query mode=sql org=default scan=2.4gb",
+    message: "sql scan 2.4gb",
     highlight: "sql",
     duration: "240ms",
     traceId: "5f61c990",
@@ -123,7 +123,7 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:02.401",
     level: "debug",
-    message: "parquet flush stream=metrics_v2 files=3",
+    message: "parquet flush x3",
     duration: "38ms",
   },
 ];
@@ -134,7 +134,7 @@ export const SAMPLE_JSON_FIELDS: Array<[string, string, "key" | "string" | "numb
   ["trace_id", "04d77ba8f2c14a6d9e3b715c8a204ef6", "string"],
   ["duration_us", "5001422", "number"],
   ["status", "500", "number"],
-  ["msg", "upstream timeout service=billing", "string"],
+  ["msg", "upstream timeout", "string"],
   ["stream", "app_logs", "string"],
   ["node", "retrace-0", "string"],
 ];
@@ -160,7 +160,7 @@ export type SampleSpan = {
 };
 
 export const SAMPLE_TRACES: SampleSpan[] = [
-  { name: "GET /api/search", offset: 0, width: 100, ms: "142ms", depth: 0, selected: true },
+  { name: "GET /search", offset: 0, width: 100, ms: "142ms", depth: 0, selected: true },
   { name: "parse query", offset: 8, width: 18, ms: "26ms", depth: 1 },
   { name: "scan app_logs", offset: 24, width: 58, ms: "83ms", depth: 1 },
   { name: "merge results", offset: 84, width: 14, ms: "20ms", depth: 1 },

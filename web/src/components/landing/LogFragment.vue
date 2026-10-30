@@ -106,7 +106,7 @@ const spark = computed(() => {
           role="tab"
           :aria-selected="tab === tb"
           data-test="landing-fragment-tab"
-          class="rounded-default text-compact focus-visible:ring-text-heading h-7 px-3 font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          class="rounded-default text-compact focus-visible:ring-text-heading h-8 px-3 font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           :class="
             tab === tb
               ? 'bg-text-heading text-surface-base'
@@ -156,7 +156,7 @@ const spark = computed(() => {
           type="button"
           :aria-pressed="levelsOn.has(lv)"
           data-test="landing-fragment-level"
-          class="bg-surface-base text-2xs focus-visible:ring-text-heading h-6 shrink-0 rounded-xs border-s-2 px-2 font-mono transition-opacity duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          class="bg-surface-base text-2xs focus-visible:ring-text-heading h-7 shrink-0 rounded-xs border-s-2 px-2 font-mono transition-opacity duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           :class="[chipStyles[lv], levelsOn.has(lv) ? '' : 'opacity-40']"
           @click="toggleLevel(lv)"
         >
@@ -174,7 +174,7 @@ const spark = computed(() => {
           <li v-for="(row, i) in visible" :key="row.time + i">
             <button
               type="button"
-              class="hover:bg-surface-subtle focus-visible:ring-text-heading grid w-full grid-cols-[1rem_5.35rem_auto_minmax(0,1fr)] items-baseline gap-x-2.5 gap-y-0.5 px-2.5 py-2 text-start transition-colors duration-100 outline-none focus-visible:ring-2 focus-visible:ring-inset lg:grid-cols-[0.5rem_5rem_auto_1fr_4.5rem]"
+              class="hover:bg-surface-subtle focus-visible:ring-text-heading grid w-full grid-cols-[1rem_5.35rem_4.6rem_minmax(0,1fr)] items-baseline gap-x-2.5 gap-y-0.5 px-2.5 py-2 text-start transition-colors duration-100 outline-none focus-visible:ring-2 focus-visible:ring-inset lg:grid-cols-[0.5rem_5rem_4.6rem_1fr_4.5rem]"
               :aria-expanded="openRow === rowKey(row)"
               data-test="landing-fragment-row"
               @click="openRow = openRow === rowKey(row) ? null : rowKey(row)"

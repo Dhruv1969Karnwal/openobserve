@@ -34,8 +34,8 @@ const fired = ref(false);
         {{ t("welcome.oneLine.heading") }}
       </h2>
 
-      <div class="mt-8 flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-10">
-        <div class="min-w-0 lg:w-1/2" data-reveal>
+      <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3 lg:items-stretch">
+        <div class="min-w-0" data-reveal>
           <p class="text-compact text-text-body">{{ t("welcome.oneLine.arrives") }}</p>
           <div class="rounded-surface border-border-subtle bg-surface-panel mt-3 border p-4">
             <div class="flex items-center justify-between gap-3">
@@ -75,7 +75,7 @@ const fired = ref(false);
           </div>
         </div>
 
-        <div class="min-w-0 space-y-10 lg:w-1/2">
+        <div class="min-w-0 space-y-8 lg:contents">
           <div data-reveal>
             <p class="text-compact text-text-body">{{ t("welcome.oneLine.look") }}</p>
             <div class="rounded-surface border-border-subtle bg-surface-panel mt-3 border p-4">

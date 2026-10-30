@@ -24,7 +24,7 @@ const F = {
   ingestRate: "ingest rate",
   rateNow: "4.1k events/min",
   rateWindow: "09:52 — 10:00",
-  cond: "count(level:error) >= 2 in 5m",
+  cond: "count(level='error') >= 2 in 5m",
   fired: "Fired 14:32:11 · 2 notified",
   email: "email",
   webhook: "webhook",
@@ -44,7 +44,7 @@ const F = {
       >
         {{ t("welcome.bands.heading") }}
       </h2>
-      <p class="text-text-secondary mt-3 max-w-2xl text-base">{{ t("welcome.bands.note") }}</p>
+      <p class="text-text-body mt-3 max-w-2xl text-base">{{ t("welcome.bands.note") }}</p>
     </div>
 
     <div class="mt-8 flex flex-col">
@@ -54,7 +54,7 @@ const F = {
         >
           <div class="min-w-0 md:col-span-7">
             <p class="band-sentence text-text-heading text-balance">{{ t(b.s) }}</p>
-            <p class="text-text-secondary mt-2 max-w-xl text-base leading-relaxed">{{ t(b.c) }}</p>
+            <p class="text-text-body mt-2 max-w-xl text-base leading-relaxed">{{ t(b.c) }}</p>
           </div>
           <div class="md:col-span-5" data-ui>
             <div
@@ -75,7 +75,7 @@ const F = {
               <p class="text-compact border-border-subtle text-text-body mt-3 border-t pt-2">
                 {{ t("welcome.bands.b1note") }}
               </p>
-              <p class="text-text-secondary mt-2 font-mono text-xs">{{ F.oneStore }}</p>
+              <p class="text-text-body mt-2 font-mono text-xs">{{ F.oneStore }}</p>
             </div>
             <div
               v-else-if="b.n === 2"
@@ -108,15 +108,22 @@ const F = {
                   stroke-width="1"
                   vector-effect="non-scaling-stroke"
                 />
-                <path
-                  d="M0 34 L24 38 L48 30 L72 35 L96 24 L120 29 L144 18 L168 25 L192 14 L216 20 L240 10"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  vector-effect="non-scaling-stroke"
-                />
+                <g fill="currentColor">
+                  <rect x="2" y="30" width="16" height="17" />
+                  <rect x="22" y="24" width="16" height="23" />
+                  <rect x="42" y="33" width="16" height="14" />
+                  <rect x="62" y="18" width="16" height="29" />
+                  <rect x="82" y="27" width="16" height="20" />
+                  <rect x="102" y="14" width="16" height="33" />
+                  <rect x="122" y="22" width="16" height="25" />
+                  <rect x="142" y="10" width="16" height="37" />
+                  <rect x="162" y="19" width="16" height="28" />
+                  <rect x="182" y="8" width="16" height="39" />
+                  <rect x="202" y="15" width="16" height="32" />
+                  <rect x="222" y="4" width="16" height="43" />
+                </g>
               </svg>
-              <p class="text-text-secondary mt-1 text-end font-mono text-xs">{{ F.rateWindow }}</p>
+              <p class="text-text-body mt-1 text-end font-mono text-xs">{{ F.rateWindow }}</p>
             </div>
             <div
               v-else-if="b.n === 4"
@@ -130,7 +137,7 @@ const F = {
                 <span class="rounded-default bg-surface-subtle text-text-heading px-2 py-1">{{
                   F.webhook
                 }}</span>
-                <span class="text-text-secondary ms-auto">{{ F.fired }}</span>
+                <span class="text-text-body ms-auto">{{ F.fired }}</span>
               </div>
             </div>
             <div v-else class="rounded-surface border-border-subtle bg-surface-panel border p-4">
