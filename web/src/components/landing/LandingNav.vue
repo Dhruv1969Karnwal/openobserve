@@ -82,7 +82,7 @@ onBeforeUnmount(() => {
           class="rounded-default bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover focus-visible:ring-focus-ring-accent hidden h-10 items-center px-4 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 md:inline-flex"
           data-landing-cta="signin"
           data-test="landing-nav-signin"
-          >{{ t("welcome.nav.signin") }}</a
+          >{{ t("welcome.hero.cta") }}</a
         >
         <button
           type="button"
@@ -135,7 +135,7 @@ onBeforeUnmount(() => {
             class="rounded-default bg-button-primary text-button-primary-foreground focus-visible:ring-focus-ring-accent mt-2 inline-flex h-12 items-center justify-center px-6 text-base font-medium focus-visible:ring-2 focus-visible:ring-offset-2"
             data-landing-cta="signin-sheet"
             data-test="landing-sheet-signin"
-            >{{ t("welcome.nav.signin") }}</a
+            >{{ t("welcome.hero.cta") }}</a
           >
         </nav>
       </div>

@@ -1,15 +1,14 @@
 <script setup lang="ts">
 // Copyright 2026 OpenObserve Inc.
 
-// How it works: a real range input with step nodes drives the ingestion story.
-// Clause and product fragment swap together; keyboard-operable by design.
+// How it works: a four-segment stepper (real buttons, keyboard-operable)
+// drives the ingestion story: clause and product fragment swap together.
 // The command is the one the in-app ingestion guide prints (port 5080 default).
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import { useI18nTyped } from "@/types/i18n";
 
 const { t } = useI18nTyped();
 const stage = ref(0);
-const TOTAL = 4;
 
 const CLAUSE_KEYS = [
   "welcome.stages.c0",
@@ -37,11 +36,9 @@ const SEARCH_ROWS = [
 
 const CHIP = { left: "level", op: "=", val: "error" };
 
-const pct = computed(() => (stage.value / (TOTAL - 1)) * 100);
-
 const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
-  http://localhost:5080/api/default/
-  app_logs/_json \\
+  http://localhost:5080/api/
+  default/app_logs/_json \\
   -d '[{"level":"info",
         "service":"billing",
         "msg":"charge accepted"}]'`;
@@ -51,11 +48,11 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
   <section
     id="how-it-works"
     aria-labelledby="how-h"
-    class="mx-auto max-w-7xl scroll-mt-24 px-6 py-20 md:px-10 md:py-28"
+    class="mx-auto max-w-7xl scroll-mt-24 px-6 py-20 md:px-10 md:py-24"
   >
     <h2
       id="how-h"
-      class="text-text-heading text-2xl font-semibold tracking-tight md:text-3xl"
+      class="text-text-heading text-2xl font-semibold tracking-tight text-balance md:text-3xl"
       data-reveal
     >
       {{ t("welcome.stages.heading") }}
@@ -64,7 +61,7 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
     <div class="mt-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16" data-reveal>
       <p
         :key="stage"
-        class="stage-clause text-text-heading order-2 lg:order-1"
+        class="stage-clause text-text-heading order-2 text-balance lg:order-1"
         aria-live="polite"
         data-test="landing-stage-clause"
       >
@@ -101,7 +98,7 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
               <span class="text-2xs text-text-secondary w-16 shrink-0 font-mono">{{
                 t(r.at)
               }}</span>
-              <span class="text-compact text-text-body">{{ t(r.msg) }}</span>
+              <span class="text-compact text-text-body min-w-0 break-words">{{ t(r.msg) }}</span>
             </li>
           </ul>
         </div>
@@ -126,7 +123,7 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
               <span class="text-2xs text-text-secondary w-24 shrink-0 font-mono tabular-nums">{{
                 r.at
               }}</span>
-              <span class="text-compact text-log-severity-error-indicator truncate">{{
+              <span class="text-compact text-log-severity-error-indicator min-w-0 break-words">{{
                 t(r.msg)
               }}</span>
             </li>
@@ -194,63 +191,53 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
       </div>
     </div>
 
-    <!-- real slider with step nodes aligned under the track positions -->
-    <div class="relative mt-10" data-reveal>
-      <label for="landing-stages" class="sr-only">{{ t("welcome.stages.slider") }}</label>
+    <!-- segmented stepper: node rail + four cells; progress is a fill, no overlay math -->
+    <div class="mt-10" data-reveal>
       <div class="relative">
-        <input
-          id="landing-stages"
-          v-model.number="stage"
-          type="range"
-          min="0"
-          :max="TOTAL - 1"
-          step="1"
-          class="stage-range focus-visible:ring-focus-ring-accent relative z-2 w-full focus-visible:ring-2 focus-visible:ring-offset-2"
-          :style="{
-            background: `linear-gradient(to right, var(--color-text-heading) ${pct}%, var(--color-surface-subtle) ${pct}%)`,
-          }"
-          data-test="landing-stage-slider"
-        />
-        <span
-          v-for="i in TOTAL"
-          :key="i"
+        <div
+          class="bg-surface-subtle absolute inset-x-0 top-1.5 h-0.5 rounded-full"
           aria-hidden="true"
-          class="border-border-strong pointer-events-none absolute top-1/2 z-1 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border"
-          :class="i - 1 <= stage ? 'bg-text-heading' : 'bg-border-strong'"
-          :style="{ left: `calc(% - rem + 0.625rem)` }"
-        />
-      </div>
-      <div class="relative mt-3 h-8">
-        <button
-          v-for="(lk, i) in LABEL_KEYS"
-          :key="lk"
-          type="button"
-          class="rounded-default focus-visible:ring-focus-ring-accent absolute top-0 -translate-x-1/2 py-1 text-base transition-colors duration-150 first:translate-x-0 last:-translate-x-full focus-visible:ring-2 focus-visible:ring-offset-2"
-          :class="
-            i === stage
-              ? 'text-text-heading font-medium'
-              : 'text-text-secondary hover:text-text-heading'
-          "
-          :aria-current="i === stage ? 'step' : undefined"
-          :aria-label="t('welcome.stages.nodeAria', { n: i + 1, label: t(lk) })"
-          :style="{
-            left: `calc(% - rem + 0.625rem)`,
-            transform:
-              i === 0 ? 'none' : i === TOTAL - 1 ? 'translateX(-100%)' : 'translateX(-50%)',
-          }"
-          data-test="landing-stage-name"
-          @click="stage = i"
-        >
-          {{ t(lk) }}
-        </button>
+        ></div>
+        <div
+          class="bg-text-heading absolute start-0 top-1.5 h-0.5 rounded-full transition-[width] duration-200 motion-reduce:transition-none"
+          :style="{ width: (stage / (LABEL_KEYS.length - 1)) * 100 + '%' }"
+          aria-hidden="true"
+        ></div>
+        <ol class="relative grid grid-cols-4" :aria-label="t('welcome.stages.stagesLabel')">
+          <li v-for="(lk, i) in LABEL_KEYS" :key="lk">
+            <button
+              type="button"
+              class="group rounded-default focus-visible:ring-focus-ring-accent flex flex-col items-start gap-2 pb-1 text-start focus-visible:ring-2 focus-visible:ring-offset-2"
+              :aria-current="i === stage ? 'step' : undefined"
+              :aria-label="t('welcome.stages.nodeAria', { n: i + 1, label: t(lk) })"
+              data-test="landing-stage-name"
+              @click="stage = i"
+            >
+              <span
+                class="bg-surface-base block size-3.5 rounded-full border-2 transition-colors duration-150"
+                :class="i <= stage ? 'border-text-heading bg-text-heading' : 'border-border-strong'"
+                aria-hidden="true"
+              ></span>
+              <span
+                class="text-base transition-colors duration-150"
+                :class="
+                  i === stage
+                    ? 'text-text-heading font-medium'
+                    : 'text-text-secondary group-hover:text-text-heading'
+                "
+                >{{ t(lk) }}</span
+              >
+            </button>
+          </li>
+        </ol>
       </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-/* keep(complex-state): the clause swap animation and the range slider's
-   thumb/track have no utility equivalents; both are token-fed. */
+/* keep(keyframes): the clause swap animation has no utility equivalent;
+   it is token-fed and reduced-motion guarded. */
 .stage-clause {
   font-size: clamp(2rem, 3.2vw + 1rem, 3.75rem);
   line-height: 1.02;
@@ -268,29 +255,6 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
     transform: translateY(0);
   }
 }
-
-.stage-range {
-  appearance: none;
-  height: 0.5rem;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-}
-.stage-range::-webkit-slider-thumb {
-  appearance: none;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: var(--radius-full);
-  background: var(--color-text-heading);
-  border: 0.25rem solid var(--color-surface-base);
-}
-.stage-range::-moz-range-thumb {
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: var(--radius-full);
-  background: var(--color-text-heading);
-  border: 0.25rem solid var(--color-surface-base);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .stage-clause {
     animation: none;

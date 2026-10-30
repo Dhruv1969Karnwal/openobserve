@@ -81,7 +81,7 @@ function toggle(i: number) {
                 </button>
                 <p class="band-sentence text-surface-base min-w-0 text-balance">{{ t(b.s) }}.</p>
               </div>
-              <p class="text-surface-base mt-3 max-w-xl ps-17 text-base leading-relaxed">
+              <p class="text-surface-base mt-3 max-w-xl text-base leading-relaxed md:ps-17">
                 {{ t(b.c) }}
               </p>
             </div>
@@ -89,7 +89,7 @@ function toggle(i: number) {
               <!-- per-band fragment, same geometry in every row -->
               <div
                 v-if="b.n === 1"
-                class="rounded-surface border-border-subtle bg-surface-panel border p-3"
+                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
               >
                 <div class="text-2xs flex flex-wrap items-center gap-2 font-mono">
                   <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
@@ -108,7 +108,7 @@ function toggle(i: number) {
               </div>
               <div
                 v-else-if="b.n === 2"
-                class="rounded-surface border-border-subtle bg-surface-panel border p-3"
+                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
               >
                 <div class="flex gap-1">
                   <button
@@ -128,13 +128,13 @@ function toggle(i: number) {
                     {{ m }}
                   </button>
                 </div>
-                <p class="text-2xs text-text-code mt-2 truncate font-mono">
+                <p class="text-2xs text-text-code mt-2 min-w-0 font-mono break-words lg:truncate">
                   {{ F.sql }}
                 </p>
               </div>
               <div
                 v-else-if="b.n === 3"
-                class="rounded-surface border-border-subtle bg-surface-panel border p-3"
+                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
               >
                 <div class="flex items-center justify-between">
                   <p class="text-compact text-text-heading font-medium">{{ F.ingestRate }}</p>
@@ -160,7 +160,7 @@ function toggle(i: number) {
               </div>
               <div
                 v-else-if="b.n === 4"
-                class="rounded-surface border-border-subtle bg-surface-panel border p-3"
+                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
               >
                 <p class="text-2xs text-text-code font-mono">{{ F.cond }}</p>
                 <div class="text-2xs mt-2 flex flex-wrap gap-2 font-mono">
@@ -172,7 +172,10 @@ function toggle(i: number) {
                   }}</span>
                 </div>
               </div>
-              <div v-else class="rounded-surface border-border-subtle bg-surface-panel border p-3">
+              <div
+                v-else
+                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
+              >
                 <p class="text-2xs text-text-code truncate font-mono">
                   {{ F.docker }}
                 </p>
@@ -209,14 +212,14 @@ function toggle(i: number) {
                 </button>
                 <p class="band-sentence text-text-heading min-w-0 text-balance">{{ t(b.s) }}.</p>
               </div>
-              <p class="text-text-secondary mt-3 max-w-xl ps-17 text-base leading-relaxed">
+              <p class="text-text-secondary mt-3 max-w-xl text-base leading-relaxed md:ps-17">
                 {{ t(b.c) }}
               </p>
             </div>
             <div class="md:col-span-6 lg:col-span-5" data-ui>
               <div
                 v-if="b.n === 1"
-                class="rounded-surface border-border-subtle bg-surface-panel border p-3"
+                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
               >
                 <div class="text-2xs flex flex-wrap items-center gap-2 font-mono">
                   <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
@@ -235,7 +238,7 @@ function toggle(i: number) {
               </div>
               <div
                 v-else-if="b.n === 2"
-                class="rounded-surface border-border-subtle bg-surface-panel border p-3"
+                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
               >
                 <div class="flex gap-1">
                   <span
@@ -247,13 +250,13 @@ function toggle(i: number) {
                     >{{ F.modeLucene }}</span
                   >
                 </div>
-                <p class="text-2xs text-text-code mt-2 truncate font-mono">
+                <p class="text-2xs text-text-code mt-2 min-w-0 font-mono break-words lg:truncate">
                   {{ F.lucene }}
                 </p>
               </div>
               <div
                 v-else-if="b.n === 3"
-                class="rounded-surface border-border-subtle bg-surface-panel border p-3"
+                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
               >
                 <div class="flex items-center justify-between">
                   <p class="text-compact text-text-heading font-medium">{{ F.ingestRate }}</p>
@@ -279,7 +282,7 @@ function toggle(i: number) {
               </div>
               <div
                 v-else-if="b.n === 4"
-                class="rounded-surface border-border-subtle bg-surface-panel border p-3"
+                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
               >
                 <p class="text-2xs text-text-code font-mono">{{ F.cond }}</p>
                 <div class="text-2xs mt-2 flex flex-wrap gap-2 font-mono">
@@ -291,7 +294,10 @@ function toggle(i: number) {
                   }}</span>
                 </div>
               </div>
-              <div v-else class="rounded-surface border-border-subtle bg-surface-panel border p-3">
+              <div
+                v-else
+                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
+              >
                 <p class="text-2xs text-text-code truncate font-mono">
                   {{ F.docker }}
                 </p>

@@ -26794,7 +26794,8 @@
       "signin": "Sign in",
       "menu": "Menu",
       "sections": "Sections",
-      "home": "Retrace.ai home"
+      "home": "Retrace.ai home",
+      "source": "Source"
     },
     "hero": {
       "line1": "Every signal,",
@@ -26802,7 +26803,8 @@
       "sub": "Logs, metrics, traces, dashboards and alerts \u2014 one open-source binary you run on your own hardware.",
       "cta": "Open the app",
       "secondary": "Point it at your first stream",
-      "caption": "The log-search view \u2014 the product\u2019s own interface, running on this page with an example stream."
+      "caption": "The log-search view \u2014 the product\u2019s own interface, running on this page with an example stream.",
+      "facts": "Linux \u00b7 Docker \u00b7 bare metal \u2014 one binary, one port (:5080), no external services."
     },
     "fragment": {
       "aria": "Product preview: log search view",
@@ -26817,7 +26819,8 @@
       "tabTraces": "traces",
       "eventsChart": "Events per minute, example stream",
       "eventsFoot": "events/min \u00b7 app_logs \u00b7 last 24 points",
-      "traceFoot": "trace 04d77ba8 \u00b7 5 spans \u00b7 waterfall view"
+      "traceFoot": "trace 04d77ba8 \u00b7 5 spans \u00b7 waterfall view",
+      "moreRows": "rows ahead in this stream \u2014 scroll the list"
     },
     "oneLine": {
       "heading": "What one line does",

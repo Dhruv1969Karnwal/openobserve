@@ -18,7 +18,7 @@ const query = ref("");
 const levelsOn = ref(new Set(["info", "warn", "error", "debug"]));
 const openRow = ref<string | null>(null);
 
-const filtered = computed(() =>
+const matched = computed(() =>
   SAMPLE_ROWS.filter((r) => {
     if (!levelsOn.value.has(r.level)) return false;
     const q = query.value.trim().toLowerCase();
@@ -51,13 +51,13 @@ function quoted(v: string): string {
   return QUOTE + v + QUOTE;
 }
 
-function shortTime(t: string): string {
-  return t.length > 8 ? t.slice(0, 8) : t;
-}
-
 function jsonClass(kind: string): string {
   return kind === "bool" ? "log-boolean" : "log-" + kind;
 }
+
+const MAX_ROWS = 7;
+const visible = computed(() => matched.value.slice(0, MAX_ROWS));
+const moreRows = computed(() => Math.max(0, matched.value.length - MAX_ROWS));
 
 function toggleLevel(level: string) {
   const next = new Set(levelsOn.value);
@@ -122,7 +122,7 @@ const spark = computed(() => {
         class="text-text-secondary ms-auto font-mono text-xs tabular-nums"
         data-test="landing-fragment-count"
       >
-        {{ t("welcome.fragment.rowsShown", { shown: filtered.length, total: SAMPLE_ROWS.length }) }}
+        {{ t("welcome.fragment.rowsShown", { shown: matched.length, total: SAMPLE_ROWS.length }) }}
       </span>
     </div>
 
@@ -173,17 +173,17 @@ const spark = computed(() => {
           class="divide-border-subtle rounded-default bg-surface-base divide-y overflow-y-auto"
           :class="props.compact ? 'max-h-64' : 'max-h-80'"
         >
-          <li v-for="(row, i) in filtered" :key="row.time + i">
+          <li v-for="(row, i) in visible" :key="row.time + i">
             <button
               type="button"
-              class="hover:bg-surface-subtle focus-visible:ring-focus-ring-accent grid w-full grid-cols-[4.5rem_auto_1fr] items-baseline gap-x-2.5 gap-y-0.5 px-2.5 py-2 text-start transition-colors duration-100 focus-visible:ring-2 focus-visible:ring-inset lg:grid-cols-[0.5rem_5rem_auto_1fr_4.5rem]"
+              class="hover:bg-surface-subtle focus-visible:ring-focus-ring-accent grid w-full grid-cols-[1rem_5.35rem_auto_minmax(0,1fr)] items-baseline gap-x-2.5 gap-y-0.5 px-2.5 py-2 text-start transition-colors duration-100 focus-visible:ring-2 focus-visible:ring-inset lg:grid-cols-[0.5rem_5rem_auto_1fr_4.5rem]"
               :aria-expanded="openRow === rowKey(row)"
               data-test="landing-fragment-row"
               @click="openRow = openRow === rowKey(row) ? null : rowKey(row)"
             >
               <svg
                 viewBox="0 0 12 12"
-                class="text-text-secondary hidden size-3 translate-y-0.5 transition-transform duration-150 motion-reduce:transition-none lg:block"
+                class="text-text-secondary size-3 shrink-0 translate-y-0.5 transition-transform duration-150 motion-reduce:transition-none"
                 :class="openRow === rowKey(row) ? 'rotate-90' : ''"
                 fill="none"
                 stroke="currentColor"
@@ -194,12 +194,7 @@ const spark = computed(() => {
               >
                 <path d="m4.5 2.5 4 3.5-4 3.5" />
               </svg>
-              <span class="text-text-secondary font-mono text-xs tabular-nums lg:hidden">{{
-                shortTime(row.time)
-              }}</span>
-              <span class="text-text-secondary hidden font-mono text-xs tabular-nums lg:inline">{{
-                row.time
-              }}</span>
+              <span class="text-text-secondary font-mono text-xs tabular-nums">{{ row.time }}</span>
               <span
                 class="bg-surface-subtle text-2xs rounded-xs border-s-2 px-1.5 py-px font-mono leading-4"
                 :class="chipStyles[row.level]"
@@ -226,7 +221,14 @@ const spark = computed(() => {
             </div>
           </li>
           <li
-            v-if="filtered.length === 0"
+            v-if="moreRows > 0"
+            class="text-text-secondary px-3 py-2 text-center font-mono text-xs"
+            data-test="landing-more-rows"
+          >
+            +{{ moreRows }} {{ t("welcome.fragment.moreRows") }}
+          </li>
+          <li
+            v-if="matched.length === 0"
             class="text-compact text-text-secondary px-3 py-8 text-center"
           >
             {{ t("welcome.fragment.noMatch") }}
