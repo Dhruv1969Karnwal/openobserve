@@ -34,7 +34,7 @@ function jsonClass(kind: string): string {
   <section
     id="one-line"
     aria-labelledby="one-line-h"
-    class="mx-auto max-w-7xl scroll-mt-24 px-6 py-28 md:px-10 md:py-36"
+    class="mx-auto max-w-7xl scroll-mt-24 px-6 py-24 md:px-10 md:py-32"
   >
     <h2
       id="one-line-h"

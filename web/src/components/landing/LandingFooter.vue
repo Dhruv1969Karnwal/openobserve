@@ -103,7 +103,7 @@ function go(href: string) {
       <RouterLink to="/login" custom v-slot="{ navigate }">
         <button
           type="button"
-          class="group rounded-surface bg-text-heading hover:bg-text-body focus-visible:outline-focus-ring-accent col-span-12 flex h-48 items-start justify-between p-6 text-start transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-4 md:h-64 md:p-8"
+          class="group rounded-surface bg-text-heading hover:bg-text-body focus-visible:outline-focus-ring-accent col-span-12 flex h-48 items-center justify-between p-6 text-start transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-4 md:h-64 md:p-8"
           data-landing-cta="footer-tile"
           data-test="landing-footer-invite"
           @click="navigate"
@@ -113,7 +113,7 @@ function go(href: string) {
           }}</span>
           <svg
             viewBox="0 0 40 40"
-            class="text-surface-base mt-8 h-8 w-8 transition-transform duration-150 group-hover:translate-x-1 motion-reduce:translate-x-0 motion-reduce:transition-none md:mt-12 md:h-10 md:w-10"
+            class="text-surface-base h-8 w-8 shrink-0 transition-transform duration-150 group-hover:translate-x-1 motion-reduce:translate-x-0 motion-reduce:transition-none md:h-10 md:w-10"
             fill="none"
             stroke="currentColor"
             stroke-width="4"

@@ -155,7 +155,7 @@ const spark = computed(() => {
         type="button"
         :aria-pressed="levelsOn.has(lv)"
         data-test="landing-fragment-level"
-        class="rounded-default bg-surface-base text-2xs focus-visible:outline-focus-ring-accent h-6 border-s-3 px-2 font-mono transition-opacity duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
+        class="bg-surface-base text-2xs focus-visible:outline-focus-ring-accent h-6 rounded-xs border-s-2 px-2 font-mono transition-opacity duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
         :class="[chipStyles[lv], levelsOn.has(lv) ? '' : 'opacity-40']"
         @click="toggleLevel(lv)"
       >

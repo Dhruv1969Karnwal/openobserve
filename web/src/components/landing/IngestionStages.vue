@@ -49,7 +49,7 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
   <section
     id="how-it-works"
     aria-labelledby="how-h"
-    class="mx-auto max-w-7xl scroll-mt-24 px-6 py-28 md:px-10 md:py-36"
+    class="mx-auto max-w-7xl scroll-mt-24 px-6 py-24 md:px-10 md:py-32"
   >
     <h2 id="how-h" class="text-text-heading text-2xl font-semibold tracking-tight" data-reveal>
       {{ t("welcome.stages.heading") }}

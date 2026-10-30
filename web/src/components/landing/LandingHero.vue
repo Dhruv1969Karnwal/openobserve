@@ -21,7 +21,11 @@ function scrollToSection(id: string) {
 <template>
   <section aria-labelledby="hero-lead" class="mx-auto max-w-7xl px-6 pt-16 pb-24 md:px-10 md:pt-24">
     <div class="max-w-3xl">
-      <h1 id="hero-lead" class="landing-h1 text-text-heading" data-test="landing-h1">
+      <h1
+        id="hero-lead"
+        class="landing-h1 text-text-heading leading-[0.98] font-semibold tracking-tight"
+        data-test="landing-h1"
+      >
         <span class="landing-h1-line block">
           <span class="landing-h1-word block">{{ t("welcome.hero.line1") }}</span>
         </span>
@@ -70,15 +74,12 @@ function scrollToSection(id: string) {
 <style scoped>
 /* keep(keyframes): the hero line-mask entrance (clipped rise) is this page’s signature
    motion; the display scale is a fluid vw clamp with no app utility step. */
+.landing-h1 {
+  font-size: clamp(2.75rem, 7vw, 5.75rem);
+}
 
 /* Display type: marketing scale, brand face. The clamp floors keep the
    two-line headline within two lines from 390px up (copy arithmetic). */
-.landing-h1 {
-  font-size: clamp(2.75rem, 7vw, 5.75rem);
-  line-height: 0.98;
-  letter-spacing: var(--tracking-tight);
-  font-weight: var(--font-semibold);
-}
 
 /* Masked-line entrance: each line rises out of its own clip band. */
 .landing-h1-line {
