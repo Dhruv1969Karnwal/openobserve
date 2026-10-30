@@ -4165,46 +4165,6 @@
         "dark O2 Crimson Ink": 7.8,
         "light O2 Crimson Ink": 4.7
       }
-    },
-    {
-      "id": "components/landing/ClosingCta.vue --color-button-primary --color-button-primary-foreground [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "text-button-primary-foreground painted on the primary CTA fill in components/landing/ClosingCta.vue (1 site(s)); worst 3.22:1 at dark O2 Lens \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 14.36,
-        "light O2 Signature": 16.54,
-        "dark O2 Pulse": 4.8,
-        "light O2 Pulse": 4.8,
-        "dark O2 Horizon": 3.25,
-        "light O2 Horizon": 5.12,
-        "dark O2 Beacon": 8.7,
-        "light O2 Beacon": 5.08,
-        "dark O2 Lens": 3.22,
-        "light O2 Lens": 3.6,
-        "dark O2 Crimson Ink": 7.8,
-        "light O2 Crimson Ink": 4.7
-      }
-    },
-    {
-      "id": "components/landing/ClosingCta.vue --color-button-primary --color-button-primary-foreground @focus-visible [text]",
-      "kind": "text",
-      "sites": 1,
-      "reason": "text-button-primary-foreground @focus-visible painted on the primary CTA fill in components/landing/ClosingCta.vue (1 site(s)); worst 3.22:1 at dark O2 Lens \u2014 palette-decision: see web/src/constants/themes.ts DECISION RECORD",
-      "at": {
-        "dark O2 Signature": 14.36,
-        "light O2 Signature": 16.54,
-        "dark O2 Pulse": 4.8,
-        "light O2 Pulse": 4.8,
-        "dark O2 Horizon": 3.25,
-        "light O2 Horizon": 5.12,
-        "dark O2 Beacon": 8.7,
-        "light O2 Beacon": 5.08,
-        "dark O2 Lens": 3.22,
-        "light O2 Lens": 3.6,
-        "dark O2 Crimson Ink": 7.8,
-        "light O2 Crimson Ink": 4.7
-      }
     }
   ],
   "dynamicBindings": [

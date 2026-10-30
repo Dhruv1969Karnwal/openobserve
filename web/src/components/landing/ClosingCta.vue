@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // Copyright 2026 OpenObserve Inc.
 
-// Closing statement with the action inline on the baseline (direction: "a
-// sentence with a blank" — the blank is the button, since there is no form
-// backend to fake). A real anchor keeps keyboard and middle-click semantics.
+// Closing statement: headline, one line of ground, the standard primary
+// action at its standard size (the round-1 council rejected the inline
+// baseline block as a collision and a scale break).
 import { useI18nTyped } from "@/types/i18n";
 import { getPath } from "@/utils/queryUtils";
 
@@ -12,30 +12,44 @@ const base = getPath();
 </script>
 
 <template>
-  <section aria-labelledby="cta-h" class="mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
-    <h2
-      id="cta-h"
-      class="cta-sentence text-text-heading max-w-[22ch] leading-none font-semibold tracking-tight"
-      data-reveal
+  <section aria-labelledby="cta-h" class="bg-text-heading">
+    <div
+      class="mx-auto flex max-w-7xl flex-col gap-10 px-6 py-24 md:px-10 md:py-28 lg:flex-row lg:items-end lg:justify-between"
     >
-      {{ t("welcome.cta.sentence") }}
+      <div>
+        <h2
+          id="cta-h"
+          class="cta-sentence text-surface-base leading-[1.04] font-semibold tracking-tight"
+          data-reveal
+        >
+          {{ t("welcome.cta.sentence") }}
+        </h2>
+        <p
+          class="text-surface-base mt-4 max-w-xl text-base leading-relaxed md:text-lg"
+          data-reveal
+          data-reveal-step="1"
+        >
+          {{ t("welcome.cta.note") }}
+        </p>
+      </div>
       <a
         :href="base + 'login'"
-        class="cta-inline-btn rounded-default bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover focus-visible:outline-focus-ring-accent inline-block px-[0.3em] leading-normal font-semibold whitespace-nowrap no-underline focus-visible:outline-2 focus-visible:outline-offset-4"
+        class="rounded-default bg-surface-base text-text-heading focus-visible:outline-surface-base hover:bg-surface-panel inline-flex h-12 shrink-0 items-center px-6 text-base font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-4"
         data-landing-cta="final"
         data-test="landing-cta-button"
+        data-reveal
+        data-reveal-step="2"
         >{{ t("welcome.cta.button") }}</a
       >
-    </h2>
-    <p class="text-text-secondary mt-6 text-base md:text-lg" data-reveal data-reveal-step="1">
-      {{ t("welcome.cta.note") }}
-    </p>
+    </div>
   </section>
 </template>
 
 <style scoped>
-/* keep(brand): the statement scale is a fluid vw clamp; no fixed utility step exists. */
+/* keep(brand): the closing statement carries the marketing display scale
+   (fluid vw clamp); no fixed utility step exists for it. */
 .cta-sentence {
-  font-size: clamp(2.25rem, 6vw, 5rem);
+  font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
+  max-width: 26ch;
 }
 </style>

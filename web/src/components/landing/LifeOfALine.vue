@@ -38,7 +38,7 @@ function jsonClass(kind: string): string {
   <section
     id="one-line"
     aria-labelledby="one-line-h"
-    class="mx-auto max-w-7xl scroll-mt-24 px-6 py-24 md:px-10 md:py-32"
+    class="mx-auto max-w-7xl scroll-mt-24 px-6 py-16 md:px-10 md:py-24"
   >
     <h2
       id="one-line-h"
@@ -48,10 +48,10 @@ function jsonClass(kind: string): string {
       {{ t("welcome.oneLine.heading") }}
     </h2>
 
-    <div class="mx-auto mt-20 grid max-w-5xl grid-cols-1 gap-y-12 md:grid-cols-12 md:gap-y-14">
+    <div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-y-6 md:grid-cols-12 md:gap-y-10">
       <!-- arrives -->
       <p
-        class="text-text-secondary col-span-12 text-lg md:col-span-3 md:pt-3 md:text-right"
+        class="text-text-heading col-span-12 text-lg font-medium md:col-span-3 md:pe-6 md:pt-3 md:text-right"
         data-reveal
       >
         {{ t("welcome.oneLine.arrives") }}
@@ -87,7 +87,7 @@ function jsonClass(kind: string): string {
 
       <!-- selected (live) -->
       <p
-        class="text-text-secondary col-span-12 text-lg md:col-span-3 md:pt-3 md:text-right"
+        class="text-text-heading col-span-12 text-lg font-medium md:col-span-3 md:pe-6 md:pt-3 md:text-right"
         data-reveal
       >
         {{ t("welcome.oneLine.look") }}
@@ -141,7 +141,7 @@ function jsonClass(kind: string): string {
 
       <!-- alarmed -->
       <p
-        class="text-text-secondary col-span-12 text-lg md:col-span-3 md:pt-3 md:text-right"
+        class="text-text-heading col-span-12 text-lg font-medium md:col-span-3 md:pe-6 md:pt-3 md:text-right"
         data-reveal
       >
         {{ t("welcome.oneLine.warns") }}

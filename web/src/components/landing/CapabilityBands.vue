@@ -1,10 +1,10 @@
 <script setup lang="ts">
 // Copyright 2026 OpenObserve Inc.
 
-// Capabilities as switchable sentences (direction: "Sentences with switches").
-// Off = page ground, soft ink. On = inverted field (the product's own
-// primary-by-inversion signature - the monochrome brand forbids a hue per band).
-// The consequence line only exists in the On state.
+// Capabilities as switchable sentences. Off = page ground, full ink sentence,
+// empty switch. On = inverted field (the product's primary-by-inversion
+// signature) plus the consequence line. The switch sits beside its sentence —
+// not exiled to the far edge — per the round-1 council.
 import { ref } from "vue";
 import { useI18nTyped } from "@/types/i18n";
 
@@ -27,10 +27,10 @@ function toggle(i: number) {
 
 <template>
   <section id="capabilities" aria-labelledby="capabilities-h" class="scroll-mt-24">
-    <div class="mx-auto max-w-7xl px-6 pt-28 md:px-10 md:pt-36">
+    <div class="mx-auto max-w-7xl px-6 pt-24 md:px-10 md:pt-28">
       <h2
         id="capabilities-h"
-        class="text-text-heading text-2xl font-semibold tracking-tight"
+        class="text-text-heading text-2xl font-semibold tracking-tight md:text-3xl"
         data-reveal
       >
         {{ t("welcome.bands.heading") }}
@@ -38,63 +38,53 @@ function toggle(i: number) {
       <p class="text-text-secondary mt-3 text-base">{{ t("welcome.bands.note") }}</p>
     </div>
 
-    <div class="mt-14 flex flex-col">
+    <div class="mt-10 flex flex-col">
       <template v-for="b in BANDS" :key="b.n">
-        <div
-          v-if="bands[b.n]"
-          class="bg-text-heading flex min-h-40 items-center md:min-h-44"
-          data-reveal
-        >
+        <div v-if="bands[b.n]" class="bg-text-heading" data-reveal>
           <div
-            class="mx-auto grid w-full max-w-7xl grid-cols-12 items-center gap-x-6 px-6 py-10 md:px-10"
+            class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-8 gap-y-4 px-6 py-9 md:px-10"
           >
-            <div class="col-span-9 md:col-span-10">
+            <div class="max-w-4xl min-w-0">
               <p class="band-sentence text-surface-base">{{ t(b.s) }}.</p>
               <p class="text-surface-base mt-3 max-w-3xl text-base leading-relaxed md:text-lg">
                 {{ t(b.c) }}
               </p>
             </div>
-            <div class="col-span-3 flex justify-end md:col-span-2">
-              <button
-                type="button"
-                role="switch"
-                :aria-checked="true"
-                :aria-label="t('welcome.bands.toggleDetail', { sentence: t(b.s) })"
-                data-test="landing-band-switch"
-                class="border-surface-base bg-surface-base focus-visible:outline-surface-base relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 px-0.5 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
-                @click="toggle(b.n)"
-              >
-                <span
-                  class="bg-text-heading block size-5 translate-x-5 rounded-full"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="true"
+              :aria-label="t('welcome.bands.toggleDetail', { sentence: t(b.s) })"
+              data-test="landing-band-switch"
+              class="border-surface-base bg-surface-base focus-visible:outline-surface-base relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 px-0.5 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
+              @click="toggle(b.n)"
+            >
+              <span
+                class="bg-text-heading block size-5 translate-x-5 rounded-full"
+                aria-hidden="true"
+              />
+            </button>
           </div>
         </div>
-        <div v-else class="bg-surface-base flex min-h-40 items-center md:min-h-44" data-reveal>
+        <div v-else class="bg-surface-base" data-reveal>
           <div
-            class="mx-auto grid w-full max-w-7xl grid-cols-12 items-center gap-x-6 px-6 py-10 md:px-10"
+            class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-8 gap-y-4 px-6 py-9 md:px-10"
           >
-            <div class="col-span-9 md:col-span-10">
-              <p class="band-sentence text-text-secondary">{{ t(b.s) }}.</p>
-            </div>
-            <div class="col-span-3 flex justify-end md:col-span-2">
-              <button
-                type="button"
-                role="switch"
-                :aria-checked="false"
-                :aria-label="t('welcome.bands.toggleDetail', { sentence: t(b.s) })"
-                data-test="landing-band-switch"
-                class="border-border-strong focus-visible:outline-focus-ring-accent relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 bg-transparent px-0.5 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
-                @click="toggle(b.n)"
-              >
-                <span
-                  class="bg-border-strong block size-5 translate-x-0 rounded-full"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
+            <p class="band-sentence text-text-heading max-w-4xl min-w-0">{{ t(b.s) }}.</p>
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="false"
+              :aria-label="t('welcome.bands.toggleDetail', { sentence: t(b.s) })"
+              data-test="landing-band-switch"
+              class="border-border-strong focus-visible:outline-focus-ring-accent relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 bg-transparent px-0.5 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
+              @click="toggle(b.n)"
+            >
+              <span
+                class="bg-border-strong block size-5 translate-x-0 rounded-full"
+                aria-hidden="true"
+              />
+            </button>
           </div>
         </div>
       </template>
@@ -103,10 +93,10 @@ function toggle(i: number) {
 </template>
 
 <style scoped>
-/* keep(brand): the fluid display step for the sentence rows is the landing
-   type system itself — no fixed utility step expresses the 1.5rem–2.75rem ramp. */
+/* keep(brand): fluid display step for the sentence rows; no utility step for
+   the 1.5rem–2.5rem marketing ramp. */
 .band-sentence {
-  font-size: clamp(1.5rem, 3vw, 2.75rem);
+  font-size: clamp(1.5rem, 2.2vw + 0.75rem, 2.5rem);
   line-height: 1.08;
   letter-spacing: var(--tracking-tight);
   font-weight: var(--font-medium);

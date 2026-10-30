@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // Copyright 2026 OpenObserve Inc.
 
-// How it works: a real range input drags through the ingestion story. The
-// clause and the product fragment swap together; keyboard-operable by design.
-// Commands are the ones the in-app ingestion guide prints (port 5080 default).
+// How it works: a real range input with step nodes drives the ingestion story.
+// Clause and product fragment swap together; keyboard-operable by design.
+// The command is the one the in-app ingestion guide prints (port 5080 default).
 import { computed, ref } from "vue";
 import { useI18nTyped } from "@/types/i18n";
 
@@ -40,8 +40,10 @@ const CHIP = { left: "level", op: "=", val: "error" };
 const pct = computed(() => (stage.value / (TOTAL - 1)) * 100);
 
 const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
-  http://localhost:5080/api/default/app_logs/_json \\
-  -d '[{"level":"info","service":"billing",
+  http://localhost:5080/api/default/
+  app_logs/_json \\
+  -d '[{"level":"info",
+        "service":"billing",
         "msg":"charge accepted"}]'`;
 </script>
 
@@ -49,28 +51,27 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
   <section
     id="how-it-works"
     aria-labelledby="how-h"
-    class="mx-auto max-w-7xl scroll-mt-24 px-6 py-24 md:px-10 md:py-32"
+    class="mx-auto max-w-7xl scroll-mt-24 px-6 py-20 md:px-10 md:py-28"
   >
-    <h2 id="how-h" class="text-text-heading text-2xl font-semibold tracking-tight" data-reveal>
+    <h2
+      id="how-h"
+      class="text-text-heading text-2xl font-semibold tracking-tight md:text-3xl"
+      data-reveal
+    >
       {{ t("welcome.stages.heading") }}
     </h2>
 
-    <div
-      class="mt-16 grid min-h-96 grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16"
-      data-reveal
-    >
-      <!-- clause -->
+    <div class="mt-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16" data-reveal>
       <p
         :key="stage"
-        class="stage-clause text-text-heading"
+        class="stage-clause text-text-heading order-2 lg:order-1"
         aria-live="polite"
         data-test="landing-stage-clause"
       >
         {{ t(CLAUSE_KEYS[stage]) }}
       </p>
 
-      <!-- fragment -->
-      <div class="min-h-72" data-ui>
+      <div class="order-1 min-h-56 lg:order-2" data-ui>
         <div
           v-if="stage === 0"
           data-test="landing-stage-connect"
@@ -79,9 +80,9 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
           <p class="border-border-subtle text-2xs text-text-secondary border-b px-3 py-2 font-mono">
             {{ t("welcome.stages.terminal") }}
           </p>
-          <pre class="text-text-code overflow-x-auto px-4 py-3 font-mono text-xs leading-6">{{
-            CURL
-          }}</pre>
+          <pre
+            class="text-text-code overflow-x-auto px-4 py-3 font-mono text-xs leading-6 break-words lg:break-normal"
+            >{{ CURL }}</pre>
           <p class="border-border-subtle text-2xs text-text-heading border-t px-4 py-2.5 font-mono">
             {{ t("welcome.stages.ok") }}
           </p>
@@ -149,13 +150,42 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
                 t("welcome.stages.notifyLabel")
               }}</span>
               <span
-                class="rounded-default bg-surface-subtle text-2xs text-text-heading inline-flex h-6 items-center px-2 font-mono"
+                class="rounded-default bg-surface-subtle text-2xs text-text-heading inline-flex h-6 items-center gap-1.5 px-2 font-mono"
               >
+                <svg
+                  viewBox="0 0 24 24"
+                  class="size-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="20" height="16" x="2" y="4" rx="2" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
                 {{ t("welcome.stages.tEmail") }}
               </span>
               <span
-                class="rounded-default bg-surface-subtle text-2xs text-text-heading inline-flex h-6 items-center px-2 font-mono"
+                class="rounded-default bg-surface-subtle text-2xs text-text-heading inline-flex h-6 items-center gap-1.5 px-2 font-mono"
               >
+                <svg
+                  viewBox="0 0 24 24"
+                  class="size-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A3 3 0 1 1 2 17c0-1.1.45-2.1 1.17-2.83L7 10.34V6c0-1.1.9-2 2-2h1"
+                  />
+                  <circle cx="18" cy="19" r="3" />
+                  <circle cx="6" cy="6" r="3" />
+                </svg>
                 {{ t("welcome.stages.tWebhook") }}
               </span>
             </div>
@@ -164,53 +194,61 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
       </div>
     </div>
 
-    <!-- the real slider across both fields -->
-    <div class="mt-14">
+    <!-- real slider with step nodes aligned under the track positions -->
+    <div class="relative mt-10" data-reveal>
       <label for="landing-stages" class="sr-only">{{ t("welcome.stages.slider") }}</label>
-      <input
-        id="landing-stages"
-        v-model.number="stage"
-        type="range"
-        min="0"
-        :max="TOTAL - 1"
-        step="1"
-        class="stage-range focus-visible:outline-focus-ring-accent w-full focus-visible:outline-2 focus-visible:outline-offset-4"
-        :style="{
-          background: `linear-gradient(to right, var(--color-text-heading) ${pct}%, var(--color-surface-subtle) ${pct}%)`,
-        }"
-        data-test="landing-stage-slider"
-      />
-      <ol
-        class="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4"
-        :aria-label="t('welcome.stages.stagesLabel')"
-      >
-        <li v-for="(lk, i) in LABEL_KEYS" :key="lk">
-          <button
-            type="button"
-            class="rounded-default focus-visible:outline-focus-ring-accent py-1 text-start text-base transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
-            :class="
-              i === stage
-                ? 'text-text-heading font-medium'
-                : 'text-text-secondary hover:text-text-heading'
-            "
-            :aria-current="i === stage ? 'step' : undefined"
-            data-test="landing-stage-name"
-            @click="stage = i"
-          >
-            {{ t(lk) }}
-          </button>
-        </li>
-      </ol>
+      <div class="relative">
+        <input
+          id="landing-stages"
+          v-model.number="stage"
+          type="range"
+          min="0"
+          :max="TOTAL - 1"
+          step="1"
+          class="stage-range focus-visible:outline-focus-ring-accent relative z-2 w-full focus-visible:outline-2 focus-visible:outline-offset-4"
+          :style="{
+            background: `linear-gradient(to right, var(--color-text-heading) ${pct}%, var(--color-surface-subtle) ${pct}%)`,
+          }"
+          data-test="landing-stage-slider"
+        />
+        <span
+          v-for="i in TOTAL"
+          :key="i"
+          aria-hidden="true"
+          class="border-border-strong pointer-events-none absolute top-1/2 z-1 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border"
+          :class="i - 1 <= stage ? 'border-text-heading bg-text-heading' : 'bg-surface-base'"
+          :style="{ left: ((i - 1) / (TOTAL - 1)) * 100 + '%' }"
+        />
+      </div>
+      <div class="relative mt-3 h-8">
+        <button
+          v-for="(lk, i) in LABEL_KEYS"
+          :key="lk"
+          type="button"
+          class="rounded-default focus-visible:outline-focus-ring-accent absolute top-0 -translate-x-1/2 py-1 text-base transition-colors duration-150 first:translate-x-0 last:-translate-x-full focus-visible:outline-2 focus-visible:outline-offset-2"
+          :class="
+            i === stage
+              ? 'text-text-heading font-medium'
+              : 'text-text-secondary hover:text-text-heading'
+          "
+          :aria-current="i === stage ? 'step' : undefined"
+          :aria-label="t('welcome.stages.nodeAria', { n: i + 1, label: t(lk) })"
+          :style="{ left: (i / (TOTAL - 1)) * 100 + '%' }"
+          data-test="landing-stage-name"
+          @click="stage = i"
+        >
+          {{ t(lk) }}
+        </button>
+      </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-/* keep(complex-state): the clause’s swap animation and the range slider's thumb/track
-   have no utility equivalents; both are token-fed and reduced-motion guarded. */
-
+/* keep(complex-state): the clause swap animation and the range slider's
+   thumb/track have no utility equivalents; both are token-fed. */
 .stage-clause {
-  font-size: clamp(2.25rem, 4.6vw, 4.25rem);
+  font-size: clamp(2rem, 3.2vw + 1rem, 3.75rem);
   line-height: 1.02;
   letter-spacing: var(--tracking-tight);
   font-weight: var(--font-semibold);
@@ -229,24 +267,26 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
 
 .stage-range {
   appearance: none;
-  height: 0.5rem;
+  height: 0.375rem;
   border-radius: var(--radius-full);
   cursor: pointer;
 }
 .stage-range::-webkit-slider-thumb {
   appearance: none;
-  width: 2rem;
-  height: 2rem;
-  border-radius: var(--radius-default);
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
   background: var(--color-text-heading);
-  border: 0;
+  border: 0.25rem solid var(--color-surface-base);
+  box-shadow: 0 0 0 0.0625rem var(--color-text-heading);
 }
 .stage-range::-moz-range-thumb {
-  width: 2rem;
-  height: 2rem;
-  border-radius: var(--radius-default);
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
   background: var(--color-text-heading);
-  border: 0;
+  border: 0.25rem solid var(--color-surface-base);
+  box-shadow: 0 0 0 0.0625rem var(--color-text-heading);
 }
 
 @media (prefers-reduced-motion: reduce) {

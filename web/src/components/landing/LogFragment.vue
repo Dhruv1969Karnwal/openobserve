@@ -30,10 +30,10 @@ const filtered = computed(() =>
 );
 
 const chipStyles: Record<string, string> = {
-  info: "text-log-severity-info-indicator border-log-severity-info-indicator",
-  warn: "text-log-severity-warning-indicator border-log-severity-warning-indicator",
-  error: "text-log-severity-error-indicator border-log-severity-error-indicator",
-  debug: "text-log-severity-debug-indicator border-log-severity-debug-indicator",
+  info: "text-text-heading border-log-severity-info-indicator",
+  warn: "text-text-heading border-log-severity-warning-indicator",
+  error: "text-text-heading border-log-severity-error-indicator",
+  debug: "text-text-heading border-log-severity-debug-indicator",
 };
 
 const QUOTE = String.fromCharCode(34);
@@ -193,7 +193,10 @@ const spark = computed(() => {
                 :class="chipStyles[row.level]"
                 >{{ row.level }}</span
               >
-              <span class="text-compact text-text-body truncate">{{ row.message }}</span>
+              <span
+                class="text-compact text-text-body line-clamp-2 lg:line-clamp-none lg:truncate"
+                >{{ row.message }}</span
+              >
               <span
                 class="text-2xs text-text-secondary hidden text-end font-mono tabular-nums lg:block"
               >

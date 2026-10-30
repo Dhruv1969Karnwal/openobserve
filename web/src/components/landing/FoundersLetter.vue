@@ -11,7 +11,7 @@ const { t } = useI18nTyped();
 
 <template>
   <section id="open-source" aria-labelledby="letter-h" class="bg-surface-panel scroll-mt-24">
-    <div class="mx-auto max-w-2xl px-6 py-28 md:px-8 md:py-36">
+    <div class="mx-auto max-w-2xl px-6 py-20 md:px-8 md:py-24">
       <h2 id="letter-h" class="sr-only">{{ t("welcome.letter.heading") }}</h2>
 
       <svg
