@@ -50,12 +50,10 @@ function jsonClass(kind: string): string {
 
     <div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-y-6 md:grid-cols-12 md:gap-y-10">
       <!-- arrives -->
-      <p
-        class="text-text-heading col-span-12 text-lg font-medium md:col-span-3 md:pe-6 md:pt-3 md:text-right"
-        data-reveal
-      >
-        {{ t("welcome.oneLine.arrives") }}
-      </p>
+      <div class="col-span-12 text-right md:col-span-3 md:pe-8" data-reveal>
+        <p class="text-text-heading text-xl font-medium">{{ t("welcome.oneLine.arrives") }}</p>
+        <p class="text-compact text-text-secondary mt-1">{{ t("welcome.oneLine.arrivesNote") }}</p>
+      </div>
       <div class="md:col-span-9" data-reveal data-reveal-step="1">
         <div
           data-ui
@@ -86,12 +84,10 @@ function jsonClass(kind: string): string {
       </div>
 
       <!-- selected (live) -->
-      <p
-        class="text-text-heading col-span-12 text-lg font-medium md:col-span-3 md:pe-6 md:pt-3 md:text-right"
-        data-reveal
-      >
-        {{ t("welcome.oneLine.look") }}
-      </p>
+      <div class="col-span-12 text-right md:col-span-3 md:pe-8" data-reveal>
+        <p class="text-text-heading text-xl font-medium">{{ t("welcome.oneLine.look") }}</p>
+        <p class="text-compact text-text-secondary mt-1">{{ t("welcome.oneLine.lookNote") }}</p>
+      </div>
       <div class="md:col-span-9" data-reveal data-reveal-step="1">
         <div
           data-ui
@@ -99,7 +95,7 @@ function jsonClass(kind: string): string {
         >
           <button
             type="button"
-            class="hover:bg-surface-subtle focus-visible:outline-focus-ring-accent grid w-full grid-cols-[4.6rem_auto_1fr] items-baseline gap-x-2.5 px-3 py-2.5 text-start transition-colors duration-100 focus-visible:outline-2 focus-visible:-outline-offset-2 lg:grid-cols-[5.6rem_auto_1fr_3.5rem]"
+            class="hover:bg-surface-subtle focus-visible:ring-focus-ring-accent grid w-full grid-cols-[4.6rem_auto_1fr] items-baseline gap-x-2.5 px-3 py-2.5 text-start transition-colors duration-100 focus-visible:ring-2 focus-visible:ring-inset lg:grid-cols-[5.6rem_auto_1fr_3.5rem]"
             :aria-expanded="openMid"
             data-test="landing-line-row"
             @click="openMid = !openMid"
@@ -140,12 +136,10 @@ function jsonClass(kind: string): string {
       </div>
 
       <!-- alarmed -->
-      <p
-        class="text-text-heading col-span-12 text-lg font-medium md:col-span-3 md:pe-6 md:pt-3 md:text-right"
-        data-reveal
-      >
-        {{ t("welcome.oneLine.warns") }}
-      </p>
+      <div class="col-span-12 text-right md:col-span-3 md:pe-8" data-reveal>
+        <p class="text-text-heading text-xl font-medium">{{ t("welcome.oneLine.warns") }}</p>
+        <p class="text-compact text-text-secondary mt-1">{{ t("welcome.oneLine.warnsNote") }}</p>
+      </div>
       <div class="md:col-span-9" data-reveal data-reveal-step="1">
         <div
           data-ui

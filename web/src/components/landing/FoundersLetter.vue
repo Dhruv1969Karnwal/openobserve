@@ -44,7 +44,7 @@ const { t } = useI18nTyped();
           {{ t("welcome.letter.p4a") }}
           <a
             href="https://github.com/openobserve/openobserve"
-            class="text-text-heading focus-visible:outline-focus-ring-accent underline underline-offset-4 transition-colors duration-150 hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-2"
+            class="text-text-heading focus-visible:ring-focus-ring-accent underline underline-offset-4 transition-colors duration-150 hover:no-underline focus-visible:ring-2 focus-visible:ring-offset-2"
             rel="noopener"
             target="_blank"
             >{{ t("welcome.letter.p4link") }}</a

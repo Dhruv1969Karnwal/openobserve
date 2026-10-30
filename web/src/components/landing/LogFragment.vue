@@ -36,9 +36,6 @@ const chipStyles: Record<string, string> = {
   debug: "text-text-heading border-log-severity-debug-indicator",
 };
 
-const QUOTE = String.fromCharCode(34);
-const SEP = ": ";
-
 const LEVELS = ["info", "warn", "error", "debug"] as const;
 
 const TAB_KEYS = {
@@ -46,6 +43,21 @@ const TAB_KEYS = {
   metrics: "welcome.fragment.tabMetrics",
   traces: "welcome.fragment.tabTraces",
 } as const;
+
+const QUOTE = String.fromCharCode(34);
+const SEP = ": ";
+
+function quoted(v: string): string {
+  return QUOTE + v + QUOTE;
+}
+
+function shortTime(t: string): string {
+  return t.length > 8 ? t.slice(0, 8) : t;
+}
+
+function jsonClass(kind: string): string {
+  return kind === "bool" ? "log-boolean" : "log-" + kind;
+}
 
 function toggleLevel(level: string) {
   const next = new Set(levelsOn.value);
@@ -57,18 +69,6 @@ function toggleLevel(level: string) {
 
 function rowKey(row: { time: string; traceId?: string }): string {
   return row.traceId ?? row.time;
-}
-
-function quoted(v: string): string {
-  return QUOTE + v + QUOTE;
-}
-
-function shortTime(t: string): string {
-  return t.length > 8 ? t.slice(0, 8) : t;
-}
-
-function jsonClass(kind: string): string {
-  return kind === "bool" ? "log-boolean" : `log-${kind}`;
 }
 
 const spark = computed(() => {
@@ -94,7 +94,6 @@ const spark = computed(() => {
     class="rounded-surface border-border-subtle bg-surface-panel overflow-hidden border"
     :aria-label="t('welcome.fragment.aria')"
   >
-    <!-- view header: signal tabs -->
     <div class="flex items-center gap-1 px-3 pt-3">
       <div
         role="tablist"
@@ -107,7 +106,7 @@ const spark = computed(() => {
           role="tab"
           :aria-selected="tab === tb"
           data-test="landing-fragment-tab"
-          class="rounded-default text-compact focus-visible:outline-focus-ring-accent h-7 px-3 font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
+          class="rounded-default text-compact focus-visible:ring-focus-ring-accent h-7 px-3 font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2"
           :class="
             tab === tb
               ? 'bg-text-heading text-surface-base'
@@ -120,16 +119,15 @@ const spark = computed(() => {
       </div>
       <span
         v-if="tab === 'logs'"
-        class="text-2xs text-text-secondary ms-auto font-mono tabular-nums"
+        class="text-text-secondary ms-auto font-mono text-xs tabular-nums"
         data-test="landing-fragment-count"
       >
         {{ t("welcome.fragment.rowsShown", { shown: filtered.length, total: SAMPLE_ROWS.length }) }}
       </span>
     </div>
 
-    <!-- toolbar: search + severity chips -->
-    <div v-if="tab === 'logs'" class="flex flex-wrap items-center gap-2 px-3 pt-3">
-      <label class="relative block min-w-0 grow sm:max-w-72">
+    <div v-if="tab === 'logs'" class="px-3 pt-3">
+      <label class="relative block sm:max-w-80">
         <span class="sr-only">{{ t("welcome.fragment.filter") }}</span>
         <svg
           class="text-text-secondary pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2"
@@ -147,27 +145,28 @@ const spark = computed(() => {
           type="search"
           :placeholder="t('welcome.fragment.filterPlaceholder')"
           data-test="landing-fragment-search"
-          class="rounded-default border-border-control bg-surface-base text-compact text-text-body placeholder:text-text-placeholder focus-visible:outline-focus-ring-accent h-8 w-full border ps-8 pe-2 focus-visible:outline-2 focus-visible:outline-offset-1"
+          class="rounded-default border-border-control bg-surface-base text-compact text-text-body placeholder:text-text-placeholder focus-visible:ring-focus-ring-accent h-8 w-full border ps-8 pe-2 focus-visible:ring-2 focus-visible:ring-offset-1"
         />
       </label>
-      <span class="text-2xs text-text-secondary hidden font-medium sm:inline">{{
-        t("welcome.fragment.level")
-      }}</span>
-      <button
-        v-for="lv in LEVELS"
-        :key="lv"
-        type="button"
-        :aria-pressed="levelsOn.has(lv)"
-        data-test="landing-fragment-level"
-        class="bg-surface-base text-2xs focus-visible:outline-focus-ring-accent h-6 rounded-xs border-s-2 px-2 font-mono transition-opacity duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
-        :class="[chipStyles[lv], levelsOn.has(lv) ? '' : 'opacity-40']"
-        @click="toggleLevel(lv)"
-      >
-        {{ lv }}
-      </button>
+      <div class="mt-2 flex flex-wrap items-center gap-1.5">
+        <span class="text-2xs text-text-secondary font-medium">{{
+          t("welcome.fragment.level")
+        }}</span>
+        <button
+          v-for="lv in LEVELS"
+          :key="lv"
+          type="button"
+          :aria-pressed="levelsOn.has(lv)"
+          data-test="landing-fragment-level"
+          class="bg-surface-base text-2xs focus-visible:ring-focus-ring-accent h-6 shrink-0 rounded-xs border-s-2 px-2 font-mono transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-offset-2"
+          :class="[chipStyles[lv], levelsOn.has(lv) ? '' : 'opacity-40']"
+          @click="toggleLevel(lv)"
+        >
+          {{ lv }}
+        </button>
+      </div>
     </div>
 
-    <!-- content -->
     <div class="p-3" :class="props.compact ? '' : 'min-h-80'">
       <template v-if="tab === 'logs'">
         <ul
@@ -177,15 +176,28 @@ const spark = computed(() => {
           <li v-for="(row, i) in filtered" :key="row.time + i">
             <button
               type="button"
-              class="hover:bg-surface-subtle focus-visible:outline-focus-ring-accent grid w-full grid-cols-[4.5rem_auto_1fr] items-baseline gap-x-2.5 gap-y-0.5 px-2.5 py-2 text-start transition-colors duration-100 focus-visible:outline-2 focus-visible:-outline-offset-2 lg:grid-cols-[5rem_auto_1fr_4.5rem]"
+              class="hover:bg-surface-subtle focus-visible:ring-focus-ring-accent grid w-full grid-cols-[4.5rem_auto_1fr] items-baseline gap-x-2.5 gap-y-0.5 px-2.5 py-2 text-start transition-colors duration-100 focus-visible:ring-2 focus-visible:ring-inset lg:grid-cols-[0.5rem_5rem_auto_1fr_4.5rem]"
               :aria-expanded="openRow === rowKey(row)"
               data-test="landing-fragment-row"
               @click="openRow = openRow === rowKey(row) ? null : rowKey(row)"
             >
-              <span class="text-2xs text-text-secondary font-mono tabular-nums lg:hidden">{{
+              <svg
+                viewBox="0 0 12 12"
+                class="text-text-secondary hidden size-3 translate-y-0.5 transition-transform duration-150 motion-reduce:transition-none lg:block"
+                :class="openRow === rowKey(row) ? 'rotate-90' : ''"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m4.5 2.5 4 3.5-4 3.5" />
+              </svg>
+              <span class="text-text-secondary font-mono text-xs tabular-nums lg:hidden">{{
                 shortTime(row.time)
               }}</span>
-              <span class="text-2xs text-text-secondary hidden font-mono tabular-nums lg:inline">{{
+              <span class="text-text-secondary hidden font-mono text-xs tabular-nums lg:inline">{{
                 row.time
               }}</span>
               <span
@@ -194,18 +206,17 @@ const spark = computed(() => {
                 >{{ row.level }}</span
               >
               <span
-                class="text-compact text-text-body line-clamp-2 lg:line-clamp-none lg:truncate"
+                class="text-compact text-text-body line-clamp-2 min-w-0 lg:line-clamp-none lg:truncate"
                 >{{ row.message }}</span
               >
               <span
-                class="text-2xs text-text-secondary hidden text-end font-mono tabular-nums lg:block"
+                class="text-text-secondary hidden text-end font-mono text-xs tabular-nums lg:block"
+                >{{ row.duration }}</span
               >
-                {{ row.duration }}
-              </span>
             </button>
             <div
               v-if="openRow === rowKey(row)"
-              class="log-highlight border-border-subtle bg-surface-subtle border-t px-3 py-2.5"
+              class="log-highlight border-border-subtle bg-surface-subtle border-t px-4 py-2.5"
             >
               <div v-for="pair in SAMPLE_JSON_FIELDS" :key="pair[0]" class="leading-5">
                 <span class="log-key">{{ quoted(pair[0]) }}</span>
@@ -225,10 +236,10 @@ const spark = computed(() => {
 
       <template v-else-if="tab === 'metrics'">
         <div
-          class="divide-border-subtle rounded-default bg-surface-base grid grid-cols-3 divide-x overflow-hidden"
+          class="divide-border-subtle rounded-default bg-surface-base grid grid-cols-1 overflow-hidden sm:grid-cols-3 sm:divide-x sm:divide-y-0"
         >
           <div v-for="kpi in SAMPLE_METRICS.kpis" :key="kpi.label" class="px-3 py-3">
-            <p class="text-2xs text-text-secondary font-medium">{{ kpi.label }}</p>
+            <p class="text-text-secondary text-xs font-medium">{{ kpi.label }}</p>
             <p class="text-text-heading mt-1 font-mono text-xl tabular-nums">{{ kpi.value }}</p>
           </div>
         </div>
@@ -247,7 +258,7 @@ const spark = computed(() => {
               vector-effect="non-scaling-stroke"
             />
           </svg>
-          <p class="text-2xs text-text-secondary mt-1 font-mono">
+          <p class="text-text-secondary mt-1 font-mono text-xs">
             {{ t("welcome.fragment.eventsFoot") }}
           </p>
         </div>
@@ -257,7 +268,7 @@ const spark = computed(() => {
         <ul class="rounded-default bg-surface-base px-3 py-3">
           <li v-for="span in SAMPLE_TRACES" :key="span.name" :class="span.depth ? 'ms-6' : ''">
             <div class="flex items-center gap-3 py-1.5">
-              <span class="text-2xs text-text-body w-36 shrink-0 truncate font-mono">{{
+              <span class="text-text-body w-36 shrink-0 truncate font-mono text-xs">{{
                 span.name
               }}</span>
               <span class="bg-surface-subtle relative h-3 grow rounded-xs">
@@ -268,13 +279,13 @@ const spark = computed(() => {
                 />
               </span>
               <span
-                class="text-2xs text-text-secondary w-14 shrink-0 text-end font-mono tabular-nums"
+                class="text-text-secondary w-14 shrink-0 text-end font-mono text-xs tabular-nums"
                 >{{ span.ms }}</span
               >
             </div>
           </li>
         </ul>
-        <p class="text-2xs text-text-secondary mt-2 px-1 font-mono">
+        <p class="text-text-secondary mt-2 px-1 font-mono text-xs">
           {{ t("welcome.fragment.traceFoot") }}
         </p>
       </template>

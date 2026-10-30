@@ -205,7 +205,7 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
           min="0"
           :max="TOTAL - 1"
           step="1"
-          class="stage-range focus-visible:outline-focus-ring-accent relative z-2 w-full focus-visible:outline-2 focus-visible:outline-offset-4"
+          class="stage-range focus-visible:ring-focus-ring-accent relative z-2 w-full focus-visible:ring-2 focus-visible:ring-offset-2"
           :style="{
             background: `linear-gradient(to right, var(--color-text-heading) ${pct}%, var(--color-surface-subtle) ${pct}%)`,
           }"
@@ -216,8 +216,8 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
           :key="i"
           aria-hidden="true"
           class="border-border-strong pointer-events-none absolute top-1/2 z-1 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border"
-          :class="i - 1 <= stage ? 'border-text-heading bg-text-heading' : 'bg-surface-base'"
-          :style="{ left: ((i - 1) / (TOTAL - 1)) * 100 + '%' }"
+          :class="i - 1 <= stage ? 'bg-text-heading' : 'bg-border-strong'"
+          :style="{ left: `calc(% - rem + 0.625rem)` }"
         />
       </div>
       <div class="relative mt-3 h-8">
@@ -225,7 +225,7 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
           v-for="(lk, i) in LABEL_KEYS"
           :key="lk"
           type="button"
-          class="rounded-default focus-visible:outline-focus-ring-accent absolute top-0 -translate-x-1/2 py-1 text-base transition-colors duration-150 first:translate-x-0 last:-translate-x-full focus-visible:outline-2 focus-visible:outline-offset-2"
+          class="rounded-default focus-visible:ring-focus-ring-accent absolute top-0 -translate-x-1/2 py-1 text-base transition-colors duration-150 first:translate-x-0 last:-translate-x-full focus-visible:ring-2 focus-visible:ring-offset-2"
           :class="
             i === stage
               ? 'text-text-heading font-medium'
@@ -233,7 +233,11 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
           "
           :aria-current="i === stage ? 'step' : undefined"
           :aria-label="t('welcome.stages.nodeAria', { n: i + 1, label: t(lk) })"
-          :style="{ left: (i / (TOTAL - 1)) * 100 + '%' }"
+          :style="{
+            left: `calc(% - rem + 0.625rem)`,
+            transform:
+              i === 0 ? 'none' : i === TOTAL - 1 ? 'translateX(-100%)' : 'translateX(-50%)',
+          }"
           data-test="landing-stage-name"
           @click="stage = i"
         >
@@ -267,7 +271,7 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
 
 .stage-range {
   appearance: none;
-  height: 0.375rem;
+  height: 0.5rem;
   border-radius: var(--radius-full);
   cursor: pointer;
 }
@@ -278,7 +282,6 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
   border-radius: var(--radius-full);
   background: var(--color-text-heading);
   border: 0.25rem solid var(--color-surface-base);
-  box-shadow: 0 0 0 0.0625rem var(--color-text-heading);
 }
 .stage-range::-moz-range-thumb {
   width: 1.5rem;
@@ -286,7 +289,6 @@ const CURL = `curl -u [EMAIL]:[PASSCODE] -k \\
   border-radius: var(--radius-full);
   background: var(--color-text-heading);
   border: 0.25rem solid var(--color-surface-base);
-  box-shadow: 0 0 0 0.0625rem var(--color-text-heading);
 }
 
 @media (prefers-reduced-motion: reduce) {
