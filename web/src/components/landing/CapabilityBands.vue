@@ -110,6 +110,7 @@ const F = {
               </div>
               <svg
                 viewBox="0 0 240 48"
+                preserveAspectRatio="none"
                 class="text-text-heading mt-2 h-10 w-full"
                 role="img"
                 :aria-label="t('welcome.fragment.eventsChart')"
