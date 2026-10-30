@@ -330,6 +330,16 @@ const useRoutes = () => {
       },
     },
     {
+      // Public marketing page: outside MainLayout, so the guard's public branch
+      // (router/index.ts) passes it without touching the login redirect.
+      path: "/welcome",
+      name: "welcome",
+      component: () => import("@/views/WelcomeView.vue"),
+      meta: {
+        public: true,
+      },
+    },
+    {
       // Outside MainLayout and the login redirect: anyone holding a public link can read it.
       path: "/ai/public/:token",
       name: "publicSharedChat",

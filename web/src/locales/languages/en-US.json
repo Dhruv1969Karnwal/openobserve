@@ -26784,5 +26784,127 @@
       "title": "Move {count} collector | Move {count} collectors",
       "tooMany": "Move at most {max} collectors at a time"
     }
+  },
+  "welcome": {
+    "nav": {
+      "capabilities": "Capabilities",
+      "ingestion": "Ingestion",
+      "logLine": "A log line",
+      "openSource": "Open source",
+      "signin": "Sign in",
+      "menu": "Menu",
+      "sections": "Sections",
+      "home": "Retrace.ai home"
+    },
+    "hero": {
+      "line1": "Every signal,",
+      "line2": "one box.",
+      "sub": "Logs, metrics, traces, dashboards and alerts — one open-source binary you run on your own hardware.",
+      "cta": "Open the app",
+      "secondary": "Point it at your first stream",
+      "caption": "The log-search view — the product’s own interface, running on this page with an example stream."
+    },
+    "fragment": {
+      "aria": "Product preview: log search view",
+      "signal": "Signal",
+      "rowsShown": "{shown} of {total} rows",
+      "filter": "Filter rows",
+      "filterPlaceholder": "filter this stream",
+      "level": "level:",
+      "noMatch": "no rows match this filter",
+      "tabLogs": "logs",
+      "tabMetrics": "metrics",
+      "tabTraces": "traces",
+      "eventsChart": "Events per minute, example stream",
+      "eventsFoot": "events/min · app_logs · last 24 points",
+      "traceFoot": "trace 04d77ba8 · 5 spans · waterfall view"
+    },
+    "oneLine": {
+      "heading": "What one line does",
+      "arrives": "It arrives",
+      "look": "You look",
+      "warns": "It warns",
+      "ingested": "stream app_logs · ingested 2s ago",
+      "liveNote": "Click the row — that toggle is the product’s own expand, not an animation.",
+      "alertName": "alert 5xx-spike",
+      "alertCond": "count(level:’error’) >= 2 in 5m",
+      "alertFired": "Fired 14:32:11 · evaluation on the same engine",
+      "notify": "notify"
+    },
+    "bands": {
+      "heading": "Capabilities",
+      "note": "Flip a switch to read what each one buys you.",
+      "toggleDetail": "Toggle detail for: {sentence}",
+      "b1": "Logs, metrics and traces live in one store",
+      "b1c": "One stream schema, one binary, one query path — no bolted-together trio of backends.",
+      "b2": "Ask in SQL, search in Lucene",
+      "b2c": "Switch query modes on the same stream. Same results, tabular or filtered.",
+      "b3": "Dashboards redraw while data streams",
+      "b3c": "Auto-refresh panels and live-tail the search view from the same screen.",
+      "b4": "Alerts run on the query engine itself",
+      "b4c": "Conditions fire to email or any webhook you point at — no sidecar to trust.",
+      "b5": "The whole stack is one Rust binary",
+      "b5c": "Docker run it on a laptop, or put it behind your load balancer. It answers on :5080."
+    },
+    "stages": {
+      "heading": "Ingestion in minutes",
+      "slider": "Ingestion stages",
+      "stagesLabel": "Stages",
+      "c0": "Point one URL at your app",
+      "c1": "Rows land in seconds",
+      "c2": "Search it while it streams",
+      "c3": "Set the alert, walk away",
+      "n0": "Connect",
+      "n1": "Arrival",
+      "n2": "Search",
+      "n3": "Alert",
+      "terminal": "terminal · HTTP JSON API",
+      "ok": "→ HTTP 200 · 21 ms",
+      "searchScope": "search · app_logs · 15m",
+      "a_r1": "charge accepted service=billing",
+      "a_r2": "webhook ops-oncall delivered 200",
+      "a_r3": "ingest app_logs +1 batch (1 row)",
+      "qJustNow": "just now",
+      "qS2": "2s ago",
+      "qS5": "5s ago",
+      "rowCount": "14 of 12,483 rows",
+      "s_r1": "upstream timeout service=billing",
+      "s_r2": "connection reset host=queue-1",
+      "alertPanel": "alert · 5xx-spike",
+      "alertCond": "count(level:’error’) >= 2 in 5m",
+      "notifyLabel": "notify",
+      "tEmail": "email · ops@corp.example",
+      "tWebhook": "webhook · ops-oncall"
+    },
+    "letter": {
+      "heading": "Open source, and why this exists",
+      "mark": "Retrace.ai mark",
+      "p1": "Your systems talk all day — request logs, latency numbers, traces, failures. Most teams hand that conversation to three SaaS dashboards and pay per gigabyte for the privilege of overreading it.",
+      "p2": "Retrace.ai gives it back. One binary stores and searches your logs, metrics and traces, draws the dashboards and fires the alerts — on hardware you already own. Nothing about your infrastructure has to leave the building.",
+      "p3": "This build ships a single edition: every capability you saw on this page is what you get. No locked screens, no upsell, no tier to unlock.",
+      "p4a": "Retrace.ai is built on",
+      "p4link": "OpenObserve",
+      "p4b": ", the open-source observability database released under AGPL-3.0 — the engine underneath is their work and stays credited. What I design is the surface it presents: one calm interface for the whole signal set.",
+      "p5": "Point it at your first stream. It takes a few minutes, and from then on the box answers to you.",
+      "signoff": "Dhruv Karnwal",
+      "role": "Designer and maintainer of Retrace.ai"
+    },
+    "cta": {
+      "sentence": "Your first stream is minutes away —",
+      "button": "Open the app",
+      "note": "It runs on your own hardware. Your data stays where you put it."
+    },
+    "footer": {
+      "aria": "Site footer",
+      "statement": "One binary for logs, metrics, traces, dashboards and alerts.",
+      "legal": "© 2026 Dhruv Karnwal · Retrace.ai is built on OpenObserve (AGPL-3.0), © OpenObserve Inc. Product design and code by Dhruv Karnwal.",
+      "author": "Created by Dhruv Karnwal",
+      "authorNote": "A single-edition observability surface you can self-host in an afternoon — the subject of everything above.",
+      "wordmark": "Retrace.ai",
+      "invite": "Open the app"
+    },
+    "view": {
+      "skip": "Skip to content"
+    }
   }
 }

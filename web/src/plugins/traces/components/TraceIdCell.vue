@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <template>
   <span
-    class="text-text-body hover:text-theme-accent cursor-pointer font-mono text-xs"
+    class="text-text-body hover:text-text-heading cursor-pointer font-mono text-xs"
     data-test="trace-row-trace-id"
     @click.stop="navigateToTrace"
   >

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,12 +6,39 @@
     <link rel="alternate icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="author" content="Dhruv Karnwal" />
+    <meta
+      name="description"
+      content="Retrace.ai — logs, metrics, traces, dashboards and alerts in one open-source binary you self-host."
+    />
     <title>Retrace.ai</title>
     <base href="/" />
   </head>
 
   <body>
     <div id="app"></div>
+    <noscript>
+      <div
+        style="
+          max-width: 38rem;
+          margin: 6rem auto;
+          padding: 0 1.5rem;
+          font:
+            16px/1.6 system-ui,
+            sans-serif;
+          color: #1c1f23;
+        "
+      >
+        <h1 style="font-size: 1.75rem">Retrace.ai</h1>
+        <p>
+          Retrace.ai is a self-hosted observability app — logs, metrics, traces, dashboards and
+          alerts in one open-source binary. Its interface needs JavaScript enabled in this browser.
+        </p>
+        <p>
+          If JavaScript is unavailable, the sign-in endpoint is still reachable on this host at the
+          path <code>/web/login</code>.
+        </p>
+      </div>
+    </noscript>
     <script>
       window.global = window;
       var exports = {};
