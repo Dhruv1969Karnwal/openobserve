@@ -13,6 +13,8 @@ const { t } = useI18nTyped();
 const LEVELS = ["info", "warn", "error"] as const;
 const level = ref<number>(2);
 const metric = ref(42);
+const WIDTHS = [72, 40, 88];
+const barStyle = (i: number) => ({ width: WIDTHS[i] + "%" });
 </script>
 
 <template>
@@ -50,8 +52,15 @@ const metric = ref(42);
                     >{{ r.time.slice(-12, -7) }}:{{ String(i).padStart(2, "0") }}</span
                   >
                   <span
-                    class="bg-text-heading h-2 rounded-none"
-                    :style="{ width: `${[72, 40, 88][i]}%`, opacity: 0.25 - i * 0.06 }"
+                    class="h-2 rounded-none"
+                    :class="
+                      r.level === 'error'
+                        ? 'bg-severity-error'
+                        : r.level === 'warn'
+                          ? 'bg-severity-warn'
+                          : 'bg-severity-info'
+                    "
+                    :style="barStyle(i)"
                   />
                   <span class="text-text-secondary text-end font-mono text-xs tabular-nums">{{
                     [142, 96, 58][i]
@@ -79,7 +88,7 @@ const metric = ref(42);
                   class="rounded-default inline-flex items-center gap-1.5 px-2 py-1 font-mono text-xs"
                   :class="
                     i === level
-                      ? 'bg-surface-active text-text-heading'
+                      ? 'bg-text-heading text-surface-panel'
                       : 'bg-surface-subtle text-text-body'
                   "
                 >

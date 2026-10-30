@@ -34,7 +34,7 @@ export const SAMPLE_ROWS: SampleRow[] = [
   {
     time: "14:32:07.876",
     level: "info",
-    message: "POST /api/default/app_logs/_json",
+    message: "POST /app_logs/_json",
     highlight: "_json",
     duration: "21ms",
     traceId: "b10f9e42",

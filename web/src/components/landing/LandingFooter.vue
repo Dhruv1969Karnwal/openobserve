@@ -1,10 +1,8 @@
 <script setup lang="ts">
 // Copyright 2026 OpenObserve Inc.
 
-// Footer as the closing board of tiles (direction: "a footer of tiles").
-// The dealt email/city/time tiles were dropped - no honest content for them -
-// and replaced by the attribution, source link and legal facts that must be
-// on page.
+// Footer as aligned page columns on the same 7xl grid as every section, and
+// a low full-bleed wordmark echo closing the page.
 import { useI18nTyped } from "@/types/i18n";
 import { getPath } from "@/utils/queryUtils";
 
@@ -12,9 +10,9 @@ const { t } = useI18nTyped();
 const base = getPath();
 
 const LINKS = [
-  { href: "#capabilities", key: "welcome.nav.capabilities" },
   { href: "#how-it-works", key: "welcome.nav.ingestion" },
-  { href: "#open-source", key: "welcome.nav.openSource" },
+  { href: "#one-line", key: "welcome.nav.logLine" },
+  { href: "#capabilities", key: "welcome.nav.capabilities" },
 ] as const;
 
 function reduced(): boolean {
@@ -28,24 +26,29 @@ function go(href: string) {
 </script>
 
 <template>
-  <footer class="p-2" :aria-label="t('welcome.footer.aria')" data-test="landing-footer">
-    <div class="grid grid-cols-1 gap-2 md:grid-cols-12">
-      <div
-        class="rounded-surface bg-surface-panel flex flex-col justify-between gap-12 p-6 md:col-span-4 md:p-8"
-      >
-        <p class="text-text-heading text-xl leading-snug font-medium">
+  <footer
+    :aria-label="t('welcome.footer.aria')"
+    data-test="landing-footer"
+    class="bg-surface-subtle"
+  >
+    <div
+      class="mx-auto grid max-w-7xl grid-cols-1 gap-x-10 gap-y-10 px-6 py-16 md:grid-cols-12 md:px-10"
+    >
+      <div class="md:col-span-5">
+        <p class="text-text-heading max-w-md text-xl leading-snug font-medium">
           {{ t("welcome.footer.statement") }}
         </p>
-        <p class="text-compact text-text-body leading-relaxed" data-test="landing-legal">
+        <p
+          class="text-text-body mt-8 max-w-md font-mono text-xs leading-relaxed"
+          data-test="landing-legal"
+        >
           {{ t("welcome.footer.legal") }}
         </p>
       </div>
 
-      <nav
-        :aria-label="t('welcome.footer.navAria')"
-        class="rounded-surface bg-surface-panel p-6 md:col-span-3 md:p-8"
-      >
-        <ul class="flex flex-col gap-3 text-base">
+      <nav :aria-label="t('welcome.footer.navAria')" class="md:col-span-3">
+        <p class="text-compact text-text-secondary uppercase">{{ t("welcome.footer.eyebrow") }}</p>
+        <ul class="mt-4 flex flex-col items-start gap-3 font-mono text-sm">
           <li v-for="l in LINKS" :key="l.href">
             <a
               :href="l.href"
@@ -76,28 +79,26 @@ function go(href: string) {
         </ul>
       </nav>
 
-      <div
-        class="rounded-surface bg-surface-panel flex flex-col justify-between gap-12 p-6 md:col-span-5 md:p-8"
-      >
-        <p class="text-text-heading text-xl font-medium" data-test="landing-author">
+      <div class="md:col-span-4">
+        <p class="text-compact text-text-secondary uppercase">{{ t("welcome.footer.eyebrow") }}</p>
+        <p class="text-text-heading mt-4 text-xl font-medium" data-test="landing-author">
           {{ t("welcome.footer.author") }}
         </p>
-        <p class="text-compact text-text-body mt-4 max-w-sm leading-relaxed">
+        <p class="text-text-body mt-3 max-w-sm text-sm leading-relaxed">
           {{ t("welcome.footer.authorNote") }}
         </p>
       </div>
+    </div>
 
-      <div
-        class="rounded-surface bg-text-heading col-span-12 flex h-20 items-center gap-4 px-6 py-6 md:h-32 md:px-8"
-        data-test="landing-wordmark-strip"
-      >
+    <div class="bg-text-heading" data-test="landing-wordmark-strip">
+      <div class="mx-auto flex h-16 max-w-7xl items-center gap-3 px-6 md:px-10">
         <svg
           viewBox="14 72 96 96"
-          class="h-8 w-9 shrink-0 md:h-9 md:w-10"
+          class="h-6 w-7 shrink-0"
           role="img"
           :aria-label="t('welcome.footer.wordmark')"
         >
-          <rect x="14" y="72" width="96" height="96" rx="18" class="fill-surface-base" />
+          <rect x="14" y="72" width="96" height="96" rx="14" class="fill-surface-base" />
           <path
             d="M36 120h14l10-26 12 52 10-26h16"
             fill="none"
@@ -107,22 +108,10 @@ function go(href: string) {
             stroke-linejoin="round"
           />
         </svg>
-        <span class="wordmark-big-text text-surface-base min-w-0 truncate">{{
+        <span class="text-surface-base truncate text-2xl font-semibold tracking-tight">{{
           t("welcome.footer.wordmark")
         }}</span>
       </div>
     </div>
   </footer>
 </template>
-
-<style scoped>
-/* keep(brand): the footer wordmark carries the page's display scale (a fluid
-   vw clamp). Marketing type steps exist only here, not as app utilities. */
-.wordmark-big-text {
-  font-size: clamp(2rem, 6vw, 4.5rem);
-  line-height: 1;
-  letter-spacing: var(--tracking-tight);
-  font-weight: var(--font-medium);
-  white-space: nowrap;
-}
-</style>

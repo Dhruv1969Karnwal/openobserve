@@ -94,7 +94,7 @@ const spark = computed(() => {
     class="rounded-surface border-border-subtle bg-surface-panel overflow-hidden border"
     :aria-label="t('welcome.fragment.aria')"
   >
-    <div class="flex items-center gap-1 px-3 pt-3">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 pt-3">
       <div
         role="tablist"
         :aria-label="t('welcome.fragment.signal')"

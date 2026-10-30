@@ -1,9 +1,8 @@
 <script setup lang="ts">
 // Copyright 2026 OpenObserve Inc.
 
-// Closing statement: headline, one line of ground, the standard primary
-// action at its standard size (the round-1 council rejected the inline
-// baseline block as a collision and a scale break).
+// Closing statement: left-anchored composition — headline, ground, and the
+// standard primary action under the copy, on the shared page grid.
 import { useI18nTyped } from "@/types/i18n";
 import { getPath } from "@/utils/queryUtils";
 
@@ -13,28 +12,24 @@ const base = getPath();
 
 <template>
   <section aria-labelledby="cta-h" class="bg-text-heading">
-    <div
-      class="mx-auto flex max-w-7xl flex-col gap-10 px-6 py-24 md:px-10 md:py-28 lg:flex-row lg:items-end lg:justify-between"
-    >
-      <div>
-        <h2
-          id="cta-h"
-          class="cta-sentence text-surface-base leading-[1.04] font-semibold tracking-tight"
-          data-reveal
-        >
-          {{ t("welcome.cta.sentence") }}
-        </h2>
-        <p
-          class="text-surface-base mt-4 max-w-xl text-base leading-relaxed md:text-lg"
-          data-reveal
-          data-reveal-step="1"
-        >
-          {{ t("welcome.cta.note") }}
-        </p>
-      </div>
+    <div class="mx-auto max-w-7xl px-6 py-20 md:px-10 md:py-24">
+      <h2
+        id="cta-h"
+        class="cta-sentence text-surface-base leading-[1.04] font-semibold tracking-tight text-balance"
+        data-test="landing-cta-heading"
+      >
+        {{ t("welcome.cta.sentence") }}
+      </h2>
+      <p
+        class="text-surface-base mt-5 max-w-xl text-lg leading-relaxed"
+        data-reveal
+        data-reveal-step="1"
+      >
+        {{ t("welcome.cta.note") }}
+      </p>
       <a
         :href="base + 'login'"
-        class="rounded-default bg-surface-base text-text-heading focus-visible:ring-surface-base hover:bg-surface-panel inline-flex h-12 shrink-0 items-center px-6 text-base font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        class="rounded-default text-text-heading hover:bg-surface-panel focus-visible:ring-offset-surface-base focus-visible:ring-surface-base mt-10 inline-flex h-12 items-center justify-center px-6 text-base font-medium transition-colors duration-150 outline-none hover:no-underline focus-visible:ring-2 focus-visible:ring-offset-2"
         data-landing-cta="final"
         data-test="landing-cta-button"
         data-reveal

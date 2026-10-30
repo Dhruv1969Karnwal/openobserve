@@ -79,7 +79,7 @@ onBeforeUnmount(() => {
       <div class="flex items-center gap-2">
         <a
           :href="`${base}login`"
-          class="rounded-default bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover focus-visible:ring-text-heading hidden h-10 items-center px-4 text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 md:inline-flex"
+          class="rounded-default bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover focus-visible:ring-text-heading hidden h-10 items-center px-4 text-sm font-medium transition-colors duration-150 outline-none hover:no-underline focus-visible:ring-2 focus-visible:ring-offset-2 md:inline-flex"
           data-landing-cta="signin"
           data-test="landing-nav-signin"
           >{{ t("welcome.hero.cta") }}</a
@@ -125,7 +125,7 @@ onBeforeUnmount(() => {
             v-for="l in LINKS"
             :key="l.href"
             :href="l.href"
-            class="rounded-default text-text-heading focus-visible:ring-text-heading px-2 py-3 text-lg outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            class="rounded-default text-text-heading focus-visible:ring-text-heading px-1 py-3 text-lg outline-none hover:no-underline focus-visible:ring-2 focus-visible:ring-inset"
             data-test="landing-sheet-link"
             @click.prevent="go(l.href)"
             >{{ t(l.key) }}</a

@@ -152,7 +152,7 @@ const F = {
 /* keep(brand): statement step sits between body and section-h2; no utility
    covers it with the brand's tight tracking. */
 .band-sentence {
-  font-size: clamp(1.125rem, 1vw + 0.9rem, 1.5rem);
+  font-size: clamp(1.125rem, 0.9vw + 0.9rem, 1.375rem);
   line-height: 1.25;
   letter-spacing: var(--tracking-tight);
   font-weight: var(--font-semibold);

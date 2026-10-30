@@ -82,20 +82,16 @@ onBeforeUnmount(() => {
           <div
             class="border-border-subtle flex items-center justify-between gap-4 border-b px-4 py-2"
           >
-            <p class="text-compact text-text-secondary">
-              <span class="font-mono text-xs">{{ t("welcome.stages.terminal") }}</span>
-              <span aria-hidden="true"> · </span
-              ><span class="font-mono text-xs">{{ t("welcome.stages.termTag") }}</span>
-            </p>
+            <p class="text-text-secondary font-mono text-xs">{{ t("welcome.stages.terminal") }}</p>
           </div>
           <pre
-            class="text-text-code overflow-x-auto px-4 py-4 font-mono text-xs leading-6"
+            class="text-text-code overflow-x-auto px-4 py-4 font-mono text-xs leading-6 break-all whitespace-pre-wrap"
             data-test="landing-curl"
           ><!-- eslint-disable vue/no-bare-strings-in-template --><code>curl -u [EMAIL]:[PASSCODE] -k \
   {{ CURL.url }} \
   -d '{{ CURL.body }}'</code><!-- eslint-enable vue/no-bare-strings-in-template --></pre>
           <div class="border-border-subtle flex items-center gap-2 border-t px-4 py-2">
-            <span class="text-text-secondary" aria-hidden="true">→</span>
+            <span class="text-text-secondary font-mono" aria-hidden="true">→</span>
             <p class="text-text-heading font-mono text-xs" data-test="landing-stage-outcome">
               {{ t("welcome.stages.ok") }}
             </p>
@@ -107,6 +103,7 @@ onBeforeUnmount(() => {
         <div
           class="rounded-surface border-border-strong grid grid-cols-2 gap-px overflow-hidden border md:grid-cols-4"
           role="tablist"
+          @focusin="stop()"
           :aria-label="t('welcome.stages.heading')"
           data-test="landing-steps"
           data-stages="4"
@@ -144,7 +141,7 @@ onBeforeUnmount(() => {
 /* keep(brand): clause line sits between heading and body sizes with the
    brand's tight tracking; no utility covers it. */
 .stage-clause {
-  font-size: clamp(1.5rem, 2.2vw + 0.75rem, 2.25rem);
+  font-size: clamp(1.375rem, 1.6vw + 0.8rem, 1.75rem);
   line-height: 1.12;
   letter-spacing: var(--tracking-tight);
   font-weight: var(--font-semibold);

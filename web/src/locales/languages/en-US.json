@@ -26867,7 +26867,7 @@
       "n2": "Search",
       "n3": "Alert",
       "terminal": "terminal \u00b7 HTTP JSON API",
-      "ok": "\u2192 HTTP 200 \u00b7 21 ms",
+      "ok": "HTTP 200 \u00b7 21 ms",
       "searchScope": "search \u00b7 app_logs \u00b7 15m",
       "a_r1": "charge accepted service=billing",
       "a_r2": "webhook ops-oncall delivered 200",
@@ -26884,7 +26884,8 @@
       "tEmail": "email \u00b7 ops\\@corp.example",
       "tWebhook": "webhook \u00b7 ops-oncall",
       "nodeAria": "Go to stage {n}: {label}",
-      "termTag": "HTTP JSON API"
+      "termTag": "HTTP JSON API",
+      "p4b": null
     },
     "letter": {
       "heading": "Open source, and why this exists",
@@ -26894,7 +26895,7 @@
       "p3": "This build ships a single edition: every capability you saw on this page is what you get. No locked screens, no upsell, no tier to unlock.",
       "p4a": "Retrace.ai is built on",
       "p4link": "OpenObserve",
-      "p4b": ", the open-source observability database released under AGPL-3.0 \u2014 the engine underneath is their work and stays credited. What I design is the surface it presents: one calm interface for the whole signal set.",
+      "p4b": ", the open-source observability database released under AGPL-3.0 \u2014 the engine underneath is theirs and stays credited. What I design is the surface it presents: one calm interface for the whole signal set.",
       "p5": "Point it at your first stream. It takes a few minutes, and from then on the box answers to you.",
       "signoff": "Dhruv Karnwal",
       "role": "Designer and maintainer of Retrace.ai"
@@ -26912,9 +26913,11 @@
       "authorNote": "A single-edition observability surface you can self-host in an afternoon \u2014 the subject of everything above.",
       "wordmark": "Retrace.ai",
       "invite": "Open the app",
-      "source": "Source on GitHub",
+      "source": "GitHub",
       "inviteNote": "Sign in to reach search, dashboards and alerts on your own instance.",
-      "navAria": "Links"
+      "navAria": "Links",
+      "eyebrow": "Pages",
+      "created": "Created by"
     },
     "view": {
       "skip": "Skip to content"
