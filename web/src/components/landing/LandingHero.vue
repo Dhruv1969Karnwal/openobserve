@@ -5,11 +5,9 @@
 // the app's own controls over example stream data — works at real size beside
 // it. Below lg the fragment falls under the copy at its natural width.
 import { useI18nTyped } from "@/types/i18n";
-import { getPath } from "@/utils/queryUtils";
 import LogFragment from "./LogFragment.vue";
 
 const { t } = useI18nTyped();
-const base = getPath();
 
 function reduced(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -48,17 +46,24 @@ function scrollToSection(id: string) {
           data-reveal-step="2"
         >
           <a
-            :href="base + 'login'"
+            href="#how-it-works"
             class="rounded-default bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover active:bg-button-primary-active focus-visible:ring-text-heading inline-flex h-12 items-center px-6 text-base font-medium transition-colors duration-150 outline-none hover:no-underline focus-visible:ring-2 focus-visible:ring-offset-2"
             data-landing-cta="get-started"
             data-test="landing-hero-cta"
+            @click.prevent="
+              scrollToSection('how-it-works');
+              history.replaceState(null, '', '#how-it-works');
+            "
             >{{ t("welcome.hero.cta") }}</a
           >
           <a
             href="#how-it-works"
             class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-text-heading text-base underline underline-offset-4 transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             data-test="landing-hero-secondary"
-            @click.prevent="scrollToSection('how-it-works')"
+            @click.prevent="
+              scrollToSection('how-it-works');
+              history.replaceState(null, '', '#how-it-works');
+            "
             >{{ t("welcome.hero.secondary") }}</a
           >
         </div>

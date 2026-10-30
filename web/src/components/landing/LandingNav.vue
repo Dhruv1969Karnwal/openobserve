@@ -52,7 +52,11 @@ onBeforeUnmount(() => {
 <template>
   <header
     class="sticky top-0 z-100 transition-colors duration-200"
-    :class="scrolled || open ? 'bg-surface-panel shadow-sm' : 'bg-surface-base'"
+    :class="
+      scrolled || open
+        ? 'border-border-subtle bg-surface-panel border-b shadow-sm'
+        : 'bg-surface-base'
+    "
     data-test="landing-nav"
   >
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-10">

@@ -6,13 +6,20 @@
 import { useI18nTyped } from "@/types/i18n";
 
 const { t } = useI18nTyped();
+
+const FACTS: Array<[string, string]> = [
+  ["welcome.letter.f1", "OpenObserve"],
+  ["welcome.letter.f2", "AGPL-3.0"],
+  ["welcome.letter.f3", "1 binary"],
+  ["welcome.letter.f4", "5080"],
+];
 </script>
 
 <template>
   <section id="open-source" aria-labelledby="letter-h" class="scroll-mt-24">
     <div class="mx-auto grid max-w-7xl grid-cols-1 px-6 py-14 md:px-10 md:py-16 lg:grid-cols-12">
       <h2 id="letter-h" class="sr-only">{{ t("welcome.letter.heading") }}</h2>
-      <article class="rounded-surface bg-surface-subtle p-6 md:p-10 lg:col-span-12" data-reveal>
+      <article class="rounded-surface bg-surface-subtle p-6 md:p-10 lg:col-span-8" data-reveal>
         <svg
           viewBox="14 72 96 96"
           class="size-10"
@@ -60,21 +67,9 @@ const { t } = useI18nTyped();
           <dl
             class="divide-border-subtle border-border-subtle mt-4 flex flex-col divide-y border-t"
           >
-            <div class="flex flex-col gap-1 py-1">
-              <dt class="text-text-body text-sm">{{ t("welcome.letter.f1") }}</dt>
-              <dd class="text-text-heading font-mono text-xs">OpenObserve</dd>
-            </div>
-            <div class="flex flex-col gap-1 py-1">
-              <dt class="text-text-body text-sm">{{ t("welcome.letter.f2") }}</dt>
-              <dd class="text-text-heading font-mono text-xs">AGPL-3.0</dd>
-            </div>
-            <div class="flex flex-col gap-1 py-1">
-              <dt class="text-text-body text-sm">{{ t("welcome.letter.f3") }}</dt>
-              <dd class="text-text-heading font-mono text-xs">1 binary</dd>
-            </div>
-            <div class="flex flex-col gap-1 py-1">
-              <dt class="text-text-body text-sm">{{ t("welcome.letter.f4") }}</dt>
-              <dd class="text-text-heading font-mono text-xs">:5080</dd>
+            <div v-for="f in FACTS" :key="f[0]" class="flex flex-col gap-1 py-1">
+              <dt class="text-text-body text-sm">{{ t(f[0]) }}</dt>
+              <dd class="text-text-heading font-mono text-xs">{{ f[1] }}</dd>
             </div>
           </dl>
         </aside>

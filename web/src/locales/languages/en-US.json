@@ -26801,7 +26801,7 @@
       "line1": "Every signal,",
       "line2": "one box",
       "sub": "Logs, metrics, traces, dashboards and alerts \u2014 one open-source binary you run on your own hardware.",
-      "cta": "Sign in",
+      "cta": "Run it in one command",
       "secondary": "See ingestion in one command",
       "caption": "The log-search view \u2014 the product\u2019s own interface, running on this page with an example stream.",
       "facts": "Linux \u00b7 Docker \u00b7 bare metal \u2014 one binary, one port (:5080), no external services."
@@ -26820,7 +26820,8 @@
       "eventsChart": "Events per minute, example stream",
       "eventsFoot": "events/min \u00b7 app_logs \u00b7 last 24 points",
       "traceFoot": "trace 04d77ba8 \u00b7 5 spans \u00b7 waterfall view",
-      "moreRows": "more in this stream"
+      "moreRows": "more in this stream",
+      "showAll": "show all"
     },
     "oneLine": {
       "heading": "What one line does",

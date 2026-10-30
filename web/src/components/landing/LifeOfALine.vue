@@ -73,7 +73,7 @@ const fired = ref(false);
                 <span class="text-text-body min-w-0 truncate text-sm">{{ r.message }}</span>
               </li>
             </ul>
-            <p class="text-compact text-text-body mt-auto pt-6">
+            <p class="text-compact text-text-body mt-3">
               {{ t("welcome.oneLine.arrivesNote") }}
             </p>
           </div>
@@ -103,7 +103,7 @@ const fired = ref(false);
                   <span class="text-text-body min-w-0 truncate text-sm">{{ r.message }}</span>
                 </li>
               </ul>
-              <p class="text-compact text-text-body mt-auto pt-6">
+              <p class="text-compact text-text-body mt-3">
                 {{ t("welcome.oneLine.lookNote") }}
               </p>
             </div>
@@ -116,7 +116,7 @@ const fired = ref(false);
               data-test="landing-alert-demo"
             >
               <p class="text-text-code font-mono text-xs">{{ F.cond }}</p>
-              <div class="mt-3 grid grid-cols-3 gap-2">
+              <div class="mt-3 grid grid-cols-3 gap-1.5">
                 <span
                   v-for="(lv, i) in LEVELS"
                   :key="lv"

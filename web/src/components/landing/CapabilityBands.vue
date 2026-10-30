@@ -25,7 +25,6 @@ const F = {
   rateNow: "4.1k events/min",
   rateA: "09:52",
   rateB: "10:00",
-  rateB: "10:00",
   cond: "count(level='error') >= 2 in 5m",
   fired: "Fired 14:32:11 · 2 notified",
   email: "email",

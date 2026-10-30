@@ -56,8 +56,9 @@ function jsonClass(kind: string): string {
 }
 
 const MAX_ROWS = 7;
-const visible = computed(() => matched.value.slice(0, MAX_ROWS));
-const moreRows = computed(() => Math.max(0, matched.value.length - MAX_ROWS));
+const showAll = ref(false);
+const visible = computed(() => (showAll.value ? matched.value : matched.value.slice(0, MAX_ROWS)));
+const moreRows = computed(() => Math.max(0, matched.value.length - visible.value.length));
 
 function toggleLevel(level: string) {
   const next = new Set(levelsOn.value);
@@ -119,7 +120,7 @@ const spark = computed(() => {
       </div>
       <span
         v-if="tab === 'logs'"
-        class="text-text-secondary ms-auto font-mono text-xs tabular-nums"
+        class="text-text-body ms-auto font-mono text-xs tabular-nums"
         data-test="landing-fragment-count"
       >
         {{ t("welcome.fragment.rowsShown", { shown: visible.length, total: matched.length }) }}
@@ -192,7 +193,7 @@ const spark = computed(() => {
               >
                 <path d="m4.5 2.5 4 3.5-4 3.5" />
               </svg>
-              <span class="text-text-secondary font-mono text-xs tabular-nums">{{ row.time }}</span>
+              <span class="text-text-body font-mono text-xs tabular-nums">{{ row.time }}</span>
               <span
                 class="bg-surface-subtle text-2xs rounded-xs border-s-2 px-1.5 py-px font-mono leading-4"
                 :class="chipStyles[row.level]"
@@ -215,12 +216,16 @@ const spark = computed(() => {
               </div>
             </div>
           </li>
-          <li
-            v-if="moreRows > 0"
-            class="text-text-body px-3 py-2 text-center font-mono text-xs"
-            data-test="landing-more-rows"
-          >
-            +{{ moreRows }} {{ t("welcome.fragment.moreRows") }}
+          <li v-if="moreRows > 0" class="px-3 py-1 text-center">
+            <button
+              type="button"
+              class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-text-heading px-2 py-1 font-mono text-xs underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              data-test="landing-more-rows"
+              @click="showAll = true"
+            >
+              +{{ moreRows }} {{ t("welcome.fragment.moreRows") }} ·
+              {{ t("welcome.fragment.showAll") }}
+            </button>
           </li>
           <li
             v-if="matched.length === 0"
