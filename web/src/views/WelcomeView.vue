@@ -63,7 +63,9 @@ function setMeta(kind: "name" | "property", key: string, value: string) {
 onMounted(() => {
   document.title = "Retrace.ai — every signal, one box";
   document.documentElement.style.overflow = "auto";
-  document.body.style.overflow = "auto";
+  // body must stay `visible` (not auto): with both boxes scrollable, Chrome
+  // detaches position:sticky from the viewport scrollport.
+  document.body.style.overflow = "visible";
   for (const [kind, key, value] of META) setMeta(kind as "name" | "property", key, value);
 });
 

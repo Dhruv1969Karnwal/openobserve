@@ -69,7 +69,7 @@ onBeforeUnmount(() => {
           v-for="l in LINKS"
           :key="l.href"
           :href="l.href"
-          class="rounded-default text-text-secondary hover:text-text-heading focus-visible:ring-text-heading text-sm transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-text-heading text-sm transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           data-test="landing-nav-link"
           @click.prevent="go(l.href)"
           >{{ t(l.key) }}</a

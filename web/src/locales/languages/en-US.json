@@ -26801,7 +26801,7 @@
       "line1": "Every signal,",
       "line2": "one box",
       "sub": "Logs, metrics, traces, dashboards and alerts \u2014 one open-source binary you run on your own hardware.",
-      "cta": "Open the app",
+      "cta": "Sign in",
       "secondary": "See ingestion in one command",
       "caption": "The log-search view \u2014 the product\u2019s own interface, running on this page with an example stream.",
       "facts": "Linux \u00b7 Docker \u00b7 bare metal \u2014 one binary, one port (:5080), no external services."
@@ -26917,7 +26917,7 @@
     },
     "cta": {
       "sentence": "Your first stream is minutes away",
-      "button": "Open the app",
+      "button": "Sign in",
       "note": "It runs on your own hardware. Your data stays where you put it."
     },
     "footer": {
@@ -26925,7 +26925,7 @@
       "statement": "One binary for logs, metrics, traces, dashboards and alerts.",
       "legal": "\u00a9 2026 Dhruv Karnwal \u00b7 Retrace.ai is built on OpenObserve (AGPL-3.0), \u00a9 OpenObserve Inc. Product design and code by Dhruv Karnwal.",
       "author": "Created by Dhruv Karnwal",
-      "authorNote": "A single-edition observability surface you can self-host in an afternoon \u2014 the subject of everything above.",
+      "authorNote": "A single-edition observability surface you can self-host in minutes \u2014 the subject of everything above.",
       "wordmark": "Retrace.ai",
       "invite": "Open the app",
       "source": "GitHub",

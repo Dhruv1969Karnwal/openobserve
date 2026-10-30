@@ -90,7 +90,7 @@ const onKey = (e: KeyboardEvent) => {
   http://localhost:5080 \
   /api/default/app_logs/_json \
   -d '{"level":"info",
-       "msg":"charge accepted"}'</code></pre>
+    "msg":"charge accepted"}'</code></pre>
           <!-- eslint-enable vue/no-bare-strings-in-template -->
           <div class="border-border-subtle flex items-center gap-2 border-t px-4 py-2">
             <span class="text-text-body font-mono text-xs" aria-hidden="true">→</span>

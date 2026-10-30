@@ -12,10 +12,7 @@ const { t } = useI18nTyped();
   <section id="open-source" aria-labelledby="letter-h" class="scroll-mt-24">
     <div class="mx-auto grid max-w-7xl grid-cols-1 px-6 py-14 md:px-10 md:py-16 lg:grid-cols-12">
       <h2 id="letter-h" class="sr-only">{{ t("welcome.letter.heading") }}</h2>
-      <article
-        class="rounded-surface bg-surface-subtle p-6 md:p-10 lg:col-span-8 lg:col-start-2"
-        data-reveal
-      >
+      <article class="rounded-surface bg-surface-subtle p-6 md:p-10 lg:col-span-12" data-reveal>
         <svg
           viewBox="14 72 96 96"
           class="size-10"
@@ -34,7 +31,7 @@ const { t } = useI18nTyped();
         </svg>
 
         <div
-          class="text-text-body mt-6 flex max-w-xl flex-col gap-4 text-base leading-relaxed md:text-lg"
+          class="text-text-body mx-auto mt-6 flex max-w-2xl flex-col gap-4 text-base leading-relaxed md:text-lg"
         >
           <p>{{ t("welcome.letter.p1") }}</p>
           <p>{{ t("welcome.letter.p2") }}</p>
@@ -52,13 +49,13 @@ const { t } = useI18nTyped();
           <p>{{ t("welcome.letter.p5") }}</p>
         </div>
 
-        <div class="mt-8">
+        <div class="mx-auto mt-8 max-w-2xl">
           <p class="text-text-heading text-lg font-medium" data-test="landing-letter-signoff">
             {{ t("welcome.letter.signoff") }}
           </p>
           <p class="text-compact text-text-secondary mt-1">{{ t("welcome.letter.role") }}</p>
         </div>
-        <aside class="border-border-subtle mt-10 border-t pt-6" data-reveal>
+        <aside class="border-border-subtle mx-auto mt-10 max-w-4xl border-t pt-6" data-reveal>
           <p class="text-compact text-text-body uppercase">{{ t("welcome.letter.factsTitle") }}</p>
           <dl
             class="divide-border-subtle border-border-subtle mt-4 flex flex-col divide-y border-t"

@@ -23,7 +23,9 @@ const F = {
   sql: "SELECT level, count(*)\nFROM app_logs\nGROUP BY level",
   ingestRate: "ingest rate",
   rateNow: "4.1k events/min",
-  rateWindow: "09:52 — 10:00",
+  rateA: "09:52",
+  rateB: "10:00",
+  rateB: "10:00",
   cond: "count(level='error') >= 2 in 5m",
   fired: "Fired 14:32:11 · 2 notified",
   email: "email",
@@ -86,7 +88,7 @@ const F = {
               v-else-if="b.n === 2"
               class="rounded-surface border-border-subtle bg-surface-panel border p-4"
             >
-              <div class="grid grid-cols-2 gap-4 font-mono text-xs">
+              <div class="grid grid-cols-1 gap-3 font-mono text-xs sm:grid-cols-2 sm:gap-4">
                 <p class="text-text-code whitespace-pre">{{ F.sql }}</p>
                 <table class="text-text-body w-full border-collapse self-end">
                   <tbody>
@@ -137,7 +139,12 @@ const F = {
                   <rect x="222" y="4" width="16" height="43" />
                 </g>
               </svg>
-              <p class="text-text-body mt-1 text-end font-mono text-xs">{{ F.rateWindow }}</p>
+              <div
+                class="text-text-body mt-1 flex items-baseline justify-between font-mono text-xs"
+              >
+                <span>{{ F.rateA }}</span
+                ><span>{{ F.rateB }}</span>
+              </div>
             </div>
             <div
               v-else-if="b.n === 4"

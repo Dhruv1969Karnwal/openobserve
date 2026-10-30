@@ -198,9 +198,7 @@ const spark = computed(() => {
                 :class="chipStyles[row.level]"
                 >{{ row.level }}</span
               >
-              <span class="text-compact text-text-body min-w-0 break-words lg:truncate">{{
-                row.message
-              }}</span>
+              <span class="text-compact text-text-body min-w-0 truncate">{{ row.message }}</span>
               <span
                 class="text-text-body hidden text-end font-mono text-xs tabular-nums lg:block"
                 >{{ row.duration }}</span
