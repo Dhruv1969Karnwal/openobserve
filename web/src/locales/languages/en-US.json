@@ -26799,17 +26799,17 @@
     },
     "hero": {
       "line1": "Every signal,",
-      "line2": "one box.",
+      "line2": "one box",
       "sub": "Logs, metrics, traces, dashboards and alerts \u2014 one open-source binary you run on your own hardware.",
       "cta": "Open the app",
-      "secondary": "Point it at your first stream",
+      "secondary": "See ingestion in one command",
       "caption": "The log-search view \u2014 the product\u2019s own interface, running on this page with an example stream.",
       "facts": "Linux \u00b7 Docker \u00b7 bare metal \u2014 one binary, one port (:5080), no external services."
     },
     "fragment": {
       "aria": "Product preview: log search view",
       "signal": "Signal",
-      "rowsShown": "{shown} of {total} rows",
+      "rowsShown": "showing {shown} of {total}",
       "filter": "Filter rows",
       "filterPlaceholder": "filter this stream",
       "level": "level:",
@@ -26820,7 +26820,7 @@
       "eventsChart": "Events per minute, example stream",
       "eventsFoot": "events/min \u00b7 app_logs \u00b7 last 24 points",
       "traceFoot": "trace 04d77ba8 \u00b7 5 spans \u00b7 waterfall view",
-      "moreRows": "rows ahead in this stream \u2014 scroll the list"
+      "moreRows": "more in this stream"
     },
     "oneLine": {
       "heading": "What one line does",
@@ -26835,11 +26835,13 @@
       "notify": "notify",
       "arrivesNote": "One POST, indexed the moment it lands.",
       "lookNote": "Open the row: every field, one click.",
-      "warnsNote": "A condition on the same rows fires it."
+      "warnsNote": "A condition on the same rows fires it.",
+      "alertRun": "Run check",
+      "alertMetric": "events / min"
     },
     "bands": {
       "heading": "Capabilities",
-      "note": "Everything below ships in the box \u2014 flip a switch to spotlight a capability.",
+      "note": "Everything below ships in the single edition \u2014 no locked tiers, no upsell screens.",
       "toggleDetail": "Toggle detail for: {sentence}",
       "b1": "Logs, metrics and traces live in one store",
       "b1c": "One stream schema, one binary, one query path \u2014 no bolted-together trio of backends.",
@@ -26881,7 +26883,8 @@
       "notifyLabel": "notify",
       "tEmail": "email \u00b7 ops\\@corp.example",
       "tWebhook": "webhook \u00b7 ops-oncall",
-      "nodeAria": "Go to stage {n}: {label}"
+      "nodeAria": "Go to stage {n}: {label}",
+      "termTag": "HTTP JSON API"
     },
     "letter": {
       "heading": "Open source, and why this exists",
@@ -26897,7 +26900,7 @@
       "role": "Designer and maintainer of Retrace.ai"
     },
     "cta": {
-      "sentence": "Your first stream is minutes away.",
+      "sentence": "Your first stream is minutes away",
       "button": "Open the app",
       "note": "It runs on your own hardware. Your data stays where you put it."
     },

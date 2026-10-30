@@ -1,11 +1,10 @@
 <script setup lang="ts">
 // Copyright 2026 OpenObserve Inc.
 
-// Capabilities: a statement row each with a working switch and a matching
-// product fragment in a fixed right column (the round-2 council: the off rows
-// read unfinished with an empty half). On = the row's field inverts — the
-// product's primary-by-inversion signature.
-import { ref } from "vue";
+// Capabilities: five statements, each with its product fragment on a shared
+// grid. Round-4 decision: the interactive spotlight switches were removed -
+// they read as broken state, not control; the page's interactive element is
+// the hero explorer plus the ingestion stepper.
 import { useI18nTyped } from "@/types/i18n";
 
 const { t } = useI18nTyped();
@@ -21,32 +20,23 @@ const BANDS = [
 const F = {
   streams: ["app_logs", "host_metrics", "ingest_traces"] as const,
   oneStore: "one store · node retrace-0",
-  sql: "SELECT level, count(*) FROM app_logs GROUP BY level",
-  lucene: "level:error AND service:billing",
+  sql: "SELECT level, count(*)\nFROM app_logs\nGROUP BY level",
   ingestRate: "ingest rate",
-  refreshFast: "5s",
-  refreshSlow: "1m",
+  rateNow: "4.1k events/min",
+  rateWindow: "09:52 — 10:00",
   cond: "count(level:error) >= 2 in 5m",
+  fired: "Fired 14:32:11 · 2 notified",
   email: "email",
   webhook: "webhook",
-  docker: "docker run -p 5080:5080 retrace/retrace",
+  dockerA: "docker run -p 5080:5080 \\",
+  dockerB: "  retrace/retrace:latest",
   ready: ":5080 ready",
-  modeSQL: "SQL",
-  modeLucene: "Lucene",
 };
-
-const bands = ref<Record<number, boolean>>({ 1: true, 2: true, 3: false, 4: false, 5: false });
-const MODES = ["SQL", "Lucene"] as const;
-const mode = ref<"SQL" | "Lucene">("SQL");
-
-function toggle(i: number) {
-  bands.value[i] = !bands.value[i];
-}
 </script>
 
 <template>
   <section id="capabilities" aria-labelledby="capabilities-h" class="scroll-mt-24">
-    <div class="mx-auto max-w-7xl px-6 pt-20 md:px-10 md:pt-24">
+    <div class="mx-auto max-w-7xl px-6 pt-16 md:px-10 md:pt-20">
       <h2
         id="capabilities-h"
         class="text-text-heading text-2xl font-semibold tracking-tight text-balance md:text-3xl"
@@ -54,276 +44,117 @@ function toggle(i: number) {
       >
         {{ t("welcome.bands.heading") }}
       </h2>
-      <p class="text-text-secondary mt-3 text-base">{{ t("welcome.bands.note") }}</p>
+      <p class="text-text-secondary mt-3 max-w-2xl text-base">{{ t("welcome.bands.note") }}</p>
     </div>
 
     <div class="mt-8 flex flex-col">
-      <template v-for="b in BANDS" :key="b.n">
-        <div v-if="bands[b.n]" class="bg-text-heading" data-reveal>
-          <div
-            class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-x-8 gap-y-5 px-6 py-8 md:grid-cols-12 md:px-10"
-          >
-            <div class="min-w-0 md:col-span-6 lg:col-span-7">
-              <div class="flex items-center gap-5">
-                <button
-                  type="button"
-                  role="switch"
-                  :aria-checked="true"
-                  :aria-label="t('welcome.bands.toggleDetail', { sentence: t(b.s) })"
-                  data-test="landing-band-switch"
-                  class="border-surface-base bg-surface-base focus-visible:ring-surface-base relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 px-0.5 transition-colors duration-150 focus-visible:ring-2"
-                  @click="toggle(b.n)"
-                >
-                  <span
-                    class="bg-text-heading block size-5 translate-x-5 rounded-full"
-                    aria-hidden="true"
-                  />
-                </button>
-                <p class="band-sentence text-surface-base min-w-0 text-balance">{{ t(b.s) }}.</p>
+      <div v-for="b in BANDS" :key="b.n" class="border-border-subtle border-t" data-reveal>
+        <div
+          class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-x-10 gap-y-6 px-6 py-8 md:grid-cols-12 md:px-10"
+        >
+          <div class="min-w-0 md:col-span-7">
+            <p class="band-sentence text-text-heading text-balance">{{ t(b.s) }}</p>
+            <p class="text-text-secondary mt-2 max-w-xl text-base leading-relaxed">{{ t(b.c) }}</p>
+          </div>
+          <div class="md:col-span-5" data-ui>
+            <div
+              v-if="b.n === 1"
+              class="rounded-surface border-border-subtle bg-surface-panel border p-4"
+            >
+              <div class="flex flex-wrap items-center gap-2 font-mono text-xs">
+                <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
+                  F.streams[0]
+                }}</span>
+                <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
+                  F.streams[1]
+                }}</span>
+                <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
+                  F.streams[2]
+                }}</span>
               </div>
-              <p class="text-surface-base mt-3 max-w-xl text-base leading-relaxed md:ps-17">
-                {{ t(b.c) }}
-              </p>
+              <p class="text-text-secondary mt-2 font-mono text-xs">{{ F.oneStore }}</p>
             </div>
-            <div class="md:col-span-6 lg:col-span-5" data-ui>
-              <!-- per-band fragment, same geometry in every row -->
-              <div
-                v-if="b.n === 1"
-                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
-              >
-                <div class="text-2xs flex flex-wrap items-center gap-2 font-mono">
-                  <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
-                    F.streams[0]
-                  }}</span>
-                  <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
-                    F.streams[1]
-                  }}</span>
-                  <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
-                    F.streams[2]
-                  }}</span>
-                </div>
-                <p class="text-2xs text-text-secondary mt-2 font-mono">
-                  {{ F.oneStore }}
-                </p>
+            <div
+              v-else-if="b.n === 2"
+              class="rounded-surface border-border-subtle bg-surface-panel border p-4"
+            >
+              <p class="text-text-code font-mono text-xs leading-6 whitespace-pre">{{ F.sql }}</p>
+            </div>
+            <div
+              v-else-if="b.n === 3"
+              class="rounded-surface border-border-subtle bg-surface-panel border p-4"
+            >
+              <div class="flex items-baseline justify-between gap-4">
+                <p class="text-compact text-text-heading font-medium">{{ F.ingestRate }}</p>
+                <p class="text-text-body font-mono text-xs tabular-nums">{{ F.rateNow }}</p>
               </div>
-              <div
-                v-else-if="b.n === 2"
-                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
+              <svg
+                viewBox="0 0 240 48"
+                class="text-text-heading mt-2 h-10 w-full"
+                role="img"
+                :aria-label="t('welcome.fragment.eventsChart')"
               >
-                <div class="flex gap-1">
-                  <button
-                    v-for="m in MODES"
-                    :key="m"
-                    type="button"
-                    class="rounded-default text-compact focus-visible:ring-text-heading h-7 px-3 font-medium transition-colors duration-150 focus-visible:ring-2"
-                    :class="
-                      mode === m
-                        ? 'bg-text-heading text-surface-base'
-                        : 'text-text-secondary hover:text-text-heading'
-                    "
-                    :aria-pressed="mode === m"
-                    data-test="landing-mode-chip"
-                    @click="mode = m"
-                  >
-                    {{ m }}
-                  </button>
-                </div>
-                <p class="text-2xs text-text-code mt-2 min-w-0 font-mono break-words lg:truncate">
-                  {{ F.sql }}
-                </p>
+                <line
+                  x1="0"
+                  y1="47"
+                  x2="240"
+                  y2="47"
+                  stroke="currentColor"
+                  stroke-opacity="0.35"
+                  stroke-width="1"
+                  vector-effect="non-scaling-stroke"
+                />
+                <path
+                  d="M0 34 L24 38 L48 30 L72 35 L96 24 L120 29 L144 18 L168 25 L192 14 L216 20 L240 10"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  vector-effect="non-scaling-stroke"
+                />
+              </svg>
+              <p class="text-text-secondary mt-1 text-end font-mono text-xs">{{ F.rateWindow }}</p>
+            </div>
+            <div
+              v-else-if="b.n === 4"
+              class="rounded-surface border-border-subtle bg-surface-panel border p-4"
+            >
+              <p class="text-text-code font-mono text-xs">{{ F.cond }}</p>
+              <div class="mt-2 flex flex-wrap items-center gap-2 font-mono text-xs">
+                <span class="rounded-default bg-surface-subtle text-text-heading px-2 py-1">{{
+                  F.email
+                }}</span>
+                <span class="rounded-default bg-surface-subtle text-text-heading px-2 py-1">{{
+                  F.webhook
+                }}</span>
+                <span class="text-text-secondary ms-auto">{{ F.fired }}</span>
               </div>
-              <div
-                v-else-if="b.n === 3"
-                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
+            </div>
+            <div v-else class="rounded-surface border-border-subtle bg-surface-panel border p-4">
+              <p class="text-text-code font-mono text-xs leading-6">
+                {{ F.dockerA }}<br />{{ F.dockerB }}
+              </p>
+              <p
+                class="rounded-default bg-surface-subtle text-text-heading mt-2 inline-flex items-center gap-1.5 px-2 py-1 font-mono text-xs"
               >
-                <div class="flex items-center justify-between">
-                  <p class="text-compact text-text-heading font-medium">{{ F.ingestRate }}</p>
-                  <span
-                    class="rounded-default bg-surface-subtle text-2xs text-text-heading px-2 py-0.5 font-mono"
-                    >{{ F.refreshFast }}</span
-                  >
-                </div>
-                <svg
-                  viewBox="0 0 240 64"
-                  class="text-text-heading mt-2 h-14 w-full"
-                  role="img"
-                  :aria-label="t('welcome.fragment.eventsChart')"
-                >
-                  <path
-                    d="M0 52 L24 46 L48 49 L72 38 L96 41 L120 30 L144 33 L168 22 L192 26 L216 14 L240 17"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    vector-effect="non-scaling-stroke"
-                  />
-                </svg>
-              </div>
-              <div
-                v-else-if="b.n === 4"
-                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
-              >
-                <p class="text-2xs text-text-code font-mono">{{ F.cond }}</p>
-                <div class="text-2xs mt-2 flex flex-wrap gap-2 font-mono">
-                  <span class="rounded-default bg-surface-subtle text-text-heading px-2 py-1">{{
-                    F.email
-                  }}</span>
-                  <span class="rounded-default bg-surface-subtle text-text-heading px-2 py-1">{{
-                    F.webhook
-                  }}</span>
-                </div>
-              </div>
-              <div
-                v-else
-                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
-              >
-                <p class="text-2xs text-text-code truncate font-mono">
-                  {{ F.docker }}
-                </p>
-                <p
-                  class="rounded-default bg-surface-subtle text-2xs text-text-heading mt-2 inline-flex items-center gap-1.5 px-2 py-1 font-mono"
-                >
-                  <span class="bg-text-heading size-1.5 rounded-full" aria-hidden="true" />{{
-                    F.ready
-                  }}
-                </p>
-              </div>
+                <span class="bg-text-heading size-1.5 rounded-full" aria-hidden="true" />{{
+                  F.ready
+                }}
+              </p>
             </div>
           </div>
         </div>
-        <div v-else class="bg-surface-base" data-reveal>
-          <div
-            class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-x-8 gap-y-5 px-6 py-8 md:grid-cols-12 md:px-10"
-          >
-            <div class="min-w-0 md:col-span-6 lg:col-span-7">
-              <div class="flex items-center gap-5">
-                <button
-                  type="button"
-                  role="switch"
-                  :aria-checked="false"
-                  :aria-label="t('welcome.bands.toggleDetail', { sentence: t(b.s) })"
-                  data-test="landing-band-switch"
-                  class="border-text-heading focus-visible:ring-focus-ring-accent relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 bg-transparent px-0.5 transition-colors duration-150 focus-visible:ring-2"
-                  @click="toggle(b.n)"
-                >
-                  <span
-                    class="bg-text-heading block size-5 translate-x-0 rounded-full"
-                    aria-hidden="true"
-                  />
-                </button>
-                <p class="band-sentence text-text-heading min-w-0 text-balance">{{ t(b.s) }}.</p>
-              </div>
-              <p class="text-text-secondary mt-3 max-w-xl text-base leading-relaxed md:ps-17">
-                {{ t(b.c) }}
-              </p>
-            </div>
-            <div class="md:col-span-6 lg:col-span-5" data-ui>
-              <div
-                v-if="b.n === 1"
-                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
-              >
-                <div class="text-2xs flex flex-wrap items-center gap-2 font-mono">
-                  <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
-                    F.streams[0]
-                  }}</span>
-                  <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
-                    F.streams[1]
-                  }}</span>
-                  <span class="rounded-default bg-surface-base text-text-heading px-2 py-1">{{
-                    F.streams[2]
-                  }}</span>
-                </div>
-                <p class="text-2xs text-text-secondary mt-2 font-mono">
-                  {{ F.oneStore }}
-                </p>
-              </div>
-              <div
-                v-else-if="b.n === 2"
-                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
-              >
-                <div class="flex gap-1">
-                  <span
-                    class="rounded-default bg-text-heading text-compact text-surface-base h-7 px-3 leading-7 font-medium"
-                    >{{ F.modeSQL }}</span
-                  >
-                  <span
-                    class="rounded-default text-compact text-text-secondary h-7 px-3 leading-7 font-medium"
-                    >{{ F.modeLucene }}</span
-                  >
-                </div>
-                <p class="text-2xs text-text-code mt-2 min-w-0 font-mono break-words lg:truncate">
-                  {{ F.lucene }}
-                </p>
-              </div>
-              <div
-                v-else-if="b.n === 3"
-                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
-              >
-                <div class="flex items-center justify-between">
-                  <p class="text-compact text-text-heading font-medium">{{ F.ingestRate }}</p>
-                  <span
-                    class="rounded-default bg-surface-subtle text-2xs text-text-heading px-2 py-0.5 font-mono"
-                    >{{ F.refreshSlow }}</span
-                  >
-                </div>
-                <svg
-                  viewBox="0 0 240 64"
-                  class="text-text-heading mt-2 h-14 w-full"
-                  role="img"
-                  :aria-label="t('welcome.fragment.eventsChart')"
-                >
-                  <path
-                    d="M0 40 L24 44 L48 36 L72 41 L96 32 L120 37 L144 28 L168 34 L192 26 L216 31 L240 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    vector-effect="non-scaling-stroke"
-                  />
-                </svg>
-              </div>
-              <div
-                v-else-if="b.n === 4"
-                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
-              >
-                <p class="text-2xs text-text-code font-mono">{{ F.cond }}</p>
-                <div class="text-2xs mt-2 flex flex-wrap gap-2 font-mono">
-                  <span class="rounded-default bg-surface-subtle text-text-heading px-2 py-1">{{
-                    F.email
-                  }}</span>
-                  <span class="rounded-default bg-surface-subtle text-text-heading px-2 py-1">{{
-                    F.webhook
-                  }}</span>
-                </div>
-              </div>
-              <div
-                v-else
-                class="rounded-surface border-border-subtle bg-surface-panel flex min-h-28 flex-col justify-center gap-0 border p-3"
-              >
-                <p class="text-2xs text-text-code truncate font-mono">
-                  {{ F.docker }}
-                </p>
-                <p
-                  class="rounded-default bg-surface-subtle text-2xs text-text-heading mt-2 inline-flex items-center gap-1.5 px-2 py-1 font-mono"
-                >
-                  <span class="bg-text-heading size-1.5 rounded-full" aria-hidden="true" />{{
-                    F.ready
-                  }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
+      </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-/* keep(brand): fluid marketing sentence step between 2xl and 3xl; no utility
-   covers the 1.25rem-1.875rem marketing band with the brand's tight tracking. */
+/* keep(brand): statement step sits between body and section-h2; no utility
+   covers it with the brand's tight tracking. */
 .band-sentence {
-  font-size: clamp(1.25rem, 1.2vw + 1rem, 1.875rem);
-  line-height: 1.15;
+  font-size: clamp(1.125rem, 1vw + 0.9rem, 1.5rem);
+  line-height: 1.25;
   letter-spacing: var(--tracking-tight);
-  font-weight: var(--font-medium);
+  font-weight: var(--font-semibold);
 }
 </style>

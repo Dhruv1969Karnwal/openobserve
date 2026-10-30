@@ -91,9 +91,9 @@ onBeforeUnmount(() => {
     <LandingNav />
     <main id="main">
       <LandingHero />
+      <IngestionStages />
       <LifeOfALine />
       <CapabilityBands />
-      <IngestionStages />
       <FoundersLetter />
       <ClosingCta />
     </main>

@@ -49,14 +49,14 @@ function scrollToSection(id: string) {
         >
           <a
             :href="base + 'login'"
-            class="rounded-default bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover active:bg-button-primary-active focus-visible:ring-focus-ring-accent inline-flex h-12 items-center px-6 text-base font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2"
+            class="rounded-default bg-button-primary text-button-primary-foreground hover:bg-button-primary-hover active:bg-button-primary-active focus-visible:ring-text-heading inline-flex h-12 items-center px-6 text-base font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             data-landing-cta="get-started"
             data-test="landing-hero-cta"
             >{{ t("welcome.hero.cta") }}</a
           >
           <a
             href="#how-it-works"
-            class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-focus-ring-accent text-base underline underline-offset-4 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2"
+            class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-text-heading text-base underline underline-offset-4 transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             data-test="landing-hero-secondary"
             @click.prevent="scrollToSection('how-it-works')"
             >{{ t("welcome.hero.secondary") }}</a

@@ -34,7 +34,7 @@ const base = getPath();
       </div>
       <a
         :href="base + 'login'"
-        class="rounded-default bg-surface-base text-text-heading focus-visible:ring-surface-base hover:bg-surface-panel inline-flex h-12 shrink-0 items-center px-6 text-base font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2"
+        class="rounded-default bg-surface-base text-text-heading focus-visible:ring-surface-base hover:bg-surface-panel inline-flex h-12 shrink-0 items-center px-6 text-base font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         data-landing-cta="final"
         data-test="landing-cta-button"
         data-reveal

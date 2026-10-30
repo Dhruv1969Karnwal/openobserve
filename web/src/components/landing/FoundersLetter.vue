@@ -21,7 +21,7 @@ const { t } = useI18nTyped();
         :aria-label="t('welcome.letter.mark')"
         data-reveal
       >
-        <rect x="14" y="72" width="96" height="96" rx="48" class="fill-text-heading" />
+        <rect x="14" y="72" width="96" height="96" rx="14" class="fill-text-heading" />
         <path
           d="M36 120h14l10-26 12 52 10-26h16"
           fill="none"
@@ -44,7 +44,7 @@ const { t } = useI18nTyped();
           {{ t("welcome.letter.p4a") }}
           <a
             href="https://github.com/openobserve/openobserve"
-            class="text-text-heading focus-visible:ring-focus-ring-accent underline underline-offset-4 transition-colors duration-150 hover:no-underline focus-visible:ring-2 focus-visible:ring-offset-2"
+            class="text-text-heading focus-visible:ring-text-heading underline underline-offset-4 transition-colors duration-150 outline-none hover:no-underline focus-visible:ring-2 focus-visible:ring-offset-2"
             rel="noopener"
             target="_blank"
             >{{ t("welcome.letter.p4link") }}</a

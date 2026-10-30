@@ -49,7 +49,7 @@ function go(href: string) {
           <li v-for="l in LINKS" :key="l.href">
             <a
               :href="l.href"
-              class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-focus-ring-accent transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2"
+              class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-text-heading transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               data-test="landing-footer-link"
               @click.prevent="go(l.href)"
               >{{ t(l.key) }}</a
@@ -58,7 +58,7 @@ function go(href: string) {
           <li>
             <a
               href="https://github.com/openobserve/openobserve"
-              class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-focus-ring-accent underline underline-offset-4 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2"
+              class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-text-heading underline underline-offset-4 transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               rel="noopener"
               target="_blank"
               data-test="landing-footer-source"
@@ -68,7 +68,7 @@ function go(href: string) {
           <li>
             <a
               :href="`${base}login`"
-              class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-focus-ring-accent underline underline-offset-4 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2"
+              class="rounded-default text-text-body hover:text-text-heading focus-visible:ring-text-heading underline underline-offset-4 transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               data-test="landing-footer-signin"
               >{{ t("welcome.nav.signin") }}</a
             >
@@ -88,7 +88,7 @@ function go(href: string) {
       </div>
 
       <div
-        class="rounded-surface bg-text-heading col-span-12 flex h-28 items-center gap-4 px-6 py-6 md:h-32 md:px-8"
+        class="rounded-surface bg-text-heading col-span-12 flex h-20 items-center gap-4 px-6 py-6 md:h-32 md:px-8"
         data-test="landing-wordmark-strip"
       >
         <svg

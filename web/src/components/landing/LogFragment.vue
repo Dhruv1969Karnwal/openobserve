@@ -106,7 +106,7 @@ const spark = computed(() => {
           role="tab"
           :aria-selected="tab === tb"
           data-test="landing-fragment-tab"
-          class="rounded-default text-compact focus-visible:ring-focus-ring-accent h-7 px-3 font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2"
+          class="rounded-default text-compact focus-visible:ring-text-heading h-7 px-3 font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           :class="
             tab === tb
               ? 'bg-text-heading text-surface-base'
@@ -122,7 +122,7 @@ const spark = computed(() => {
         class="text-text-secondary ms-auto font-mono text-xs tabular-nums"
         data-test="landing-fragment-count"
       >
-        {{ t("welcome.fragment.rowsShown", { shown: matched.length, total: SAMPLE_ROWS.length }) }}
+        {{ t("welcome.fragment.rowsShown", { shown: visible.length, total: matched.length }) }}
       </span>
     </div>
 
@@ -145,7 +145,7 @@ const spark = computed(() => {
           type="search"
           :placeholder="t('welcome.fragment.filterPlaceholder')"
           data-test="landing-fragment-search"
-          class="rounded-default border-border-control bg-surface-base text-compact text-text-body placeholder:text-text-placeholder focus-visible:ring-focus-ring-accent h-8 w-full border ps-8 pe-2 focus-visible:ring-2 focus-visible:ring-offset-1"
+          class="rounded-default border-border-control bg-surface-base text-compact text-text-body placeholder:text-text-placeholder focus-visible:ring-text-heading h-8 w-full border ps-8 pe-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
         />
       </label>
       <div class="mt-2 flex flex-wrap items-center gap-1.5">
@@ -158,7 +158,7 @@ const spark = computed(() => {
           type="button"
           :aria-pressed="levelsOn.has(lv)"
           data-test="landing-fragment-level"
-          class="bg-surface-base text-2xs focus-visible:ring-focus-ring-accent h-6 shrink-0 rounded-xs border-s-2 px-2 font-mono transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-offset-2"
+          class="bg-surface-base text-2xs focus-visible:ring-text-heading h-6 shrink-0 rounded-xs border-s-2 px-2 font-mono transition-opacity duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           :class="[chipStyles[lv], levelsOn.has(lv) ? '' : 'opacity-40']"
           @click="toggleLevel(lv)"
         >
@@ -176,7 +176,7 @@ const spark = computed(() => {
           <li v-for="(row, i) in visible" :key="row.time + i">
             <button
               type="button"
-              class="hover:bg-surface-subtle focus-visible:ring-focus-ring-accent grid w-full grid-cols-[1rem_5.35rem_auto_minmax(0,1fr)] items-baseline gap-x-2.5 gap-y-0.5 px-2.5 py-2 text-start transition-colors duration-100 focus-visible:ring-2 focus-visible:ring-inset lg:grid-cols-[0.5rem_5rem_auto_1fr_4.5rem]"
+              class="hover:bg-surface-subtle focus-visible:ring-text-heading grid w-full grid-cols-[1rem_5.35rem_auto_minmax(0,1fr)] items-baseline gap-x-2.5 gap-y-0.5 px-2.5 py-2 text-start transition-colors duration-100 outline-none focus-visible:ring-2 focus-visible:ring-inset lg:grid-cols-[0.5rem_5rem_auto_1fr_4.5rem]"
               :aria-expanded="openRow === rowKey(row)"
               data-test="landing-fragment-row"
               @click="openRow = openRow === rowKey(row) ? null : rowKey(row)"

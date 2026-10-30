@@ -166,3 +166,10 @@ export const SAMPLE_TRACES: SampleSpan[] = [
   { name: "merge results", offset: 84, width: 14, ms: "20ms", depth: 1 },
   { name: "serialize json", offset: 92, width: 8, ms: "11ms", depth: 1 },
 ];
+
+export const LOG_ROWS = SAMPLE_ROWS;
+
+export const CURL = {
+  url: "http://localhost:5080/api/default/app_logs/_json",
+  body: '{"level":"info", "service":"billing", "msg":"charge accepted"}',
+};
