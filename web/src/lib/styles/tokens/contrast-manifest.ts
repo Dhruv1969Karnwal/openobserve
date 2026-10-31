@@ -523,14 +523,6 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
     themes: ["light"],
   },
   {
-    fg: "--color-error-tag-text",
-    bg: "--color-error-tag-bg",
-    category: "pending",
-    why: "an error tag is a filled pill",
-    issue: "WCAG-AA colour remediation (follow-up PR)",
-    themes: ["light"],
-  },
-  {
     fg: "--color-field-type-boolean-text",
     bg: "--color-field-type-boolean-bg",
     category: "pending",
