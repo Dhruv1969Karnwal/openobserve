@@ -48,8 +48,8 @@ const fired = ref(false);
               class="divide-border-subtle border-border-subtle mt-3 flex flex-col divide-y border-t"
             >
               <li
-                v-for="r in LOG_ROWS.slice(0, 3)"
-                :key="r.id"
+                v-for="(r, i) in LOG_ROWS.slice(0, 3)"
+                :key="i"
                 class="flex items-baseline gap-3 py-2"
               >
                 <span class="text-text-secondary shrink-0 font-mono text-xs tabular-nums">{{
@@ -93,8 +93,8 @@ const fired = ref(false);
                 class="divide-border-subtle border-border-subtle mt-3 flex flex-col divide-y border-t"
               >
                 <li
-                  v-for="r in LOG_ROWS.filter((x) => x.level === 'error').slice(0, 3)"
-                  :key="r.id"
+                  v-for="(r, i) in LOG_ROWS.filter((x) => x.level === 'error').slice(0, 3)"
+                  :key="i"
                   class="flex items-baseline gap-3 py-2"
                 >
                   <span class="text-text-secondary shrink-0 font-mono text-xs tabular-nums">{{
