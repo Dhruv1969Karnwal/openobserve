@@ -1551,7 +1551,7 @@
     "noStreams": "No profile streams available",
     "setupIngestion": "Set up profiles ingestion",
     "setupIngestionDesc": "Connect a profiling data source",
-    "noSeries": "No Data",
+    "noSeries": "No data",
     "noResults": "No Profiles found",
     "noProfilesFound": "No Profiles found",
     "noProfilesFoundDesc": "Your time window doesn't contain any profile data from this stream. Try a wider time range or a different service.",
@@ -6409,7 +6409,7 @@
     "editVariable": "Edit Variable",
     "addOption": "Add Option",
     "addFilter": "Add Filter",
-    "noDataFound": "No Data Found",
+    "noDataFound": "No data found",
     "streamSelectTooltip": "Select a stream or use a variable like $streamVariable to dynamically choose the stream based on another value.",
     "fieldSelectTooltip": "Select a field or use a variable like $fieldVariable. If stream uses a variable, field list will be empty - type field name manually.",
     "filterInfoTooltip": "In filters, you can use the value of another variable to filter the current variable's value. This can be done by using the other variable's name. For example:",
@@ -7481,14 +7481,14 @@
       "exampleQueryInserted": "The example query will be inserted into the query editor"
     },
     "variableCustomValueSelector": {
-      "noDataFound": "No Data Found"
+      "noDataFound": "No data found"
     },
     "variableQueryValueSelector": {
       "selectAll": "Select All",
       "all": "All",
       "custom": "(Custom)",
       "customValue": "{value} (Custom)",
-      "noDataFound": "No Data Found",
+      "noDataFound": "No data found",
       "noDataFoundParen": "(No Data Found)",
       "blank": "<blank>",
       "allSelected": "<ALL>",
@@ -7860,7 +7860,7 @@
     "yAxisShort": "Y-Axis",
     "rowFields": "Row Fields",
     "valueFields": "Value Fields",
-    "noData": "No Data",
+    "noData": "No data",
     "logExplorer": {
       "title": "Logs Explorer",
       "openInLogs": "Open in Logs",
@@ -10819,7 +10819,7 @@
     },
     "selectAllColumnsNotAllowed": "Selecting all columns is not allowed",
     "customSql": "Custom SQL",
-    "noData": "No Data",
+    "noData": "No data",
     "recentData": "recent data",
     "theLastDay": "the last day | the last {count} days",
     "forecast": {
@@ -14471,7 +14471,7 @@
     },
     "loadingLogs": "Loading logs...",
     "noLogsFound": "No Logs Found",
-    "noDataFound": "No Data Found",
+    "noDataFound": "No data found",
     "noLogsDescription": "No logs found for this correlation in the selected time range.",
     "correlatedTracesFor": "Correlated traces for service: {service}",
     "all": "All",
@@ -17644,7 +17644,7 @@
       "openFields": "Open Fields",
       "events": "events",
       "patterns": "patterns",
-      "noData": "No Data",
+      "noData": "No data",
       "histogramFetchError": "Error while fetching histogram data.",
       "include": "include",
       "exclude": "exclude",
@@ -19984,7 +19984,7 @@
       },
       "qualityStatus": {
         "nothreshold": "No Threshold",
-        "nodata": "No Data",
+        "nodata": "No data",
         "healthy": "Healthy",
         "warn": "Warn",
         "unhealthy": "Unhealthy"
@@ -20056,7 +20056,7 @@
       },
       "alertLevel": {
         "ok": "Ok",
-        "nodata": "No Data",
+        "nodata": "No data",
         "critical": "Critical",
         "warning": "Warning"
       },
