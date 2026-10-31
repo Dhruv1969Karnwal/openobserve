@@ -131,12 +131,12 @@ const isMuted = computed(() => {
 // Proportion-bar fill %. The track is ALWAYS rendered (so height never shifts as
 // data loads); only the fill width changes:
 //   empty / "—" / 0  → 0% (empty track)
-//   value, no max    → 100% (a full line, e.g. the Total tile)
+//   value, no max    → 0%: a full line with no denominator encodes nothing
 //   value with max   → its share of the total
 const pct = computed(() => {
   if (isMuted.value) return 0;
   const v = Number(props.value);
-  if (props.max == null || props.max <= 0 || !Number.isFinite(v)) return 100;
+  if (props.max == null || props.max <= 0 || !Number.isFinite(v)) return 0;
   return Math.max(0, Math.min(100, (v / props.max) * 100));
 });
 const trendArrow = computed(() =>

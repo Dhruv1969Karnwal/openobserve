@@ -13590,8 +13590,8 @@
       "askAi": "Ask AI to fix my query",
       "selectedRange": "the selected range"
     },
-    "tracesFound": "Traces Found",
-    "spansFound": "Spans Found",
+    "tracesFound": "traces found",
+    "spansFound": "spans found",
     "errorTraces": "Error Traces",
     "errorSpans": "Error Spans",
     "filterByErrors": "Filter by errors",
