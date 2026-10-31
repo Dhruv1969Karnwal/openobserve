@@ -75,18 +75,15 @@ const props = withDefaults(
 
 const emit = defineEmits<{ click: [] }>();
 
-// Each variant carries BOTH its resting background and its resting colour. They
-// are not split between here and the base class on purpose: two plain utilities
-// setting the same property differ only by Tailwind's emit order, so
-// `text-tabs-active-text` in the base class silently won over every
-// `text-ingest-accent-*` and all five variants rendered one colour.
+// All variants render one neutral chip: the onboarding empty-states are a
+// monochrome family, and provider-hue icon chips read as off-palette.
 const ICON_VARIANT_CLASS: Record<IconVariant, string> = {
-  default: "bg-tabs-active-bg text-tabs-active-text",
-  blue: "bg-ingest-tint-blue text-ingest-accent-blue",
-  teal: "bg-ingest-tint-teal text-ingest-accent-teal",
-  purple: "bg-ingest-tint-purple text-ingest-accent-purple",
-  amber: "bg-ingest-tint-amber text-ingest-accent-amber",
-  orange: "bg-ingest-tint-orange text-ingest-accent-orange",
+  default: "bg-icon-chip-primary-bg text-icon-chip-primary-text",
+  blue: "bg-icon-chip-primary-bg text-icon-chip-primary-text",
+  teal: "bg-icon-chip-primary-bg text-icon-chip-primary-text",
+  purple: "bg-icon-chip-primary-bg text-icon-chip-primary-text",
+  amber: "bg-icon-chip-primary-bg text-icon-chip-primary-text",
+  orange: "bg-icon-chip-primary-bg text-icon-chip-primary-text",
 };
 
 const iconClass = computed(() => ICON_VARIANT_CLASS[props.iconVariant]);
