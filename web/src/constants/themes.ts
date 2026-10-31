@@ -113,11 +113,11 @@ export const THEME_STORAGE_KEYS = {
  *
  * At this head — these figures are the gate's own output, transcribed 2026-10-28 at reviewed head
  * 07698e801 (identical when re-run after the gate-integrity fixes, which change enforcement, not
- * measurement): 5123 runtime pairs in 2426 booking groups — 2225 groups measured-pass, 201 groups
- * (277 individual sites) booked with all twelve numbers each, 0 groups unbooked, and 0 groups
+ * measurement): 5169 runtime pairs in 2450 booking groups — 2243 groups measured-pass, 207 groups
+ * (285 individual sites) booked with all twelve numbers each, 0 groups unbooked, and 0 groups
  * delegated to tokens/contrast-manifest.ts (none stand — the grey-tier light debt was paid by
  * re-tiering), of the bookings 34 are icon-only sites riding SC 1.4.11's 3:1 bar with a per-entry
- * justification and 167 are text riding 4.5, with 19 of all bookings tagged conditional and
+ * justification and 173 are text riding 4.5, with 19 of all bookings tagged conditional and
  * guard-cited, 0 booking drift and 0 stale bookings. 41 script/style class literals are registered
  * as runtime grounds; 11 of them co-bind a measurable (ground, ink) pair inside their own class
  * string and must carry that pair's twelve numbers (2 of the 11 state an SC 1.4.3
