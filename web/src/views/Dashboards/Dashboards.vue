@@ -885,7 +885,9 @@ export default defineComponent({
           sortable: true,
           resizable: true,
           hideable: true,
-          size: COL.description,
+          // Every row has a name and almost none have a description: the fixed
+          // 300px description left the flex identity column as the one that truncated.
+          size: 220,
           meta: { align: "left" },
         },
         {
