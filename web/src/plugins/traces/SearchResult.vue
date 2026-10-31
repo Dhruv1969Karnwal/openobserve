@@ -129,6 +129,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             size="sm"
             :searchable="false"
             data-test="traces-search-result-records-per-page"
+            :aria-label="t('search.recordsPerPage')"
             @update:model-value="changeRowsPerPage"
           />
           <OPagination

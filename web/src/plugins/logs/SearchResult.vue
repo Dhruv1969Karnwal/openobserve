@@ -228,6 +228,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 searchObj.meta.logsVisualizeToggle === 'logs'
               "
               data-test="logs-search-result-records-per-page"
+              :aria-label="t('search.recordsPerPage')"
               v-model="searchObj.meta.resultGrid.rowsPerPage"
               :options="rowsPerPageOptions"
               class="select-pagination min-w-[4.5rem]"
