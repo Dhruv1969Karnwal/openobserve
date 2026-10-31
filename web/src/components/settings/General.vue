@@ -45,7 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               class="w-36!"
               data-test="general-settings-scrape-interval"
             />
-            <span class="individual-setting-description text-compact opacity-70">
+            <span class="individual-setting-description text-text-secondary text-compact">
               {{ t("settings.scrapeIntervalDescription") }}
             </span>
           </div>
@@ -72,7 +72,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </OIcon>
               </template>
             </OFormInput>
-            <span class="individual-setting-description text-compact opacity-70">
+            <span class="individual-setting-description text-text-secondary text-compact">
               {{ t("settings.maxSeriesPerQueryDescription") }}
             </span>
           </div>
@@ -157,7 +157,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OTooltip :content="t('settings.resetToDefaultColors')" side="top" />
               </button>
             </div>
-            <span class="individual-setting-description text-compact self-start opacity-70">
+            <span
+              class="individual-setting-description text-text-secondary text-compact self-start"
+            >
               {{ t("settings.themeManagementDescription") }}
             </span>
           </div>
@@ -258,7 +260,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               />
             </div>
           </template>
-          <span class="individual-setting-description text-compact opacity-70">
+          <span class="individual-setting-description text-text-secondary text-compact">
             {{ t("settings.customLogoTextDescription") }}
           </span>
         </div>
@@ -346,7 +348,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </div>
             </div>
           </template>
-          <span class="individual-setting-description text-compact -translate-y-1.25 opacity-70">
+          <span
+            class="individual-setting-description text-text-secondary text-compact -translate-y-1.25"
+          >
             {{ t("settings.customLogoLightDescription") }}
           </span>
         </div>
@@ -435,7 +439,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </div>
             </div>
           </template>
-          <span class="individual-setting-description text-compact -translate-y-1.25 opacity-70">
+          <span
+            class="individual-setting-description text-text-secondary text-compact -translate-y-1.25"
+          >
             {{ t("settings.customLogoDarkDescription") }}
           </span>
         </div>

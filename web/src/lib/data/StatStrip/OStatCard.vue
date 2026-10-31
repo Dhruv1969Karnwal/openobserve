@@ -142,9 +142,16 @@ const pct = computed(() => {
 const trendArrow = computed(() =>
   props.trend?.direction === "up" ? "▲" : props.trend?.direction === "down" ? "▼" : "—",
 );
+// Trend text uses the status TEXT inks, not the icon-chip inks: a chip glyph is
+// large and sits on its own tint, while a delta is 11px copy on the card ground.
+const TREND_TEXT: Partial<Record<StatTone, string>> = {
+  success: "text-status-success-text",
+  error: "text-status-error-text",
+};
+
 const trendClass = computed(() =>
   props.trend?.tone
-    ? (TONES[props.trend.tone]?.value ?? "text-text-secondary")
+    ? (TREND_TEXT[props.trend.tone] ?? TONES[props.trend.tone]?.value ?? "text-text-secondary")
     : "text-text-secondary",
 );
 </script>
