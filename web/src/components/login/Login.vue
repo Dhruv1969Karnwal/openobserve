@@ -17,9 +17,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <template>
   <!-- dvh, not vh: mobile browser chrome overlaps a 100vh box. -->
   <main
-    class="bg-card-glass-bg h-[100vh] w-[100vw] max-md:h-dvh max-md:w-full max-md:overflow-y-auto"
+    class="bg-card-glass-bg flex h-[100vh] w-[100vw] max-md:h-dvh max-md:w-full max-md:overflow-y-auto"
   >
-    <div style="max-width: 25rem; padding-top: 6.25rem" class="mx-auto p-3">
+    <div style="max-width: 25rem" class="mx-auto my-auto p-3">
       <div
         class="flex justify-center text-center"
         v-if="
@@ -77,7 +77,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </div>
 
       <div v-else>
-        <h1 style="font-size: var(--text-xl)" class="w-full pb-3 text-center">
+        <h1 class="text-text-heading w-full pb-4 text-center text-2xl font-semibold">
           {{ t("login.login") }}
         </h1>
 
