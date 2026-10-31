@@ -116,7 +116,7 @@ const boxSizeClasses: Record<NonNullable<CheckboxProps["size"]>, string> = {
   <label
     :class="[
       'inline-flex items-center gap-2',
-      isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+      isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
     ]"
     @click.stop
   >

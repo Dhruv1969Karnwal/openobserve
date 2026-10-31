@@ -77,7 +77,7 @@ export default function (store: any) {
   const router = createRouter(routerMap);
 
   router.beforeEach((to: any, from: any, next: any) => {
-    // Set page title with OpenObserve prefix.
+    // Set page title with the Retrace.ai prefix.
     //
     // Routes carry an i18n KEY (`meta.titleKey`), not the text: the route tables
     // are module-scope, so translating where a route is declared would freeze the
@@ -88,9 +88,9 @@ export default function (store: any) {
     const routeTitle = to.meta?.titleKey ? gt(to.meta.titleKey) : to.meta?.title;
     if (routeTitle) {
       // The brand prefix is a product noun, never translated; the page name is.
-      document.title = `OpenObserve - ${routeTitle}`;
+      document.title = `Retrace.ai - ${routeTitle}`;
     } else {
-      document.title = "OpenObserve";
+      document.title = "Retrace.ai";
     }
 
     const isAuthenticated = store.state.loggedIn;

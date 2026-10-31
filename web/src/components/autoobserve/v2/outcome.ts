@@ -48,7 +48,7 @@ export const OUTCOME: Record<
   },
   resolved: {
     marker: "bg-status-positive",
-    ink: "text-status-positive",
+    ink: "text-status-success-text",
     tag: "success-soft",
     key: "autoobserve2.outcome.resolved",
   },

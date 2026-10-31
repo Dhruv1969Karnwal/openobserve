@@ -127,16 +127,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <span
               :data-test="`service-accounts-roles-${row.email}`"
               class="text-text-secondary inline-flex min-w-0 items-center gap-1 truncate text-xs"
-              :class="{ 'cursor-pointer': !rbacAccess.allowed }"
-              :title="rbacAccess.allowed ? serviceAccountRolesText(row.email) : rbacAccess.message"
-              @click="!rbacAccess.allowed && openUpgradeDialog()"
+              :title="serviceAccountRolesText(row.email)"
               >{{ serviceAccountRolesText(row.email) }}
-              <OIcon
-                v-if="!rbacAccess.allowed"
-                name="lock"
-                size="xs"
-                class="text-warning-600 shrink-0"
-              />
             </span>
           </template>
 
@@ -469,10 +461,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <span class="text-text-secondary text-xs">{{ tokenNextStepHint }}</span>
             </div>
 
-            <!-- Always rendered — locked (not hidden) when rbac isn't allowed:
-                 inert links, lock icon instead of the arrow, tooltip explains
-                 why. See rbacAccess / onQuickLinkClick. -->
-            <div class="mt-3 flex flex-wrap items-center justify-center gap-3">
+            <!-- Hidden entirely while RBAC isn't on offer: the targets are
+                 gated routes, so an inert link would be a dead control. -->
+            <div
+              v-if="rbacAccess.visible"
+              class="mt-3 flex flex-wrap items-center justify-center gap-3"
+            >
               <router-link
                 data-test="service-accounts-list-token-add-to-role"
                 :to="roleLinkTarget"
@@ -482,14 +476,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OIcon name="shield" size="sm" class="text-primary shrink-0" />
                 <span class="font-medium">{{ t("serviceAccounts.tokenReveal.addToRole") }}</span>
                 <OIcon
-                  :name="rbacAccess.allowed ? 'arrow-right' : 'lock'"
+                  name="arrow-right"
                   size="sm"
-                  :class="
-                    rbacAccess.allowed
-                      ? 'text-text-secondary group-hover:translate-x-0.5'
-                      : 'text-warning-600'
-                  "
-                  class="shrink-0 transition-transform"
+                  class="text-text-secondary shrink-0 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none"
                 />
               </router-link>
               <router-link
@@ -501,14 +490,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OIcon name="group" size="sm" class="text-primary shrink-0" />
                 <span class="font-medium">{{ t("serviceAccounts.tokenReveal.addToGroup") }}</span>
                 <OIcon
-                  :name="rbacAccess.allowed ? 'arrow-right' : 'lock'"
+                  name="arrow-right"
                   size="sm"
-                  :class="
-                    rbacAccess.allowed
-                      ? 'text-text-secondary group-hover:translate-x-0.5'
-                      : 'text-warning-600'
-                  "
-                  class="shrink-0 transition-transform"
+                  class="text-text-secondary shrink-0 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none"
                 />
               </router-link>
             </div>
@@ -704,21 +688,34 @@ export default defineComponent({
     });
 
     // Same rbac gate AddServiceAccount.vue / IdentityAccessManagement.vue use
-    // for the Groups/Roles rail — reused here so the quick-add links and the
-    // Roles column lock instead of vanish when rbac isn't allowed.
+    // for the Groups/Roles rail: the quick-add links and the Roles column render
+    // on `rbacAccess.visible`, so the shipped "hide" policy drops them and only a
+    // "lock" build renders them locked.
     const rbacAccess = useLockedAffordance("rbac");
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 
     // Step 2 framing: unlocked nudges toward the Groups page (with a link
-    // below); locked still shows the links (disabled, with the lock tooltip)
-    // and points to Roles & Groups in copy instead.
+    // below); not allowed points at Roles & Groups in copy instead (the links
+    // themselves are `visible`-gated, so "hide" renders none here at all).
     const tokenNextStepHint = computed(() => {
       if (rbacAccess.value.allowed) return t("serviceAccounts.tokenReveal.nextStepGrant");
       return t("serviceAccounts.tokenReveal.nextStepOss");
     });
 
-    // Quick-add links stay visible when locked — clicking opens the upgrade
-    // dialog instead of navigating to Roles/Groups.
+    const rolesColumn = computed<OTableColumnDef<any>>(() => ({
+      id: "roles",
+      header: t("serviceAccounts.list.col.roles"),
+      accessorKey: "roles",
+      sortable: false,
+      resizable: true,
+      hideable: true,
+      size: 160,
+      minSize: 120,
+      meta: { align: "left" },
+    }));
+
+    // The links render only when the gate is `visible`; on a "lock" build a click
+    // opens the upgrade dialog instead of navigating to Roles/Groups.
     const onQuickLinkClick = (e: Event) => {
       if (!rbacAccess.value.allowed) {
         e.preventDefault();
@@ -812,7 +809,7 @@ export default defineComponent({
       }
     });
 
-    const columns: OTableColumnDef[] = [
+    const columns = computed<OTableColumnDef[]>(() => [
       {
         id: "email",
         header: t("serviceAccounts.list.col.identifier"),
@@ -834,22 +831,9 @@ export default defineComponent({
         minSize: 160,
         meta: { align: "left", flex: true },
       },
-      // Shown locked (not hidden) in builds/orgs where rbac isn't allowed —
-      // see rbacAccess; the cell itself renders the lock icon + tooltip.
-      {
-        id: "roles",
-        header: t("serviceAccounts.list.col.roles"),
-        accessorKey: "roles",
-        sortable: false,
-        resizable: true,
-        hideable: true,
-        size: 160,
-        minSize: 120,
-        meta: {
-          align: "left",
-          headerTooltip: rbacAccess.value.allowed ? undefined : rbacAccess.value.message,
-        },
-      },
+      // Honors the comment above `rbacAccess`: the Roles column is a paid
+      // surface and must be ABSENT (not a header of dashes) under "hide".
+      ...(rbacAccess.value.visible ? [rolesColumn.value] : []),
       {
         id: "token",
         header: t("serviceAccounts.list.col.token"),
@@ -878,7 +862,7 @@ export default defineComponent({
         size: 130,
         meta: { align: "center", actionCount: 3 },
       },
-    ];
+    ]);
     const userEmail: any = ref("");
     const options = ref([{ label: t("iam.roleAdmin"), value: "admin" }]);
     const selectedRole = ref(options.value[0].value);

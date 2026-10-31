@@ -67,7 +67,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               class="rounded-default mb-1 flex cursor-pointer items-center px-3 py-2 transition-all duration-200"
               :class="
                 selectedCategory === category.chartLabelKey
-                  ? 'bg-theme-accent text-text-inverse font-semibold'
+                  ? 'bg-select-item-selected-bg text-select-item-selected-text font-semibold'
                   : 'hover:bg-button-ghost-hover-bg'
               "
               data-test="chart-category-item"

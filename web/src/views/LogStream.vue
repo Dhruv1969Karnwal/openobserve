@@ -969,7 +969,7 @@ export default defineComponent({
           label: t("home.docsCountLbl"),
           value: count(s?.total_records),
           icon: "bar-chart",
-          tone: "info",
+          tone: "primary",
           dataTest: "log-stream-summary-events",
         },
         {
@@ -977,7 +977,7 @@ export default defineComponent({
           label: t("home.totalDataIngested"),
           value: size(s?.total_storage_size),
           icon: "download",
-          tone: "teal",
+          tone: "neutral",
           dataTest: "log-stream-summary-storage",
         },
         // Cloud does not report compressed size (its column and its Home tile are
@@ -989,7 +989,7 @@ export default defineComponent({
                 label: t("home.totalDataCompressed"),
                 value: size(s?.total_compressed_size),
                 icon: "compress",
-                tone: "purple",
+                tone: "neutral",
                 trend: compressionTrend(),
                 dataTest: "log-stream-summary-compressed",
               } as StatItem,

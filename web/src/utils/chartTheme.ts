@@ -35,9 +35,9 @@ const cache = new Map<string, string>();
 const FALLBACKS: Record<string, string> = {
   "--color-text-heading": "#262626",
   "--color-text-body": "#404040",
-  "--color-text-secondary": "#737373",
+  "--color-text-secondary": "#525252",
   "--color-border-default": "#d4d4d4",
-  "--color-border-strong": "#a3a3a3",
+  "--color-border-strong": "#737373",
   "--color-border-subtle": "#ededed",
   "--color-border-control": "#949494",
   "--color-surface-base": "#ffffff",
@@ -125,14 +125,17 @@ const FALLBACKS: Record<string, string> = {
   // Brand accent (--color-primary-600), light value — metric sparkline default color.
   "--color-accent": "#3f7994",
   // Alert threshold marklines (light values from semantic.css / base.css).
-  "--color-status-error-text": "#cc3645",
-  "--color-status-warning-text": "#be5a13",
+  "--color-status-error-text": "#b91c1c",
+  "--color-status-warning-text": "#9c4a10",
   // Error series in canvas charts (light value from base.css).
-  "--color-severity-error-color": "#ea1a17",
+  "--color-severity-error-color": "#c8100e",
+  // SLO warning budget line (light value from base.css) — the four hand-rolled
+  // resolveToken() seams were resynced onto chartColor(), which needs the mirror.
+  "--color-severity-warning-color": "#965300",
   // Status accents used by SLO / health charts (light values from semantic.css, base.css).
   "--color-status-negative": "#db3b4b",
   "--color-status-success-bg": "#f2fcf3",
-  "--color-status-success-text": "#20883b",
+  "--color-status-success-text": "#1a7a33",
   "--color-success-200": "#bbf7d0",
   // Threshold step presets (light values from base.css).
   "--color-success-500": "#22c55e",

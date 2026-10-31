@@ -517,7 +517,10 @@ function fireConfetti() {
       <!-- Hero -->
       <div v-if="!hideHero" class="c-hero">
         <div class="c-hero-head">
-          <span class="ds-mono xl text-white" :class="{ logo: logoSrc }">
+          <span
+            class="ds-mono xl bg-theme-accent text-button-primary-foreground"
+            :class="{ logo: logoSrc }"
+          >
             <img
               v-if="logoSrc"
               :src="logoSrc"

@@ -61,7 +61,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 >
                   <!-- pipeline name should not be empty -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-if="typeof errorMessage === 'object' && errorMessage.field == 'pipeline_name'"
                   >
                     {{ errorMessage.message }}
@@ -91,7 +91,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
                   <!-- source stream name should not be empty -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'source_stream_name'
                     "
@@ -116,7 +116,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
                   <!-- source stream type should be one of the valid stream types -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'source_stream_type'
                     "
@@ -148,7 +148,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
                   <!-- sql query should be same across all nodes as well try to match the query in the nodes -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'sql_query_missing'
                     "
@@ -174,7 +174,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
                   <!-- destination stream type should be one of the valid stream types -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' &&
                       errorMessage.field == 'destination_stream_type'
@@ -211,7 +211,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
                   <!-- destination stream name should not be empty -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="typeof errorMessage === 'object' && errorMessage.field == 'org_id'"
                   >
                     {{ errorMessage.message }}
@@ -236,7 +236,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
                   <!-- source stream type should be one of the valid stream types -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' &&
                       errorMessage.field.startsWith('function_name')
@@ -273,7 +273,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
 
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'remote_destination'
                     "
@@ -306,7 +306,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                   </span>
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'source_timezone'
                     "
@@ -338,7 +338,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                   </span>
                   <!-- Errors with no inline fix-up are pushed as plain strings, and must read as errors too. -->
-                  <span v-else class="text-status-negative">{{ errorMessage }}</span>
+                  <span v-else class="text-status-error-text">{{ errorMessage }}</span>
                 </div>
               </div>
             </div>
@@ -361,7 +361,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   'py-1.25 text-sm font-bold': true,
                   'text-status-success-text': val.success && !val.warning,
                   'text-status-warning-text': val.warning,
-                  'text-status-negative': !val.success,
+                  'text-status-error-text': !val.success,
                 }"
                 class="whitespace-pre-wrap"
                 style="word-wrap: break-word; overflow-wrap: break-word"

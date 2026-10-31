@@ -230,6 +230,12 @@ jobs:
       - name: Check design-consistency ratchet (strict — hardcoded/arbitrary/raw-token, no slack)
         run: cd web && npm run lint:design:strict
 
+      - name: Check runtime-contrast census + self-spec (strict — full census, then mutation battery)
+        run: cd web && npm run lint:runtime-contrast:strict
+
+      - name: Check rendered e2e copy against the shipped locale (branding-drift gate)
+        run: node tests/ui-testing/scripts/check-rendered-copy.js
+
       - name: Build binary and frontend
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"

@@ -45,7 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <OButton
             variant="ghost"
             size="icon"
-            :class="{ 'bg-theme-accent! text-white!': wrapTableCells }"
+            :class="{ 'bg-theme-accent! text-button-primary-foreground!': wrapTableCells }"
             data-test="correlated-logs-table-wrap-content-btn"
             @click="wrapTableCells = !wrapTableCells"
           >
@@ -101,7 +101,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   @drop="handleDrop($event, index)"
                   :class="[
                     'group hover:bg-interactive-hover-bg cursor-grab transition-colors duration-200',
-                    { 'cursor-grabbing! opacity-50': draggedIndex === index },
+                    { 'cursor-grabbing!': draggedIndex === index },
                   ]"
                   :data-test="`column-item-${field}`"
                   @select="
@@ -174,7 +174,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           variant="ghost"
           size="icon"
           class="h-5!"
-          :class="{ 'bg-theme-accent! text-white! hover:opacity-80': wrapTableCells }"
+          :class="{
+            'bg-theme-accent! text-button-primary-foreground!': wrapTableCells,
+          }"
           data-test="correlated-logs-table-wrap-content-btn"
           @click="wrapTableCells = !wrapTableCells"
         >

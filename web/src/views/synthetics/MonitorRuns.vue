@@ -2600,10 +2600,10 @@ const ENV_SERIES_TOKENS = [
 ];
 
 const responseChartOption = computed(() => {
-  const lineColor = cssVar("--color-primary-600", "#3b82f6");
-  const axisColor = cssVar("--color-text-secondary", "#6c707e");
-  const splitColor = cssVar("--color-border-default", "#e2e8f0");
-  const p95Color = cssVar("--color-status-warning-text", "#f59e0b");
+  const lineColor = cssVar("--color-primary-600", "#3f7994");
+  const axisColor = cssVar("--color-text-secondary", "#525252");
+  const splitColor = cssVar("--color-border-default", "#d4d4d4");
+  const p95Color = cssVar("--color-status-warning-text", "#9c4a10");
 
   const p95MarkLine = p95Ms.value
     ? {
@@ -2714,9 +2714,9 @@ const responseChartOption = computed(() => {
 });
 
 const errorChartOption = computed(() => {
-  const axisColor = cssVar("--color-text-secondary", "#6c707e");
-  const splitColor = cssVar("--color-border-default", "#e2e8f0");
-  const errorColor = cssVar("--color-status-error-text", "#dc2626");
+  const axisColor = cssVar("--color-text-secondary", "#525252");
+  const splitColor = cssVar("--color-border-default", "#d4d4d4");
+  const errorColor = cssVar("--color-status-error-text", "#b91c1c");
 
   let categories: string[];
   let data: number[];

@@ -51,8 +51,11 @@ import {
   initShownSearchFromUrl,
   parseRowsParam,
   writeLogsUrl,
+  writeVisualizeToggleParam,
 } from "@/composables/useLogs/useLogsUrl";
 import { columnsFromUrl } from "@/composables/useLogs/useLogPermalink";
+import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
+import { resolveLogsVisualizeToggle } from "@/ts/interfaces/logs";
 
 const useLogs = (t: TranslateFn) => {
   const store = useStore();
@@ -515,7 +518,10 @@ const useLogs = (t: TranslateFn) => {
       Object.prototype.hasOwnProperty.call(queryParams, "logs_visualize_toggle") &&
       queryParams.logs_visualize_toggle != ""
     ) {
-      searchObj.meta.logsVisualizeToggle = queryParams.logs_visualize_toggle;
+      searchObj.meta.logsVisualizeToggle = resolveLogsVisualizeToggle(
+        queryParams.logs_visualize_toggle,
+        checkFeatureAccess("logPatterns", buildFeatureGateContext(store.state.zoConfig)).allowed,
+      );
     }
 
     //here we restore the fn editor state from the url query params
@@ -524,11 +530,17 @@ const useLogs = (t: TranslateFn) => {
     }
 
     initShownSearchFromUrl(queryParams);
-    void writeLogsUrl("replace", {
+    const restoredQuery: Record<string, any> = {
       ...queryParams,
       sql_mode: searchObj.meta.sqlMode,
       defined_schemas: searchObj.meta.useUserDefinedSchemas,
-    });
+    };
+    // The raw param may carry a gated or unknown toggle the sanitizer rewrote, so the URL is
+    // rewritten to the RESTORED state; the default panel travels by absence (see
+    // writeVisualizeToggleParam — the canonical builder applies the same rule, which is what
+    // makes the byte-shape survive a search or pagination write instead of just this one).
+    writeVisualizeToggleParam(restoredQuery, searchObj.meta.logsVisualizeToggle);
+    void writeLogsUrl("replace", restoredQuery);
   };
 
   const enableRefreshInterval = (value: number) => {

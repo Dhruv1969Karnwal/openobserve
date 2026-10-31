@@ -1,0 +1,760 @@
+// Copyright 2026 OpenObserve Inc.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * The ONE model of what a browser paints under a runtime theme, shared by the
+ * spec-side gate (tokens/themeRuntimeContrast.spec.ts) and the census
+ * (scripts/check-runtime-contrast.mjs), which imports this file through node's
+ * built-in type stripping.
+ *
+ * A "scope" is the token map a page actually resolves: the parsed sheets
+ * (base/semantic/component/dark.css) with `utils/themePalette`'s injection map written
+ * over them, exactly as `applyThemeColors` writes it onto <html>/<body>. Six themes × two
+ * modes = the twelve scopes every booked number in this repo is measured against.
+ *
+ * Nothing here transcribes production: the palette, the injected inks, the `--color-theme-*`
+ * values and the semanticColors overlay all come from the functions the app runs, so a
+ * booking can never describe a state the UI does not show.
+ */
+// Relative imports (not the @/ alias) so node's type-stripping loader can resolve this
+// module from scripts/check-runtime-contrast.mjs without a bundler.
+import { PREDEFINED_THEME_COLORS } from "../../../constants/themeRegistry";
+import {
+  generatePrimaryPalette,
+  libraryForegroundTokens,
+  PALETTE_SHADES,
+  runtimeInjectedTokens,
+  runtimePageBackground,
+  runtimeSemanticTokens,
+  type ThemeMode,
+} from "../../../utils/themePalette";
+
+import type { CensusPair, DynamicBinding, ScanContext, ScanInput } from "./runtimeContrastScan";
+import { scanSources, unattributedRuntimeLiterals } from "./runtimeContrastScan";
+
+import {
+  composite,
+  contrastRatio,
+  parseColor,
+  relativeLuminance,
+  resolveColor,
+  resolveExpression,
+  resolveTokens,
+  type Rgba,
+} from "./colorMath";
+
+export type { ThemeMode };
+export {
+  composite,
+  contrastRatio,
+  parseColor,
+  relativeLuminance,
+  resolveColor,
+  resolveExpression,
+  resolveTokens,
+};
+export type { Rgba };
+
+export const TEXT_MIN = 4.5;
+export const NON_TEXT_MIN = 3;
+
+export interface Scope {
+  mode: ThemeMode;
+  theme: string;
+  themeColor: string;
+  tokens: Map<string, string>;
+  /** Memoised token → pixel for this scope. */
+  color(name: string): Rgba | null;
+  /** The <body> paint, opaque — what a translucent plate is finally laid over. */
+  page: Rgba;
+}
+
+export interface PairOptions {
+  /** What the ground is painted over (a translucent wash needs a plate). */
+  under?: string;
+  /** Element opacity (`hover:opacity-85`): fades ink AND ground toward the plate. */
+  alpha?: number;
+}
+
+export interface RuntimeModel {
+  sheets: Record<ThemeMode, Map<string, string>>;
+  scopes: Scope[];
+  darkScopes: Scope[];
+  lightScopes: Scope[];
+  /** Tokens whose painted pixel moves between the six themes of one mode. */
+  runtimeVarying: Set<string>;
+  side(value: string, scope: Scope): Rgba | null;
+  hexOf(value: string, scope: Scope): string;
+  measurePair(fg: string, bg: string, scope: Scope, options?: PairOptions): number | null;
+}
+
+/** Pseudo-token the census uses for the <body> paint itself (no utility produces it). */
+export const PAGE_GROUND = "--census-page-bg";
+
+/** A token name, a literal colour, or a colour expression resolved against `scope`. */
+const literalSide = (value: string, scope: Map<string, string>): Rgba | null =>
+  resolveColor(value, scope) ?? resolveExpression(value, scope);
+
+/** Element opacity: `alpha` of the layer, the plate behind it for the rest. */
+const blend = (layer: Rgba, plate: Rgba, alpha: number): Rgba => ({
+  r: layer.r * alpha + plate.r * (1 - alpha),
+  g: layer.g * alpha + plate.g * (1 - alpha),
+  b: layer.b * alpha + plate.b * (1 - alpha),
+  a: 1,
+});
+
+const opaquePage = (mode: ThemeMode, themeColor: string): Rgba => {
+  const parsed = parseColor(runtimePageBackground(themeColor, mode)) ?? {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 1,
+  };
+  return parsed.a < 1 ? composite(parsed, { r: 255, g: 255, b: 255, a: 1 }) : parsed;
+};
+
+/**
+ * Build the twelve scopes over already-read sheet sources. Pure and synchronous: the
+ * caller owns file I/O so the same call works in vitest, in node, and over fixtures.
+ */
+export const createRuntimeModel = (cssSources: string[]): RuntimeModel => {
+  const parsed = resolveTokens(cssSources);
+  const sheets: Record<ThemeMode, Map<string, string>> = {
+    light: parsed.light,
+    dark: parsed.dark,
+  };
+
+  const build = (theme: (typeof PREDEFINED_THEME_COLORS)[number], mode: ThemeMode): Scope => {
+    const themeColor = theme[mode].themeColor;
+    const palette = generatePrimaryPalette(themeColor);
+    const tokens = new Map(sheets[mode]);
+    for (const shade of PALETTE_SHADES) tokens.set(`--color-primary-${shade}`, palette[shade]);
+    for (const [token, value] of Object.entries(runtimeInjectedTokens(themeColor, mode))) {
+      tokens.set(token, value);
+    }
+    for (const [token, hex] of Object.entries(libraryForegroundTokens(mode, palette))) {
+      tokens.set(token, hex);
+    }
+    for (const [token, hex] of Object.entries(
+      runtimeSemanticTokens(
+        theme[mode].semanticColors as unknown as Record<string, string | undefined> | undefined,
+      ),
+    )) {
+      tokens.set(token, hex);
+    }
+    const cache = new Map<string, Rgba | null>();
+    return {
+      mode,
+      theme: theme.name,
+      themeColor,
+      tokens,
+      page: opaquePage(mode, themeColor),
+      color: (name: string) => {
+        if (!cache.has(name)) cache.set(name, resolveColor(name, tokens) ?? null);
+        return cache.get(name) ?? null;
+      },
+    };
+  };
+
+  const scopes = PREDEFINED_THEME_COLORS.flatMap((theme) => [
+    build(theme, "dark"),
+    build(theme, "light"),
+  ]);
+
+  const runtimeVarying = new Set<string>();
+  const names = new Set<string>();
+  for (const scope of scopes) for (const key of scope.tokens.keys()) names.add(key);
+  for (const name of names) {
+    for (const mode of ["dark", "light"] as ThemeMode[]) {
+      const values = new Set<string>();
+      for (const scope of scopes) {
+        if (scope.mode !== mode) continue;
+        const color = scope.color(name);
+        if (color)
+          values.add(`${Math.round(color.r)},${Math.round(color.g)},${Math.round(color.b)}`);
+      }
+      if (values.size > 1) runtimeVarying.add(name);
+    }
+  }
+
+  const side = (value: string, scope: Scope): Rgba | null => {
+    if (value === PAGE_GROUND) return scope.page;
+    if (/^--[\w-]+$/.test(value)) return scope.color(value);
+    return literalSide(value, scope.tokens);
+  };
+
+  const measurePair = (
+    fg: string,
+    bg: string,
+    scope: Scope,
+    options: PairOptions = {},
+  ): number | null => {
+    const plateToken = options.under ?? "--color-surface-base";
+    const plateColor = side(plateToken, scope);
+    if (!plateColor) return null;
+    let ground = side(bg, scope);
+    let ink = side(fg, scope);
+    if (!ground || !ink) return null;
+    const plate = plateColor.a < 1 ? composite(plateColor, scope.page) : plateColor;
+    if (ground.a < 1) ground = composite(ground, plate);
+    if (ink.a < 1) ink = composite(ink, ground);
+    if (options.alpha !== undefined) {
+      ground = blend(ground, plate, options.alpha);
+      ink = blend(ink, plate, options.alpha);
+    }
+    if (ink.a < 1 || ground.a < 1) return null;
+    return contrastRatio(ink, ground);
+  };
+
+  const hexOf = (value: string, scope: Scope): string => {
+    const color = side(value, scope);
+    if (!color) throw new Error(`${value} does not resolve`);
+    return `#${[color.r, color.g, color.b]
+      .map((channel) => Math.round(channel).toString(16).padStart(2, "0"))
+      .join("")}`;
+  };
+
+  return {
+    sheets,
+    scopes,
+    darkScopes: scopes.filter((scope) => scope.mode === "dark"),
+    lightScopes: scopes.filter((scope) => scope.mode === "light"),
+    runtimeVarying,
+    side,
+    hexOf,
+    measurePair,
+  };
+};
+
+/** Per-theme label so a booked key reads like the ledger's ("dark O2 Lens rest"). */
+export const scopeKey = (scope: Scope): string => `${scope.mode} ${scope.theme}`;
+
+/** One booked residual, number-locked across the twelve scopes. */
+export interface LedgerRow {
+  id: string;
+  /** The WCAG bar the site is measured at; a non-text row must be justified per entry. */
+  kind?: "text" | "non-text";
+  reason?: string;
+  /** A row delegated to ANOTHER ledger names it here instead of carrying a reason. */
+  bookedIn?: string;
+  /** Plate the ground composites over (defaults to the ledger's plate). */
+  plate?: string;
+  /** How many sites this row covers — equality-locked, so an extra site is a finding. */
+  sites?: number;
+  /** Ground and ink are reachable only under a content guard the scanner cannot read (content-guard residue). */
+  conditional?: boolean;
+  /** Every scope's measured ratio, 2dp — an improvement is as loud as a regression. */
+  at: Record<string, number>;
+}
+
+export interface CensusLedger {
+  version: number;
+  textMin: number;
+  nonTextMin: number;
+  /** Equality lock: the census fails when the residue grows OR heals without the lock moving. */
+  maxUnbooked: number;
+  maxDynamic: number;
+  plate: string;
+  bodyInk: string;
+  pageGround: string;
+  bookings: LedgerRow[];
+  delegated?: LedgerRow[];
+  dynamicBindings: Array<{
+    file: string;
+    literal: string;
+    reason: string;
+    /** The literal's measured pair; required whenever the census can measure one (F-153). */
+    at?: Record<string, number>;
+    /** The pair paints only behind a guard the scanner cannot read; must cite `guard: file:line`. */
+    conditional?: boolean;
+  }>;
+}
+
+export interface CensusRow {
+  pair: CensusPair;
+  /** Booking key: file, both sides, the state and the bar (see groupKey). */
+  id: string;
+  pairId: string;
+  file: string;
+  lines: number[];
+  sites: number;
+  bar: number;
+  /** Key of the pair WITHOUT the file, used to cite a row booked in another ledger. */
+  numbers: Record<string, number>;
+  failing: Array<[string, number]>;
+  unresolved: number;
+  booking?: LedgerRow;
+  delegated: boolean;
+}
+
+export interface CensusReport {
+  files: number;
+  pairs: number;
+  groups: number;
+  measuredPass: number;
+  booked: number;
+  unbooked: number;
+  fixable: number;
+  driftCount: number;
+  staleCount: number;
+  dynamicCount: number;
+  conditionalCount: number;
+  rows: CensusRow[];
+  unbookedRows: CensusRow[];
+  driftRows: string[];
+  staleRows: LedgerRow[];
+  staleDelegations: LedgerRow[];
+  /** dynamicBindings rows whose literal is no longer in the source (F-153 staleness check). */
+  staleDynamic: Array<{ file: string; literal: string }>;
+  unbookedDynamic: DynamicBinding[];
+  suggestions: Array<{ row: CensusRow; ink: string | null }>;
+  exitCode: number;
+  overCap: boolean;
+  underRatchet: boolean;
+}
+
+const round2 = (value: number): number => Math.round(value * 100) / 100;
+
+/**
+ * The registered justification vocabulary (F-156/RS10-01): a booked row's reason must match ONE
+ * of these anchored templates EXACTLY. The shapes are the decision families this branch's review
+ * panel actually accepted, each citing the DECISION RECORD and its measured worst pair; a new
+ * family is admitted by registering its template HERE (a reviewed code change), never by prose
+ * drift. The old rule — a bare `includes("palette-decision")` — was satisfiable by the census's
+ * own `--emit` placeholder, so a machine paste could book unlimited sub-AA pairs with every gate
+ * green; `EMIT_PLACEHOLDER_REASON` below matches NO template, by design and by selftest mutation.
+ */
+const escapeRe = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const THEME_ALT = `(?:${PREDEFINED_THEME_COLORS.map((theme) => theme.name)
+  .sort((a, b) => b.length - a.length)
+  .map(escapeRe)
+  .join("|")})`;
+const JUST_N = String.raw`\d+(?:\.\d+)?`;
+const JUST_AT = `at (?:light|dark) ${THEME_ALT}`;
+const JUST_WORST = `worst ${JUST_N}:${JUST_N} ${JUST_AT}`;
+const JUST_TAIL = " \u2014 palette-decision: see web/src/constants/themes\\.ts DECISION RECORD";
+const PAGE_TINT = String.raw`\(utils/themePalette runtimePageBackground: \d+% theme colour over white in light, \d+% theme colour into black in dark\)`;
+const ICON_PREFIX = String.raw`(?:\[icon-only site\] )?`;
+
+export const JUSTIFICATION_VOCABULARY: RegExp[] = [
+  `${ICON_PREFIX}accent used AS TEXT on .+: the runtime re-derives this ink from the selected theme's colour \\(raw themeColor at alpha ${JUST_N}, or a primary-ramp step\\), and for these predefined palettes no single step holds AA on this ground \u2014 ${JUST_N}:${JUST_N} worst ${JUST_AT}.*?${JUST_TAIL}`,
+  `${ICON_PREFIX}literal (?:white|black) label on the runtime page tint ${PAGE_TINT} \u2014 brand-by-design fill \\(hero panels, badges, toast actions\\): the ground is the runtime colour itself, so no static ink survives it; routing every one of these labels through a picked token is the owner decision, not a class swap; ${JUST_WORST}.*?${JUST_TAIL}`,
+  `literal text-inverse label on the accent ramp step \\(--color-accent: primary-${JUST_N} dark / primary-${JUST_N} light\\) \u2014 brand-by-design fill \\(hero panels, badges, toast actions\\): the ground is the runtime colour itself, so no static ink survives it; routing every one of these labels through a picked token is the owner decision, not a class swap; ${JUST_WORST}.*?${JUST_TAIL}`,
+  `${ICON_PREFIX}.+ painted on .+ in [\\w./-]+\\.vue \\(${JUST_N} site\\(s\\)\\); ${JUST_WORST}.*?${JUST_TAIL}`,
+  `${ICON_PREFIX}legacy palette status shade [\\w-]+ on the runtime page tint ${PAGE_TINT} \\(status-shade routing\\): the ${JUST_N} site\\(s\\) in [\\w./-]+\\.vue paints an OIcon status glyph with the raw shade; this is an icon-only site judged at SC 1\\.4\\.11's 3:1 bar, not status text, so it is re-classified out of the status-shade routing set \\(the routed text tier would over-ink the glyph\\) and the raw shade stays; ${JUST_WORST}.*?${JUST_TAIL}`,
+  `${ICON_PREFIX}the grey-${JUST_N} [\\w -]*tier painted on .+: the tier has no pending row in contrast-manifest yet, so this is the surface where it is worst; ${JUST_WORST}.*?${JUST_TAIL}`,
+  `${ICON_PREFIX}non-text glyph ink [\\w-]+ on the runtime page tint ${PAGE_TINT}: SC 1\\.4\\.11's 3:1 bar applies \\(the glyph repeats a state its adjacent label already states\\); ${JUST_WORST}.*?${JUST_TAIL}`,
+  `status-error-text painted on the translucent error tint of its own chip \u2014 status-shade routing: the site moved off the raw error shade \\(${JUST_N}:${JUST_N} ${JUST_AT}\\); on the matching /[A-Z0-9]+ tint wash the routed tier holds every dark scope and misses only the light band named in its reason number${JUST_TAIL}`,
+  `picked button-primary-foreground painted on count-badge-bg \\(component fill\\): the badge fill is the ramp's ${JUST_N} step, the same pixel as the accent fill, so the picked label holds ${JUST_N}:${JUST_N} ${JUST_AT} and rides the booked button-label residuals \\(worst ${JUST_N}:${JUST_N} ${JUST_AT}${JUST_TAIL}`,
+  `the page-number ink on the active-page fill \\(component fill\\): SCAN LIMITATION, stated rather than hidden \u2014 both classes live in one :class ternary in lib/navigation/Pagination/OPagination\\.vue; .* guard: lib/navigation/Pagination/OPagination\\.vue:${JUST_N} active arm vs :${JUST_N} item-text arm\\.${JUST_TAIL}`,
+  `the datepicker-[\\w-]+ [\\w -]*tier on [\\w-]+ \\(component fill\\): one token serves every control of this family, and it is measured against the runtime wash/plate rather than the sheet value it was picked for; ${JUST_WORST}.*?${JUST_TAIL}`,
+].map((template) => new RegExp(`^${template}$`));
+
+export const isRegisteredJustification = (reason: string): boolean =>
+  JUSTIFICATION_VOCABULARY.some((template) => template.test(reason));
+
+/** The SC clause a sub-AA default-theme row must cite for its exemption claim (RS10-02). */
+export const SC_CLAUSE = /SC 1\.4\.(3|11)/;
+
+/**
+ * The starting point `--emit` prints for a human to rewrite. It is deliberately NOT a member of
+ * the justification vocabulary: pasting emitted rows back into the ledger is RED until someone
+ * writes the actual decision (the loophole RS10-01 demonstrated).
+ */
+export const EMIT_PLACEHOLDER_REASON =
+  "TODO palette-decision: why this pair is not re-inked (brand-by-design / owner call, name the file)";
+
+/**
+ * The delegation key of a pair: the same identity as groupKey WITHOUT the file — a tier is a tier
+ * wherever it is painted, so this is what cites a row booked in another ledger (contrast-manifest).
+ */
+export const delegationKey = (pair: CensusPair): string =>
+  pair.ground +
+  " " +
+  pair.ink +
+  (pair.state ? " @" + pair.state : "") +
+  (pair.alpha !== undefined ? " opacity-" + Math.round(pair.alpha * 100) : "") +
+  " [" +
+  pair.bar +
+  "]";
+
+/**
+ * The booking key of a pair: the FILE, both sides, the variant chain, the element opacity and the
+ * bar. Deliberately no line number — a booking must survive the site moving down a file, while the
+ * row's sites count still catches every added or removed binding.
+ */
+export const groupKey = (pair: CensusPair): string =>
+  pair.file +
+  " " +
+  pair.ground +
+  " " +
+  pair.ink +
+  (pair.state ? " @" + pair.state : "") +
+  (pair.alpha !== undefined ? " opacity-" + Math.round(pair.alpha * 100) : "") +
+  " [" +
+  pair.bar +
+  "]";
+
+/** Inks a failing site could simply bind: stable foreground tokens that hold the bar everywhere. */
+const SUGGESTION_INKS = ["--color-text-heading", "--color-text-body", "--color-text-secondary"];
+
+/**
+ * The census pipeline BOTH gates run: scan the sources, measure every runtime pair in all twelve
+ * injected scopes, and classify each BOOKING GROUP as measured-pass / booked / delegated /
+ * unbooked / drift.
+ *
+ * A booking group is (file, ground, ink, state, opacity, bar): one site binding one failing pair is
+ * one row, and a file that binds the same pair in twelve places is still one row with sites=12 —
+ * the count is equality-locked, so the thirteenth site is a finding. The ledger is the only way a
+ * pair may fail its bar and its twelve numbers are checked exactly, so a booking that stops
+ * describing the source is as loud as a brand-new failure.
+ */
+export const runRuntimeCensus = (
+  model: RuntimeModel,
+  ledger: CensusLedger,
+  sources: ScanInput[],
+): CensusReport => {
+  const context: ScanContext = {
+    isToken: (token) => model.sheets.light.has(token) || model.sheets.dark.has(token),
+    isRuntime: (token) => {
+      if (token === ledger.pageGround) return true;
+      if (token.startsWith("--")) return model.runtimeVarying.has(token);
+      return [...token.matchAll(/--[\w-]+/g)].some((match) =>
+        model.runtimeVarying.has(match[0] ?? ""),
+      );
+    },
+    bodyInk: ledger.bodyInk,
+    pageGround: ledger.pageGround,
+  };
+  const scan = scanSources(
+    sources.filter((source) => source.path.endsWith(".vue")),
+    context,
+  );
+  const cited = new Set(
+    scan.pairs.flatMap((pair) => [pair.ground, pair.ink]).filter((value) => value.startsWith("--")),
+  );
+  // PAIR-LEVEL ATTRIBUTION (F-153/F-154): the citation a script class literal needs is the very
+  // (ground, ink) it paints, not its two tokens cited by unrelated pairs. White on
+  // --color-badge-primary-soft-bg is 1.19:1 in O2 Lens light; a measured pair that cites the same
+  // FILL with a legible INK says nothing about it, and the whole-`src` run used to filter such a
+  // literal out of the census entirely.
+  // F-154: the citation a script class literal needs is the (ground, ink) PAIR it paints. A
+  // measured pair that cites the same FILL with a legible INK says nothing about a literal whose
+  // ink is hand-written white, and the whole-`src` run used to filter such a literal out entirely.
+  const citedPairs = new Set(scan.pairs.map((pair) => pair.ground + "|" + pair.ink));
+  const unattributed = unattributedRuntimeLiterals(sources, context, cited, citedPairs);
+
+  const bookings = new Map(ledger.bookings.map((row) => [row.id, row]));
+  const delegatedRows = new Map((ledger.delegated ?? []).map((row) => [row.id, row]));
+  const dynamicKey = (binding: { file: string; literal: string }): string =>
+    binding.file + " " + binding.literal;
+  const dynamicBooked = new Map(
+    (ledger.dynamicBindings ?? []).map((row) => [dynamicKey(row), row]),
+  );
+
+  /**
+   * The numbers a dynamic row owes the census (F-153). A class string that co-binds a ground and
+   * an ink paints THAT pair, in every scope, whether or not the template walker can reach the
+   * element; the expanded fragment family is measured the same way and the worst member wins.
+   * Returns null when the literal paints no measurable pair, which is the only honest prose row.
+   */
+  const dynamicNumbers = (
+    binding: DynamicBinding,
+  ): { at: Record<string, number>; bar: number } | null => {
+    const pairs = binding.pairs ?? [];
+    if (!pairs.length) return null;
+    const at: Record<string, number> = {};
+    for (const scope of model.scopes) {
+      let worst: number | null = null;
+      for (const pair of pairs) {
+        const value = model.measurePair(pair.ink, pair.ground, scope, { under: ledger.plate });
+        if (value === null) continue;
+        worst = worst === null ? value : Math.min(worst, value);
+      }
+      if (worst === null) return null;
+      at[scopeKey(scope)] = round2(worst);
+    }
+    return { at, bar: ledger.textMin };
+  };
+
+  const groups = new Map<string, CensusRow>();
+  for (const pair of scan.pairs) {
+    const bookingKey = groupKey(pair);
+    const existing = groups.get(bookingKey);
+    if (existing) {
+      existing.sites += 1;
+      if (existing.lines.length < 4) existing.lines.push(pair.line);
+      continue;
+    }
+    const bar = pair.bar === "non-text" ? ledger.nonTextMin : ledger.textMin;
+    const pairId = delegationKey(pair);
+    const booking = bookings.get(bookingKey) ?? delegatedRows.get(pairId);
+    const numbers: Record<string, number> = {};
+    const failing: Array<[string, number]> = [];
+    let unresolved = 0;
+    for (const scope of model.scopes) {
+      const value = model.measurePair(pair.ink, pair.ground, scope, {
+        under: booking?.plate ?? ledger.plate,
+        alpha: pair.alpha,
+      });
+      if (value === null) {
+        unresolved++;
+        continue;
+      }
+      numbers[scopeKey(scope)] = round2(value);
+      if (value < bar) failing.push([scopeKey(scope), round2(value)]);
+    }
+    groups.set(bookingKey, {
+      pair,
+      id: bookingKey,
+      pairId,
+      file: pair.file,
+      lines: [pair.line],
+      sites: 1,
+      bar,
+      numbers,
+      failing,
+      unresolved,
+      booking,
+      delegated: !bookings.has(bookingKey) && Boolean(booking),
+    });
+  }
+  const rows = [...groups.values()];
+
+  const measuredPass = rows.filter((row) => row.failing.length === 0 && row.unresolved === 0);
+  const problems = rows.filter((row) => row.failing.length > 0 || row.unresolved > 0);
+  const booked = problems.filter((row) => row.booking);
+  const unbooked = problems.filter((row) => !row.booking);
+
+  // A delegated row covers every group that cites its pair, so its sites lock is the TOTAL,
+  // while a per-file booking locks its own count.
+  const delegatedTotals = new Map<string, number>();
+  for (const row of rows.filter((entry) => entry.delegated)) {
+    delegatedTotals.set(row.pairId, (delegatedTotals.get(row.pairId) ?? 0) + row.sites);
+  }
+
+  const driftRows: string[] = [];
+  const seenDelegations = new Set<string>();
+  for (const row of booked) {
+    const booking = row.booking;
+    if (!booking) continue;
+    const kind = row.pair.bar === "non-text" ? "non-text" : "text";
+    if (booking.kind !== undefined && booking.kind !== kind) {
+      driftRows.push(row.id + ": booked as " + booking.kind + ", the source paints " + kind);
+    }
+    if (row.delegated && !booking.bookedIn) {
+      driftRows.push(row.pairId + ": a delegated row must name the ledger that carries it");
+    }
+    if (!row.delegated && !isRegisteredJustification(booking.reason ?? "")) {
+      driftRows.push(
+        row.id +
+          ": a booked pair needs a reason matching one of the registered justification templates" +
+          " (runtimeContrast.ts JUSTIFICATION_VOCABULARY) — the --emit TODO placeholder is not one",
+      );
+    }
+    if (booking.conditional === true && !/guard: [\w/.-]+:\d+/.test(booking.reason ?? "")) {
+      driftRows.push(
+        row.id + ": a conditional row must cite its guard expression (guard: <file>:<line>)",
+      );
+    }
+    // The Default-theme rule the ledger note states (RS10-02), now machine-checked: a booked text
+    // pair below 4.5:1 on the shipped default theme must cite the SC clause it rides.
+    if (row.pair.bar === "text" && booking.conditional !== true) {
+      const defaultThemeSubAA = ["light O2 Signature", "dark O2 Signature"].some(
+        (scope) => row.numbers[scope] !== undefined && row.numbers[scope] < ledger.textMin,
+      );
+      if (defaultThemeSubAA && !SC_CLAUSE.test(booking.reason ?? "")) {
+        driftRows.push(
+          row.id +
+            ": a booked text pair below the 4.5 bar at the default O2 Signature theme must cite" +
+            " the SC 1.4.3 / SC 1.4.11 clause it rides, or be tagged conditional with its guard cited",
+        );
+      }
+    }
+    const covered = row.delegated ? (delegatedTotals.get(row.pairId) ?? row.sites) : row.sites;
+    if (booking.sites === undefined) {
+      driftRows.push(row.id + ": a booking must lock the number of sites it covers (sites)");
+    }
+    if (row.delegated && !seenDelegations.has(row.pairId)) {
+      seenDelegations.add(row.pairId);
+    }
+    if (booking.sites !== undefined && booking.sites !== covered) {
+      driftRows.push(
+        row.id + ": booked for " + booking.sites + " site(s), the source binds " + covered,
+      );
+    }
+    for (const [scope, value] of Object.entries(row.numbers)) {
+      const at = booking.at[scope];
+      if (at === undefined)
+        driftRows.push(row.id + " @ " + scope + ": measures " + value + ", nothing booked");
+      else if (round2(at) !== value)
+        driftRows.push(row.id + " @ " + scope + ": measures " + value + ", booked " + at);
+    }
+    for (const scope of Object.keys(booking.at)) {
+      if (row.numbers[scope] === undefined) {
+        driftRows.push(
+          row.id +
+            " @ " +
+            scope +
+            ": booked " +
+            booking.at[scope] +
+            ", the pair no longer resolves there",
+        );
+      }
+    }
+    if (row.unresolved > 0) {
+      driftRows.push(row.id + ": pair does not resolve in " + row.unresolved + " scopes");
+    }
+  }
+
+  const staleRows = ledger.bookings.filter((entry) => !groups.has(entry.id));
+  const staleDelegations = (ledger.delegated ?? []).filter(
+    (entry) => !rows.some((row) => row.pairId === entry.id),
+  );
+  // DYNAMIC ROWS CARRY NUMBERS (F-153). A registration used to be pure prose: the stepper family
+  // sat behind rows claiming the census had "found no label co-bound with that fill", while the
+  // same class string carried `text-stepper-indicator-fg` and painted 1.20:1 in the shipped
+  // default theme. A row whose literal co-binds a measurable pair now books that pair's twelve
+  // numbers, and a pair below its bar cannot hide in this list at all — it must be re-inked or
+  // made visible to the template census, where the justification vocabulary governs it.
+  const unbookedDynamic = unattributed.filter(
+    (binding) => binding.unexpandableStems?.length || !dynamicBooked.has(dynamicKey(binding)),
+  );
+  for (const binding of unattributed) {
+    const row = dynamicBooked.get(dynamicKey(binding));
+    if (!row) continue;
+    const measured = dynamicNumbers(binding);
+    if (!measured) continue;
+    if (!row.at) {
+      driftRows.push(
+        dynamicKey(binding) +
+          ": the literal co-binds a measurable (ground, ink) pair (" +
+          (binding.pairs?.[0]?.ground ?? "?") +
+          " on " +
+          (binding.pairs?.[0]?.ink ?? "?") +
+          "), so the row must carry its twelve numbers — prose cannot cover a pair the census " +
+          "can measure",
+      );
+      continue;
+    }
+    for (const [scope, value] of Object.entries(measured.at)) {
+      if (row.at[scope] === undefined)
+        driftRows.push(
+          dynamicKey(binding) + " @ " + scope + ": measures " + value + ", nothing booked",
+        );
+      else if (round2(row.at[scope]) !== value)
+        driftRows.push(
+          dynamicKey(binding) +
+            " @ " +
+            scope +
+            ": measures " +
+            value +
+            ", booked " +
+            round2(row.at[scope]),
+        );
+    }
+    for (const scope of Object.keys(row.at)) {
+      if (measured.at[scope] === undefined)
+        driftRows.push(dynamicKey(binding) + " @ " + scope + ": booked a scope the pair left");
+    }
+    if (Object.values(measured.at).some((value) => value < measured.bar)) {
+      // A sub-bar pair may only stay if the row states why, exactly as a booking must: the
+      // inactive-component exemption (SC 1.4.3) and the guard that holds the class string back.
+      const guarded = row.conditional === true && /guard: [\w/.-]+:\d+/.test(row.reason ?? "");
+      const defaultSubAA = ["light O2 Signature", "dark O2 Signature"].some(
+        (scope) => measured.at[scope] !== undefined && measured.at[scope] < measured.bar,
+      );
+      if (!guarded || (defaultSubAA && !SC_CLAUSE.test(row.reason ?? ""))) {
+        const worst = Object.entries(measured.at).sort((a, b) => a[1] - b[1])[0];
+        const pair = binding.pairs?.[0];
+        driftRows.push(
+          dynamicKey(binding) +
+            ": the class string co-binds " +
+            (pair?.ground ?? "?") +
+            " on " +
+            (pair?.ink ?? "?") +
+            " at " +
+            worst[1] +
+            " (" +
+            worst[0] +
+            ") — below the " +
+            measured.bar +
+            " bar, so prose cannot cover it: re-ink the site, or state the exemption" +
+            " (conditional + guard: <file>:<line> + the SC clause it rides)",
+        );
+        continue;
+      }
+    }
+  }
+
+  const liveDynamic = new Set(unattributed.map((binding) => dynamicKey(binding)));
+  const staleDynamic = (ledger.dynamicBindings ?? []).filter(
+    (row) => !liveDynamic.has(dynamicKey(row)),
+  );
+  const suggestions = unbooked.map((row) => ({
+    row,
+    ink:
+      SUGGESTION_INKS.find((ink) =>
+        model.scopes.every((scope) => {
+          const value = model.measurePair(ink, row.pair.ground, scope, {
+            under: ledger.plate,
+            alpha: row.pair.alpha,
+          });
+          return value !== null && value >= row.bar;
+        }),
+      ) ?? null,
+  }));
+
+  const conditionalRows = booked.filter((row) => row.booking?.conditional === true);
+  const counts = {
+    files: scan.files,
+    pairs: scan.pairs.length,
+    groups: rows.length,
+    measuredPass: measuredPass.length,
+    booked: booked.length,
+    unbooked: unbooked.length,
+    fixable: suggestions.filter((entry) => entry.ink).length,
+    driftCount: driftRows.length,
+    staleCount: staleRows.length + staleDelegations.length + staleDynamic.length,
+    dynamicCount: unbookedDynamic.length,
+    conditionalCount: conditionalRows.length,
+  };
+  const overCap = counts.unbooked > ledger.maxUnbooked;
+  const underRatchet = counts.unbooked < ledger.maxUnbooked;
+  const maxDynamic = ledger.maxDynamic ?? 0;
+  const exitCode =
+    overCap ||
+    underRatchet ||
+    counts.dynamicCount > maxDynamic ||
+    counts.dynamicCount < maxDynamic ||
+    counts.driftCount ||
+    counts.staleCount
+      ? 1
+      : 0;
+  return {
+    ...counts,
+    rows,
+    unbookedRows: unbooked,
+    driftRows,
+    staleRows,
+    staleDelegations,
+    staleDynamic,
+    unbookedDynamic,
+    suggestions,
+    exitCode,
+    overCap,
+    underRatchet,
+  };
+};

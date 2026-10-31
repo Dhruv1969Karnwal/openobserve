@@ -85,7 +85,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           />
         </span>
       </template>
-      <span v-else class="text-2xs text-text-muted">—</span>
+      <span v-else class="text-2xs text-text-secondary">—</span>
     </div>
 
     <!-- Message: badges row + tokenized template -->

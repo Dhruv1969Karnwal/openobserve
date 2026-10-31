@@ -21,15 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <!-- ── Hero Banner ─────────────────────────────────────────── -->
         <div class="bg-card-glass-bg rounded-default relative overflow-hidden p-4">
           <div class="relative z-1">
-            <img
-              :alt="t('login.openObserveLogoAlt')"
-              :src="
-                isDark
-                  ? getImageURL('images/common/openobserve_latest_dark_2.svg')
-                  : getImageURL('images/common/openobserve_latest_light_2.svg')
-              "
-              class="block max-w-55"
-              width="220"
+            <BrandWordmark
+              size="hero"
+              test-id="about-retrace-logo"
+              :name="t('login.openObserveLogoAlt')"
             />
             <OText variant="body" class="mt-1 mb-0">
               {{ t("about.logoMsg") }}
@@ -41,9 +36,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             >
               <!-- version -->
               <span
-                class="rounded-default text-status-positive border-status-positive/28 bg-card-glass-tint-positive inline-flex items-center gap-1.5 border px-3.5 py-2 text-sm font-semibold whitespace-nowrap"
+                class="rounded-default text-status-success-text border-status-positive/28 bg-card-glass-tint-positive inline-flex items-center gap-1.5 border px-3.5 py-2 text-sm font-semibold whitespace-nowrap"
               >
-                <OIcon name="check-circle" size="sm" class="text-status-positive shrink-0" />
+                <OIcon name="check-circle" size="sm" class="text-status-success-text shrink-0" />
                 {{ store.state.zoConfig.version }}
               </span>
               <!-- build type -->
@@ -58,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 class="text-text-body rounded-default border-info/28 bg-card-glass-tint-info-soft inline-flex items-center gap-1.5 border px-3.5 py-2 text-sm whitespace-nowrap max-md:min-w-0"
               >
                 <OIcon name="code" size="sm" class="text-info shrink-0" />
-                <span class="text-info text-xs font-semibold tracking-wide uppercase">{{
+                <span class="text-status-info-text text-xs font-semibold tracking-wide uppercase">{{
                   t("about.commit_lbl")
                 }}</span>
                 <OText variant="mono" class="max-md:max-w-28 max-md:truncate">{{
@@ -77,9 +72,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 class="text-text-body rounded-default border-warning/28 bg-card-glass-tint-warning inline-flex items-center gap-1.5 border px-3.5 py-2 text-sm whitespace-nowrap"
               >
                 <OIcon name="event" size="sm" class="text-warning shrink-0" />
-                <span class="text-warning text-xs font-semibold tracking-wide uppercase">{{
-                  t("about.build_lbl")
-                }}</span>
+                <span
+                  class="text-status-warning-text text-xs font-semibold tracking-wide uppercase"
+                  >{{ t("about.build_lbl") }}</span
+                >
                 {{
                   store.state.zoConfig.build_date ? formatDate(store.state.zoConfig.build_date) : ""
                 }}
@@ -334,7 +330,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       />
                       <span
                         :class="
-                          licenseData?.expired ? 'text-status-error-text' : 'text-status-positive'
+                          licenseData?.expired
+                            ? 'text-status-error-text'
+                            : 'text-status-success-text'
                         "
                       >
                         {{ licenseData?.expired ? t("about.expired_lbl") : t("about.active_lbl") }}
@@ -434,7 +432,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
               </div>
               <div
-                class="text-status-positive rounded-default border-status-positive/22 bg-card-glass-tint-positive flex items-start gap-1.5 border px-3 py-2 text-xs"
+                class="text-status-success-text rounded-default border-status-positive/22 bg-card-glass-tint-positive flex items-start gap-1.5 border px-3 py-2 text-xs"
               >
                 <OIcon name="check-circle" size="sm" class="mt-0.5 shrink-0" />
                 {{ t("about.feature_comparision_plan_detail") }}
@@ -444,7 +442,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
 
         <!-- ── Feature Comparison ──────────────────────────────────── -->
-        <div v-if="config.isCloud === 'false'" class="bg-card-glass-bg rounded-default mb-5 p-4">
+        <!-- Edition comparison is a selling surface, so a single-edition build omits it; "lock" brings it back. -->
+        <div
+          v-if="config.isCloud === 'false' && showsLockedAffordances"
+          class="bg-card-glass-bg rounded-default mb-5 p-4"
+        >
           <FeatureComparisonTable />
         </div>
       </div>
@@ -462,6 +464,8 @@ import { useRouter } from "vue-router";
 import config from "@/aws-exports";
 import licenseServer from "@/services/license_server";
 import FeatureComparisonTable from "@/components/about/FeatureComparisonTable.vue";
+import BrandWordmark from "@/components/BrandWordmark.vue";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OSpinner from "@/lib/feedback/Spinner/OSpinner.vue";
@@ -474,6 +478,7 @@ export default defineComponent({
   name: "PageAbout",
   components: {
     FeatureComparisonTable,
+    BrandWordmark,
     OButton,
     OIcon,
     OSpinner,
@@ -565,6 +570,7 @@ export default defineComponent({
 
     return {
       isDark,
+      showsLockedAffordances,
       t,
       raw,
       store,

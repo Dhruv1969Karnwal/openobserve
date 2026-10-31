@@ -1746,7 +1746,7 @@ const fieldWidthClass = computed(() => {
                             <span class="shrink-0 font-medium">{{
                               filteredOptions[vRow.index].label
                             }}</span>
-                            <span class="text-select-placeholder mx-1 shrink-0">–</span>
+                            <span class="text-text-secondary mx-1 shrink-0">–</span>
                             <OTruncatedText class="text-text-secondary text-xs">{{
                               filteredOptions[vRow.index].subLabel
                             }}</OTruncatedText>
@@ -1779,7 +1779,7 @@ const fieldWidthClass = computed(() => {
                                     // `pointer-events-auto` keeps a muted badge's tooltip reachable despite the row's own `pointer-events-none`.
                                     filteredOptions[vRow.index].badgeMuted
                                       ? 'text-text-secondary border-border-default pointer-events-auto'
-                                      : 'text-status-positive border-status-positive',
+                                      : 'text-status-success-text border-status-positive',
                                     filteredOptions[vRow.index].badgeTitle
                                       ? 'cursor-help'
                                       : undefined,

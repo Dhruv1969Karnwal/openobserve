@@ -95,7 +95,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OIcon
                   name="edit"
                   size="xs"
-                  class="text-text-secondary cursor-pointer opacity-60 transition-opacity duration-150 hover:opacity-100"
+                  class="text-text-secondary cursor-pointer transition-opacity duration-150"
                   @click.stop.prevent="startEditQueryName(index, tab)"
                   @mousedown.stop.prevent
                   @pointerdown.stop.prevent
@@ -139,7 +139,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   "
                   name="close"
                   size="sm"
-                  class="hover:bg-hover-gray text-text-secondary cursor-pointer opacity-60 transition-all duration-150 hover:rounded-full hover:opacity-100"
+                  class="hover:bg-hover-gray text-text-secondary cursor-pointer transition-all duration-150 hover:rounded-full"
                   :class="{
                     'max-md:hidden': index !== dashboardPanelData.layout.currentQueryIndex,
                   }"

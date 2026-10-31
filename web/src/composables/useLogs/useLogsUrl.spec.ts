@@ -33,6 +33,7 @@ import {
   shownSearch,
   urlWriteMode,
   writeLogsUrl,
+  writeVisualizeToggleParam,
 } from "@/composables/useLogs/useLogsUrl";
 import type { ExecutedRecordedEvent, LogsSignature } from "@/composables/useLogs/useAutoRun";
 
@@ -286,6 +287,34 @@ describe("useLogsUrl (4c C7b)", () => {
       await dropLineLinkParams();
       expect(router.replace).toHaveBeenCalledTimes(1);
       expect(router.push).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("writeVisualizeToggleParam (the default panel travels by absence)", () => {
+    it("writes a non-default panel by value", () => {
+      const query: Record<string, unknown> = { stream: "app" };
+      writeVisualizeToggleParam(query, "visualize");
+      expect(query.logs_visualize_toggle).toBe("visualize");
+    });
+
+    it("carries the default panel by absence instead of writing it", () => {
+      const query: Record<string, unknown> = { stream: "app", logs_visualize_toggle: "visualize" };
+      writeVisualizeToggleParam(query, "logs");
+      expect(query).not.toHaveProperty("logs_visualize_toggle");
+      expect(query.stream).toBe("app");
+    });
+
+    it("clears a stale param when the state has no panel at all", () => {
+      const query: Record<string, unknown> = { logs_visualize_toggle: "patterns" };
+      writeVisualizeToggleParam(query, undefined);
+      expect(query).not.toHaveProperty("logs_visualize_toggle");
+    });
+
+    it("is idempotent: re-applying absence to an absent param is a no-op", () => {
+      const query: Record<string, unknown> = { stream: "app" };
+      writeVisualizeToggleParam(query, "logs");
+      writeVisualizeToggleParam(query, "logs");
+      expect(query).toEqual({ stream: "app" });
     });
   });
 });

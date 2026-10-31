@@ -42,6 +42,7 @@ import { describe, expect, it } from "vitest";
 import {
   composite,
   contrastRatio,
+  SRGB_LINEAR_KNEE,
   parseColor,
   relativeLuminance,
   resolveColor,
@@ -180,8 +181,33 @@ describe("color-mix", () => {
     });
   });
 
+  // oklab is NOT an optional space any more: Tailwind v4 compiles every /NN alpha modifier to
+  // color-mix(in oklab, var(--color-x) N%, transparent), so the runtime-contrast census measures
+  // the whole alpha utility family through this path. Midpoint of black↔white in oklab is the
+  // neutral #636363 (L 0.5), not the #808080 an srgb mix would give.
+  it("mixes in oklab, the space Tailwind v4 compiles /NN modifiers to", () => {
+    const mid = parseColor("color-mix(in oklab, #000000 50%, #ffffff)");
+    expect(mid).not.toBeNull();
+    expect(Math.round(mid!.r)).toBe(99);
+    expect(Math.round(mid!.g)).toBe(99);
+    expect(Math.round(mid!.b)).toBe(99);
+    expect(mid!.a).toBe(1);
+  });
+
+  // Mixing into transparent must FADE the colour (premultiplied), keeping its channels: this is
+  // exactly what bg-theme-accent/10 paints, and a naive mix toward transparent's black would
+  // measure a dark slab instead of a tint.
+  it("fades toward transparent in oklab instead of darkening", () => {
+    const tint = parseColor("color-mix(in oklab, #e56d17 10%, transparent)");
+    expect(tint).not.toBeNull();
+    expect(tint!.a).toBeCloseTo(0.1, 6);
+    expect(Math.round(tint!.r)).toBe(229);
+    expect(Math.round(tint!.g)).toBe(109);
+    expect(Math.round(tint!.b)).toBe(23);
+  });
+
   it("returns null for an interpolation space it cannot do", () => {
-    expect(parseColor("color-mix(in oklab, #000000 50%, #ffffff)")).toBeNull();
+    expect(parseColor("color-mix(in hsl, #000000 50%, #ffffff)")).toBeNull();
   });
 });
 
@@ -389,8 +415,14 @@ describe("the real token sheets", () => {
   });
 
   describe.each([
-    ["light", 1075, 1063],
-    ["dark", 1076, 1064],
+    // Honesty note on these counts: 3fa9a4e95 added two tokens (stepper-indicator-error-fg,
+    // toast-loading-fg) WITHOUT re-pinning, so the sheets sat at 1088/1076 and 1089/1077
+    // while this pin still read 1086/1074 — the stale number, not a lost token.
+    // −11 here is F-161c: the ten dead `--color-button-*-focus-ring` roles left behind by
+    // feef74aa6 (only button-primary-focus-ring has a paint site) and the unbound
+    // --color-button-confirm-hover deleted from component.css; counts move DOWN on purpose.
+    ["light", 1077, 1065],
+    ["dark", 1078, 1066],
   ] as const)("%s theme", (theme, total, resolved) => {
     const scope = THEMES[theme];
     const names = colorTokens(scope);
@@ -426,5 +458,19 @@ describe("the real token sheets", () => {
         .map(([name]) => name);
       expect(offenders).toEqual([]);
     });
+  });
+});
+
+describe("the sRGB knee is ONE constant across the two halves of the system (A8)", () => {
+  it("picker and measurer agree on the published value", () => {
+    // utils/themePalette's relativeLuminance picks the inks the app injects at runtime;
+    // this file's srgbToLinear measures them. Before F-161h the picker knee was the
+    // legacy 0.03928 while the measurer used the published 0.04045 — a knife-edge for a
+    // future mid-tone brand colour. themePalette must import nothing (the census gate
+    // transpiles it standalone), so the values are locked here at the source level.
+    const palette = readFileSync(join(here, "../../../utils/themePalette.ts"), "utf8");
+    expect(SRGB_LINEAR_KNEE).toBe(0.04045);
+    expect(palette).toContain("0.04045");
+    expect(palette).not.toContain("0.03928");
   });
 });

@@ -1028,7 +1028,7 @@ describe("ImportAlert Component - Comprehensive Function Tests", () => {
       const classesOf = (errorIndex: number) =>
         wrapper.find(`[data-test="alert-import-error-0-${errorIndex}"]`).find("span").classes();
 
-      expect(classesOf(1)).toContain("text-status-negative");
+      expect(classesOf(1)).toContain("text-status-error-text");
       // Same colour as the branch that does have an inline control.
       expect(classesOf(1)).toEqual(classesOf(0));
     });

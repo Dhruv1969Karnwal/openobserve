@@ -13,7 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { PREDEFINED_THEME_COLORS } from "@/constants/themeRegistry";
 import { raw } from "@/types/i18n";
+import type { PredefinedThemeColors } from "@/constants/themeRegistry";
 import type { SemanticColors } from "@/utils/theme";
 
 /**
@@ -29,21 +31,10 @@ import type { SemanticColors } from "@/utils/theme";
  *                       so editing O2 Signature's colors also changes the default.
  */
 
-export interface ThemeModeColors {
-  // Hex color used for buttons/toggles/borders and to derive the primary palette
-  themeColor: string;
-  // Optional multi-color semantic palette (errors/success/secondary button, etc.)
-  semanticColors?: SemanticColors;
-}
+export type { PredefinedThemeColors, ThemeModeColors } from "@/constants/themeRegistry";
 
-export interface PredefinedTheme {
-  // Stable numeric id — kept only for legacy localStorage migration.
-  id: number;
-  // Stable display name — this is the persisted key for theme selection.
-  name: string;
-  light: ThemeModeColors;
-  dark: ThemeModeColors;
-}
+/** A predefined theme: registry colours plus the i18n-wrapped display name. */
+export interface PredefinedTheme extends PredefinedThemeColors {}
 
 /** Marker stored in `appliedXThemeName` when the user picked a custom color. */
 export const CUSTOM_THEME_NAME = "__custom__";
@@ -67,97 +58,137 @@ export const THEME_STORAGE_KEYS = {
   },
 } as const;
 
-/** Predefined themes with both light and dark mode colors. */
-export const PREDEFINED_THEMES: PredefinedTheme[] = [
-  {
-    id: 10,
-    name: raw("O2 Signature"),
-    light: {
-      themeColor: "#6B76E3",
-    },
-    dark: {
-      themeColor: "#8B8DF0",
-    },
-  },
-  {
-    id: 2,
-    name: raw("O2 Pulse"),
-    light: {
-      themeColor: "#3F7994",
-    },
-    dark: {
-      themeColor: "#3F7994",
-    },
-  },
-  {
-    id: 4,
-    name: raw("O2 Horizon"),
-    light: {
-      themeColor: "#077A7F",
-    },
-    dark: {
-      themeColor: "#588CF3",
-    },
-  },
-  {
-    id: 5,
-    name: raw("O2 Beacon"),
-    light: {
-      themeColor: "#3369D6",
-    },
-    dark: {
-      themeColor: "#6EA8FE",
-    },
-  },
-  {
-    id: 8,
-    name: raw("O2 Lens"),
-    light: {
-      themeColor: "#4682FA",
-    },
-    dark: {
-      themeColor: "#E56D17",
-    },
-  },
-  {
-    id: 14,
-    name: raw("O2 Crimson Ink"),
-    light: {
-      themeColor: "#E11D48",
-      semanticColors: {
-        error: "#F97316",
-        errorBg: "#FFF7ED",
-        errorText: "#C2410C",
-        success: "#6366F1",
-        successBg: "#EEF2FF",
-        successText: "#3730A3",
-        secondaryBtnBg: "#FFE4E6",
-        secondaryBtnText: "#BE123C",
-        secondaryBtnBorder: "#FECDD3",
-        outlineText: "#BE123C",
-        outlineBorder: "#FECDD3",
-        ghostText: "#BE123C",
-      },
-    },
-    dark: {
-      themeColor: "#FB7185",
-      semanticColors: {
-        error: "#FB923C",
-        errorBg: "#3A1A08",
-        errorText: "#FB923C",
-        success: "#818CF8",
-        successBg: "#1E1B4B",
-        successText: "#A5B4FC",
-        secondaryBtnBg: "#3D0617",
-        secondaryBtnText: "#FECDD3",
-        secondaryBtnBorder: "#9F1239",
-        outlineText: "#FECDD3",
-        outlineBorder: "#9F1239",
-        ghostText: "#FECDD3",
-      },
-    },
-  },
-];
+/**
+ * ── DECISION RECORD: single-ink button labels vs the 4.5:1 AA bar ──
+ * OButton's default md label is `text-sm font-medium` = 14px normal-weight
+ * text — below WCAG's large-text cut-offs (≥24px, or ≥18.66px bold) — so SC
+ * 1.4.3 demands 4.5:1 in every state the one label token rides (primary-600/
+ * 700/800 of the injected ramp). For these predefined palettes a single ink
+ * provably cannot deliver that. Two-sided constraint, dark O2 Horizon as the
+ * worked example (600 #588CF3, L 0.273; 800 #355492, L 0.092): a light ink on
+ * the rest fill is capped by white itself at 3.25, and clearing AA there
+ * needs L ≤ 0.022 — a dark ink — which on the active step tops out at black's
+ * (0.092+0.05)/0.05 = 2.83. Both luminance directions fail at opposite ends
+ * of the ramp, so no ink works; the full 12-scope table is in
+ * utils/theme.ts's picker, the five residual pairs are booked number-locked in
+ * tokens/themeRuntimeContrast.spec.ts (BUTTON_LABEL_RESIDUALS).
+ * Flagship defaults are clean in ALL states: light #1C1F23 16.54/17.65/18.62,
+ * dark #E6E6E6 (grey-900 ink) 14.36/9.04/5.19. The residual worst-of-states
+ * floor ships documented at 3.22–3.60 on predefined themes (3.07 for legacy
+ * stored custom pastels, e.g. #8B8DF0), gated at ≥3.00. Closing the gap needs
+ * a brand/palette-owner decision — darker saturated 600 steps (Horizon dark,
+ * both Lens) or a formal deviation record; per-state ink flips were rejected
+ * by design. This is an OPEN DECISION SURFACE, not hidden debt.
+ *
+ * ── LINK / ACCENT-ON-TINT RESIDUALS ──
+ * The same two-sided problem exists one tier lighter: an accent shade used AS
+ * TEXT on the runtime accent tints. `--color-text-link` (light = themeColor,
+ * dark = primary-400) measured 3.03:1 on `--color-surface-accent-active` under
+ * O2 Lens light and 3.77:1 under O2 Pulse dark; the primary-ramp label roles
+ * that fold onto the same steps (open-collapsible ink, primary icon chips, the
+ * primary soft badge, file chips, the range-band day, the on-state toggle) sat
+ * at 4.44:1 under O2 Lens light. Those pairs are FIXED by the machinery, not by
+ * a palette move: utils/theme.ts re-picks each ink against the tint it actually
+ * paints on and tokens/themeRuntimeContrast.spec.ts locks the pick twice over —
+ * AA under all twelve scopes, plus the sheet shade that justifies the pick
+ * (ACCENT_TINT_PICKS). What is BOOKED, number-locked and still open: the routed
+ * `--color-status-warning-text` tier on the runtime row wash (4.10–4.27 in the
+ * six light ramps, 10.40 in dark) — darkening the warning ink is a decision for
+ * every warning label in the product, not for this gate — and the global link
+ * tier itself, which remains the themeColor on the PLAIN page. Measured by the template
+ * census (tokens/runtime-contrast-ledger.json, twelve scopes, every booking number-locked):
+ * --color-text-link on the page tint runs 3.41 (O2 Lens light) to 4.40, on the plain plate
+ * 3.60 (O2 Lens light), and accent-as-text on the same grounds 3.41–4.35. A global link move
+ * repaints every `<a>` in the app, so the accent-ground consumers were routed to the picked
+ * accent label instead and the page tier stays the palette owner's call.
+ *
+ * ── THE MEASURED SURFACE (what this record may claim) ──
+ * Every figure quoted in this file is generated by the template census, not remembered: run
+ * `node scripts/check-runtime-contrast.mjs --list` (web/) to re-derive it and see
+ * tokens/runtime-contrast-ledger.json for the bookings. That script scans all 1517 components,
+ * builds the (ground, ink) pair each element really paints — including ink on a descendant, ink
+ * inherited from an ancestor or falling back to --color-text-body, `/NN` alpha fills, gradient
+ * stops, classes read from <script>, scoped-style paint, and element-opacity composite states —
+ * and measures it across the same twelve injected scopes this file's pickers run against.
+ *
+ * At this head — these figures are the gate's own output, transcribed 2026-10-28 at reviewed head
+ * 07698e801 (identical when re-run after the gate-integrity fixes, which change enforcement, not
+ * measurement): 5123 runtime pairs in 2426 booking groups — 2225 groups measured-pass, 201 groups
+ * (277 individual sites) booked with all twelve numbers each, 0 groups unbooked, and 0 groups
+ * delegated to tokens/contrast-manifest.ts (none stand — the grey-tier light debt was paid by
+ * re-tiering), of the bookings 34 are icon-only sites riding SC 1.4.11's 3:1 bar with a per-entry
+ * justification and 167 are text riding 4.5, with 19 of all bookings tagged conditional and
+ * guard-cited, 0 booking drift and 0 stale bookings. 41 script/style class literals are registered
+ * as runtime grounds; 11 of them co-bind a measurable (ground, ink) pair inside their own class
+ * string and must carry that pair's twelve numbers (2 of the 11 state an SC 1.4.3
+ * inactive-component exemption with its guard cited), and the other 30 paint one side only, which
+ * is the only case left where prose is the honest registration.
+ * MAX-UNBOOKED = 0 and MAX-DYNAMIC = 0, both equality
+ * locks, hard-pinned spec-side too: the residue growing OR healing without the lock moving is a
+ * build failure.
+ *
+ * Honest limits of that claim, all restated in the ledger's reason fields: the census models class
+ * bindings, not content conditionals, so the 19 guard-cited conditional rows (checkbox ticks, the
+ * selected datepicker day and weekday, the active page number, mode-exclusive ternary arms)
+ * describe a pair that does not co-occur on screen — the guard renders the ink only while a
+ * different fill token paints, and those fills are gated at 4.7+ by tokens/themeRuntimeContrast.spec.ts. Translucent grounds are composited over the plate
+ * the ledger names (--color-surface-base by default), which is the page plate, not necessarily the
+ * card a component actually sits on. Cascade inheritance is walked one level for page-default text.
+ *
+ * What this record may NO LONGER claim: that any pair "clears" a bar in all twelve scopes merely
+ * because its resting state does. Element opacity (opacity-NN / hover:opacity-NN) fades ink AND
+ * ground toward the plate behind the control, so a booked number for the rest state says nothing
+ * about the shipped hover state; that is the specific defect the hover-state audit found at the wrap toggles below,
+ * and every element-opacity state the census can still find (17 booking groups over 26 sites, the
+ * worst booked number 1.23:1) is now booked BY NUMBER instead.
+ *
+ * ── THE ACCENT FILL ITSELF ──
+ * One tier heavier sits the raw brand fill: applyThemeColors paints
+ * `--color-theme-accent` with the theme colour at alpha 1 in BOTH modes, so
+ * `bg-theme-accent` is the same pixel as the ramp's 600 step (asserted) and every
+ * label on it rides the button ground with none of the button's ink. A static ink
+ * cannot hold that ground: `--color-text-inverse` measures 3.73:1 (O2 Pulse dark)
+ * and 3.60:1 (O2 Lens light), and the plain-white variant the toggle buttons carried
+ * falls to 1.25:1 on the shipped dark default #E6E6E6 — an invisible glyph. No site of
+ * the enumerated seven keeps a static ink: the four real-text ones (AI integration
+ * initials, the field-count pill, the selected chart-type row) moved onto the accent
+ * TINT pairs the picker already re-inks per theme (4.50–15.04 across the twelve
+ * scopes), and the five filled-control ones bind the picked
+ * `--color-button-primary-foreground`, whose three sub-AA scopes are the booked
+ * `rest` states above — two of them are the confirm dialog's own branch. The three wrap toggles
+ * that remain are glyph-sized, so SC 1.4.11's 3:1 bar is the one they ride, and their RESTING state
+ * does clear it in all twelve scopes (3.22–3.60). That is deliberately NOT a claim about the shipped
+ * control: two of them also carried `hover:opacity-85`/`-80`, and element opacity fades ink AND
+ * ground toward the plate behind the button, which dropped the same label to 2.73–2.99:1 — below the
+ * 3.00 floor the booking promised to hold; the opacity treatment was removed at both sites.
+ * Two options were measured and rejected: routing every accent-fill label through the worst-of-states
+ * button pick alone would have dropped the dark Horizon/Lens labels from 5.52/5.58 to
+ * 3.25/3.22, and an AA-everywhere single ink (white-if-AA else readable, 4.70 worst)
+ * needs a label token computed in both modes — the existing selected-fill picks are
+ * light-only because their dark grounds are ladder literals. That token is a second
+ * answer to "what ink goes on the brand fill" and moves the pinned sheet counts, so
+ * it is the palette owner's call, not a micro-fix's. Still white-by-design: the two
+ * enterprise hero panels, whose fill is a gradient whose stops sit on opposite sides
+ * of any one ink. Measured per scope (white on stop 0, then the dark inks on stop 1 =
+ * color-mix(accent 85%, black)): white caps at 1.25–3.60 in six of the twelve scopes
+ * (Signature dark 1.25, Beacon dark 2.42, Crimson dark 2.69, Lens dark 3.22, Horizon dark
+ * 3.25, Lens light 3.60) and clears AA in the other six (Pulse 4.80 both modes, Crimson
+ * light 4.70, Beacon light 5.08, Horizon light 5.12, Signature light 16.54).
+ * The near-black half of the squeeze is NOT a six-theme range — it is O2 Signature
+ * light, whose accent (#1C1F23) is itself near-black: grey-900 measures 1.08 at stop 0
+ * and 1.03 at stop 1 there, black 1.27/1.21. On the five chromatic light ramps the same
+ * inks sit 2.74–3.78 (grey-900) and 3.20–4.43 (black), i.e. comfortably above the white
+ * figure. The conclusion is unchanged — no single static ink holds 4.5 across both stops
+ * in all twelve scopes — but it holds for the shipped default because of its near-black
+ * accent, and for the other eleven because white cannot carry the dark scopes' stops.
+ * Both panels also hardcode white on three nested elements plus translucent-white plates,
+ * which assume a dark ground — that is a repaint decision, booked in the same ledger.
+ */
+/** Predefined themes with both light and dark mode colors, names wrapped for i18n. */
+export const PREDEFINED_THEMES: PredefinedTheme[] = PREDEFINED_THEME_COLORS.map((theme) => ({
+  ...theme,
+  name: raw(theme.name),
+}));
 
 /** A light/dark background pair an announcement banner can be painted with. */
 export interface BannerColorPreset {
@@ -196,11 +227,16 @@ export const themeNameSlug = (name: string): string => name.toLowerCase().replac
 
 /**
  * User-facing label for a theme. The stored `name` is the persisted selection key
- * and must never change, but the "O2 " prefix is dropped for display on every
- * theme except the signature theme ("O2 Signature" stays branded).
+ * and must never change; the "O2 " prefix is dropped for display, and the
+ * signature theme is remapped below to carry this product's name instead.
  */
+// Stored names stay historical so saved preferences keep resolving; only the display name carries the product.
+export const THEME_DISPLAY_NAMES: Record<string, string> = {
+  [DEFAULT_THEME_NAME]: "Retrace Signature",
+};
+
 export const themeDisplayName = (name: string): string =>
-  name === DEFAULT_THEME_NAME ? name : name.replace(/^O2\s+/, "");
+  THEME_DISPLAY_NAMES[name] ?? (name === DEFAULT_THEME_NAME ? name : name.replace(/^O2\s+/, ""));
 
 export type ThemeSource = "preview" | "predefined" | "custom" | "default";
 

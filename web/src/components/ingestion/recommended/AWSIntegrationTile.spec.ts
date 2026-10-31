@@ -5,6 +5,7 @@ import { createI18n } from "vue-i18n";
 import enUS from "@/locales/languages/en-US.json";
 import { createRouter, createWebHistory } from "vue-router";
 import AWSIntegrationTile from "./AWSIntegrationTile.vue";
+import type { AWSIntegration } from "@/utils/awsIntegrations";
 
 vi.mock("../../../aws-exports", () => ({
   default: { API_ENDPOINT: "http://localhost:5080", region: "us-east-1" },
@@ -132,12 +133,14 @@ const mockRouter = createRouter({
   ],
 });
 
-const createMockIntegration = (overrides = {}) => ({
+const createMockIntegration = (overrides = {}): AWSIntegration => ({
   id: "cloudwatch-logs",
   name: "CloudWatchLogs",
   displayName: "CloudWatch Logs",
   descriptionKey: "ingestion.integrations.aws.cloudwatch-logs.description",
   category: "logs",
+  icon: "",
+  comingSoon: false,
   cloudFormationTemplate: "https://example.com/cloudwatch.yaml",
   hasDashboard: true,
   dashboardGithubUrl:
@@ -199,7 +202,7 @@ describe("AWSIntegrationTile.vue", () => {
 
     it("should render integration description", () => {
       wrapper = createWrapper();
-      expect(wrapper.text()).toContain("Stream CloudWatch logs to OpenObserve for analysis");
+      expect(wrapper.text()).toContain("Stream CloudWatch logs to Retrace.ai for analysis");
     });
 
     it("should render Add Source button when has CloudFormation", () => {
@@ -231,7 +234,7 @@ describe("AWSIntegrationTile.vue", () => {
   describe("Props Validation", () => {
     it("should accept integration prop", () => {
       wrapper = createWrapper();
-      expect(wrapper.props("integration")).toBeDefined();
+      expect((wrapper.props() as Record<string, any>)["integration"]).toBeDefined();
     });
 
     it("should expose organizationId from store", () => {

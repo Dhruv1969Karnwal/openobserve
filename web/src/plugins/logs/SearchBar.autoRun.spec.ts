@@ -128,12 +128,12 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
     });
 
   const setup = async (opts: { aqe?: boolean; liveMode?: boolean } = {}) => {
-    store.state.zoConfig = {
-      ...originalZoConfig,
+    const zoCfg: Record<string, unknown> = {
       auto_query_enabled: opts.aqe ?? true,
       query_on_stream_selection: true,
       web_url: "https://o2.example",
     };
+    store.state.zoConfig = { ...originalZoConfig, ...zoCfg };
     wrapper = mountSearchBar();
     const { searchObj } = wrapper.vm;
     searchObj.meta.logsVisualizeToggle = "logs";
@@ -146,6 +146,11 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
     searchObj.meta.autoRunBlocked = null;
     searchObj.data.query = "";
     searchObj.data.editorValue = "";
+    // A prior test's function payload would make the apply open the async
+    // function editor and crash on its not-yet-mounted ref.
+    searchObj.data.tempFunctionContent = "";
+    searchObj.data.transformType = "";
+    searchObj.meta.showTransformEditor = false;
     searchObj.data.stream.selectedStream = ["app_logs"];
     searchObj.data.stream.streamLists = [{ label: "app_logs", value: "app_logs" }];
     searchObj.data.datetime = { type: "relative", relativeTimePeriod: "15m" };
@@ -263,7 +268,7 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
       config.isEnterprise = "true";
       config.isCloud = "false";
       await setup({ liveMode: false });
-      store.state.zoConfig.search_inspector_enabled = true;
+      (store.state.zoConfig as any).search_inspector_enabled = true;
       markExecuted();
       await wrapper!.get('[data-test="logs-search-bar-more-options-btn"]').trigger("click");
       await flushPromises();
@@ -678,7 +683,7 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
       expect(searchObj.data.customDownloadQueryObj).toBeUndefined();
       expect(wrapper!.vm.autoRun.engine.isResultsStale()).toBe(false);
       await vi.waitFor(() => expect(logs).toHaveBeenCalled(), { timeout: 4000 });
-      expect(logs.mock.calls.at(-1)[0]).toMatchObject({ reason: "saved-view", op: "full" });
+      expect(logs.mock.calls.at(-1)![0]).toMatchObject({ reason: "saved-view", op: "full" });
     });
 
     const applyView = async (view: any) => {
@@ -694,6 +699,149 @@ describe("SearchBar — auto-run wiring (item 2)", () => {
       view.data.resultGrid = { ...(view.data.resultGrid ?? {}), colOrder: {}, colSizes: {} };
       return view;
     };
+
+    // The saved-view payload is org-stored client-writable JSON and merges
+    // into searchObj wholesale, so the gated toggle must pass the URL sanitizer.
+    it("a view payload cannot open the gated patterns panel on the shipped build", async () => {
+      await router.replace({ name: "logs", query: {} });
+      const { searchObj, logs } = await setup();
+      const patterns = vi.fn();
+      wrapper!.vm.autoRun.setExecutors({ patterns });
+      markExecuted();
+      const view = viewOf();
+      view.meta.logsVisualizeToggle = "patterns";
+
+      await applyView(view);
+
+      expect(toastMock).not.toHaveBeenCalledWith(expect.objectContaining({ variant: "error" }));
+      expect(searchObj.meta.logsVisualizeToggle).toBe("logs");
+      await vi.waitFor(() => expect(logs).toHaveBeenCalled(), { timeout: 4000 });
+      expect(patterns).not.toHaveBeenCalled();
+    });
+
+    it("a garbage view payload toggle lands on logs too, not a blank panel", async () => {
+      await router.replace({ name: "logs", query: {} });
+      const { searchObj } = await setup();
+      const view = viewOf();
+      view.meta.logsVisualizeToggle = "service-graph";
+
+      await applyView(view);
+
+      expect(searchObj.meta.logsVisualizeToggle).toBe("logs");
+    });
+
+    it("keeps the patterns payload toggle when the entitlement unlocks log patterns", async () => {
+      (config as any).isEnterprise = "true";
+      await router.replace({ name: "logs", query: {} });
+      const { searchObj } = await setup();
+      const view = viewOf();
+      view.meta.logsVisualizeToggle = "patterns";
+
+      await applyView(view);
+
+      expect(searchObj.meta.logsVisualizeToggle).toBe("patterns");
+    });
+
+    /**
+     * The saved-view boundary sanitized the panel toggle but let the
+     * rest of `meta` merge unfiltered, and `meta.showSearchScheduler` has an
+     * `immediate` watcher that turns a truthy value straight into
+     * `searchSchedulerJob = true` — the Create Scheduled Search dialog, a paid
+     * affordance, popped open on the shipped build from a crafted (or stale)
+     * org-stored view. The key now lands on its closed value at the boundary.
+     */
+    it("a view payload cannot open the paid scheduler dialog on the shipped build", async () => {
+      await router.replace({ name: "logs", query: {} });
+      const { searchObj } = await setup();
+      markExecuted();
+      const view = viewOf();
+      view.meta.showSearchScheduler = true;
+
+      await applyView(view);
+
+      expect(searchObj.meta.showSearchScheduler).toBe(false);
+      expect(wrapper!.vm.searchSchedulerJob).toBe(false);
+      expect(
+        document.querySelector('[data-test="search-bar-search-scheduler-job-dialog"]'),
+      ).toBeNull();
+    });
+
+    /**
+     * Control that makes the test above load-bearing rather than vacuous: the
+     * watcher is live, so writing the very same field by hand DOES open the
+     * dialog. Remove the sanitizer and the previous test starts failing here.
+     */
+    it("opens that dialog when the field itself goes true, so the boundary is what blocks it", async () => {
+      await router.replace({ name: "logs", query: {} });
+      const { searchObj } = await setup();
+
+      searchObj.meta.showSearchScheduler = true;
+      await flushPromises();
+
+      expect(wrapper!.vm.searchSchedulerJob).toBe(true);
+    });
+
+    /** Only the paid key is touched: the free half of the payload still applies. */
+    it("keeps every free field of a payload that also carries the paid scheduler key", async () => {
+      await router.replace({ name: "logs", query: {} });
+      const { searchObj } = await setup();
+      markExecuted();
+      const view = viewOf();
+      view.meta.showSearchScheduler = true;
+      view.meta.sqlMode = true;
+      view.meta.quickMode = true;
+      view.data.query = ".a = 1";
+
+      await applyView(view);
+
+      expect(searchObj.meta.showSearchScheduler).toBe(false);
+      expect(searchObj.meta.sqlMode).toBe(true);
+      expect(searchObj.meta.quickMode).toBe(true);
+      expect(searchObj.data.query).toBe(".a = 1");
+    });
+
+    /**
+     * A payload whose `meta` is not an object used to be stopped only by
+     * an unrelated strict-mode write throwing before the merge. The boundary now
+     * type-guards it, so the shape lands safe BY DESIGN and the watcher never sees
+     * a paid key.
+     */
+    it.each(["abc", 42, true])(
+      "treats a %p meta as unusable instead of merging it",
+      async (meta) => {
+        await router.replace({ name: "logs", query: {} });
+        const { searchObj } = await setup();
+        const view = viewOf();
+        view.meta = meta;
+
+        await applyView(view);
+
+        expect(searchObj.meta).toBeTypeOf("object");
+        expect(searchObj.meta.showSearchScheduler).not.toBe(true);
+        expect(searchObj.meta.logsVisualizeToggle).not.toBe("patterns");
+        expect(wrapper!.vm.searchSchedulerJob).toBe(false);
+      },
+    );
+
+    /**
+     * Entitled path unaffected: what the sanitizer removes is the paid DIALOG key,
+     * which no shipped writer ever sets to true, not the feature state an entitled
+     * build legitimately restores (that is the toggle test above).
+     */
+    it("still coerces the dialog key on an entitled build — no shipped writer ever sets it", async () => {
+      (config as any).isEnterprise = "true";
+      await router.replace({ name: "logs", query: {} });
+      const { searchObj } = await setup();
+      const view = viewOf();
+      view.meta.logsVisualizeToggle = "patterns";
+      view.meta.showSearchScheduler = true;
+
+      await applyView(view);
+
+      expect(searchObj.meta.logsVisualizeToggle).toBe("patterns");
+      expect(searchObj.meta.showSearchScheduler).toBe(false);
+      expect(wrapper!.vm.searchSchedulerJob).toBe(false);
+    });
 
     it("after a view apply with no run, Custom range says to run the query and never sends a reset request", async () => {
       await router.replace({ name: "logs", query: {} });

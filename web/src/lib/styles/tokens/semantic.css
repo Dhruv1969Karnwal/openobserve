@@ -14,14 +14,18 @@
   /* Text — grey-based semantic hierarchy */
   --color-text-heading: var(--color-grey-800); /* h1-h6, modal titles, page/panel titles */
   --color-text-body: var(--color-grey-700); /* paragraphs, default body */
-  --color-text-secondary: var(--color-grey-500); /* supporting text, descriptions, captions */
-  --color-text-label: var(--color-grey-400); /* form labels, metadata, badges */
-  --color-text-muted: var(--color-grey-300); /* disabled, placeholder, de-emphasized */
-  /* label / disabled / placeholder (+ border-strong, scrollbar-thumb-hover) are
-     intentionally equal for now: all route through the grey-400 primitive so any one
-     can diverge later. Distinct intents kept as distinct tokens on purpose, NOT aliases. */
+  --color-text-secondary: var(
+    --color-grey-600
+  ); /* supporting text, descriptions, captions — grey-500 (4.74) sank to 3.49-4.45 on the runtime primary-50/100 washes; grey-600 holds 5.76+ on every ramp's tint */
+  --color-text-label: var(
+    --color-grey-600
+  ); /* form labels, metadata, badges — grey-400 measured 1.86-2.29 on the light page/washes */
+  --color-text-muted: var(
+    --color-grey-600
+  ); /* de-emphasized text — grey-300 measured 1.09-1.35 light; AA has no de-emphasis exemption */
+  /* disabled stays grey-400 on purpose: SC 1.4.3 exempts inactive UI components */
   --color-text-disabled: var(--color-grey-400);
-  --color-text-placeholder: var(--color-grey-400);
+  --color-text-placeholder: var(--color-grey-600); /* placeholder text is real text */
   --color-text-soft: rgba(0, 0, 0, 0.75); /* black at 75% — readable but not harsh */
   --color-text-link: var(--color-primary-600); /* clickable links */
   --color-text-link-hover: var(--color-primary-700); /* link hover state */
@@ -34,11 +38,6 @@
   --color-surface-overlay: var(--color-white);
   --color-surface-subtle: var(--color-grey-100);
   --color-surface-subtle-hover: var(--color-grey-200);
-  /* Floating chip/pill (e.g. the NDV's prev/next node buttons over the white
-     Input/Output panes) — a WHITE fill that reads via its border + shadow in light
-     mode; flips to a lifted grey on the dark canvas (dark.css). */
-  --color-surface-chip: var(--color-white);
-  --color-surface-chip-hover: var(--color-grey-100);
   /* Accent-tinted interaction surfaces. The ONE place the "hover/active on an
      accent-tinted control" treatment lives, so buttons, menu items, tabs, selected
      rows etc. share it — change it here and every accent hover/active surface moves. */
@@ -76,16 +75,18 @@
        subtle  #ededed  1.17:1   grouping only, never a control edge
        default #d4d4d4  1.48:1   card / table / rail edges
        control #949494  3.02:1   inputs, checkboxes, anything operable
-       strong  #a3a3a3  2.52:1   emphasis, not an accessibility guarantee
+       strong  #737373  4.74:1   emphasis + the checkbox/radio/file outlines
 
      `default` was grey-200 (1.26:1) and read as barely-there on a white card;
-     grey-300 firms it without turning every card into a box. Controls get
-     their own token rather than borrowing `strong`, which does NOT reach 3:1
-     and would have quietly implied it did. */
+     grey-300 firms it without turning every card into a box. Controls keep
+     their own token so the operable-edge floor is stated once; `strong` was
+     grey-400 (2.52:1) while its checkbox/radio/file outlines are component
+     boundaries SC 1.4.11 prices at 3:1 — grey-500 clears that on the page
+     (4.74) and on every runtime accent wash (3.49 worst, themeRuntimeContrast). */
   --color-border-default: var(--color-grey-300);
-  --color-border-strong: var(--color-grey-400);
-  /* The only border step that clears 3:1 in light mode. Use for the edge of
-     anything the user operates — input, select, checkbox, radio, textarea. */
+  --color-border-strong: var(--color-grey-500);
+  /* The operable-edge floor in light mode. Use for the edge of
+     anything the user operates — input, select, radio, textarea. */
   --color-border-control: #949494;
   /* Soft divider — lighter than the structural border. Use for in-list row
      dividers and intra-card section splits. */
@@ -105,6 +106,8 @@
      series token (chart-series-6) rather than minting a new hue, so it stays in
      sync with the dashboard chart palette. */
   --color-series-b: var(--color-chart-series-6);
+  /* AA text tier of series B — the amber itself measures 1.51 on the light page. */
+  --color-series-b-text: #965300;
 
   /* One hue per telemetry signal; aliases the chart palette so dark mode follows dark.css. */
   --color-signal-logs: var(--color-chart-series-1);
@@ -112,11 +115,15 @@
   --color-signal-traces: var(--color-chart-series-9);
   --color-status-outdated-text: var(--color-text-secondary);
 
-  /* Favorite (filled star) — a warm yellow, deliberately distinct from the
+  /* Favorite (filled star) — a warm amber, deliberately distinct from the
      destructive error red so "starred" and "danger" never read as the same hue
      on a row that carries both. Only the FILLED star uses this; unfavorited
-     outlines stay neutral. */
-  --color-favorite: #eab308;
+     outlines stay neutral. Re-inked from the old #eab308 (1.74:1 on the lightest
+     brand page tint — a fifth of the way to invisible) to amber-700, which clears
+     SC 1.4.11's 3:1 non-text bar in every light scope; the dark override in
+     dark.css (#facc15, ~12:1) is unchanged. The shape swap (star ↔ star-outline /
+     saved-search) already carries the state; this makes the graphic perceivable. */
+  --color-favorite: #a16207;
 
   /* Alert PRIORITY — the semantic hot→cold ramp for P1…P5, so the priority
      chip and the row rail that carries the same priority are provably the same
@@ -211,8 +218,6 @@
   --color-surface-overlay: var(--color-surface-overlay);
   --color-surface-subtle: var(--color-surface-subtle);
   --color-surface-subtle-hover: var(--color-surface-subtle-hover);
-  --color-surface-chip: var(--color-surface-chip);
-  --color-surface-chip-hover: var(--color-surface-chip-hover);
   --color-surface-accent-hover: var(--color-surface-accent-hover);
   --color-surface-accent-active: var(--color-surface-accent-active);
   --color-icon-chip-primary-bg: var(--color-icon-chip-primary-bg);
@@ -252,6 +257,7 @@
 
   /* Series B (paired secondary series identity, see :root above) */
   --color-series-b: var(--color-series-b);
+  --color-series-b-text: var(--color-series-b-text);
 
   /* Telemetry signals (see :root above) */
   --color-signal-logs: var(--color-signal-logs);
@@ -500,12 +506,15 @@
      + any custom semantic theme, e.g. Crimson Ink) */
   --color-status-negative: #db3b4b;
   --color-status-positive: #208a3c;
-  --color-status-error-text: #cc3645;
+  /* Darkened from #cc3645 (4.40 on the runtime light accent tint) to the error-700
+     step; clears 4.5 on every light state surface the census paints it on. */
+  --color-status-error-text: #b91c1c;
   --color-status-error-bg: #fff7f7;
-  /* Nudged from #208a3c (4.41:1) to clear 4.5:1 for its several genuine
-     plain-text uses (QualityRunsTable.vue, AppSessions.vue, MonitorRuns.vue
-     KPI values) — imperceptibly darker. */
-  --color-status-success-text: #20883b;
+  /* Stable success ink: genuine text (diff tables, checklists, KPI values) and
+     the routed status labels sit on the wash, the page and grey panels —
+     #208a3c/#20883b measured 4.41/4.52 on white and 4.30 on the wash; #1a7a33
+     clears 5.16 on the wash, 5.42 on white, 5.19 on the panel tier. */
+  --color-status-success-text: #1a7a33;
   --color-status-success-bg: #f2fcf3;
 }
 

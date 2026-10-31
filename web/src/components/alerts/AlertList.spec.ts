@@ -156,6 +156,7 @@ type AlertV2 = {
   stream_type: string;
   enabled: boolean;
   condition: any;
+  alert_type?: string;
   child_count?: number;
   referenced_by_composite_count?: number;
   expression_summary?: string;
@@ -409,7 +410,7 @@ const waitData = async (wrapper: any) => {
       conditions = JSON.stringify(alert.condition.conditions);
     }
 
-    let frequency = "";
+    let frequency: string | number | undefined = "";
     if (alert.trigger_condition?.frequency_type == "cron") {
       frequency = alert.trigger_condition.cron;
     } else {
@@ -817,7 +818,9 @@ describe("AlertList - row actions", () => {
     expect(alertsSvc.listByFolderId).not.toHaveBeenCalled();
     // The store cache backs a folder revisit, so the row must leave it too or it
     // reappears the moment the user navigates away and back.
-    const cached = store.state.organizationData.allAlertsListByFolderId[wrapper.vm.activeFolderId];
+    const cached = (store.state.organizationData.allAlertsListByFolderId as Record<string, any>)[
+      wrapper.vm.activeFolderId
+    ];
     if (Array.isArray(cached)) {
       expect(cached.find((r: any) => r.alert_id === row.alert_id)).toBeUndefined();
     }
@@ -932,7 +935,7 @@ describe("AlertList - router query behaviors", () => {
     const spy = vi.spyOn(router, "push");
     await wrapper.vm.hideForm();
 
-    const pushedQuery = spy.mock.calls[0][0].query;
+    const pushedQuery = (spy.mock.calls[0][0] as { query: Record<string, unknown> }).query;
     expect(pushedQuery.page).toBe("3");
     expect(pushedQuery.action).toBeUndefined();
     expect(pushedQuery.alert_id).toBeUndefined();
@@ -986,7 +989,7 @@ describe("AlertList - pagination restoration", () => {
     await flushPromises();
 
     expect(wrapper.vm.currentPage).toBe(1);
-    expect(useListViewState("alerts", {}).currentPage).toBe(1);
+    expect((useListViewState("alerts", {}) as { currentPage: number }).currentPage).toBe(1);
   });
 });
 
@@ -1226,7 +1229,7 @@ describe("AlertList - micro validations", () => {
     await flushPromises();
     expect(wrapper.vm.showImportAlertDialog).toBe(true);
     expect(spy).toHaveBeenCalled();
-    expect(spy.mock.calls[0][0].query.page).toBe("3");
+    expect((spy.mock.calls[0][0] as { query: { page: string } }).query.page).toBe("3");
   });
 
   it("updateFolderIdToBeCloned updates state", async () => {
@@ -1361,15 +1364,14 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     expect(tabValues).toContain("anomalyDetection");
   });
 
-  it("should show anomalyDetection tab locked when build_type=opensource even when enterprise flags are set", async () => {
+  it("should omit the anomalyDetection tab when build_type=opensource even when enterprise flags are set", async () => {
     (config as any).isEnterprise = "true";
     (config as any).isCloud = "false";
     (store.state as any).zoConfig.build_type = "opensource";
 
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
   it("should enable anomalyDetection tab when isCloud=true (cloud build)", async () => {
@@ -1383,23 +1385,21 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     expect(tabValues).toContain("anomalyDetection");
   });
 
-  it("should show anomalyDetection tab locked when isEnterprise=false (opensource frontend)", async () => {
+  it("should omit the anomalyDetection tab when isEnterprise=false (opensource frontend)", async () => {
     (config as any).isEnterprise = "false";
     (config as any).isCloud = "false";
     (store.state as any).zoConfig.build_type = "enterprise";
 
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
-  it("should show anomalyDetection tab locked by default (no env vars set)", async () => {
-    // isEnterprise defaults to "false" → feature locked, not hidden
+  it("should omit the anomalyDetection tab by default (no env vars set)", async () => {
+    // isEnterprise defaults to "false" → the tab is absent, not locked.
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
   it("should include anomalyDetection tab in alertTabs when enabled", async () => {
@@ -1409,28 +1409,161 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     (store.state as any).zoConfig.anomaly_detection_enabled = true;
 
     const wrapper: any = await mountAlertList();
-    const tabValues = wrapper.vm.alertTabs.map((t: any) => t.value);
-    expect(tabValues).toContain("anomalyDetection");
+    const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
+    expect(tab).toBeTruthy();
+    expect(tab.locked).toBeFalsy();
   });
 
-  it("should show anomalyDetection tab locked in alertTabs when not entitled", async () => {
+  it("should omit the anomalyDetection tab from alertTabs when not entitled", async () => {
     (config as any).isEnterprise = "false";
     (config as any).isCloud = "false";
 
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
   it("should fall back activeTab to 'all' when anomalyDetection tab requested but feature disabled", async () => {
     (config as any).isEnterprise = "false";
     (config as any).isCloud = "false";
 
+    // The query has to be in place BEFORE the mount: activeTab is initialised
+    // once, in setup, from `route.query.tab`. (Assigning it afterwards — which is
+    // what this test used to do — asserted nothing about the restore path.)
+    router.currentRoute.value.query = { tab: "anomalyDetection" } as any;
     const wrapper: any = await mountAlertList();
-    // Simulate URL query requesting anomalyDetection tab when feature is off
-    wrapper.vm.router.currentRoute.value.query = { tab: "anomalyDetection" } as any;
-    // The computed initialises activeTab to 'all' when the feature is disabled
+
+    expect(wrapper.vm.activeTab).toBe("all");
+  });
+
+  /** Entitled mirror: with the feature on, the very same link opens that tab. */
+  it("restores the anomalyDetection tab from the URL when the feature is enabled", async () => {
+    (config as any).isEnterprise = "true";
+    (config as any).isCloud = "false";
+    (store.state as any).zoConfig.build_type = "enterprise";
+    (store.state as any).zoConfig.anomaly_detection_enabled = true;
+
+    router.currentRoute.value.query = { tab: "anomalyDetection" } as any;
+    const wrapper: any = await mountAlertList();
+
+    expect(wrapper.vm.activeTab).toBe("anomalyDetection");
+  });
+
+  /**
+   * The restore used to refuse `anomalyDetection` and nothing else, so any other value
+   * was adopted as a tab. `?tab=incidents` (a branch whose toggle no longer
+   * exists) turned row filtering OFF with nothing lit, and garbage stuck in the
+   * URL — the `activeTab` watcher that re-writes `?tab=` fires on CHANGE only, and
+   * this page is keep-alive, so setup never ran again. Closed set now, exactly
+   * like resolveLogsVisualizeToggle / resolveTraceSearchMode.
+   */
+  it.each(["incidents", "all ", "ALL", "", "undefined-tab", "__proto__", "<script>"])(
+    "coerces the non-tab value %p in the URL to the all tab",
+    async (tab) => {
+      router.currentRoute.value.query = { tab } as any;
+      const wrapper: any = await mountAlertList();
+
+      expect(wrapper.vm.activeTab).toBe("all");
+      // Row filtering is back on: "all" is the branch that shows every alert.
+      // Pinned harder than a value check would: the incidents early-return
+      // that the coercion made unreachable is gone, so whatever the URL
+      // claimed, filterAlertsByTab filters instead of skipping.
+      await waitData(wrapper);
+      expect(wrapper.vm.allAlerts.length).toBeGreaterThan(0);
+      wrapper.vm.filteredResults = [];
+      wrapper.vm.filterAlertsByTab(true);
+      expect(wrapper.vm.filteredResults.length).toBe(wrapper.vm.allAlerts.length);
+      expect(wrapper.vm.alertTabs.map((t: any) => t.value)).not.toContain(tab);
+    },
+  );
+
+  it.each([undefined, null, 0, true, {}, [], ["all", "scheduled"]])(
+    "coerces a non-string tab query shape (%#) to the all tab",
+    async (tab) => {
+      router.currentRoute.value.query = tab === undefined ? ({} as any) : ({ tab } as any);
+      const wrapper: any = await mountAlertList();
+
+      expect(wrapper.vm.activeTab).toBe("all");
+    },
+  );
+
+  /** Free tabs round-trip — the closed set is not a blanket reset to "all". */
+  it.each(["scheduled", "realTime", "composite"])(
+    "restores the %s tab from the URL",
+    async (tab) => {
+      router.currentRoute.value.query = { tab } as any;
+      const wrapper: any = await mountAlertList();
+
+      expect(wrapper.vm.activeTab).toBe(tab);
+    },
+  );
+
+  /**
+   * The coerced value has to reach the URL too — the state/URL desync class — by
+   * REPLACE — a normalization must not add a history entry.
+   */
+  it("re-writes the URL with the coerced tab, with replace rather than push", async () => {
+    const replace = vi.spyOn(router, "replace").mockResolvedValue(undefined as any);
+    const push = vi.spyOn(router, "push").mockResolvedValue(undefined as any);
+    router.currentRoute.value.query = { tab: "incidents", org_identifier: "default" } as any;
+
+    const wrapper: any = await mountAlertList();
+    await wrapper.vm.$nextTick();
+
+    expect(replace).toHaveBeenCalledWith({
+      query: { org_identifier: "default", tab: "all" },
+    });
+    expect(push).not.toHaveBeenCalled();
+    replace.mockRestore();
+    push.mockRestore();
+  });
+
+  /** A valid deep link is left alone: no normalization hop, no extra history entry. */
+  it("does not touch the URL when the tab it restored is already canonical", async () => {
+    const replace = vi.spyOn(router, "replace").mockResolvedValue(undefined as any);
+    router.currentRoute.value.query = { tab: "scheduled" } as any;
+
+    const wrapper: any = await mountAlertList();
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.vm.activeTab).toBe("scheduled");
+    expect(replace).not.toHaveBeenCalled();
+    replace.mockRestore();
+  });
+
+  /**
+   * The closed set is enforced at the CHANGE SINK as well as at the URL restore, so
+   * it has one meaning in this component: a handler that trusts its caller would
+   * adopt a value no tab renders, switch row filtering off with nothing lit, and
+   * have the `activeTab` watcher re-persist that value into the URL. Only the
+   * rendered toggle group feeds this handler today, which is why the assertion pins
+   * the contract instead of a reachable user flow — and it fails the moment the
+   * sink starts assigning the raw value again.
+   */
+  it("refuses a non-tab value at the change handler instead of adopting it", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+
+    wrapper.vm.onAlertTabChange("incidents");
+    await flushPromises();
+
+    expect(wrapper.vm.activeTab).toBe("all");
+    // Row filtering stayed on: "all" is the branch that shows every alert.
+    expect(wrapper.vm.filteredResults.length).toBe(wrapper.vm.allAlerts.length);
+
+    // The ungated values still round-trip — the sink is not a blanket reset.
+    wrapper.vm.onAlertTabChange("scheduled");
+    await flushPromises();
+    expect(wrapper.vm.activeTab).toBe("scheduled");
+  });
+
+  it("keeps refusing to activate the anomaly tab while the feature is off", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+
+    wrapper.vm.onAlertTabChange("anomalyDetection");
+    await flushPromises();
+
     expect(wrapper.vm.activeTab).not.toBe("anomalyDetection");
   });
 });
@@ -1625,7 +1758,8 @@ describe("AlertList - ODialog/ODrawer migration", () => {
   });
 
   it("duplicateAlert still fetches the alert to clone when the stream list fails to load", async () => {
-    global.server.use(
+    // `server` is stubbed onto the global by setupTests.ts via vi.stubGlobal
+    (global as any).server.use(
       http.get(
         `${store.state.API_ENDPOINT}/api/${store.state.selectedOrganization.identifier}/streams`,
         () => HttpResponse.error(),

@@ -146,7 +146,7 @@
           />
         </div>
 
-        <span class="text-warning font-medium">{{ t("slos.alert.warningIf") }}</span>
+        <span class="text-status-warning-text font-medium">{{ t("slos.alert.warningIf") }}</span>
         <div class="flex flex-wrap items-center gap-2">
           <span>{{ t("slos.alert.burnRate") }}</span>
           <!-- Shares the operator with critical (T-2): two operators would
@@ -196,7 +196,7 @@
             data-test="slos-sloalertcondition-critical"
           />
         </div>
-        <span class="text-warning font-medium">{{ t("slos.alert.warningIf") }}</span>
+        <span class="text-status-warning-text font-medium">{{ t("slos.alert.warningIf") }}</span>
         <div class="flex flex-wrap items-center gap-2">
           <span>{{ t("slos.alert.budgetConsumed") }}</span>
           <span class="font-mono">{{ model.operator }}</span>

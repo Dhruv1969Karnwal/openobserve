@@ -191,10 +191,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                    locked without an Enterprise/Cloud edition. See Agent
                    Signals design §4b. -->
             <OTab
-              v-if="isAgentBehaviorContext"
+              v-if="isAgentBehaviorContext && agentBehaviorAccess.visible"
               name="behavior"
               :label="t('aiObservability.behavior.node.tabLabel')"
-              :suffix-icon="!agentBehaviorAccess.allowed ? 'lock' : undefined"
               class="capitalize"
               data-test="service-graph-node-panel-tab-behavior"
             />
@@ -307,7 +306,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 "
               >
                 <template #cell-errors="{ row }">
-                  <span :class="row.errors > 0 ? 'text-status-negative font-semibold' : ''">{{
+                  <span :class="row.errors > 0 ? 'text-status-error-text font-semibold' : ''">{{
                     row.errors
                   }}</span>
                 </template>
@@ -453,7 +452,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </OButton>
                 </template>
                 <template #cell-errors="{ row }">
-                  <span :class="row.errors > 0 ? 'text-status-negative font-semibold' : ''">{{
+                  <span :class="row.errors > 0 ? 'text-status-error-text font-semibold' : ''">{{
                     row.errors
                   }}</span>
                 </template>

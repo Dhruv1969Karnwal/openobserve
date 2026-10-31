@@ -127,10 +127,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       @retry="() => loadAll(true)"
     />
 
-    <!-- Locked: no license to unlock Incidents, shown instead of omitted so
-         the capability is discoverable from a build that can't enable it. -->
+    <!-- The whole Incidents bundle is entitlement gated; when it isn't on
+         offer the section is omitted rather than advertised. -->
     <section
-      v-else-if="!incidentsAccess.allowed"
+      v-else-if="!incidentsAccess.allowed && incidentsAccess.visible"
       class="mb-5"
       data-test="overview-incidents-locked"
     >
@@ -247,7 +247,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 }}</span>
                 <span
                   class="text-text-body text-sm font-medium"
-                  :class="svc.errorFlag ? 'text-error-600' : ''"
+                  :class="svc.errorFlag ? 'text-status-error-text' : ''"
                 >
                   {{ svc.error_rate != null ? svc.error_rate.toFixed(1) + "%" : "—" }}
                 </span>
@@ -258,7 +258,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 }}</span>
                 <span
                   class="text-text-body text-sm font-medium"
-                  :class="svc.latencyFlag ? 'text-warning-700' : ''"
+                  :class="svc.latencyFlag ? 'text-status-warning-text' : ''"
                 >
                   {{ svc.latencyMultiplier ? raw(svc.latencyMultiplier + "x") : raw("—") }}
                 </span>
@@ -310,9 +310,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       @retry="() => loadAll(true)"
     />
 
-    <!-- Locked: Services shares the Incidents license gate — same bundle, no
-         separate upsell story of its own. -->
-    <section v-else-if="!incidentsAccess.allowed" class="mb-5" data-test="overview-services-locked">
+    <!-- Services shares the Incidents gate — same bundle, same treatment. -->
+    <section
+      v-else-if="!incidentsAccess.allowed && incidentsAccess.visible"
+      class="mb-5"
+      data-test="overview-services-locked"
+    >
       <div class="mb-2 flex items-center justify-between ps-1">
         <div class="text-text-heading text-sm font-medium tracking-[0.01em]">
           {{ t("overview.services") }}
@@ -534,7 +537,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           @click="goToAlertList"
         >
           <span
-            class="rounded-default bg-icon-chip-warning-bg text-icon-chip-warning-text group-hover:bg-accent group-hover:text-text-inverse inline-flex h-10 w-10 shrink-0 items-center justify-center transition-[background-color,color] duration-150"
+            class="rounded-default bg-icon-chip-primary-bg text-icon-chip-primary-text group-hover:bg-accent group-hover:text-text-inverse inline-flex h-10 w-10 shrink-0 items-center justify-center transition-[background-color,color] duration-150"
           >
             <OIcon name="notifications" size="md" />
           </span>
@@ -561,7 +564,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           @click="goToLogs"
         >
           <span
-            class="rounded-default bg-status-info-bg text-status-info-text group-hover:bg-accent group-hover:text-text-inverse inline-flex h-10 w-10 shrink-0 items-center justify-center transition-[background-color,color] duration-150"
+            class="rounded-default bg-icon-chip-primary-bg text-icon-chip-primary-text group-hover:bg-accent group-hover:text-text-inverse inline-flex h-10 w-10 shrink-0 items-center justify-center transition-[background-color,color] duration-150"
           >
             <OIcon name="search" size="md" />
           </span>
@@ -588,7 +591,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           @click="goToTraces"
         >
           <span
-            class="rounded-default bg-status-info-bg text-status-info-text group-hover:bg-accent group-hover:text-text-inverse inline-flex h-10 w-10 shrink-0 items-center justify-center transition-[background-color,color] duration-150"
+            class="rounded-default bg-icon-chip-primary-bg text-icon-chip-primary-text group-hover:bg-accent group-hover:text-text-inverse inline-flex h-10 w-10 shrink-0 items-center justify-center transition-[background-color,color] duration-150"
           >
             <OIcon name="account-tree" size="md" />
           </span>

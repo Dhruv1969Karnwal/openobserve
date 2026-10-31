@@ -92,7 +92,7 @@ the Free Software Foundation, either version 3 of the License, or
                 <span>
                   {{ t(`onlineEvals.${importI18nKey}.import.customLabel`) }}
                 </span>
-                <span class="text-dropdown-item-text text-xs opacity-60">
+                <span class="text-dropdown-item-text text-xs">
                   {{ t(`onlineEvals.${importI18nKey}.import.customSubtitle`) }}
                 </span>
               </div>
@@ -105,7 +105,7 @@ the Free Software Foundation, either version 3 of the License, or
                 <span>
                   {{ t(`onlineEvals.${importI18nKey}.import.libraryLabel`) }}
                 </span>
-                <span class="text-dropdown-item-text text-xs opacity-60">
+                <span class="text-dropdown-item-text text-xs">
                   {{ t(`onlineEvals.${importI18nKey}.import.librarySubtitle`) }}
                 </span>
               </div>

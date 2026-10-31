@@ -67,8 +67,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             class="thread-pill"
             :class="
               tool.span_status === 'ERROR'
-                ? 'thread-pill--error text-error-600 dark:text-error-400'
-                : 'thread-pill--ok text-success-600 dark:text-success-400'
+                ? 'thread-pill--error text-status-error-text'
+                : 'thread-pill--ok text-status-success-text'
             "
           >
             {{ tool.span_status === "ERROR" ? "ERROR" : "OK" }}
@@ -98,7 +98,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <div class="thread-tool-body__section">
             <div class="thread-tool-body__label text-text-secondary">
               {{ t("traces.threadToolCalls.result") }}
-              <span v-if="tool.span_status === 'ERROR'" class="text-error-600">
+              <span v-if="tool.span_status === 'ERROR'" class="text-status-error-text">
                 · {{ t("traces.error") }}
               </span>
             </div>

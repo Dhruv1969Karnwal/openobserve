@@ -158,7 +158,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         @click="toggleJsonEditorAIChat"
         data-test="menu-link-ai-item"
         :aria-label="t('menu.aiAssistant')"
-        class="group text-ai-accent! hover:shadow-ai-accent/35 dark:shadow-ai-accent/20 dark:hover:shadow-ai-accent/35 [background:var(--color-gradient-ai-subtle)]! [transition:background_0.3s_ease,box-shadow_0.3s_ease,color_0.3s_ease] hover:text-white! hover:shadow-md hover:[background:var(--color-gradient-ai)]! dark:text-white! dark:shadow-md dark:hover:shadow-md"
+        class="group text-ai-accent-text! hover:shadow-ai-accent/35 dark:shadow-ai-accent/20 dark:hover:shadow-ai-accent/35 [background:var(--color-gradient-ai-subtle)]! [transition:background_0.3s_ease,box-shadow_0.3s_ease,color_0.3s_ease] hover:shadow-md dark:text-white! dark:shadow-md dark:hover:shadow-md"
         :class="store.state.isAiChatEnabled ? 'ai-btn-active' : ''"
         @mouseenter="isJsonEditorAiHovered = true"
         @mouseleave="isJsonEditorAiHovered = false"
@@ -168,13 +168,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           :src="jsonEditorAiBtnLogo"
           class="header-icon size-5 [transition:transform_0.6s_ease] group-hover:rotate-180 group-hover:brightness-0 group-hover:invert group-hover:[transition:filter_0.3s_ease]"
         />
-        <span
-          v-if="!aiAccess.allowed"
-          aria-hidden="true"
-          class="bg-surface-overlay border-surface-base absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border shadow-sm"
-        >
-          <OIcon name="lock" size="xs" class="text-warning-600 size-2.5!" />
-        </span>
       </OButton>
     </template>
     <JsonEditor
@@ -228,7 +221,6 @@ import StepPickerDialog from "@/components/flow/StepPickerDialog.vue";
 import NodePalette from "@/components/flow/NodePalette.vue";
 import { raw, useI18nTyped, type I18nText } from "@/types/i18n";
 import OButton from "@/lib/core/Button/OButton.vue";
-import OIcon from "@/lib/core/Icon/OIcon.vue";
 import ODrawer from "@/lib/overlay/Drawer/ODrawer.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 import { useLockedAffordance } from "@/composables/useLockedAffordance";
@@ -481,7 +473,8 @@ const associatedFunctions: Ref<string[]> = ref([]);
 const aiAccess = useLockedAffordance("aiAssistant");
 const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 const jsonEditorAiButtonVisible = computed(
-  () => !aiAccess.value.allowed || Boolean(store.state.zoConfig.ai_enabled),
+  () =>
+    aiAccess.value.visible && (!aiAccess.value.allowed || Boolean(store.state.zoConfig.ai_enabled)),
 );
 const isJsonEditorAiHovered = ref(false);
 const jsonEditorAiBtnLogo = computed(() => {
@@ -594,10 +587,9 @@ watch(
 );
 
 onBeforeMount(() => {
-  // Self-hosted-only (cloudOffers: false) — a pure-Cloud build reports
-  // `visible: false` so the node stays entirely absent there, matching
-  // today's real behavior; OSS gets it LOCKED instead of omitted so the
-  // capability is discoverable while building a pipeline.
+  // Self-hosted-only (cloudOffers: false): a pure-Cloud build reports `visible: false`,
+  // and under the shipped "hide" policy so does OSS — the node is absent unless entitled.
+  // Only a "lock" build renders it here, discoverable while building a pipeline.
   if (pipelineDestinationsAccess.value.visible) {
     nodeTypes.push({
       label: t("pipeline.remoteNode"),

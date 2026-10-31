@@ -17,6 +17,7 @@ import { mount, flushPromises } from "@vue/test-utils";
 import { describe, expect, it, beforeEach, afterEach, vi, type MockedFunction } from "vitest";
 import { resetListViewState, useListViewState } from "@/composables/useListViewState";
 import PipelinesList from "@/components/pipeline/PipelinesList.vue";
+import config from "@/aws-exports";
 import i18n from "@/locales";
 import { nextTick, reactive } from "vue";
 import pipelineService from "@/services/pipelines";
@@ -318,6 +319,25 @@ describe("PipelinesList", () => {
     it("initializes backfillDialog as hidden", () => {
       expect(wrapper.vm.backfillDialog.show).toBe(false);
     });
+
+    // The row action reads the `pipelineBackfill` key that Functions.vue's
+    // header entry and the route share, not a private `config` read.
+    it("keeps the backfill action hidden on the shipped OSS build", () => {
+      expect(wrapper.vm.backfillAccess.visible).toBe(false);
+    });
+
+    it("shows the backfill action on the enterprise build the route allows", () => {
+      const edition = config.isEnterprise;
+      (config as any).isEnterprise = "true";
+      try {
+        const w: any = createWrapper();
+        expect(w.vm.backfillAccess.visible).toBe(true);
+        expect(w.vm.backfillAccess.allowed).toBe(true);
+        w.unmount();
+      } finally {
+        (config as any).isEnterprise = edition;
+      }
+    });
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -505,8 +525,8 @@ describe("PipelinesList", () => {
 
       wrapper.vm.editPipeline(pipeline);
 
-      expect(pipeline.nodes[0].type).toBe("input");
-      expect(pipeline.nodes[1].type).toBe("output");
+      expect((pipeline.nodes[0] as any).type).toBe("input");
+      expect((pipeline.nodes[1] as any).type).toBe("output");
       expect(mockRouter.push).toHaveBeenCalledWith({
         name: "pipelineEditor",
         query: {

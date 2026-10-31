@@ -91,11 +91,25 @@ describe("applyThemeColors button-primary-foreground contrast", () => {
     document.body.removeAttribute("style");
   });
 
-  it("switches to dark text when the theme color is too light for white text (O2 Signature dark, #8B8DF0 vs white = 2.93:1)", () => {
+  it("falls through to pure black when neither white nor grey-900 survives every state (#8B8DF0 vs white = 2.93:1 rest, grey-900 = 2.62:1 on active #535590, black = 3.07:1)", () => {
     applyThemeColors("#8B8DF0", "dark", false);
     expect(
       document.documentElement.style.getPropertyValue("--color-button-primary-foreground"),
+    ).toBe("#000000");
+  });
+
+  it("keeps grey-900 as the house ink when it carries AA through every state (O2 Signature dark #E6E6E6, grey-900 = 14.36/9.04/5.19 worst-state)", () => {
+    applyThemeColors("#E6E6E6", "dark", false);
+    expect(
+      document.documentElement.style.getPropertyValue("--color-button-primary-foreground"),
     ).toBe("#171717");
+  });
+
+  it("weighs black before grey-900 once no ink reaches AA, lifting the worst state (O2 Beacon dark #6EA8FE: grey-900 caps at 3.03 on active #426598, black holds 3.55)", () => {
+    applyThemeColors("#6EA8FE", "dark", false);
+    expect(
+      document.documentElement.style.getPropertyValue("--color-button-primary-foreground"),
+    ).toBe("#000000");
   });
 
   it("keeps white text when the theme color is dark enough (O2 Pulse, #3F7994 vs white = 4.8:1)", () => {

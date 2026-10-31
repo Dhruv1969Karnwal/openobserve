@@ -65,13 +65,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           class="showLabelOnTop mt-2"
         />
 
-        <!-- Access grants happen in the same flow. Roles/groups are locked
-             (not hidden) when rbac isn't allowed — see rbacAccess — so OSS
-             shows what it's missing instead of pretending it doesn't exist.
-             Both pickers are optional; assignments are applied after the
-             account is created, and failures surface in the token-reveal
-             screen without blocking it. -->
-        <template v-if="!beingUpdated">
+        <!-- Access grants happen in the same flow, and are dropped whole when
+             rbac isn't on offer: the pickers are optional, so hiding them loses
+             nothing a free workflow needs. Both pickers are optional;
+             assignments are applied after the account is created, and failures
+             surface in the token-reveal screen without blocking it. -->
+        <template v-if="!beingUpdated && rbacAccess.visible">
           <!-- RBAC not allowed: the select would write to form state and the
                button would open AddRole on click, so a locked click is caught
                on this wrapper BEFORE it reaches either — removing `disabled`
@@ -223,8 +222,9 @@ export default defineComponent({
       groups: [],
     }));
 
-    // Same rbac gate IdentityAccessManagement.vue uses for the Groups/Roles
-    // rail items — reused here so the pickers lock instead of vanish in OSS.
+    // Same rbac gate IdentityAccessManagement.vue uses for the Groups/Roles rail
+    // items: the pickers render on `rbacAccess.visible`, so the shipped "hide"
+    // policy drops them and only a "lock" build renders them locked.
     const rbacAccess = useLockedAffordance("rbac");
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 

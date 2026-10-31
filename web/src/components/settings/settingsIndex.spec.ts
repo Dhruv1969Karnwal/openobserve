@@ -36,7 +36,8 @@ const mockRouter = {
   replace: mockReplace,
   currentRoute: {
     value: {
-      name: "settings",
+      // widened so the `name = undefined` case below stays type-valid
+      name: "settings" as string | undefined,
       path: "/settings",
       query: {},
     },
@@ -525,12 +526,12 @@ describe("SettingsIndex.vue", () => {
       expect(findEntry(wrapper)?.visible).toBe(false);
     });
 
-    it("shows locked (not hidden) in an OSS build, even in the meta org", () => {
+    it("is hidden, not locked, in an OSS build under the shipped hide policy", () => {
       config.isEnterprise = "false";
       isMetaOrgRef.value = true;
       wrapper = createWrapper();
 
-      expect(findEntry(wrapper)?.visible).toBe(true);
+      expect(findEntry(wrapper)?.visible).toBe(false);
       expect(findEntry(wrapper)?.locked).toBe(true);
     });
 

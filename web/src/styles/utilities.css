@@ -81,6 +81,23 @@
   box-shadow: var(--shadow-lg) !important;
 }
 
+/* Scroll-reveal states for the public landing page. The classes are attached at
+   runtime by components/landing/useReveal.ts (IntersectionObserver), so no
+   template names them — the strings there keep Tailwind's scanner from purging
+   these. Content is visible by default: JS adds _wait then _in as each element
+   enters, and prefers-reduced-motion users never get _wait. */
+@utility landing-reveal-wait {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition:
+    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@utility landing-reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Announcement message markup comes from v-html, so links and code inherit the operator-chosen banner colour. */
 @utility announcement-message {
   overflow-wrap: anywhere;

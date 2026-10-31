@@ -46,7 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       v-for="section in sections"
       :key="section.key"
       :name="section.key"
-      :disable="section.disabled"
+      :disable="section.disabled && !showsLockedTabs"
       :data-test="`dbm-section-tab-${section.key}`"
     >
       <span>{{ section.label }}</span>
@@ -70,20 +70,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
            one place the same number appears on all eight pages. The suffix is
            absent for the counts that exist in one vantage only: qualifying a
            deadlock count would imply a choice between feeds that was never
-           available. -->
+           available. The suffix carries no opacity: 80% alpha over the badge
+           sank the qualifier to 3.04:1 in light / 4.34:1 in dark, and the
+           badge paints on the badge-default-soft fill (a dedicated badge tier,
+           not the raw surface+role pair it replaced: grey-500 on grey-100 was
+           already 4.35:1), where its text clears AA at full alpha — 9.93:1
+           light, 10.21:1 dark. Size and weight keep the hierarchy the opacity
+           used to suggest. -->
       <span
         v-if="section.count != null"
         class="text-2xs inline-flex items-baseline gap-1 rounded-full px-1.5 py-1 leading-none font-bold"
         :class="
           section.key === activeTab
             ? 'bg-badge-primary-soft-bg text-badge-primary-soft-text'
-            : 'bg-surface-subtle text-text-secondary'
+            : 'bg-badge-default-soft-bg text-badge-default-soft-text'
         "
         :data-test="`dbm-section-tab-badge-${section.key}`"
         ><span>{{ section.count }}</span
         ><span
           v-if="section.vantageLabel"
-          class="text-3xs font-normal opacity-80"
+          class="text-3xs font-normal"
           :data-test="`dbm-section-tab-vantage-${section.key}`"
           >{{ section.vantageLabel }}</span
         ></span
@@ -97,7 +103,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { computed } from "vue";
 import { useRoute, useRouter, type RouteLocationRaw } from "vue-router";
 
-import config from "@/aws-exports";
+import {
+  buildFeatureGateContext,
+  checkFeatureAccess,
+  type FeatureAccess,
+} from "@/utils/enterpriseFeatures";
+import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OTab from "@/lib/navigation/Tabs/OTab.vue";
 import OTabs from "@/lib/navigation/Tabs/OTabs.vue";
@@ -157,20 +168,36 @@ const router = useRouter();
 
 /**
  * Deadlocks, Blocked queries and Table health read endpoints an OSS build
- * answers 403 on, so the three tabs are locked rather than live there.
- *
- * `isEnterprise` is a STRING env value — compared against the literal `"true"`,
- * never coerced. `Boolean(config.isEnterprise)` is true for `"false"`, which
- * would unlock all three on every OSS build.
+ * answers 403 on, so the three tabs derive from the registry's generic
+ * `enterprise` gate instead of re-reading `config` here — under "hide" an
+ * un-entitled build drops them (visible=false), under "lock" it shows them
+ * locked and routes their click to the upsell dialog.
  *
  * Read inside a computed rather than once at module scope: `/config` and the
  * build flags are resolved during startup, and a module-scope snapshot would
  * freeze whatever was there when this file first loaded.
  */
-const isEnterprise = computed(() => config.isEnterprise === "true");
+const gatedTabsAccess = computed<FeatureAccess>(() =>
+  checkFeatureAccess("enterprise", buildFeatureGateContext()),
+);
+
+/**
+ * The lock-but-clickable state: a disabled trigger would swallow the dialog click.
+ * `:disable` is therefore false for every tab that renders at all — under "hide" a
+ * gated tab is filtered out before it reaches the template — and the expression is
+ * kept as the belt that holds that if a gated tab ever renders unlocked-but-hidden.
+ */
+const showsLockedTabs = computed(
+  () => gatedTabsAccess.value.visible && !gatedTabsAccess.value.allowed,
+);
+
+const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 
 /** The three tabs the OSS backend refuses. */
 const ENTERPRISE_ONLY_TABS = ["deadlocks", "blocked", "tableHealth"];
+
+const isSectionOffered = (key: string) =>
+  !ENTERPRISE_ONLY_TABS.includes(key) || gatedTabsAccess.value.visible;
 
 /**
  * Route name → tab key. The detail route resolves to the tab it was opened
@@ -212,7 +239,7 @@ const DETAIL_ORIGIN_TABS = new Set<string>(DBM_QUERY_DETAIL_ORIGINS);
  * on Top queries, the detail page's natural parent.
  */
 const activeOriginTabs = computed(() =>
-  isEnterprise.value
+  gatedTabsAccess.value.allowed
     ? DETAIL_ORIGIN_TABS
     : new Set([...DETAIL_ORIGIN_TABS].filter((key) => !ENTERPRISE_ONLY_TABS.includes(key))),
 );
@@ -311,7 +338,7 @@ const carriedQuery = computed(() => {
   return rest;
 });
 
-const sections = computed<Section[]>(() => [
+const offeredSections = computed<Section[]>(() => [
   {
     key: "overview",
     label: t("dbm.page.tabs.overview"),
@@ -364,19 +391,21 @@ const sections = computed<Section[]>(() => [
     // A locked tab has no count to badge — the read that produces it is the
     // one the OSS backend refuses — and its hint explains the lock rather
     // than the (absent) number.
-    count: isEnterprise.value ? badgeCount(props.deadlockCount) : null,
-    hint: isEnterprise.value
+    count: gatedTabsAccess.value.allowed ? badgeCount(props.deadlockCount) : null,
+    hint: gatedTabsAccess.value.allowed
       ? t("dbm.page.tabs.deadlocksHint")
       : t("dbm.page.tabs.deadlocksLocked"),
-    disabled: !isEnterprise.value,
+    disabled: !gatedTabsAccess.value.allowed,
   },
   {
     key: "blocked",
     label: t("dbm.page.tabs.blocked"),
     to: { name: "dbmBlocking", query: carriedQuery.value },
-    count: isEnterprise.value ? badgeCount(props.blockedCount) : null,
-    hint: isEnterprise.value ? t("dbm.page.tabs.blockedHint") : t("dbm.page.tabs.blockedLocked"),
-    disabled: !isEnterprise.value,
+    count: gatedTabsAccess.value.allowed ? badgeCount(props.blockedCount) : null,
+    hint: gatedTabsAccess.value.allowed
+      ? t("dbm.page.tabs.blockedHint")
+      : t("dbm.page.tabs.blockedLocked"),
+    disabled: !gatedTabsAccess.value.allowed,
   },
   {
     // LAST: schema health is the slow-moving background question, read after
@@ -384,13 +413,17 @@ const sections = computed<Section[]>(() => [
     key: "tableHealth",
     label: t("dbm.page.tabs.tableHealth"),
     to: { name: "dbmTableHealth", query: carriedQuery.value },
-    count: isEnterprise.value ? badgeCount(props.tableHealthCount) : null,
-    hint: isEnterprise.value
+    count: gatedTabsAccess.value.allowed ? badgeCount(props.tableHealthCount) : null,
+    hint: gatedTabsAccess.value.allowed
       ? t("dbm.page.tabs.tableHealthHint")
       : t("dbm.page.tabs.tableHealthLocked"),
-    disabled: !isEnterprise.value,
+    disabled: !gatedTabsAccess.value.allowed,
   },
 ]);
+
+const sections = computed<Section[]>(() =>
+  offeredSections.value.filter((s) => isSectionOffered(s.key)),
+);
 
 const navigate = (key: string | number) => {
   if (key === activeTab.value) return;
@@ -398,7 +431,13 @@ const navigate = (key: string | number) => {
   if (!section) return;
   // A locked tab must not navigate even if `change` reaches here some other
   // way (keyboard, a future OTabs change) — the route would only bounce back.
-  if (section.disabled) return;
+  if (!isSectionOffered(section.key)) return;
+  // The `lock` contract: a visible-but-locked tab's click opens the upgrade
+  // dialog rather than dying silently (a hidden-policy build never renders it).
+  if (section.disabled) {
+    openUpgradeDialog();
+    return;
+  }
   router.push(section.to).catch(() => {});
 };
 </script>

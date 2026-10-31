@@ -537,7 +537,7 @@ defineExpose({ applyTemplate, previewTemplate });
           </button>
           <template v-if="showBuiltIns">
             <p class="text-text-secondary mx-0 mt-0 mb-2 text-xs">
-              {{ t("alerts.alertSettings.helpBuiltInIntro", { product: raw("OpenObserve") }) }}
+              {{ t("alerts.alertSettings.helpBuiltInIntro", { product: raw("Retrace.ai") }) }}
             </p>
             <div class="flex flex-wrap gap-2" data-test="help-builtin-list">
               <button

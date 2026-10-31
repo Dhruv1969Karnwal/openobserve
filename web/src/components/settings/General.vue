@@ -42,7 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               :aria-label="t('settings.scrapintervalLabel')"
               type="number"
               min="0"
-              class="ms-2 w-30!"
+              class="w-36!"
               data-test="general-settings-scrape-interval"
             />
             <span class="individual-setting-description text-compact opacity-70">
@@ -62,8 +62,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               type="number"
               :min="1000"
               :max="1000000"
-              class="ms-2 w-45!"
-              :placeholder="raw('40000 (' + t('settings.systemDefault') + ')')"
+              class="w-36!"
+              :placeholder="raw('40000')"
               data-test="general-settings-max-series-per-query"
             >
               <template v-slot:icon-right>
@@ -84,7 +84,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <span class="individual-setting-title text-sm leading-5 font-medium">
               {{ t("settings.manageTheme") }}
             </span>
-            <div class="-ms-15 flex items-center gap-2 max-lg:ms-0 max-lg:flex-wrap">
+            <div class="flex items-center gap-2 max-lg:flex-wrap">
               <!-- Light Mode Theme -->
               <div
                 class="group/chip bg-surface-subtle border-border-default hover:bg-surface-subtle-hover hover:border-accent inline-flex cursor-pointer items-center gap-2 rounded-full border py-1.5 ps-1.5 pe-3 transition-all duration-200 hover:-translate-y-px hover:shadow-md"
@@ -103,12 +103,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   />
                   <!-- eslint-enable local/no-hardcoded-px -->
                 </div>
-                <span class="chip-label text-2xs font-semibold tracking-wider opacity-50">{{
-                  t("settings.light")
-                }}</span>
-                <span class="chip-value text-2xs font-mono font-medium tracking-tight opacity-70">{{
-                  customLightColor
-                }}</span>
+                <span
+                  class="chip-label text-text-secondary text-2xs font-semibold tracking-wider"
+                  >{{ t("settings.light") }}</span
+                >
+                <span
+                  class="chip-value text-text-body text-2xs font-mono font-medium tracking-tight"
+                  >{{ customLightColor }}</span
+                >
               </div>
 
               <!-- Dark Mode Theme -->
@@ -129,17 +131,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   />
                   <!-- eslint-enable local/no-hardcoded-px -->
                 </div>
-                <span class="chip-label text-2xs font-semibold tracking-wider opacity-50">{{
-                  t("settings.dark")
-                }}</span>
-                <span class="chip-value text-2xs font-mono font-medium tracking-tight opacity-70">{{
-                  customDarkColor
-                }}</span>
+                <span
+                  class="chip-label text-text-secondary text-2xs font-semibold tracking-wider"
+                  >{{ t("settings.dark") }}</span
+                >
+                <span
+                  class="chip-value text-text-body text-2xs font-mono font-medium tracking-tight"
+                  >{{ customDarkColor }}</span
+                >
               </div>
 
               <!-- Reset Button -->
-              <div
-                class="group/resetChip border-border-default hover:border-error-400 hover:bg-error-500/10 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-dashed bg-transparent opacity-60 transition-all duration-200 hover:-translate-y-px hover:rotate-180 hover:border-solid hover:opacity-100"
+              <button
+                type="button"
+                :aria-label="t('settings.resetToDefaultColors')"
+                class="group/resetChip border-border-default hover:border-error-400 hover:bg-error-500/10 focus-visible:ring-text-heading inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-dashed bg-transparent opacity-60 transition-all duration-200 hover:-translate-y-px hover:rotate-180 hover:border-solid hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 @click="resetThemeColors"
                 data-test="reset-theme-colors-btn"
               >
@@ -149,7 +155,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   class="group-hover/resetChip:text-error-500 dark:group-hover/resetChip:text-error-400"
                 />
                 <OTooltip :content="t('settings.resetToDefaultColors')" side="top" />
-              </div>
+              </button>
             </div>
             <span class="individual-setting-description text-compact self-start opacity-70">
               {{ t("settings.themeManagementDescription") }}
@@ -692,8 +698,9 @@ export default defineComponent({
     const { isDark } = useTheme();
     const router: any = useRouter();
 
-    // Self-hosted-only (cloudOffers: false) — pure Cloud gets `visible: false`
-    // (hidden, matching today's real behavior), OSS gets locked-but-visible.
+    // Self-hosted-only (cloudOffers: false) — pure Cloud is force-hidden by that
+    // flag, and OSS hides as well under the shipped "hide" policy: the section
+    // renders on `customBrandingAccess.visible`.
     const customBrandingAccess = useLockedAffordance("customBranding");
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
     function onLockedBrandingClick(event: MouseEvent) {

@@ -312,7 +312,7 @@ const saveHelpContact = async (value: HelpContactForm): Promise<void> => {
             :name="installation.health.last_event_at ? 'check-circle' : 'schedule'"
             size="sm"
             :class="
-              installation.health.last_event_at ? 'text-status-positive' : 'text-text-secondary'
+              installation.health.last_event_at ? 'text-status-success-text' : 'text-text-secondary'
             "
           />
           <template v-if="installation.health.last_event_at">
@@ -337,7 +337,7 @@ const saveHelpContact = async (value: HelpContactForm): Promise<void> => {
             :class="
               installation.health.sockets_up >= installation.health.sockets_want &&
               installation.health.sockets_want > 0
-                ? 'text-status-positive'
+                ? 'text-status-success-text'
                 : 'text-status-warning-text'
             "
           />

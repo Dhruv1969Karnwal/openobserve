@@ -70,8 +70,18 @@ const clamp = (value: number, low: number, high: number): number =>
 
 const collapseSpace = (value: string): string => value.replace(/\s+/g, " ").trim();
 
+/**
+ * The sRGB linearization knee as PUBLISHED by WCAG 2.x (0.04045, per IEC 61966-2-1).
+ * The legacy pre-publication 0.03928 used to live in utils/themePalette's
+ * relativeLuminance — two knees drifting apart in one system (A8). The two copies are
+ * forced (both modules are import-free pure transpile targets of
+ * scripts/check-runtime-contrast.mjs's PURE_MODULES map), and colorMath.spec's
+ * "the two knee constants are one constant" cell locks the values together.
+ */
+export const SRGB_LINEAR_KNEE = 0.04045;
+
 const srgbToLinear = (channel: number): number =>
-  channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  channel <= SRGB_LINEAR_KNEE ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
 
 const linearToSrgb = (channel: number): number =>
   channel <= 0.0031308 ? 12.92 * channel : 1.055 * channel ** (1 / 2.4) - 0.055;
@@ -262,6 +272,27 @@ const splitMixOperand = (operand: string): { color: string; percent: number | nu
   return { color: text, percent: null };
 };
 
+/** linear sRGB 0-1 channels ↔ oklab (CSS Color 4 matrices). */
+const mixInOklab = (left: Rgba, right: Rgba, leftWeight: number, rightWeight: number): Rgba => {
+  const toLab = (color: Rgba): number[] =>
+    linearSrgbToOklab([
+      srgbToLinear(color.r / FULL),
+      srgbToLinear(color.g / FULL),
+      srgbToLinear(color.b / FULL),
+    ]);
+  const [labLeft, labRight] = [toLab(left), toLab(right)];
+  // Premultiplied, exactly as the srgb path above: mixing into transparent must fade, not darken.
+  const weightLeft = leftWeight * left.a;
+  const weightRight = rightWeight * right.a;
+  const alpha = weightLeft + weightRight;
+  if (alpha === 0) return { r: 0, g: 0, b: 0, a: 0 };
+  const channel = (index: number): number =>
+    (labLeft[index] * weightLeft + labRight[index] * weightRight) / alpha;
+  const linear = oklabToLinearSrgb(channel(0), channel(1), channel(2));
+  const [r, g, b] = linear.map((value) => clamp(linearToSrgb(clamp(value, 0, 1)), 0, 1) * FULL);
+  return { r, g, b, a: clamp(alpha, 0, 1) };
+};
+
 const parseColorMixArgs = (
   args: string,
   scope: Map<string, string>,
@@ -269,7 +300,10 @@ const parseColorMixArgs = (
 ): Rgba | null => {
   const parts = splitTopLevel(args, ",");
   if (parts.length !== 3) return null;
-  if (collapseSpace(parts[0]).toLowerCase() !== "in srgb") return null;
+  // Tailwind v4 compiles every /NN alpha modifier to color-mix(in oklab, …), so the census
+  // measures the alpha family only if oklab mixing resolves at all.
+  const space = collapseSpace(parts[0]).toLowerCase();
+  if (space !== "in srgb" && space !== "in oklab") return null;
   const first = splitMixOperand(parts[1]);
   const second = splitMixOperand(parts[2]);
   const left = resolveValue(first.color, scope, seen);
@@ -290,6 +324,7 @@ const parseColorMixArgs = (
   // out instead of dragging it toward transparent's black.
   const leftWeight = leftPercent / total;
   const rightWeight = (rightPercent as number) / total;
+  if (space === "in oklab") return mixInOklab(left, right, leftWeight, rightWeight);
   const alpha = leftWeight * left.a + rightWeight * right.a;
   // Clamped because un-premultiplying divides by the alpha it just multiplied
   // in, and a 70%-of-white mix lands a few ulps above 255 without it.
@@ -390,6 +425,15 @@ function readDeclarations(body: string): Array<[string, string]> {
  */
 export function parseColor(value: string): Rgba | null {
   return resolveValue(value, new Map(), new Set());
+}
+
+/**
+ * Parse a colour EXPRESSION — `var()` chains, `color-mix()` in either space, literals — against a
+ * token scope. parseColor() is the same fold with an empty scope, which silently fails on any
+ * expression that references a token; anything read out of a template or sheet must use this.
+ */
+export function resolveExpression(value: string, scope: Map<string, string>): Rgba | null {
+  return resolveValue(value, scope, new Set());
 }
 
 /** Composite `fg` over `bg` (source-over), returning the visible colour. */

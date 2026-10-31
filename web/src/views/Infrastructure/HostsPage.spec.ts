@@ -452,11 +452,13 @@ describe("HostsPage", () => {
 
       const warnCell = wrapper.find('[data-test="hosts-cell-memory-web-01"]');
       expect(warnCell.findComponent({ name: "OProgressBar" }).props("variant")).toBe("warning");
-      expect(warnCell.find("span.tabular-nums").classes()).toContain("text-warning");
+      expect(warnCell.find("span.tabular-nums").classes()).toContain("text-status-warning-text");
 
       const coolCell = wrapper.find('[data-test="hosts-cell-cpu-web-02"]');
       expect(coolCell.findComponent({ name: "OProgressBar" }).props("variant")).toBe("default");
-      expect(coolCell.find("span.tabular-nums").classes()).not.toContain("text-warning");
+      expect(coolCell.find("span.tabular-nums").classes()).not.toContain(
+        "text-status-warning-text",
+      );
     });
 
     it("draws no bar for a null reading but still prints the em-dash", async () => {

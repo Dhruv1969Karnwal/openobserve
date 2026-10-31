@@ -3,6 +3,7 @@
 import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
 import AiScopeBar from "./AiScopeBar.vue";
+import { raw } from "@/types/i18n";
 
 // Lightweight stubs for the O2 library primitives so the spec asserts the
 // scope-bar's OWN wiring (which child renders in which mode, data-test values,
@@ -15,8 +16,9 @@ const OToggleGroup = {
     '<div class="o-toggle-group" :data-test="dataTest" @click="$emit(\'update:modelValue\', \'stream\')"><slot /></div>',
 };
 const OToggleGroupItem = {
-  props: ["value", "size"],
-  template: '<button class="o-toggle-item" :data-value="value"><slot /></button>',
+  props: ["value", "size", "iconRight"],
+  template:
+    '<button class="o-toggle-item" :data-value="value" :data-icon-right="iconRight"><slot /></button>',
 };
 const OSelect = {
   props: ["modelValue", "label", "options", "loading"],
@@ -205,6 +207,37 @@ describe("AiScopeBar", () => {
     it("hides the toggle group when showAgentToggle is false", () => {
       const w = mountBar({ showAgentToggle: false });
       expect(w.find('[data-test="sessions-list-filter-mode"]').exists()).toBe(false);
+    });
+
+    /**
+     * The locked cell of the same prop, which is what a `"lock"` build renders:
+     * `agentToggleLockedMessage` is a RENDER SWITCH — passing it keeps the Agent item
+     * in the bar with a lock suffix rather than hiding the whole toggle — and the
+     * controlled group still refuses to advance into the locked mode. The negative
+     * cell directly above is what the SHIPPED "hide" policy produces, because its
+     * callers key the render switch off `access.visible` instead of relying on the
+     * hidden message being an empty string.
+     */
+    it("renders the Agent item locked and refuses the mode change when a locked message is passed", async () => {
+      const w = mountBar({
+        showAgentToggle: false,
+        agentToggleLockedMessage: raw("Agent mode is part of the enterprise edition"),
+      });
+      const toggle = w.find('[data-test="sessions-list-filter-mode"]');
+      expect(toggle.exists()).toBe(true);
+      const agent = w.find('[data-value="agent"]');
+      expect(agent.exists()).toBe(true);
+      expect(agent.attributes("data-icon-right")).toBe("lock");
+      // Announced as unavailable but still activatable: the click IS the refusal path.
+      expect(agent.attributes("aria-disabled")).toBe("true");
+      expect(w.find('[data-value="stream"]').attributes("data-icon-right")).toBeUndefined();
+      expect(w.find('[data-value="stream"]').attributes("aria-disabled")).toBeUndefined();
+
+      // Locked means locked: the bar never emits its way into Agent mode.
+      w.findComponent(OToggleGroup).vm.$emit("update:modelValue", "agent");
+      await w.vm.$nextTick();
+      expect(w.emitted("update:filterMode")).toBeUndefined();
+      expect(w.emitted("filter-mode-change")).toBeUndefined();
     });
 
     it("pins the bar to stream mode when showAgentToggle is false, even if filterMode is (defensively) 'agent'", () => {

@@ -916,6 +916,288 @@ describe("useRoutes (router.ts)", () => {
   });
 
   // =========================================================================
+  // 8c. homeChildRoutes — the registry-gated paid routes
+  // =========================================================================
+  /**
+   * `alertInsights` and `pipelineBackfill` used to carry only the auth guard,
+   * so a hand-typed URL rendered a paid page the entry points hide. They now
+   * run through `withFeatureGate`, whose hide branch bounces home and whose
+   * lock branch lands on the shared locked page — the bounce target must be
+   * ungated, so prove home never bounces back.
+   */
+  describe("homeChildRoutes — registry-gated paid routes", () => {
+    const PAID_ROUTES = ["alertInsights", "pipelineBackfill"] as const;
+
+    it.each(PAID_ROUTES)(
+      "bounces %s to home from a direct URL on the shipped OSS build",
+      (name) => {
+        const { homeChildRoutes } = useRoutes();
+        const next = vi.fn();
+        findRoute(homeChildRoutes, name).beforeEnter(
+          { query: { org_identifier: "default" }, fullPath: "/default/x" },
+          {},
+          next,
+        );
+        expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "default" } });
+        expect(routeGuard).not.toHaveBeenCalled();
+      },
+    );
+
+    /** Both keys are `cloudOffers: false` — Cloud sells neither, so the URL bounces there too. */
+    it.each(PAID_ROUTES)("bounces %s on a pure-cloud build", (name) => {
+      config.isCloud = "true";
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, name).beforeEnter({ query: {}, fullPath: "/x" }, {}, next);
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: undefined } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    it.each(PAID_ROUTES)("lets %s through on an entitled build", async (name) => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      config.isEnterprise = "true";
+      const { homeChildRoutes } = useRoutes();
+      const to = { query: { org_identifier: "default" }, fullPath: "/default/x" };
+      const next = vi.fn();
+      findRoute(homeChildRoutes, name).beforeEnter(to, {}, next);
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+
+    /** Only the literal string unlocks — a truthy-string check would fail open. */
+    it.each(["", "TRUE", "1", "yes"])(
+      "treats isEnterprise=%p as OSS for the gated routes",
+      (value) => {
+        config.isEnterprise = value;
+        const { homeChildRoutes } = useRoutes();
+        const next = vi.fn();
+        findRoute(homeChildRoutes, "alertInsights").beforeEnter(
+          { query: {}, fullPath: "/x" },
+          {},
+          next,
+        );
+        expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: undefined } });
+      },
+    );
+
+    /** The routes stay REGISTERED on OSS — a bounce is a redirect, not a 404. */
+    it.each(PAID_ROUTES)("keeps %s registered on an OSS build", (name) => {
+      const { homeChildRoutes } = useRoutes();
+      expect(findRoute(homeChildRoutes, name)).toBeDefined();
+    });
+
+    /** Redirect-loop guard: the bounce target carries no entitlement gate of its own. */
+    it("lands the bounce on home, which has no beforeEnter gate", () => {
+      const { homeChildRoutes } = useRoutes();
+      expect(findRoute(homeChildRoutes, "home").beforeEnter).toBeUndefined();
+    });
+  });
+
+  // =========================================================================
+  // 8d. homeChildRoutes — searchJobInspector, the sibling that wave missed
+  // =========================================================================
+  /**
+   * `/logs/inspector` is the paid Search Job Inspector. All three of its entry
+   * points (SearchBar "Inspect" group, SearchHistory row action, the results-grid
+   * action) hide behind `isEnterprise && !isCloud && search_inspector_enabled`,
+   * while the route itself carried only `routeGuard` — so a bookmarked URL opened
+   * the page with its entries hidden. It now runs through
+   * `withFeatureGate("searchJobInspector", …)` with that runtime flag conjuncted
+   * in the gate context, which is the one difference from the 8c routes: its
+   * entitlement has a `/config` half.
+   */
+  describe("homeChildRoutes — searchJobInspector route gate", () => {
+    let previousZoConfig: any;
+
+    beforeEach(() => {
+      previousZoConfig = store.state.zoConfig;
+      store.state.zoConfig = { ...(previousZoConfig ?? {}), search_inspector_enabled: true };
+    });
+
+    afterEach(() => {
+      store.state.zoConfig = previousZoConfig;
+    });
+
+    it("bounces the direct URL to home from a direct URL on the shipped OSS build", () => {
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(
+        { query: { org_identifier: "default" }, fullPath: "/default/logs/inspector" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "default" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /**
+     * The cloud shape that actually ships: Cloud builds set `isEnterprise=true` as
+     * well, so only the `!isCloud` half of the predicate can refuse them. All three
+     * entry points require `config.isCloud == 'false'`, so the route must too, or a
+     * cloud user could bookmark their way into a page the product hides there.
+     */
+    it("bounces a Cloud deploy that also reports isEnterprise=true", () => {
+      config.isEnterprise = "true";
+      config.isCloud = "true";
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(
+        { query: { org_identifier: "default" }, fullPath: "/default/logs/inspector" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "default" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /** `cloudOffers: false` — Cloud never sold this, so the URL bounces there too. */
+    it("bounces on a pure-cloud build", () => {
+      config.isCloud = "true";
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(
+        { query: {}, fullPath: "/logs/inspector" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: undefined } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    it("lets the page through on an entitled self-hosted build with the flag on", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      config.isEnterprise = "true";
+      const { homeChildRoutes } = useRoutes();
+      const to = { query: { org_identifier: "default" }, fullPath: "/default/logs/inspector" };
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(to, {}, next);
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+
+    /**
+     * Bidirectional proof for the flag conjunct: the SAME entitled build reaches
+     * the page above with the flag on and is bounced with it off — the entry
+     * points and the route answer the question the same way.
+     */
+    it("bounces an entitled build whose loaded /config turns the flag off", async () => {
+      config.isEnterprise = "true";
+      store.state.zoConfig = { ...store.state.zoConfig, search_inspector_enabled: false };
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(
+        { query: { org_identifier: "default" }, fullPath: "/default/logs/inspector" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "default" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /** A loaded config with no flag at all is "off" — that is what the entries read. */
+    it("bounces when a loaded /config carries no search_inspector_enabled key", async () => {
+      config.isEnterprise = "true";
+      store.state.zoConfig = { build_type: "opensource" };
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(
+        { query: {}, fullPath: "/logs/inspector" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: undefined } });
+    });
+
+    /**
+     * Cold-load counterpart (`=== false` stance, as for DBM / Downtimes): an
+     * un-awaited `/config` must not bounce a real entitled user's refresh.
+     */
+    it("lets an entitled cold load through while /config is still unloaded", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      config.isEnterprise = "true";
+      store.state.zoConfig = {};
+      const { homeChildRoutes } = useRoutes();
+      const to = { query: {}, fullPath: "/logs/inspector" };
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchJobInspector").beforeEnter(to, {}, next);
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+
+    /** The route stays REGISTERED on OSS — a bounce is a redirect, not a 404. */
+    it("keeps the route registered on an OSS build", () => {
+      const { homeChildRoutes } = useRoutes();
+      expect(findRoute(homeChildRoutes, "searchJobInspector")).toBeDefined();
+    });
+
+    /** Loop guard: the hide target is ungated home, which has no gate of its own. */
+    it("lands the bounce on home, which has no beforeEnter gate", () => {
+      const { homeChildRoutes } = useRoutes();
+      expect(findRoute(homeChildRoutes, "home").beforeEnter).toBeUndefined();
+    });
+  });
+
+  /**
+   * The page guard and the SearchBar menu entry are the two doors to
+   * the same feature — they must answer the same editions. The raw
+   * `isEnterprise` check refused pure-Cloud visits while the registry rendered
+   * the menu entry allowed; both halves now read the `scheduledSearch` gate.
+   *
+   * The next step closed the rest of the shape: the guard was an inline `checkFeatureAccess` +
+   * `next({ name: "logs" })`, which dropped `org_identifier` (a shared link
+   * silently switched org) and could never reach the locked page a `"lock"`
+   * build promises. It is now `withFeatureGate("scheduledSearch", routeGuard)`,
+   * the same helper `alertInsights` / `pipelineBackfill` use. The locked-page
+   * half of that contract is not reachable from a spec: `hidesPaidFeatures` is a
+   * module const fixed by `PAID_FEATURE_POLICY`; a source-flipped copy of the tree
+   * lands `enterpriseFeatureLocked` with `feature` + `redirect`, which is the proof
+   * this describe cannot provide from inside a spec.
+   */
+  describe("homeChildRoutes — searchScheduler guard reads the registry", () => {
+    it("bounces the direct URL to home on the shipped OSS build, org preserved", () => {
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchScheduler").beforeEnter(
+        { query: { org_identifier: "acme" }, fullPath: "/default/logs/search-scheduler" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "acme" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /** The old target (`logs`) is reachable too, but home is what the shared gate lands on. */
+    it("does not bounce without an org_identifier — the param travels with the reader", () => {
+      const { homeChildRoutes } = useRoutes();
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchScheduler").beforeEnter(
+        { query: {}, fullPath: "/logs/search-scheduler" },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({ name: "home", query: { org_identifier: undefined } });
+    });
+
+    it("lets the page through on an enterprise build", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      config.isEnterprise = "true";
+      const { homeChildRoutes } = useRoutes();
+      const to = { query: {} };
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchScheduler").beforeEnter(to, {}, next);
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+
+    /** The drift fix: pure Cloud offers scheduled searches — the guard must agree. */
+    it("lets the page through on a pure-cloud build — same predicate as the menu entry", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      config.isCloud = "true";
+      const { homeChildRoutes } = useRoutes();
+      const to = { query: {} };
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "searchScheduler").beforeEnter(to, {}, next);
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+  });
+
+  // =========================================================================
   // 9. homeChildRoutes — dashboards routes
   // =========================================================================
   describe("homeChildRoutes — dashboards routes", () => {
@@ -1289,7 +1571,37 @@ describe("useRoutes (router.ts)", () => {
   // =========================================================================
   // 14. homeChildRoutes — anomaly detection guard logic
   // =========================================================================
-  describe("homeChildRoutes — anomaly detection guard", () => {
+  /**
+   * The four paid alert surfaces (`alertSources`, `addAnomalyDetection`,
+   * `editAnomalyDetection`, `importSemanticGroups`) shared one inline guard that
+   * read `(window as any).store` — an assignment nothing in this app ever makes —
+   * so their `build_type === "opensource"` clause was a constant `false` and an
+   * enterprise UI pointed at an OSS backend rendered the paid editor page while
+   * every call 403'd. They now go through one helper reading the store
+   * singleton the module imports, the way `downtimesRouteGuard` already did.
+   *
+   * These specs used to fake `window.store`, which pinned the dead read instead
+   * of the behavior: passing while the production guard could never see a flag.
+   * They now drive the SAME singleton a browser has at navigation time.
+   */
+  describe("homeChildRoutes — alert-surface guards read the real store", () => {
+    const ALERT_SURFACE_ROUTES = [
+      "alertSources",
+      "addAnomalyDetection",
+      "editAnomalyDetection",
+      "importSemanticGroups",
+    ] as const;
+
+    let previousZoConfig: any;
+
+    beforeEach(() => {
+      previousZoConfig = store.state.zoConfig;
+    });
+
+    afterEach(() => {
+      store.state.zoConfig = previousZoConfig;
+    });
+
     it("should include addAnomalyDetection route", () => {
       const { homeChildRoutes } = useRoutes();
       const route = findRoute(homeChildRoutes, "addAnomalyDetection");
@@ -1314,140 +1626,106 @@ describe("useRoutes (router.ts)", () => {
       expect(route.path).toBe("alerts/anomaly/edit/:anomaly_id");
     });
 
-    it("should redirect addAnomalyDetection to alertList when build_type is opensource", () => {
-      (window as any).store = {
-        state: { zoConfig: { build_type: "opensource" } },
-      };
+    /**
+     * The cell the dead read could never reach: an entitled BUILD pointing at an
+     * OSS BACKEND (both Cloud and Enterprise flags on, so only the `/config`
+     * clause can save the page). Bounce carries the org.
+     */
+    it.each(ALERT_SURFACE_ROUTES)(
+      "bounces %s when the loaded /config reports an OSS backend, even on an entitled build",
+      (name) => {
+        config.isCloud = "true";
+        config.isEnterprise = "true";
+        store.state.zoConfig = { build_type: "opensource" };
+        const { homeChildRoutes } = useRoutes();
+        const next = vi.fn();
+        findRoute(homeChildRoutes, name).beforeEnter(
+          { query: { org_identifier: "test_org" } },
+          {},
+          next,
+        );
+        expect(next).toHaveBeenCalledWith({
+          name: "alertList",
+          query: { org_identifier: "test_org" },
+        });
+        expect(routeGuard).not.toHaveBeenCalled();
+      },
+    );
 
-      config.isCloud = "true";
-      config.isEnterprise = "true";
-
+    it.each(ALERT_SURFACE_ROUTES)("bounces %s on the shipped OSS build", (name) => {
       const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "addAnomalyDetection");
-
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "test_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith({
+      const next = vi.fn();
+      findRoute(homeChildRoutes, name).beforeEnter(
+        { query: { org_identifier: "test_org" } },
+        {},
+        next,
+      );
+      expect(next).toHaveBeenCalledWith({
         name: "alertList",
         query: { org_identifier: "test_org" },
       });
-
-      delete (window as any).store;
+      expect(routeGuard).not.toHaveBeenCalled();
     });
 
-    it("should redirect addAnomalyDetection to alertList when not enterprise and not cloud", () => {
-      (window as any).store = {
-        state: { zoConfig: { build_type: "enterprise" } },
-      };
+    it.each(ALERT_SURFACE_ROUTES)(
+      "lets %s through on an enterprise build with an enterprise backend",
+      async (name) => {
+        const { routeGuard } = await import("@/utils/zincutils");
+        config.isCloud = "false";
+        config.isEnterprise = "true";
+        store.state.zoConfig = { build_type: "enterprise" };
+        const to = { query: { org_identifier: "test_org" } };
+        const next = vi.fn();
+        const { homeChildRoutes } = useRoutes();
+        findRoute(homeChildRoutes, name).beforeEnter(to, {}, next);
+        expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+        expect(next).not.toHaveBeenCalledWith(expect.objectContaining({ name: "alertList" }));
+      },
+    );
 
-      config.isCloud = "false";
-      config.isEnterprise = "false";
+    it.each(ALERT_SURFACE_ROUTES)(
+      "lets %s through on a cloud build with a cloud backend",
+      async (name) => {
+        const { routeGuard } = await import("@/utils/zincutils");
+        config.isCloud = "true";
+        config.isEnterprise = "false";
+        store.state.zoConfig = { build_type: "cloud" };
+        const to = { query: { org_identifier: "test_org" } };
+        const next = vi.fn();
+        const { homeChildRoutes } = useRoutes();
+        findRoute(homeChildRoutes, name).beforeEnter(to, {}, next);
+        expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+      },
+    );
 
-      const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "addAnomalyDetection");
+    /** Cold load: `/config` still in flight (`{}`) is not "opensource". */
+    it.each(ALERT_SURFACE_ROUTES)(
+      "lets %s through on an entitled cold load while /config is still unloaded",
+      async (name) => {
+        const { routeGuard } = await import("@/utils/zincutils");
+        config.isEnterprise = "true";
+        store.state.zoConfig = {};
+        const to = { query: { org_identifier: "test_org" } };
+        const next = vi.fn();
+        const { homeChildRoutes } = useRoutes();
+        findRoute(homeChildRoutes, name).beforeEnter(to, {}, next);
+        expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+      },
+    );
 
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "test_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith({
-        name: "alertList",
-        query: { org_identifier: "test_org" },
-      });
-
+    /** The guards no longer touch `window.store` — nothing assigns it. */
+    it("does not depend on a window.store global", () => {
       delete (window as any).store;
-    });
-
-    it("should call routeGuard for addAnomalyDetection when enterprise and not OSS", async () => {
-      const { routeGuard } = await import("@/utils/zincutils");
-
-      (window as any).store = {
-        state: { zoConfig: { build_type: "enterprise" } },
-      };
-
-      config.isCloud = "false";
-      config.isEnterprise = "true";
-
-      const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "addAnomalyDetection");
-
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "test_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(routeGuard).toHaveBeenCalled();
-
-      delete (window as any).store;
-    });
-
-    it("should call routeGuard for addAnomalyDetection when cloud and not OSS", async () => {
-      const { routeGuard } = await import("@/utils/zincutils");
-
-      (window as any).store = {
-        state: { zoConfig: { build_type: "cloud" } },
-      };
-
-      config.isCloud = "true";
-      config.isEnterprise = "false";
-
-      const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "addAnomalyDetection");
-
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "test_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(routeGuard).toHaveBeenCalled();
-
-      delete (window as any).store;
-    });
-
-    it("should redirect editAnomalyDetection to alertList when build_type is opensource", () => {
-      (window as any).store = {
-        state: { zoConfig: { build_type: "opensource" } },
-      };
-
       config.isCloud = "true";
       config.isEnterprise = "true";
-
+      store.state.zoConfig = { build_type: "opensource" };
       const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "editAnomalyDetection");
-
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "my_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith({
+      const next = vi.fn();
+      findRoute(homeChildRoutes, "alertSources").beforeEnter({ query: {} }, {}, next);
+      expect(next).toHaveBeenCalledWith({
         name: "alertList",
-        query: { org_identifier: "my_org" },
+        query: { org_identifier: undefined },
       });
-
-      delete (window as any).store;
-    });
-
-    it("should redirect editAnomalyDetection to alertList when not enterprise and not cloud", () => {
-      (window as any).store = {
-        state: { zoConfig: { build_type: "enterprise" } },
-      };
-
-      config.isCloud = "false";
-      config.isEnterprise = "false";
-
-      const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "editAnomalyDetection");
-
-      const mockNext = vi.fn();
-      const mockTo = { query: { org_identifier: "my_org" } };
-      route.beforeEnter(mockTo, {}, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith({
-        name: "alertList",
-        query: { org_identifier: "my_org" },
-      });
-
-      delete (window as any).store;
     });
   });
 
@@ -2079,16 +2357,30 @@ describe("useRoutes (router.ts)", () => {
   // 22. Route Guard Invocations — sampling across major routes
   // =========================================================================
   describe("Route Guard Invocations", () => {
+    /**
+     * This route used to reach the page with nothing but the auth guard, which is
+     * what this assertion pinned. It is a registry-gated paid route now, so
+     * the auth guard only runs once the edition AND the `search_inspector_enabled`
+     * flag say the page is sold; the bounce itself is specced in section 8d.
+     */
     it("should call routeGuard for searchJobInspector route beforeEnter", async () => {
       const { routeGuard } = await import("@/utils/zincutils");
-      const { homeChildRoutes } = useRoutes();
-      const route = findRoute(homeChildRoutes, "searchJobInspector");
+      const previousZoConfig = store.state.zoConfig;
+      config.isEnterprise = "true";
+      store.state.zoConfig = { ...(previousZoConfig ?? {}), search_inspector_enabled: true };
+      try {
+        const { homeChildRoutes } = useRoutes();
+        const route = findRoute(homeChildRoutes, "searchJobInspector");
 
-      const mockTo = {};
-      const mockFrom = {};
-      const mockNext = vi.fn();
-      route.beforeEnter(mockTo, mockFrom, mockNext);
-      expect(routeGuard).toHaveBeenCalledWith(mockTo, mockFrom, mockNext);
+        const mockTo = {};
+        const mockFrom = {};
+        const mockNext = vi.fn();
+        route.beforeEnter(mockTo, mockFrom, mockNext);
+        expect(routeGuard).toHaveBeenCalledWith(mockTo, mockFrom, mockNext);
+      } finally {
+        config.isEnterprise = "false";
+        store.state.zoConfig = previousZoConfig;
+      }
     });
 
     it("should call routeGuard for promqlBuilder route beforeEnter", async () => {
@@ -2240,6 +2532,8 @@ describe("useRoutes (router.ts)", () => {
       const { homeChildRoutes } = useRoutes();
       const route = findRoute(homeChildRoutes, "pipelineBackfill");
 
+      // The route is registry-gated — entitled builds reach the page.
+      config.isEnterprise = "true";
       const mockTo = {};
       const mockFrom = {};
       const mockNext = vi.fn();
@@ -2476,10 +2770,23 @@ describe("useRoutes (router.ts)", () => {
     let previousZoConfig: any;
 
     beforeEach(() => {
+      // A truly entitled SELF-HOSTED build: with `isCloud = "true"` two of the
+      // gated routes would refuse the visit on edition alone (Search Job Inspector
+      // refuses Cloud outright, exactly like its entries do), and the proxy
+      // below would compare a paywall mute against a chain that never reached
+      // `routeGuard`. Every other key here answers on `isEnterprise` alone.
       config.isEnterprise = "true";
-      config.isCloud = "true";
+      config.isCloud = "false";
       previousZoConfig = store.state.zoConfig;
-      store.state.zoConfig = { ...(store.state.zoConfig ?? {}), database_monitoring_enabled: true };
+      // `search_inspector_enabled` is the other entitlement this table reads at
+      // face value: /logs/inspector is gated on it, so an "entitled build"
+      // that leaves it unset bounces before routeGuard and the proxy below would
+      // compare a paywall mute against a chain that never ran.
+      store.state.zoConfig = {
+        ...(store.state.zoConfig ?? {}),
+        database_monitoring_enabled: true,
+        search_inspector_enabled: true,
+      };
     });
 
     afterEach(() => {

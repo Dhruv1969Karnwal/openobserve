@@ -133,7 +133,7 @@ function refreshPage() {
 
     <!-- Task 2: allow in Incognito — Chrome hides this setting from the page,
          so the author attests to it; locked until the recorder is detected -->
-    <div v-if="!installDone" class="flex items-center gap-4 p-4 opacity-60">
+    <div v-if="!installDone" class="flex items-center gap-4 p-4">
       <span
         class="bg-surface-subtle text-text-muted flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold"
         >{{ "2" }}</span
@@ -302,7 +302,7 @@ function refreshPage() {
         </p>
       </div>
     </div>
-    <div v-else class="flex items-center gap-4 p-4 opacity-60">
+    <div v-else class="flex items-center gap-4 p-4">
       <span
         class="bg-surface-subtle text-text-muted flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold"
         >{{ "3" }}</span

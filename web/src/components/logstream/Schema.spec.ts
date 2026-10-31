@@ -15,6 +15,7 @@
 
 import { describe, expect, it, beforeEach, vi, afterEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
+import type { AxiosResponse } from "axios";
 import i18n from "@/locales";
 // @ts-ignore
 import store from "@/test/unit/helpers/store";
@@ -176,9 +177,9 @@ describe("Schema Component Tests", () => {
     const originalIsEnterprise = (config as any).isEnterprise;
 
     beforeEach(async () => {
-      // The SDR column/action is shown locked (not hidden) in builds that
-      // don't unlock it — these tests exercise the unlocked action itself,
-      // so they need an entitled build. `columns` reads this once at setup,
+      // The SDR column/action renders only while the gate is `visible`, which the
+      // shipped "hide" policy grants only to an entitled build — these tests
+      // exercise the unlocked action itself. `columns` reads this once at setup,
       // so it must be set before mount, not inside an individual `it`.
       (config as any).isEnterprise = "true";
       mockGetStream.mockResolvedValue({
@@ -374,7 +375,7 @@ describe("Schema Component Tests", () => {
 
     // Test 12: getFieldIndices function with full text search
     it("should get correct field indices for full text search", () => {
-      const property = { name: "message" };
+      const property: { name: string; index_type?: string[] } = { name: "message" };
       const settings = {
         full_text_search_keys: ["message"],
         index_fields: [],
@@ -435,7 +436,7 @@ describe("Schema Component Tests", () => {
 
     // Test 16: getFieldIndices function with key partition
     it("should get correct field indices for key partition", () => {
-      const property = { name: "region" };
+      const property: { name: string; level?: string } = { name: "region" };
       const settings = {
         full_text_search_keys: [],
         index_fields: [],
@@ -631,7 +632,7 @@ describe("Schema Component Tests", () => {
 
     // Test 30: scrollToAddFields function
     it("should scroll to add fields section", () => {
-      const mockElement = { scrollIntoView: vi.fn() };
+      const mockElement = { scrollIntoView: vi.fn() } as unknown as HTMLElement;
       vi.spyOn(document, "getElementById").mockReturnValue(mockElement);
 
       wrapper.vm.scrollToAddFields();
@@ -967,9 +968,9 @@ describe("Schema Component Tests", () => {
       const missing = wrapper.vm.getMissingPerformanceFields(selectedFieldsSet);
 
       expect(missing.length).toBeGreaterThan(0);
-      const ftsFields = missing.filter((f) => f.type === "Full Text Search");
+      const ftsFields = missing.filter((f: any) => f.type === "Full Text Search");
       expect(ftsFields.length).toBeGreaterThan(0);
-      expect(ftsFields.some((f) => f.name === "user_id" || f.name === "message")).toBe(true);
+      expect(ftsFields.some((f: any) => f.name === "user_id" || f.name === "message")).toBe(true);
     });
 
     // Test 2: getMissingPerformanceFields should detect missing Secondary Index fields
@@ -978,9 +979,9 @@ describe("Schema Component Tests", () => {
       const missing = wrapper.vm.getMissingPerformanceFields(selectedFieldsSet);
 
       expect(missing.length).toBeGreaterThan(0);
-      const secondaryIndexFields = missing.filter((f) => f.type === "Secondary Index");
+      const secondaryIndexFields = missing.filter((f: any) => f.type === "Secondary Index");
       expect(secondaryIndexFields.length).toBeGreaterThan(0);
-      expect(secondaryIndexFields.some((f) => f.name === "log_level")).toBe(true);
+      expect(secondaryIndexFields.some((f: any) => f.name === "log_level")).toBe(true);
     });
 
     // Test 3: getMissingPerformanceFields should not detect fields already selected
@@ -997,8 +998,8 @@ describe("Schema Component Tests", () => {
       const selectedFieldsSet = new Set(["message", "timestamp"]); // Not including user_id
       const missing = wrapper.vm.getMissingPerformanceFields(selectedFieldsSet);
 
-      const ftsFields = missing.filter((f) => f.type === "Full Text Search");
-      expect(ftsFields.some((f) => f.name === "user_id")).toBe(true);
+      const ftsFields = missing.filter((f: any) => f.type === "Full Text Search");
+      expect(ftsFields.some((f: any) => f.name === "user_id")).toBe(true);
     });
 
     // Test 5: getMissingPerformanceFields should detect default secondary index keys from config
@@ -1007,8 +1008,8 @@ describe("Schema Component Tests", () => {
       const selectedFieldsSet = new Set(["user_id", "timestamp"]); // Not including log_level
       const missing = wrapper.vm.getMissingPerformanceFields(selectedFieldsSet);
 
-      const secondaryIndexFields = missing.filter((f) => f.type === "Secondary Index");
-      expect(secondaryIndexFields.some((f) => f.name === "log_level")).toBe(true);
+      const secondaryIndexFields = missing.filter((f: any) => f.type === "Secondary Index");
+      expect(secondaryIndexFields.some((f: any) => f.name === "log_level")).toBe(true);
     });
 
     // Test 6: updateDefinedSchemaFields should show popup when UDS is enabled first time with missing fields
@@ -1125,9 +1126,9 @@ describe("Schema Component Tests", () => {
       const selectedFieldsSet = new Set(["timestamp"]);
       const missing = wrapper.vm.getMissingPerformanceFields(selectedFieldsSet);
 
-      const ftsFields = missing.filter((f) => f.type === "Full Text Search");
-      expect(ftsFields.some((f) => f.name === "user_id")).toBe(true);
-      expect(ftsFields.some((f) => f.name === "nonexistent_field")).toBe(false);
+      const ftsFields = missing.filter((f: any) => f.type === "Full Text Search");
+      expect(ftsFields.some((f: any) => f.name === "user_id")).toBe(true);
+      expect(ftsFields.some((f: any) => f.name === "nonexistent_field")).toBe(false);
     });
 
     // Test 15: updateDefinedSchemaFields should respect max field limit
@@ -1374,7 +1375,7 @@ describe("Schema Component Tests", () => {
       store.state.zoConfig = {
         ...store.state.zoConfig,
         enable_cross_linking: false,
-      };
+      } as typeof store.state.zoConfig;
 
       const w = mount(LogStream, {
         props: {
@@ -1461,10 +1462,11 @@ describe("Schema Component Tests", () => {
     const originalIsEnterprise = (config as any).isEnterprise;
 
     beforeEach(async () => {
-      // The pattern-association drawer's trigger is shown locked (not
-      // hidden) in builds that don't unlock it — `columns` reads this once
-      // at setup, so it must be set before mount, not inside an individual
-      // `it`. These tests exercise opening the drawer itself.
+      // The pattern-association drawer's trigger is absent under the shipped "hide"
+      // policy in builds that don't unlock it; under "lock" it shows and its click
+      // opens the upgrade dialog. `columns` reads this once at setup, so it must be
+      // set before mount, not inside an individual `it`. These tests exercise opening
+      // the drawer itself.
       (config as any).isEnterprise = "true";
       w = mount(LogStream, {
         props: buildProps(true),
@@ -2463,7 +2465,7 @@ describe("Schema Component Tests", () => {
     });
 
     it("should show cross-linking tab when enable_cross_linking is true", async () => {
-      store.state.zoConfig.enable_cross_linking = true;
+      (store.state.zoConfig as any).enable_cross_linking = true;
       w.vm.updateActiveMainTab("crossLinking");
       await w.vm.$nextTick();
 
@@ -3524,7 +3526,7 @@ describe("Schema Component Tests", () => {
       mockToast.mockClear();
       vi.mocked(mockStreamServiceDeleteFields).mockResolvedValueOnce({
         data: { code: 400, message: "Cannot delete system field" },
-      });
+      } as AxiosResponse);
 
       wrapper.vm.selectedFields = [{ name: "field_to_delete" }];
 

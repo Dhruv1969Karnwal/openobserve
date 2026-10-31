@@ -20,7 +20,7 @@ limitations under the License. -->
       data-test="test-result-success"
       class="rounded-default border-status-positive flex gap-3 border-s-3 border-solid bg-[rgba(76,175,80,0.08)] px-4 py-3 dark:bg-[rgba(76,175,80,0.12)]"
     >
-      <div class="text-status-positive shrink-0 pt-0.5">
+      <div class="text-status-success-text shrink-0 pt-0.5">
         <OIcon name="check-circle" size="md" />
       </div>
       <div class="min-w-0 flex-1">
@@ -61,7 +61,7 @@ limitations under the License. -->
       data-test="test-result-failure"
       class="rounded-default border-status-negative flex gap-3 border-s-3 border-solid bg-[rgba(244,67,54,0.08)] px-4 py-3 dark:bg-[rgba(244,67,54,0.12)]"
     >
-      <div class="text-status-negative shrink-0 pt-0.5">
+      <div class="text-status-error-text shrink-0 pt-0.5">
         <OIcon name="error" size="md" />
       </div>
       <div class="min-w-0 flex-1">

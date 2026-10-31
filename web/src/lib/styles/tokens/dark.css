@@ -21,15 +21,19 @@
        below (surfaces, borders, text, per-component overrides) references
        ONLY these vars, so the whole dark theme is tuned from here.
 
-       Elevation order (deepest → lightest) preserves the light-mode
-       relationship (subtle < panel < base < overlay) so cards LIFT and
-       sub-rails RECEDE — what creates visible "sections":
+       Elevation order (deepest → lightest), monotonic by measured WCAG
+       relative luminance — lighter floats, and the chrome recedes under the
+       content card; what creates visible "sections":
 
-         chrome   top bar / left rail / gutter behind the card  (deepest)
-         well     recessed fills, segmented-control track
-         panel    folder & sub rails, cards, table-header base
-         base     THE content card + table canvas               (main, lifted)
-         overlay  menus, dialogs, inputs, table-header, tooltips (highest)
+         chrome   top bar / left rail / gutter behind the card  (deepest, L .00400)
+         base     THE content card + table canvas               (main,    L .00847)
+         panel    folder & sub rails, cards, table-header base  (         L .01504)
+         well     recessed fills, segmented-control track       (         L .02022)
+         overlay  menus, dialogs, inputs, table-header, tooltips (highest, L .02491)
+
+       The recessed well sits UNDER the floating overlay tier — panel→well
+       1.080:1, well→overlay 1.067:1 — and the --d-zebra stripe lives OUTSIDE
+       the band (L .00597, below base) so a striped row never reads as a tier.
 
        Two rules that must survive any tuning:
         1. BASE (the content card) is clearly LIGHTER than the chrome behind
@@ -38,7 +42,13 @@
            close to its background is invisible.
 
        Accents stay on the teal brand palette (--color-primary-*), theme-driven
-       at runtime (utils/theme.ts). Surfaces are a neutral slate; nudge the hex
+       at runtime (utils/theme.ts). But the palette is injected as INLINE styles
+       on <html>, which beats this sheet: under the default dark themeColor
+       #E6E6E6 its "800/900" shades are mid-greys (#8a8a8a/#5c5c5c), so nothing
+       that carries grey-tier text may route through --color-primary-* — the
+       state washes and selected fills below are ladder literals instead, and
+       themeRuntimeContrast.spec.ts measures the injected ramp over the whole
+       sheet to keep that seam shut. Surfaces are a neutral slate; nudge the hex
        below to go warmer/cooler. */
 
   /* Surfaces — role of each elevation step:
@@ -47,17 +57,19 @@
        base    = editor / main content canvas
        well    = recessed / segmented track
        overlay = menus, dropdowns, tooltips */
-  --d-chrome: #0e0f11; /* title bar + left activity-bar strip             */
-  --d-base: #0d1117; /* MAIN: content card + table canvas               */
-  --d-well: #2d2d2d; /* recessed wells, segmented-control track         */
-  --d-panel: #181818; /* folder sidebar, sub rails, cards, dialogs (DM)  */
-  --d-overlay: #202020; /* menus, dropdowns, tooltips, table-header (top tier,
-                                lifts above panel #181818 via border + shadow)   */
+  --d-chrome: #0c0d0f; /* title bar + left activity-bar strip             */
+  --d-base: #15171a; /* MAIN: content card + table canvas               */
+  --d-well: #232730; /* recessed wells, segmented-control track — between panel
+                             (L .01504) and overlay (L .02491) at L .02022: a
+                             recess NEVER floats above the overlay tier        */
+  --d-panel: #1e2126; /* folder sidebar, sub rails, cards, dialogs (DM)  */
+  --d-overlay: #282c33; /* menus, dropdowns, tooltips, table-header (top tier,
+                                lifts above panel by lightness alone)          */
 
-  /* Borders & dividers — VS Code widget / panel borders */
-  --d-divider: #3c3c3c; /* subtle: row & section separators            */
-  --d-border: #454545; /* default: card / input / table / rail edges  */
-  --d-border-strong: #6b6b6b; /* strong: checkbox / radio / file outlines    */
+  /* Borders & dividers: one step above the surface they outline; contrast.spec.ts holds -strong at 3:1. */
+  --d-divider: #333840; /* subtle: row & section separators            */
+  --d-border: #4a505a; /* default: card / input / table / rail edges  */
+  --d-border-strong: #727982; /* strong: checkbox / radio / file outlines    */
 
   /* Text — mapped straight to the registered --color-grey-* palette in the
        block below (mirrors light mode, where each tier = a grey step). No
@@ -65,26 +77,44 @@
        grey shades, which flattened the hierarchy (body==secondary, and
        label==muted==disabled==placeholder all landed on one value). */
 
-  /* Row / item states on the content surface */
-  --d-hover: var(
-    --color-primary-900
-  ); /* row & list-item hover — MATCHES
-                             the dashboard-folder hover (theme-tinted, not grey) */
-  --d-selected: color-mix(in srgb, var(--color-primary-500) 30%, var(--d-panel));
-  /* selected row — teal-tinted (brand signal)       */
-  --d-zebra: #252526; /* striped-row bg — VS Code list alternating row    */
+  /* Row / item states on the content surface — neutral ladder literals, NEVER
+       var(--color-primary-*): utils/theme.ts injects its generated ramp as inline
+       styles on <html>, and inline beats this sheet. The default dark themeColor
+       is #E6E6E6 (near-white), so its "800/900" shades land on mid-greys rather
+       than on anything dark, and while these washes resolved through that ramp
+       every grey-tier label on a hovered/selected row sank to 2.24–2.65:1 — the
+       readings themeRuntimeContrast.spec.ts now pins as must-not-be, per theme.
+       Ladder placement: base → hover 1.062:1 (below the 1.112:1 base→panel
+       elevation step — a transient never outranks a tier), hover → selected
+       1.114:1 (selection is a persistent state, it may equal the elevation
+       step), and --d-selected stays UNDER the well (L .01916 between panel
+       .01504 and well .02022). Text on --d-hover: body 11.41, secondary 6.70, label 5.74.
+       Text on --d-selected: body 10.24, secondary 6.02, label 5.16.
+       border-strong clears 3:1 on both (3.84 / 3.45). */
+  --d-hover: #1a1d21; /* row & list-item hover — a step up off the base canvas */
+  --d-selected: #22262d; /* selected row — one step above --d-hover, below the
+                              well (L .01916 between panel .01504 and well .02022) */
+  --d-zebra: #101215; /* striped-row bg — OUTSIDE the elevation band, a hair BELOW
+                             the base canvas (L .00597: chrome .00400 < zebra < base
+                             .00847) so a stripe reads as a row rule, never a tier.
+                             Step off base 1.045:1, below the 1.112:1 base→panel
+                             elevation step and below its square root (1.055). */
 
-  /* --- Text — grey palette steps, one per tier (light half of the ramp) --- */
+  /* --- Text: label/muted/placeholder use grey-450, sized to clear 4.5:1 on the BINDING
+         tier — the lightest surface that carries these roles, --d-overlay (L .02491):
+         4.76:1, judged on it by contrast.spec.ts's manifest pairs. Next-worst --d-well
+         5.08:1, canvas 6.10:1, chrome 6.60:1. grey-500 fails the binding tier at 2.96:1
+         (3.79:1 on the canvas) — under AA everywhere, which is why these roles moved. --- */
   --color-text-heading: var(--color-grey-200); /* h1-h6, modal titles — brightest */
   --color-text-soft: var(--color-grey-200); /* feeds --color-select-text (OSelect trigger value) */
   --color-text-body: var(--color-grey-300); /* paragraphs, default body */
   --color-text-secondary: var(--color-grey-400); /* supporting text, descriptions */
-  --color-text-label: var(--color-grey-500); /* form labels, metadata */
-  --color-text-muted: var(--color-grey-500); /* de-emphasized */
+  --color-text-label: var(--color-grey-450); /* form labels, metadata — 6.10:1 on the canvas */
+  --color-text-muted: var(--color-grey-450); /* de-emphasized — AA-legible, unlike grey-500 */
   --color-text-disabled: var(--color-grey-600); /* dimmer than labels so disabled reads disabled */
   --color-text-placeholder: var(
-    --color-grey-500
-  ); /* input placeholders — dim but legible, above disabled */
+    --color-grey-450
+  ); /* input placeholders — dim but legible (grey-500: 3.79:1 canvas / 2.96:1 overlay) */
   --color-text-link: var(--color-primary-400); /* clickable links (teal) */
   --color-text-link-hover: var(--color-primary-300); /* link hover state (teal) */
   --color-text-code: var(--color-grey-300); /* inline code, monospace */
@@ -113,7 +143,7 @@
   --color-dag-node-event: #ffd54f;
   --color-dag-node-default: #9e9e9e;
   /* Code syntax highlighting — GitHub dark palette */
-  --color-syntax-bg: #0d1117;
+  --color-syntax-bg: #15171a;
   --color-syntax-text: #c9d1d9;
   --color-syntax-keyword: #ff7b72;
   --color-syntax-function: #d2a8ff;
@@ -127,7 +157,8 @@
   --color-syntax-addition-bg: #033a16;
   --color-syntax-deletion-fg: #ffdcd7;
   --color-syntax-deletion-bg: #67060c;
-  /* Colorized queries — the query editor's vs-dark hues, lifted to clear 4.5:1 on surface-subtle */
+  /* Colorized queries — the query editor's vs-dark hues, lifted to clear 4.5:1 on
+       surface-subtle: measured 5.01–8.80 on the repositioned well (L .02022), manifest-paired */
   --color-query-syntax-keyword: #569cd6;
   --color-query-syntax-function: #ff2bff;
   --color-query-syntax-string: #ce9178;
@@ -147,22 +178,66 @@
   --color-surface-panel: var(--d-panel); /* folder rails, cards, table-header base */
   --color-surface-overlay: var(--d-overlay); /* dropdowns, dialogs, selects, popovers */
   --color-surface-subtle: var(--d-well); /* recessed fills, segmented track */
-  --color-surface-subtle-hover: var(--d-panel); /* hover on a recessed fill (one step up) */
-  /* Floating chip on a dark panel — a lighter grey so it lifts off the surface. */
-  --color-surface-chip: var(--color-grey-700);
-  --color-surface-chip-hover: var(--color-grey-600);
-  /* Accent-tinted interaction surfaces — dark accent hover/active values. */
-  --color-surface-accent-hover: var(--color-primary-900);
-  --color-surface-accent-active: var(--color-primary-800);
+  --color-surface-subtle-hover: var(
+    --d-overlay
+  ); /* hover on a recessed fill — one step UP:
+                                        well L .02022 → overlay .02491 (1.067:1
+                                        lighter). The old value (--d-panel) sat
+                                        1.198:1 DARKER than the well it hovered.
+                                        Citations are token names, never line
+                                        numbers (they drifted once already).
+                                        Measured text pair: --color-pagination-item-text
+                                        grey-400 = 5.56:1 here (manifest, both
+                                        themes; light moved grey-500 3.76 →
+                                        grey-600 6.20) painted through
+                                        --color-pagination-item-hover-bg /
+                                        --color-pagination-nav-hover-bg
+                                        (component.css) and the ScheduledDashboards
+                                        rum-tab rule. The rest take this tier as
+                                        a hover/active fill: --color-dialog-close-active-bg
+                                        and --color-code-copy-hover-bg
+                                        (component.css), --color-stepper-trigger-hover
+                                        (below) and 19 .vue hover:bg utilities.
+                                        In dark any of those rows that carries
+                                        ROLE text clears AA by construction: no
+                                        text-role token sinks below grey-450
+                                        (4.76:1 here — see the text-ladder note).
+                                        Two LIGHT-side consumers are grey-500
+                                        and are honest NON-TEXT, not "brighter
+                                        text": the SVG-only close-X glyph
+                                        --color-dialog-close-text (3.76:1 on
+                                        this surface light; dark overrides to
+                                        text-muted grey-450 = 4.76) and the
+                                        SVG-only pagination prev/next arrows
+                                        --color-pagination-nav-text (3.76 light;
+                                        grey-400 5.56 dark). Icons follow WCAG
+                                        1.4.11's 3:1 bar; 3.76 clears it. */
+  /* Accent-tinted interaction surfaces — names keep the historical "accent"
+       prefix (every component maps onto them), but the dark values are neutral
+       ladder literals for the same injected-ramp reason as --d-hover above:
+       primary-800/900 under the default themeColor painted white-on-active
+       select/tab labels at 3.25–3.45:1. Placement: the wash floats on the
+       overlay tier (menus, select content) — overlay → hover 1.121:1,
+       hover → active 1.195:1 — monotonic, inside the ladder's step band, and
+       far below the lightest text-sinking mid-grey (#8a8a8a) that broke it.
+       Text measured on
+       accent-hover: heading 9.93, body 8.44, secondary 4.96; on accent-active:
+       white 10.47, heading 8.31, body 7.06, and every predefined theme's
+       --color-select-item-selected-text (primary-200) ≥ 7.06. */
+  --color-surface-accent-hover: #2f343d;
+  --color-surface-accent-active: #39404a;
   --color-surface-chrome: var(--d-chrome); /* top bar + left rail */
   --color-surface-chrome-deeper: var(--d-chrome); /* gutter behind card (same frame) */
 
   /* --- Borders (mapped — solid, clearly visible) --- */
   --color-border-default: var(--d-border);
   --color-border-strong: var(--d-border-strong);
-  /* Control edges. `--d-border-strong` (#6b6b6b) already clears ~3:1 against
-     the dark surfaces, so dark mode reuses it rather than inventing a value —
-     the light theme needs its own only because grey-400 falls short there. */
+  /* Control edges. `--d-border-strong` (#727982) clears 3:1 against every tier that
+     carries control edges TODAY — chrome 4.42, base (canvas) 4.08, panel 3.67, well 3.40,
+     overlay 3.19 (binding; the pair contrast.spec.ts judges) — measured after the
+     ladder move. Re-measure the five before extending the claim to another surface; dark
+     reuses the value rather than inventing one; the light theme needs its own only
+     because grey-400 falls short there. */
   --color-border-control: var(--d-border-strong);
   /* Soft divider — one step quieter than border-default so row/section
        splits don't read as hard structural lines (but still visible). */
@@ -191,7 +266,7 @@
   /* outline */
   --color-button-outline-text: var(--color-text-heading);
   --color-button-outline-border: var(--color-border-control);
-  --color-button-outline-hover-bg: var(--color-primary-900);
+  --color-button-outline-hover-bg: var(--color-surface-accent-hover);
   --color-button-outline-hover-border: var(--color-border-strong);
   --color-button-outline-active-bg: var(--color-surface-accent-active);
 
@@ -201,7 +276,7 @@
   --color-button-ghost-active-bg: var(--color-surface-accent-active);
 
   /* ghost-primary */
-  --color-button-ghost-primary-text: var(--color-primary-400);
+  --color-button-ghost-primary-text: var(--color-primary-300);
   --color-button-ghost-primary-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-primary-active-bg: var(--color-surface-accent-active);
 
@@ -215,12 +290,26 @@
   --color-button-ghost-success-hover-bg: var(--color-surface-overlay);
   --color-button-ghost-success-active-bg: var(--color-surface-overlay);
 
-  /* ghost-muted */
-  --color-button-ghost-muted-hover-text: var(--color-primary-400);
+  /* ghost-muted / ghost-subtle — pressed labels ride ONE text token through
+     rest/hover/active (OButton.vue ghost-muted/ghost-subtle recipes), so the
+     value must clear 4.5:1 on the lightest state, the accent-active fill:
+     grey-400 was 4.15:1
+     there (and grey-400@60% only 3.36:1 at rest on the canvas). grey-300 =
+     7.06 pressed, 8.44 hover. At rest the claim is surface-bounded and only
+     ghost-subtle dims itself (opacity-60 until hover): 5.08 on the canvas,
+     4.80 panel, 4.61 well, 4.44 on the overlay tier — rest-on-overlay is a
+     RECORDED sub-4.5 residual (the brightest realistic rest host; no rest
+     opacity clears it without erasing the ghost look, and hover restores
+     full alpha immediately). ghost-muted rests at full alpha: 12.12 canvas.
+     The hover accent keeps primary-300 for the same reason: primary-400 sank
+     to 3.77:1 (Pulse ramp) once pressed onto accent-active. */
+  --color-button-ghost-muted-text: var(--color-grey-300);
+  --color-button-ghost-muted-hover-text: var(--color-primary-300);
   --color-button-ghost-muted-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-muted-active-bg: var(--color-surface-accent-active);
 
   /* ghost-subtle */
+  --color-button-ghost-subtle-text: var(--color-grey-300);
   --color-button-ghost-subtle-hover-bg: var(--color-surface-accent-hover);
   --color-button-ghost-subtle-active-bg: var(--color-surface-accent-active);
 
@@ -246,19 +335,21 @@
   /* Tabs */
   --color-tabs-active-bg: var(--color-surface-accent-active);
   --color-tabs-active-text: var(--color-white);
-  --color-tabs-hover-bg: var(--color-primary-900);
+  --color-tabs-hover-bg: var(--color-surface-accent-hover);
   --color-tabs-bar-border: var(--color-grey-700);
   --color-nav-label-accent: var(--color-accent);
 
   /* Collapsible */
-  --color-collapsible-trigger-hover-bg: var(--color-primary-900);
-  --color-collapsible-trigger-active-bg: var(--color-surface-accent-active);
-  --color-collapsible-trigger-open-bg: var(--color-primary-900);
+  --color-collapsible-trigger-hover-bg: var(--color-surface-accent-hover);
+  /* Pressed step darkened off --color-surface-accent-active (#39404a): the caption/icon
+     secondary ink measured 4.15 there, under AA; this step holds 4.5+ for it. */
+  --color-collapsible-trigger-active-bg: #252a32;
+  --color-collapsible-trigger-open-bg: var(--color-surface-accent-hover);
   --color-collapsible-open-accent: var(--color-primary-400);
   --color-collapsible-icon-open: var(--color-primary-400);
 
   /* OFieldList / OFieldRow / OFieldLabel */
-  --color-field-list-row-hover-bg: var(--color-primary-900);
+  --color-field-list-row-hover-bg: var(--d-hover);
   --color-field-list-actions-bg: var(--color-surface-subtle);
   --color-field-list-expansion-bg: var(--color-surface-subtle);
 
@@ -271,8 +362,6 @@
   --color-badge-default-soft-bg: var(--color-grey-800);
   --color-badge-default-soft-text: var(--color-grey-300);
 
-  /* primary: brighten solid bg in dark mode — primary-600 on primary-800 (active tab) has near-zero contrast */
-  --color-badge-primary-solid-bg: var(--color-primary-400);
   --color-badge-primary-ol-text: var(--color-primary-300);
   --color-badge-primary-soft-bg: var(--color-primary-900);
   --color-badge-primary-soft-text: var(--color-primary-300);
@@ -405,6 +494,10 @@
   --color-input-placeholder: var(--color-text-placeholder);
   --color-input-error-text: var(--color-error-400);
   --color-input-border-error: var(--color-error-400);
+  /* Slider/option-group error inks had no dark override and rode the light step
+     (error-600/700 measures 3.88 on the dark page) — same fix input/select carry. */
+  --color-slider-error-text: var(--color-error-400);
+  --color-option-group-error-text: var(--color-error-400);
 
   /* Select (OSelect) — same surface-matching bg + disabled strategy as input. */
   --color-select-bg: var(--color-surface-base);
@@ -434,11 +527,16 @@
   --color-switch-disabled-border: var(--color-grey-600);
   --color-switch-disabled-thumb: var(--color-grey-600);
 
-  /* Checkbox (OCheckbox) */
+  /* Checkbox (OCheckbox) — the fill rides the runtime primary ramp (a light
+     pastel under every predefined dark theme), so the tick is the dark ink
+     that survives it: grey-900 on the sheet's primary-500 is 4.95:1, and
+     utils/theme.ts re-picks the tick against each theme's injected 500 shade
+     (4.95-14.90 across the six ramps, themeRuntimeContrast.spec measures). */
   --color-checkbox-bg: var(--color-surface-panel);
   --color-checkbox-border: var(--color-border-strong);
   --color-checkbox-checked-bg: var(--color-primary-500);
   --color-checkbox-checked-border: var(--color-primary-500);
+  --color-checkbox-checked-fg: var(--color-grey-900);
   --color-checkbox-disabled-bg: var(--color-surface-subtle);
   --color-checkbox-disabled-border: var(--color-border-default);
 
@@ -467,6 +565,7 @@
   --color-file-disabled-border: var(--color-border-default);
   --color-file-error-text: var(--color-error-400);
   --color-file-error-border: var(--color-error-400);
+  --color-file-placeholder: var(--color-text-placeholder);
   --color-file-chip-bg: var(--color-primary-900);
   --color-file-chip-text: var(--color-primary-200);
   --color-file-chip-remove: var(--color-primary-200);
@@ -478,25 +577,50 @@
   --color-datepicker-border: var(--color-border-strong);
   --color-datepicker-disabled-bg: var(--color-surface-subtle);
   --color-datepicker-disabled-border: var(--color-border-default);
+  /* Placeholder ink paints ACTIVE controls — the ODateTimeRange trigger label,
+     the ODate separators and empty segments, the popup timezone inputs — so it
+     rides the placeholder text tier, not the disabled step: the old
+     var(--color-text-disabled) measured 1.79:1 on the popup and 2.07:1 on the
+     trigger. grey-450 clears 4.76:1 on popup (overlay) / 5.48:1 on trigger
+     (panel); disabled controls keep dimming via their opacity-60 wrapper. */
+  --color-datepicker-placeholder: var(--color-text-placeholder);
+  --color-datepicker-error-text: var(
+    --color-error-400
+  ); /* was the un-overridden light error-600 (2.90:1, manifest-pending) — same fix input/select/file roles already carry */
   --color-datepicker-error-border: var(--color-error-400);
-  --color-datepicker-segment-focus-bg: var(--color-primary-500);
+  --color-datepicker-segment-focus-bg: var(--color-surface-accent-active);
   --color-datepicker-segment-focus-text: var(--color-white);
   /* DatePicker calendar popup */
   --color-datepicker-popup-bg: var(--color-surface-overlay);
   --color-datepicker-popup-border: var(--color-border-default);
   --color-datepicker-day-hover-bg: var(--color-surface-accent-hover);
-  --color-datepicker-day-selected-bg: var(--color-primary-500);
+  --color-datepicker-day-selected-bg: var(--color-surface-accent-active);
+  /* Selected segment/tab ink: a light neutral, NOT the selection fill — the
+     fill as text measured 1.34:1 on this popup. grey-100 = 12.86:1 on
+     overlay, 14.81 on panel; the step-dot/underline markers clear 3:1 by it. */
+  --color-datepicker-selected-fg: var(--color-grey-100);
   --color-datepicker-day-today-border: var(--color-primary-400);
-  --color-datepicker-day-outside-text: var(--color-text-disabled);
+  /* An outside-month day cell is still a clickable button — no disabled-state
+     exemption: it left the disabled step it folded to at 1.79:1 for the raised
+     placeholder tier (grey-450, 4.76:1 on the popup), and that tier is raised one
+     step further here because hovering the cell moves it onto the runtime accent
+     wash (--color-surface-accent-hover #2f343d), where grey-450 measures 4.25:1
+     and grey-400 holds 4.96:1 (5.56:1 on the popup, still a clear step under the
+     9.93:1 in-month day tier). */
+  --color-datepicker-day-outside-text: var(--color-grey-400);
   --color-datepicker-nav-hover-bg: var(--color-surface-accent-hover);
   --color-datepicker-day-range-bg: var(--color-primary-900);
   --color-datepicker-day-range-text: var(--color-primary-200);
   --color-datepicker-clock-face-bg: var(--color-surface-panel);
-  --color-datepicker-clock-header-bg: var(--color-primary-800);
-  --color-datepicker-clock-selected-bg: var(--color-primary-500);
+  --color-datepicker-clock-header-bg: var(--color-surface-accent-active);
+  /* Selected clock number: the disc IS the state marker (WCAG 1.4.11 ≥3:1 vs
+     the face). accent-active scored 1.54:1 on --d-panel, so the disc flips to
+     a light-neutral fill and the digits to canvas ink — 12.82 / 14.26. */
+  --color-datepicker-clock-selected-bg: var(--color-grey-200);
+  --color-datepicker-clock-selected-text: var(--d-base);
   --color-datepicker-clock-hover-bg: var(--color-surface-accent-hover);
   --color-datepicker-relative-btn-bg: var(--color-surface-panel);
-  --color-datepicker-relative-btn-selected-bg: var(--color-primary-500);
+  --color-datepicker-relative-btn-selected-bg: var(--color-surface-accent-active);
   --color-datepicker-relative-btn-hover-bg: var(--color-surface-accent-hover);
 
   /* Color picker */
@@ -521,7 +645,12 @@
   --color-dialog-close-active-bg: var(--d-border);
 
   /* Pagination */
-  --color-pagination-item-active-bg: var(--color-primary-500);
+  /* Item text is a direct grey, not --color-text-secondary: the token must
+       stand as its own root so contrast.spec's manifest can judge it on the
+       hover tier (light grey-600/grey-200, dark grey-400/overlay 5.56:1)
+       instead of folding into the role token's page judgment. */
+  --color-pagination-item-text: var(--color-grey-400);
+  --color-pagination-item-active-bg: var(--color-surface-accent-active);
 
   /* Timeline */
   --color-timeline-dot-primary: var(--color-primary-500);
@@ -532,6 +661,9 @@
   /* Stepper */
   --color-stepper-indicator-active: var(--color-primary-500);
   --color-stepper-indicator-done: var(--color-primary-500);
+  /* Same rule as the checkbox tick two blocks below: the fill is the injected
+     ramp, so the sheet ink cannot be white (4.95-14.90 on the six dark ramps). */
+  --color-stepper-indicator-fg: var(--color-grey-900);
   --color-stepper-connector-done: var(--color-primary-700);
   --color-stepper-trigger-hover: var(--color-surface-subtle-hover);
 
@@ -801,35 +933,33 @@
   --color-toast-loading-border: var(--color-border-default);
   --color-toast-action-text: var(--color-primary-400);
   --color-toast-action-hover: var(--color-primary-300);
+  --color-toast-action-foreground: var(--color-grey-900);
+  --color-toast-action-foreground-hover: var(--color-grey-900);
 
   /* OTable (dark) */
   --color-table-header-bg: var(--d-overlay); /* header band lifts off rows */
   --color-table-row-hover-bg: var(--d-hover); /* neutral hover (not teal-washed) */
-  --color-table-row-selected-bg: var(--d-selected); /* teal-tinted selection */
-  --color-table-row-striped-bg: var(--d-zebra); /* panel +1 step zebra */
+  --color-table-row-selected-bg: var(--d-selected); /* neutral selection, one step above hover */
+  --color-table-row-striped-bg: var(--d-zebra); /* stripe BELOW the canvas — sub-tier row rule */
   --color-table-row-divider: var(--d-divider); /* solid, visible row separators */
   --color-table-highlight-bg: color-mix(in srgb, var(--color-warning-700) 40%, transparent);
   --color-table-sort-icon-active: var(--color-primary-400);
   --color-table-streaming-bar: var(--color-primary-400);
   --color-table-row-expanded-bg: var(--d-overlay);
 
-  /* Chart panel bar (dark) — same trick as the table header: the panel body sits
-     on the content canvas (--d-base), so the bar LIFTS off it rather than going
-     darker. Darker than #0d1117 would read as a hole, not a header.
-
-     A literal, not an alias: this sits one step above --d-overlay (#202020) and
-     below --d-well (#2d2d2d), and both of those carry roles (menus/tooltips,
-     recessed tracks) that this is not. Aliasing either would couple the header
-     to a token that moves for unrelated reasons.
-
-     1.24:1 against the body, deliberately matched to the light side's 1.26:1
-     (grey-200 on white) so the header reads the same weight in both themes —
-     keep the pair in step if either moves.
-
-     Unlike light mode there is no ceiling on the fill here: --d-border is
-     LIGHTER than it, so a darker fill only helps the divider. That is why the
-     border below is unchanged while the light one had to move with the fill. */
-  --color-panel-bar-bg: #252526;
+  /* Chart panel bar lifts off --d-base like the light header, kept in step with its
+     light twin by arithmetic, not eyeballing: this band is 1.152:1 off --d-base
+     (L .01736, below --d-well so a resting panel header never outranks a floating
+     menu); the light side (--color-grey-100 on the white canvas, component.css) is
+     1.090:1. A literal, so tier moves cannot drift the band — if a tier crosses
+     1.1–1.2:1 off base, re-measure both themes and change the pair together.
+     The pair that reads is the 1.152:1 against the canvas the bar sits ON; its
+     1.042:1 against --d-well is deliberately imperceptible — a chart header band
+     is not a surface tier, and --color-panel-bar-border carries that separation.
+     Widening the well gap by moving the fill down only trades one unreadable pair
+     for another: 1.13:1 off base (L .01607) would read 1.063:1 off --d-well and
+     just 1.016:1 off --d-panel. */
+  --color-panel-bar-bg: #20242a;
   --color-panel-bar-border: var(--d-border);
 }
 /* Domain data-viz & color tokens (dark) */
@@ -837,6 +967,13 @@
 .dark :root,
 .dark {
   --color-actions-column-shadow: rgba(125, 125, 125, 0.694);
+  /* AA text roles minted for the shipped-default remediation (light values in
+     base.css/semantic.css; these steps clear 4.5 on the dark page). */
+  --color-ai-accent-text: #a798ff;
+  /* never painted (libraryForegroundTokens injects the pick in both modes); static sheet stand-in */
+  --color-on-fill-foreground: var(--color-grey-100);
+  --color-brand-indigo-text: #8f96e8;
+  --color-series-b-text: var(--color-series-b);
   --color-bg-gray: color-mix(in srgb, var(--color-theme-accent) 5%, rgb(42, 42, 42));
   /* Form field label — dark steps. #c4c4c4 has no palette equivalent. */
   --color-input-label-text: var(--color-grey-200);
@@ -845,7 +982,14 @@
   --color-scrollbar-thumb: var(--color-grey-700);
   --color-scrollbar-thumb-hover: var(--color-grey-600);
   /* Lighter teal step so the VRL section bar stays visible on dark surfaces.
-     (--color-promo-* is deliberately NOT overridden — promo art is theme-independent.) */
+     (Promo fills stay theme-independent; only the badge text role brightens — the
+     home banner ground follows --color-surface-base, so amber-800 sank to 3.73 in dark.) */
+  --color-promo-webinar-accent-text: var(--color-amber-300);
+  --color-promo-webinar-home-bg: color-mix(
+    in srgb,
+    var(--color-promo-webinar-accent) 6%,
+    var(--color-surface-base)
+  );
   --color-section-accent-secondary: var(--color-teal-400);
   --color-card-glass-border: rgba(255, 255, 255, 0.4);
   --color-card-glass-bg: var(--color-surface-base);
@@ -984,8 +1128,9 @@
 
   /* Misc dark overrides. */
   --color-cancel-query-bg: #7a3838;
+  --color-cancel-query-foreground: var(--color-white);
   --color-highlight-bg: #747474;
-  --color-icon-color: #5e5e5e;
+  --color-icon-color: #9a9ea6; /* was #5e5e5e: 2.89 on the page, under both the text and 3:1 glyph bars */
 
   /* eslint-disable local/no-hardcoded-px -- optical: the 1px contact shadow must stay one device pixel */
   --shadow-ai-focus:

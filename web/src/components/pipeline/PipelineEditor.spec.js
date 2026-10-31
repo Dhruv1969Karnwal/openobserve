@@ -287,19 +287,16 @@ describe("PipelineEditor", () => {
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
-  describe("Enterprise gating — locked, not hidden", () => {
-    // Test env is OSS (isEnterprise=false, isCloud=false, see web/.env) —
-    // neither entitlement applies, so both surfaces below should be locked.
-    it("shows the JSON-editor AI button locked instead of hiding it", () => {
+  describe("Enterprise gating — hidden, not locked", () => {
+    // The shipped policy is "hide", so neither affordance renders; locked is asserted in enterpriseFeatures.spec.ts.
+    it("hides the JSON-editor AI button instead of showing it locked", () => {
       expect(wrapper.vm.aiAccess.allowed).toBe(false);
-      expect(wrapper.vm.jsonEditorAiButtonVisible).toBe(true);
+      expect(wrapper.vm.jsonEditorAiButtonVisible).toBe(false);
     });
 
-    it("adds the Remote Destination node to the palette locked instead of omitting it", () => {
+    it("omits the Remote Destination node from the palette entirely", () => {
       const remoteNode = mockPipelineObj.nodeTypes.find((n) => n.subtype === "remote_stream");
-      expect(remoteNode).toBeTruthy();
-      expect(remoteNode.locked).toBe(true);
-      expect(remoteNode.lockedMessage).toBeTruthy();
+      expect(remoteNode).toBeUndefined();
     });
   });
 

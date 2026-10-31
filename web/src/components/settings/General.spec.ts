@@ -287,7 +287,7 @@ describe("General", () => {
     mockSettingsService.updateCustomText.mockResolvedValue({ status: 200 });
     mockConfigService.get_config.mockResolvedValue({ data: {} });
     mockConfigService.get_config_full.mockResolvedValue({ data: {} });
-    mockDOMPurify.sanitize.mockImplementation((text) => text);
+    mockDOMPurify.sanitize.mockImplementation((text: any) => text);
   });
 
   afterEach(() => {
@@ -419,10 +419,9 @@ describe("General", () => {
     });
   });
 
-  // customBranding is self-hosted-only (cloudOffers: false): OSS sees the
-  // section locked-but-visible (disabled controls + lock), pure Cloud doesn't
-  // see it at all — same split as the other cloudOffers:false gates (e.g.
-  // cipherKeys in settings/index.vue).
+  // customBranding is self-hosted-only (cloudOffers: false), so pure Cloud never
+  // sees it at all; on OSS the shipped "hide" policy hides it too — same shape as
+  // the other cloudOffers:false gates (e.g. cipherKeys in settings/index.vue).
   describe("Custom branding gating", () => {
     const originalIsEnterprise = config.isEnterprise;
     const originalIsCloud = config.isCloud;
@@ -432,32 +431,31 @@ describe("General", () => {
       config.isCloud = originalIsCloud;
     });
 
-    it("should keep the branding section visible but locked on OSS", () => {
+    // Under "hide" branding is absent rather than locked: there is no upsell click to route to.
+    it("should hide the branding section entirely on OSS", () => {
       mockStore.state.zoConfig.meta_org = "test-org";
       config.isEnterprise = "false";
       config.isCloud = "false";
       const wrapper = createWrapper();
 
-      expect(wrapper.find("#enterpriseFeature").exists()).toBe(true);
-      const lockedText = wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]');
-      expect(lockedText.exists()).toBe(true);
-      // Clickable (not disabled) — the wrapping row opens the upgrade dialog
-      // on click instead of the field being an inert disabled control.
-      expect(lockedText.find("input").attributes("disabled")).toBeUndefined();
+      expect(wrapper.find("#enterpriseFeature").exists()).toBe(false);
+      expect(wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]').exists()).toBe(
+        false,
+      );
       expect(
         wrapper.find('[data-test="setting_ent_custom_logo_img_file_upload_locked"]').exists(),
-      ).toBe(true);
+      ).toBe(false);
       expect(
         wrapper.find('[data-test="setting_ent_custom_logo_dark_img_file_upload_locked"]').exists(),
-      ).toBe(true);
-      // The functional controls must not render alongside the locked ones.
+      ).toBe(false);
+      // And of course the functional controls are not offered either.
       expect(wrapper.find('[data-test="settings_ent_logo_custom_text"]').exists()).toBe(false);
       expect(wrapper.find('[data-test="settings_ent_logo_custom_text_edit_btn"]').exists()).toBe(
         false,
       );
     });
 
-    it("opens the upgrade dialog when a locked branding row is clicked", async () => {
+    it("offers no upsell click from an un-entitled Settings › General", async () => {
       mockStore.state.zoConfig.meta_org = "test-org";
       config.isEnterprise = "false";
       config.isCloud = "false";
@@ -465,8 +463,9 @@ describe("General", () => {
 
       const { isOpen, close } = useEnterpriseUpgradeDialog();
       close();
-      await wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]').trigger("click");
-      expect(isOpen.value).toBe(true);
+      const clickable = wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]');
+      expect(clickable.exists()).toBe(false);
+      expect(isOpen.value).toBe(false);
     });
 
     it("should hide the branding section entirely on a pure Cloud build", () => {
@@ -641,7 +640,7 @@ describe("General", () => {
     });
 
     it("should show file upload when no logo exists", async () => {
-      mockStore.state.zoConfig.custom_logo_img = null;
+      mockStore.state.zoConfig.custom_logo_img = null as any;
       const wrapper = createWrapper();
 
       const fileUpload = wrapper.find('[data-test="setting_ent_custom_logo_img_file_upload"]');
@@ -714,7 +713,7 @@ describe("General", () => {
         expect(wrapper.vm.confirmDeleteImage).toBe(true);
       } else {
         // Fallback: call the confirmDeleteLogo method directly
-        await wrapper.vm.confirmDeleteLogo();
+        await wrapper.vm.confirmDeleteLogo(undefined as any);
         expect(wrapper.vm.confirmDeleteImage).toBe(true);
       }
     });
@@ -841,7 +840,7 @@ describe("General", () => {
       // Select the color-picker dialog by title (order-independent — other dialogs
       // like the delete-org confirmation also exist in the template).
       const dialogs = wrapper.findAll('[data-test-stub="o-dialog"]');
-      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color");
+      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color")!;
       const closeBtn = colorDialog.find('[data-test-stub="o-dialog-primary"]');
       await closeBtn.trigger("click");
       await nextTick();
@@ -864,7 +863,7 @@ describe("General", () => {
       const dialogs = wrapper.findAll('[data-test-stub="o-dialog"]');
       // Select by title (order-independent — the delete-org confirmation dialog also
       // exists and would otherwise be the last dialog in the template).
-      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color");
+      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color")!;
       expect(colorDialog.attributes("data-size")).toBe("xs");
       expect(colorDialog.attributes("data-primary-label")).toBe("Close");
     });
@@ -996,7 +995,7 @@ describe("General", () => {
     it("should use default organization when no selected organization", async () => {
       // Create wrapper first, then modify store state
       const wrapper = createWrapper();
-      mockStore.state.selectedOrganization = null;
+      mockStore.state.selectedOrganization = null as any;
 
       await wrapper.vm.uploadImage(new File(["test"], "test.png"));
 
@@ -1019,7 +1018,7 @@ describe("General", () => {
 
   describe("Edge cases", () => {
     it("should handle missing organization settings gracefully", () => {
-      mockStore.state.organizationData.organizationSettings = null;
+      mockStore.state.organizationData.organizationSettings = null as any;
       const wrapper = createWrapper();
 
       // The form falls back to the default scrape_interval (15) from the schema defaults.

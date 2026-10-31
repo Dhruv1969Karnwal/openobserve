@@ -128,6 +128,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </OToggleGroupItem>
 
             <OToggleGroupItem
+              v-if="patternsAccess.visible"
               data-test="logs-patterns-toggle"
               value="patterns"
               size="sm"
@@ -141,9 +142,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OIcon name="layers" size="sm" class="shrink-0" />
               </template>
               <span v-if="!toolbarToggleIconOnly">{{ t("search.showPatternsLabel") }}</span>
-              <template v-if="!patternsAccess.allowed" #icon-right>
-                <OIcon name="lock" size="xs" class="text-warning-600 shrink-0" />
-              </template>
             </OToggleGroupItem>
           </OToggleGroup>
           <!-- reset filters button — moves into More menu at very narrow widths -->
@@ -774,24 +772,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
           <ODropdownSeparator />
 
-          <ODropdownGroup :label="t('search.menuGroupSchedule')">
-            <template v-if="!scheduledSearchAccess.allowed" #label-action>
-              <OIcon
-                name="lock"
-                size="xs"
-                class="text-warning-600"
-                data-test="search-scheduler-locked-icon"
-              />
-            </template>
-
+          <!-- Named per entitlement so a "lock" build keeps a stable hook for the locked group (its label-action glyph is gone under "hide"). -->
+          <ODropdownGroup
+            v-if="scheduledSearchAccess.visible"
+            :data-test="
+              scheduledSearchAccess.allowed
+                ? 'search-scheduler-menu-group'
+                : 'search-scheduler-menu-group-locked'
+            "
+            :label="t('search.menuGroupSchedule')"
+          >
             <ODropdownItem
               data-test="search-scheduler-create-new-btn"
-              :disabled="scheduledSearchAccess.allowed && !!scheduleJobReason"
+              :disabled="!!scheduleJobReason"
               focusable-unavailable
-              :description="
-                scheduledSearchAccess.allowed ? scheduleJobReason || scheduleJobNote : undefined
-              "
-              @select="scheduledSearchAccess.allowed ? createScheduleJob() : openUpgradeDialog()"
+              :description="scheduleJobReason || scheduleJobNote"
+              @select="onScheduleMenuSelect"
             >
               <template #icon-left>
                 <span
@@ -809,12 +805,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </span>
             </ODropdownItem>
 
-            <ODropdownItem
-              data-test="search-scheduler-list-btn"
-              @select="
-                scheduledSearchAccess.allowed ? routeToSearchSchedule() : openUpgradeDialog()
-              "
-            >
+            <ODropdownItem data-test="search-scheduler-list-btn" @select="onScheduleListMenuSelect">
               <template #icon-left>
                 <span
                   class="rounded-default bg-section-header-bg text-text-secondary inline-flex h-7 w-7 shrink-0 items-center justify-center"
@@ -861,14 +852,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
           <ODropdownSeparator />
 
-          <ODropdownGroup
-            v-if="
-              config.isEnterprise == 'true' &&
-              config.isCloud == 'false' &&
-              store.state.zoConfig.search_inspector_enabled
-            "
-            :label="t('search.menuGroupInspect')"
-          >
+          <ODropdownGroup v-if="inspectorVisible" :label="t('search.menuGroupInspect')">
             <ODropdownItem data-test="search-inspect-btn" @select="openSearchInspectDialog">
               <template #icon-left>
                 <span
@@ -1005,7 +989,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   :title="t('search.cancel')"
                   variant="ghost"
                   size="sm-toolbar"
-                  class="bg-cancel-query-bg! text-button-primary-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
+                  class="bg-cancel-query-bg! text-cancel-query-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
                   @click="cancelVisualizeQueries"
                   >{{ t("search.cancel") }}</OButton
                 >
@@ -1031,7 +1015,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       data-test="logs-search-bar-refresh-cache-dropdown-trigger"
                       :class="[
                         config.isEnterprise == 'true' && visualizeSearchRequestTraceIds.length
-                          ? 'bg-cancel-query-bg! text-button-primary-foreground!'
+                          ? 'bg-cancel-query-bg! text-cancel-query-foreground!'
                           : 'bg-button-primary! text-button-primary-foreground! hover:shadow-button-primary/70 hover:opacity-90 hover:shadow-md',
                         'rounded-e-default! rounded-s-none!',
                       ]"
@@ -1061,7 +1045,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   variant="ghost"
                   :title="t('search.cancel')"
                   size="sm-toolbar"
-                  class="bg-cancel-query-bg! text-button-primary-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
+                  class="bg-cancel-query-bg! text-cancel-query-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
                   @click="cancelVisualizeQueries"
                   >{{ t("search.cancel") }}</OButton
                 >
@@ -1088,7 +1072,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       data-test="logs-search-bar-refresh-cache-dropdown-trigger"
                       :class="[
                         config.isEnterprise == 'true' && visualizeSearchRequestTraceIds.length
-                          ? 'bg-cancel-query-bg! text-button-primary-foreground!'
+                          ? 'bg-cancel-query-bg! text-cancel-query-foreground!'
                           : 'bg-button-primary! text-button-primary-foreground! hover:shadow-button-primary/70 hover:opacity-90 hover:shadow-md',
                         'rounded-e-default! rounded-s-none!',
                       ]"
@@ -1119,7 +1103,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 variant="ghost"
                 :title="t('search.cancel')"
                 size="sm-toolbar"
-                class="bg-cancel-query-bg! text-button-primary-foreground! element-box-shadow rounded-default h-[1.875rem]! w-[5.875rem]! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
+                class="bg-cancel-query-bg! text-cancel-query-foreground! element-box-shadow rounded-default h-[1.875rem]! w-[5.875rem]! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
                 @click="autoRun.engine.cancelGeneration(null, { cause: 'user' })"
                 >{{ t("search.cancel") }}</OButton
               >
@@ -1130,7 +1114,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 variant="primary"
                 :title="t('search.cancel')"
                 size="sm-toolbar"
-                class="bg-cancel-query-bg! text-button-primary-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
+                class="bg-cancel-query-bg! text-cancel-query-foreground! element-box-shadow rounded-s-default! h-[1.875rem]! w-[5.875rem]! rounded-e-none! p-0 px-1! text-center leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,opacity_0.2s_ease]"
                 @click="cancelRun"
                 >{{ t("search.cancel") }}</OButton
               >
@@ -1189,7 +1173,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     data-test="logs-search-bar-refresh-cache-dropdown-trigger"
                     :class="[
                       isRunQueryCancelShown
-                        ? 'bg-cancel-query-bg! text-button-primary-foreground!'
+                        ? 'bg-cancel-query-bg! text-cancel-query-foreground!'
                         : !showRunQueryPending
                           ? 'bg-button-primary! text-button-primary-foreground! hover:shadow-button-primary/70 hover:opacity-90 hover:shadow-md'
                           : showRunQueryPending
@@ -1309,7 +1293,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :debounce-time="100"
                 :nlp-mode="searchObj.meta.nlpMode"
                 :has-expand-button="!showFunctionEditor"
-                :show-ai-icon="config.isEnterprise == 'true' && store.state.zoConfig.ai_enabled"
                 :disable-ai="!searchObj.data.stream.selectedStream.length || isSqlModeDisabled"
                 :disable-ai-reason="
                   !searchObj.data.stream.selectedStream.length
@@ -1804,6 +1787,7 @@ import type {
   PersistReasonCode,
 } from "@/composables/useLogs/useAutoRun";
 import { applySearchSnapshot, prepareSearchForSave } from "@/utils/logs/transientSearchKeys";
+import { sanitizeSearchSnapshotMeta } from "@/utils/logs/snapshotPaidState";
 import { useSearchStream } from "@/composables/useLogs/useSearchStream";
 import useStreamFields from "@/composables/useLogs/useStreamFields";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
@@ -2056,15 +2040,29 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18nTyped();
     const store = useStore();
-    // Log-pattern mining ("Patterns" toggle) — shown locked (not hidden) in
-    // builds that don't unlock it, with the shared nav/settings tooltip.
+    // Log-pattern mining ("Patterns" toggle) — the shipped "hide" policy removes it
+    // outright; only a "lock" build shows the locked affordance + upsell dialog.
     const patternsAccess = computed(() =>
       checkFeatureAccess("logPatterns", buildFeatureGateContext(store.state.zoConfig)),
     );
-    // Scheduled Search menu — shown locked (not hidden) in builds that don't
-    // unlock it, same treatment as the Patterns toggle above.
+    // Scheduled Search menu — same policy split as the Patterns toggle above.
     const scheduledSearchAccess = computed(() =>
       checkFeatureAccess("scheduledSearch", buildFeatureGateContext(store.state.zoConfig)),
+    );
+    // Whether the Ask-AI bar may legitimately be ON here: the `aiAssistant`
+    // entitlement AND the `ai_enabled` runtime toggle, i.e. the conjunct
+    // QueryEditor applies to its own AI affordances.
+    const aiAssistantAllowed = computed(
+      () =>
+        checkFeatureAccess("aiAssistant", buildFeatureGateContext(store.state.zoConfig)).allowed &&
+        Boolean(store.state.zoConfig.ai_enabled),
+    );
+    // The Search Job Inspector's route carries the same `searchJobInspector` key;
+    // the backend `search_inspector_enabled` flag is the caller-side conjunct.
+    const inspectorVisible = computed(
+      () =>
+        checkFeatureAccess("searchJobInspector", buildFeatureGateContext(store.state.zoConfig))
+          .visible && !!store.state.zoConfig.search_inspector_enabled,
     );
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
     const orgIdForWrites = useOrgId();
@@ -2525,12 +2523,14 @@ export default defineComponent({
         label: t("search.drillDown"),
         disabled: searchObj.meta.sqlMode,
       },
-      ...(config.isEnterprise === "true"
+      ...(patternsAccess.value.visible
         ? [
             {
               value: "patterns",
               icon: "layers",
               label: t("search.showPatternsLabel"),
+              // Not disabled: like the toolbar toggle, the click guard in
+              // onLogsVisualizeToggleUpdate routes locked builds to the dialog.
               disabled: false,
             },
           ]
@@ -3538,7 +3538,22 @@ export default defineComponent({
         .then(async (res) => {
           if (res.status == 200) {
             store.dispatch("setSavedViewFlag", true);
-            const extractedObj = res.data.data;
+            // A saved view is org-stored client-writable JSON, so everything it
+            // says about PAID state is sanitized here, before either merge below
+            // (both `applySearchSnapshot` sites live in this one function):
+            // `meta`'s shape, the gated panel toggle and every key of
+            // PAID_SNAPSHOT_META_KEYS — the paid-dialog trigger, the Ask-AI bar's
+            // external control and the scheduled-result job context. The boundary
+            // returns a sanitized COPY and never writes the payload, so this
+            // assignment is the wiring: dropping it silently restores unsanitized
+            // state instead of failing loudly. TRANSIENT_SEARCH_KEYS is the
+            // wrong mechanism for the toggle — views legitimately persist the free
+            // values — but the boundary is the same one for all three.
+            const extractedObj = sanitizeSearchSnapshotMeta(res.data.data, {
+              patternsAllowed: patternsAccess.value.allowed,
+              aiAssistantAllowed: aiAssistantAllowed.value,
+              scheduledSearchAllowed: scheduledSearchAccess.value.allowed,
+            });
 
             // A saved view's columns are an explicit user choice, not a system
             // FTS default, so they must persist and never be auto-overridden.
@@ -4740,6 +4755,26 @@ export default defineComponent({
       searchObj.meta.jobRecords = 100;
     };
 
+    // Allowed-first, mirroring the Patterns click guard: the whole group is
+    // v-if-gone under "hide", so the dialog branch only runs in "lock" builds.
+    const onScheduleMenuSelect = () => {
+      if (scheduledSearchAccess.value.allowed) {
+        createScheduleJob();
+        return;
+      }
+      openUpgradeDialog();
+    };
+
+    // Same guard as the create item — a lock build must open the dialog, not
+    // push a route the page's own guard would bounce back.
+    const onScheduleListMenuSelect = () => {
+      if (scheduledSearchAccess.value.allowed) {
+        routeToSearchSchedule();
+        return;
+      }
+      openUpgradeDialog();
+    };
+
     const openGuardSearchJob = (snapshot: any) => {
       guardJobSnapshot.value = snapshot;
       searchSchedulerJob.value = true;
@@ -5049,6 +5084,7 @@ export default defineComponent({
       config,
       patternsAccess,
       scheduledSearchAccess,
+      inspectorVisible,
       openUpgradeDialog,
       handleRegionsSelection,
       handleQuickMode,
@@ -5080,6 +5116,8 @@ export default defineComponent({
       addJobScheduler,
       routeToSearchSchedule,
       createScheduleJob,
+      onScheduleMenuSelect,
+      onScheduleListMenuSelect,
       buildAlertPrefill,
       createAlertSource,
       createAlertDisabledReason,

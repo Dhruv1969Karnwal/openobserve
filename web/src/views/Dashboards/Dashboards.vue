@@ -64,7 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <ODropdownItem @select="importDashboard" data-test="dashboard-import-custom">
           <div class="flex flex-col">
             <span>{{ t("dashboard.importCustom") }}</span>
-            <span class="text-dropdown-item-text text-xs opacity-60">{{
+            <span class="text-dropdown-item-text text-xs">{{
               t("dashboard.importCustomDesc")
             }}</span>
           </div>
@@ -75,7 +75,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         >
           <div class="flex flex-col">
             <span>{{ t("dashboard.importTemplates") }}</span>
-            <span class="text-dropdown-item-text text-xs opacity-60">{{
+            <span class="text-dropdown-item-text text-xs">{{
               t("dashboard.importTemplatesDesc")
             }}</span>
           </div>
@@ -90,15 +90,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <div class="flex w-full items-center gap-2">
             <div class="flex min-w-0 flex-1 flex-col">
               <span>{{ t(`dashboard.${migration.labelKey}`) }}</span>
-              <span class="text-dropdown-item-text text-xs opacity-60">{{
+              <span class="text-dropdown-item-text text-xs">{{
                 t(`dashboard.${migration.descKey}`)
               }}</span>
             </div>
-            <OIcon
-              name="open-in-new"
-              size="xs"
-              class="text-dropdown-item-text shrink-0 opacity-60"
-            />
+            <OIcon name="open-in-new" size="xs" class="text-dropdown-item-text shrink-0" />
           </div>
         </ODropdownItem>
       </ODropdown>

@@ -127,8 +127,8 @@ function formatDelta(metric: MetricResult): string {
 // neutral case is a null delta (no data / no direction to show).
 function deltaColorClass(metric: MetricResult): string {
   if (metric.deltaPct === null) return "text-text-secondary";
-  if (metric.deltaPct > 0) return "text-error-600"; // rose → worse
-  if (metric.deltaPct < 0) return "text-success-600"; // fell → better
+  if (metric.deltaPct > 0) return "text-status-error-text"; // rose → worse
+  if (metric.deltaPct < 0) return "text-status-success-text"; // fell → better
   return "text-text-secondary";
 }
 

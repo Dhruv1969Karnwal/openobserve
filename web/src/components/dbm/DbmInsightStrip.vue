@@ -67,14 +67,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
       <span class="flex items-baseline gap-1.5 leading-tight">
         <span class="text-text-heading text-xs font-semibold">{{ titleOf(insight) }}</span>
-        <span class="text-text-secondary text-2xs">{{ sentenceOf(insight) }}</span>
+        <!-- The applied chip paints #39404a, where grey-400 secondary measures 4.15:1 — below AA. -->
+        <span
+          class="text-2xs"
+          :class="activeId === insight.id ? 'text-text-heading' : 'text-text-secondary'"
+          data-test="dbm-insight-sentence"
+        >
+          {{ sentenceOf(insight) }}
+        </span>
       </span>
 
       <!-- The affordance appears on hover rather than standing permanently, so
            a strip of five does not read as five buttons. -->
+      <!-- --color-text-link measured 3.03:1 (light O2 Lens) / 3.77:1 (dark O2 Pulse) on the applied chip's accent-active ground; the per-theme picked accent label is AA on it (6.73 / 5.24). -->
       <span
-        class="text-text-link text-2xs font-semibold opacity-0 transition-opacity group-hover:opacity-100 max-md:opacity-100"
+        class="text-button-ghost-primary-text text-2xs font-semibold opacity-0 transition-opacity group-hover:opacity-100 max-md:opacity-100"
         :class="activeId === insight.id ? 'opacity-100' : ''"
+        data-test="dbm-insight-affordance"
       >
         {{ affordanceOf(insight) }}
       </span>

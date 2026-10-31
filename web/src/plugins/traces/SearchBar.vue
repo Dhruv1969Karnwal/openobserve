@@ -57,7 +57,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               data-test="traces-service-graph-toggle"
               value="service-graph"
               size="sm"
-              :icon-right="!serviceGraphAccess.allowed ? 'lock' : undefined"
               :tooltip="
                 serviceGraphAccess.allowed && shouldHideToggleText
                   ? t('traces.serviceGraphTab')
@@ -327,7 +326,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 variant="ghost"
                 data-test="traces-search-bar-cancel-btn"
                 :title="t('search.cancel')"
-                class="bg-cancel-query-bg! text-button-primary-foreground! element-box-shadow h-[1.875rem]! w-[5.875rem]! ![border-radius:0.375rem_0_0_0.375rem] p-0 px-1! py-0! text-center text-xs! leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,_opacity_0.2s_ease]"
+                class="bg-cancel-query-bg! text-cancel-query-foreground! element-box-shadow h-[1.875rem]! w-[5.875rem]! ![border-radius:0.375rem_0_0_0.375rem] p-0 px-1! py-0! text-center text-xs! leading-4! font-medium! break-words whitespace-normal [transition:box-shadow_0.3s_ease,_opacity_0.2s_ease]"
                 @click="cancelQueryData"
                 >{{ t("search.cancel") }}</OButton
               >
@@ -368,7 +367,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     :disabled="isLoading"
                     :class="[
                       config.isEnterprise == 'true' && isLoading
-                        ? 'bg-cancel-query-bg! text-button-primary-foreground!'
+                        ? 'bg-cancel-query-bg! text-cancel-query-foreground!'
                         : 'bg-button-primary! text-button-primary-foreground! hover:ring-button-primary/70 hover:opacity-90 hover:ring-2',
                       '![border-radius:0_0.375rem_0.375rem_0]',
                     ]"

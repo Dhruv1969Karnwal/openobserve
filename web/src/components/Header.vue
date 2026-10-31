@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       >
         <OIcon name="menu" size="sm" class="size-5!" />
       </OButton>
-      <!-- LOGO SECTION: Displays custom or default OpenObserve logo -->
+      <!-- LOGO SECTION: Displays the enterprise custom logo, else the product wordmark -->
       <!-- Shows custom logo/text if configured in enterprise mode -->
       <div
         class="relative-position flex"
@@ -101,42 +101,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           />
         </a>
 
-        <!-- OpenObserve logo (shown alongside custom logo if configured) -->
+        <!-- Product wordmark (shown alongside custom logo if configured) -->
         <div
           v-if="store.state.zoConfig.custom_hide_self_logo == false"
           class="relative inline-flex min-h-10 items-center"
         >
           <a :href="homeUrl" @click.prevent="goToHome" class="inline-flex items-center">
-            <img
-              data-test="header-openobserve-logo"
-              class="openobserve-logo block h-8 max-w-37.5 cursor-pointer transition-opacity duration-200 hover:opacity-80"
-              :src="
-                getImageURL(
-                  isDark
-                    ? 'images/common/openobserve_latest_dark_2.svg'
-                    : 'images/common/openobserve_latest_light_2.svg',
-                )
-              "
-              :alt="raw('OpenObserve')"
+            <BrandWordmark
+              test-id="header-retrace-logo"
+              class="retrace-logo cursor-pointer transition-opacity duration-200 hover:opacity-80 motion-reduce:transition-none"
             />
           </a>
         </div>
       </div>
 
-      <!-- Default OpenObserve logo (when no custom logo) -->
+      <!-- Default product wordmark (when no custom logo) -->
       <div v-else class="relative-position relative inline-flex min-h-10 items-center">
         <a :href="homeUrl" @click.prevent="goToHome" class="inline-flex items-center">
-          <img
-            data-test="header-openobserve-logo"
-            class="openobserve-logo block h-8 max-w-37.5 cursor-pointer transition-opacity duration-200 hover:opacity-80"
-            :src="
-              getImageURL(
-                isDark
-                  ? 'images/common/openobserve_latest_dark_2.svg'
-                  : 'images/common/openobserve_latest_light_2.svg',
-              )
-            "
-            :alt="raw('OpenObserve')"
+          <BrandWordmark
+            test-id="header-retrace-logo"
+            class="retrace-logo cursor-pointer transition-opacity duration-200 hover:opacity-80 motion-reduce:transition-none"
           />
         </a>
       </div>
@@ -148,11 +132,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     <!-- RIGHT SIDE: Controls -->
     <div class="flex shrink-0 items-center justify-end gap-1 pe-3">
-      <!-- QUOTA WARNING SECTION: Shows warning when quota threshold is reached -->
-      <div
-        class="me-4 flex items-center gap-1 max-md:hidden"
-        v-if="store.state.organizationData.quotaThresholdMsg"
-      >
+      <!-- QUOTA WARNING SECTION: a plan upsell, so it rides the same policy as the edition CTA. -->
+      <div class="me-4 flex items-center gap-1 max-md:hidden" v-if="quotaUpsellVisible">
         <div type="warning" icon="cloud" class="bg-status-warning-bg rounded-default inline p-1.25">
           <OIcon name="warning" size="xs" class="text-warning" />{{
             store.state.organizationData.quotaThresholdMsg
@@ -191,9 +172,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </OButton>
 
         <!-- EDITION BADGE / UPGRADE BUTTON -->
-        <!-- Enterprise/Cloud: ghost-muted badge (informational, opens about dialog) -->
-        <!-- Open Source: primary CTA to drive upgrades -->
+        <!-- Hidden while PAID_FEATURE_POLICY is "hide": a single-edition
+             product does not sell an upgrade from its own header. -->
         <OButton
+          v-if="enterpriseDialogVisible"
           :variant="
             config.isEnterprise === 'true' || config.isCloud === 'true'
               ? 'outline-primary'
@@ -228,7 +210,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <!-- AI CHAT TOGGLE: Enterprise/Cloud feature to toggle AI chat panel.
            Leads the utility-icon cluster, set off by a separator from the
            org selector so it reads as the primary action in this group.
-           Shown locked (not hidden) in builds that don't unlock it. -->
+           Hidden outright in builds that don't unlock it. -->
           <template v-if="aiButtonVisible">
             <OButton
               variant="ghost"
@@ -236,7 +218,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               @click="toggleAIChat"
               data-test="menu-link-ai-item"
               :aria-label="t('menu.aiAssistant')"
-              class="group text-ai-accent! hover:shadow-ai-accent/35 dark:shadow-ai-accent/20 dark:hover:shadow-ai-accent/35 [background:var(--color-gradient-ai-subtle)]! [transition:background_0.3s_ease,box-shadow_0.3s_ease,color_0.3s_ease] hover:text-white! hover:shadow-md hover:[background:var(--color-gradient-ai)]! dark:text-white! dark:shadow-md dark:hover:shadow-md"
+              class="group text-ai-accent-text! hover:shadow-ai-accent/35 dark:shadow-ai-accent/20 dark:hover:shadow-ai-accent/35 [background:var(--color-gradient-ai-subtle)]! [transition:background_0.3s_ease,box-shadow_0.3s_ease,color_0.3s_ease] hover:shadow-md dark:text-white! dark:shadow-md dark:hover:shadow-md"
               :class="store.state.isAiChatEnabled ? 'ai-btn-active' : ''"
               @mouseenter="handleMouseEnter"
               @mouseleave="handleMouseLeave"
@@ -246,15 +228,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :src="getBtnLogo"
                 class="h-5 w-5 shrink-0 [transition:transform_0.6s_ease] group-hover:rotate-180 group-hover:brightness-0 group-hover:invert group-hover:[transition:filter_0.3s_ease]"
               />
-              <span
-                v-if="!aiAccess.allowed"
-                aria-hidden="true"
-                class="bg-surface-overlay border-surface-base absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border shadow-sm"
-              >
-                <OIcon name="lock" size="xs" class="text-warning-600 size-2.5!" />
-              </span>
               <OTooltip
-                v-if="aiAccess.allowed"
                 side="bottom"
                 align="center"
                 :content="t('menu.aiAssistant')"
@@ -505,10 +479,11 @@ import ThemeSwitcher from "./ThemeSwitcher.vue";
 import EnterpriseUpgradeDialog from "./EnterpriseUpgradeDialog.vue";
 import OrganizationSelector from "./OrganizationSelector.vue";
 import LinkedAccountsDialog from "./settings/LinkedAccountsDialog.vue";
+import BrandWordmark from "./BrandWordmark.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
-import { checkFeatureAccess } from "@/utils/enterpriseFeatures";
+import { checkFeatureAccess, hidesPaidFeatures } from "@/utils/enterpriseFeatures";
 import { readSlackOrgConfig } from "@/utils/slackSettings";
 import ODropdown from "@/lib/overlay/Dropdown/ODropdown.vue";
 import ODropdownItem from "@/lib/overlay/Dropdown/ODropdownItem.vue";
@@ -526,6 +501,7 @@ export default defineComponent({
     EnterpriseUpgradeDialog,
     OrganizationSelector,
     LinkedAccountsDialog,
+    BrandWordmark,
     OButton,
     OIcon,
     OTooltip,
@@ -706,8 +682,9 @@ export default defineComponent({
       event.stopPropagation();
     };
 
-    // AI chat toggle — shown locked (not hidden) in builds that don't unlock
-    // it. Same `ai_enabled`-is-an-admin-preference-not-an-upsell-target
+    // AI chat toggle — rendered on `aiAccess.visible` (see `aiButtonVisible`), so
+    // the shipped "hide" policy omits it and only a "lock" build shows it locked.
+    // Same `ai_enabled`-is-an-admin-preference-not-an-upsell-target
     // reasoning as QueryEditor.vue's floating AI icon: an entitled org that's
     // turned AI off still never sees the button at all.
     //
@@ -723,18 +700,31 @@ export default defineComponent({
       }),
     );
     const aiButtonVisible = computed(
-      () => !aiAccess.value.allowed || Boolean(props.store.state.zoConfig.ai_enabled),
+      () =>
+        aiAccess.value.visible &&
+        (!aiAccess.value.allowed || Boolean(props.store.state.zoConfig.ai_enabled)),
+    );
+
+    // The header's edition CTA is itself an upsell, so it follows the same
+    // policy as the features it advertises.
+    const enterpriseDialogVisible = computed(() => !hidesPaidFeatures);
+
+    // The quota banner's only action is "upgrade to pro", so it is an upsell too.
+    const quotaUpsellVisible = computed(
+      () => !hidesPaidFeatures && Boolean(props.store.state.organizationData.quotaThresholdMsg),
     );
 
     // The edition gate and the org's runtime switch both have to pass, as for Settings › Slack.
-    const linkedAccountsVisible = computed(
-      () =>
-        checkFeatureAccess("slack", {
-          isEnterprise: props.config.isEnterprise === "true",
-          isCloud: props.config.isCloud === "true",
-          rbac: props.store.state.zoConfig?.rbac_enabled !== false,
-        }).allowed && readSlackOrgConfig(props.store.state.zoConfig).enabled,
-    );
+    const linkedAccountsVisible = computed(() => {
+      const access = checkFeatureAccess("slack", {
+        isEnterprise: props.config.isEnterprise === "true",
+        isCloud: props.config.isCloud === "true",
+        rbac: props.store.state.zoConfig?.rbac_enabled !== false,
+      });
+      return (
+        access.visible && access.allowed && readSlackOrgConfig(props.store.state.zoConfig).enabled
+      );
+    });
     const showLinkedAccounts = ref(false);
 
     // Computed property for enterprise button text based on deployment type
@@ -743,6 +733,7 @@ export default defineComponent({
       const isCloud = props.config.isCloud === "true";
 
       if (isCloud) {
+        // The dialog this button opens advertises upstream's editions, so the label names upstream.
         return t("about.header_button.cloud_features", { product: raw("OpenObserve") });
       } else if (isEnterprise) {
         return t("about.header_button.enterprise_edition");
@@ -847,9 +838,11 @@ export default defineComponent({
       raw,
       getImageURL,
       enterpriseButtonText,
+      quotaUpsellVisible,
       ingestionQuotaPercentage,
       ingestionQuotaColor,
       showEnterpriseDialog,
+      enterpriseDialogVisible,
       showLanguageSubmenu,
       languageListRef,
       onLanguageRowSelect,

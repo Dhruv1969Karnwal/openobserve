@@ -281,7 +281,10 @@
                 <span v-else class="text-text-secondary">{{ ABSENT }}</span>
               </template>
               <template #cell-coverage="{ row }">
-                <span class="tabular-nums" :class="row.no_data ? 'text-warning font-semibold' : ''">
+                <span
+                  class="tabular-nums"
+                  :class="row.no_data ? 'text-status-warning-text font-semibold' : ''"
+                >
                   {{ formatCoverage(row.coverage) }}
                 </span>
               </template>

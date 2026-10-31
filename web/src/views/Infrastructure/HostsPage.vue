@@ -342,7 +342,11 @@ const sortColumnId = computed(() => {
 
 const tintClass = (value: number | null) => {
   const tint = utilizationTint(value);
-  return tint === "critical" ? "text-error font-medium" : tint === "warn" ? "text-warning" : "";
+  return tint === "critical"
+    ? "text-status-error-text font-medium"
+    : tint === "warn"
+      ? "text-status-warning-text"
+      : "";
 };
 
 // Bar tone reads the same utilizationTint as the number, so the two can never disagree.

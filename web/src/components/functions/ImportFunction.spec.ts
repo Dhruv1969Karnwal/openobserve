@@ -15,6 +15,16 @@
 
 import { flushPromises, mount } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
+
+// The component branches on `PAID_FEATURE_POLICY`; both sides are asserted below.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
+
 import { nextTick, ref, watch } from "vue";
 import { createStore } from "vuex";
 import { createRouter, createWebHistory } from "vue-router";
@@ -325,7 +335,7 @@ describe("ImportFunction", () => {
 
       // The controls are async components jsdom never mounts, so what is
       // asserted is the field the pane renders the name box and checkbox from.
-      expect(wrapper.vm.functionErrors.at(-1).map((e: any) => e.field)).toEqual(["name_exists"]);
+      expect(wrapper.vm.functionErrors.at(-1)?.map((e: any) => e.field)).toEqual(["name_exists"]);
     });
 
     it("imports under a new name when the clash is renamed away", async () => {
@@ -557,10 +567,23 @@ describe("ImportFunction", () => {
       expect(wrapper.vm.bodyLanguage(0)).toBe("vrl");
     });
 
-    // OSS builds cannot run JavaScript, so the option is shown locked (not
-    // hidden) but still selectable — picking it opens the upgrade dialog
-    // instead of trading this validation error for a server-side one.
-    it("offers a JavaScript option on OSS, locked via isJsAllowed", async () => {
+    // OSS builds cannot run JavaScript, so the option is absent under the shipped
+    // "hide" policy (offering a dead option only moves the error server-side); under
+    // "lock" it is listed and picking it opens the upgrade dialog instead of selecting.
+    it("offers no JavaScript option on OSS under the shipped hide policy", async () => {
+      setPaidFeaturePolicy("hide");
+      (config as any).isEnterprise = "false";
+      const wrapper = mountScreen();
+      await flushPromises();
+
+      // Listing it and refusing the selection only moved the error into a refused dialog.
+      expect(wrapper.vm.transTypeOptions.map((o: any) => o.value)).toEqual(["0"]);
+      expect(wrapper.vm.isJsAllowed).toBe(false);
+      resetPaidFeaturePolicy();
+    });
+
+    it("offers a locked JavaScript option on OSS under the lock policy", async () => {
+      setPaidFeaturePolicy("lock");
       (config as any).isEnterprise = "false";
       const wrapper = mountScreen();
       await flushPromises();
@@ -568,6 +591,7 @@ describe("ImportFunction", () => {
       const options = wrapper.vm.transTypeOptions;
       expect(options.map((o: any) => o.value)).toEqual(["0", "1"]);
       expect(wrapper.vm.isJsAllowed).toBe(false);
+      resetPaidFeaturePolicy();
     });
 
     it("offers an unlocked JavaScript option where the build can run it", async () => {
@@ -580,7 +604,9 @@ describe("ImportFunction", () => {
       expect(wrapper.vm.isJsAllowed).toBe(true);
     });
 
+    // Under "lock", JavaScript is listed and refused on selection, as in the Add form toggle.
     it("picking the locked JavaScript option opens the upgrade dialog instead of selecting it", async () => {
+      setPaidFeaturePolicy("lock");
       (config as any).isEnterprise = "false";
       const wrapper = mountScreen();
       await flushPromises();
@@ -589,6 +615,7 @@ describe("ImportFunction", () => {
       close();
       wrapper.vm.updateTransType("1", 0);
       expect(isOpen.value).toBe(true);
+      resetPaidFeaturePolicy();
     });
 
     it("takes unusable params from the params box", async () => {
@@ -625,7 +652,7 @@ describe("ImportFunction", () => {
       // what is asserted is the pair of fields the pane renders them from.
       // Language first: it is the smaller control and it decides how the body
       // below it is read.
-      expect(wrapper.vm.functionErrors.at(-1).map((e: any) => e.field)).toEqual([
+      expect(wrapper.vm.functionErrors.at(-1)?.map((e: any) => e.field)).toEqual([
         "trans_type",
         "function_body",
       ]);
@@ -894,7 +921,7 @@ describe("ImportFunction", () => {
 
       // Previously invisible to validation, so it went out as transType 0.
       expect(mockCreate).not.toHaveBeenCalled();
-      expect(wrapper.vm.functionErrors.at(-1).map((e: any) => e.field)).toContain("trans_type");
+      expect(wrapper.vm.functionErrors.at(-1)?.map((e: any) => e.field)).toContain("trans_type");
     });
 
     it("opens the language control on the snake_case value it found", async () => {

@@ -1005,7 +1005,8 @@ import { templatesQuery } from "@/services/alert_templates.queries";
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import analytics from "@/services/product_analytics";
-import config from "@/aws-exports";
+import { useAnomalyLibraryAccess } from "@/composables/alerts/useAlertLibrary";
+import { resolveAlertListTab } from "@/utils/alerts/alertTabs";
 import ImportAlert from "@/components/alerts/ImportAlert.vue";
 import { getImageURL, getUUID, verifyOrganizationStatus } from "@/utils/zincutils";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -1304,28 +1305,34 @@ export default defineComponent({
     // is not sufficient — an enterprise UI can be pointed at an OSS backend)
     // AND the runtime toggle the backend also exposes
     // (O2_ANOMALY_DETECTION_DISABLED, surfaced as anomaly_detection_enabled).
-    // Only the entitlement half is a lockable upsell; an entitled build whose
-    // admin has turned the runtime toggle off still never sees the tab at all
-    // — same reasoning as RBAC's own enabled/disabled split.
-    const anomalyDetectionEntitled = computed(
-      () => store.state.zoConfig.build_type !== "opensource" && config.isEnterprise === "true",
-    );
-    const anomalyDetectionTabVisible = computed(
-      () =>
-        !anomalyDetectionEntitled.value || store.state.zoConfig.anomaly_detection_enabled === true,
-    );
-    const isAnomalyDetectionEnabled = computed(
-      () =>
-        anomalyDetectionEntitled.value && store.state.zoConfig.anomaly_detection_enabled === true,
-    );
+    // `useAnomalyLibraryAccess` is the shared enabled/locked/hidden state
+    // machine for exactly that pair; the tab renders on anything but hidden.
+    const anomalyLibraryAccess = useAnomalyLibraryAccess();
+    const isAnomalyDetectionEnabled = computed(() => anomalyLibraryAccess.value === "enabled");
+    const anomalyDetectionTabVisible = computed(() => anomalyLibraryAccess.value !== "hidden");
     const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 
     // Initialize activeTab from URL query parameter, default to "all".
     // Prevent forcing anomalyDetection tab when the feature is not available.
-    const rawTab = (router.currentRoute.value.query.tab as string) || "all";
+    // The restore is a CLOSED SET now, not a one-value special case —
+    // `?tab=incidents` (a retired tab) or any garbage used to be adopted
+    // verbatim, which switched row filtering off with no tab lit and then got
+    // re-persisted by the `activeTab` watcher below.
+    const rawTab = router.currentRoute.value.query.tab;
     const activeTab = ref(
-      rawTab === "anomalyDetection" && !isAnomalyDetectionEnabled.value ? "all" : rawTab,
+      resolveAlertListTab(rawTab, {
+        anomalyDetectionEnabled: isAnomalyDetectionEnabled.value,
+      }),
     );
+    if (rawTab !== undefined && rawTab !== activeTab.value) {
+      // The coercion has to reach the URL as well, or the garbage param sticks
+      // (that watcher fires on CHANGE only, and this component is keep-alive, so
+      // setup never re-runs on revisit). `replace`, never `push`: a normalization
+      // must not add a history entry the Back button has to step over twice.
+      void router.replace({
+        query: { ...router.currentRoute.value.query, tab: activeTab.value },
+      });
+    }
 
     const filteredResults: Ref<any[]> = ref([]);
 
@@ -2306,10 +2313,6 @@ export default defineComponent({
       if (!refreshResults) {
         return;
       }
-      // When incidents tab is active, skip filtering (IncidentList handles its own data)
-      if (activeTab.value === "incidents") {
-        return;
-      }
       if (activeTab.value === "scheduled") {
         // Scheduled: is_real_time is falsy (false / undefined / null) — anomaly rows ("anomaly") excluded
         filteredResults.value = allAlerts.value.filter(
@@ -2341,9 +2344,20 @@ export default defineComponent({
         openUpgradeDialog();
         return;
       }
-      activeTab.value = tab;
+      // Same closed set the URL restore uses, enforced at the sink as well: today
+      // only the rendered `OTabs` values reach this handler, but the set is
+      // declared once in `alertTabs.ts` precisely so a caller cannot introduce a
+      // value that renders nothing and re-persists itself through the watcher.
+      const resolvedTab = resolveAlertListTab(tab, {
+        anomalyDetectionEnabled: isAnomalyDetectionEnabled.value,
+      });
+      activeTab.value = resolvedTab;
       const apiType =
-        tab === "realTime" ? "realtime" : tab === "anomalyDetection" ? "anomaly_detection" : tab;
+        resolvedTab === "realTime"
+          ? "realtime"
+          : resolvedTab === "anomalyDetection"
+            ? "anomaly_detection"
+            : resolvedTab;
       await getAlertsFn(store, activeFolderId.value, "", true, apiType);
     };
 
@@ -4016,7 +4030,6 @@ export default defineComponent({
       bulkDeleteAlerts,
       confirmBulkDelete,
       bulkDeleteLoading,
-      config,
       isCompactToolbar,
       isAnomalyDetectionEnabled,
       refreshAlerts,

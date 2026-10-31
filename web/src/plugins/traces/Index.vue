@@ -86,7 +86,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <div class="h-full overflow-hidden">
             <!-- Service Graph Tab Content -->
             <div
-              v-if="activeTab === 'service-graph' && config.isEnterprise == 'true'"
+              v-if="activeTab === 'service-graph' && serviceGraphAllowed"
               class="h-full overflow-hidden"
             >
               <ServiceGraph
@@ -338,6 +338,7 @@ import { logsUtils } from "@/composables/useLogs/logsUtils";
 import { useTracesTableColumns } from "./composables/useTracesTableColumns";
 import { tracesRowNavAnnouncement } from "./composables/tracesRowNav";
 import { resolveTraceSearchMode, type TraceSearchMode } from "@/ts/interfaces/traces/trace.types";
+import { buildFeatureGateContext, checkFeatureAccess } from "@/utils/enterpriseFeatures";
 import { isRangeSelectionCurrent } from "@/plugins/traces/metrics/latencyHeatmap";
 import { isLLMTrace } from "@/utils/llmUtils";
 import ODialog from "@/lib/overlay/Dialog/ODialog.vue";
@@ -364,7 +365,7 @@ interface TracesSavedView {
   stream: { label: string; value: string };
   editorValue: string;
   datetime: { type: string; relativeTimePeriod: string; startTime: number; endTime: number };
-  searchMode: "spans" | "traces";
+  searchMode: TraceSearchMode;
   sortBy: string;
   sortOrder: string;
   selectedFields?: string[];
@@ -376,10 +377,16 @@ const SearchResult = defineAsyncComponent(() => import("./SearchResult.vue"));
 const ServiceGraph = defineAsyncComponent(() => import("./ServiceGraph.vue"));
 const ServicesCatalog = defineAsyncComponent(() => import("./ServicesCatalog.vue"));
 
-const supportedTraceSearchMode = (value: unknown): TraceSearchMode =>
-  resolveTraceSearchMode(value, config.isEnterprise === "true");
-
 const store = useStore();
+
+// The entitlement behind the paid trace modes comes from the registry, the same
+// answer the tab's own v-if gives; a raw `config` read here could drift from it.
+const serviceGraphAllowed = computed(
+  () => checkFeatureAccess("enterprise", buildFeatureGateContext(store.state.zoConfig)).allowed,
+);
+
+const supportedTraceSearchMode = (value: unknown): TraceSearchMode =>
+  resolveTraceSearchMode(value, serviceGraphAllowed.value);
 const activeTab = computed(() => {
   if (searchObj.meta.searchMode === "service-graph") return "service-graph";
   if (searchObj.meta.searchMode === "services-catalog") return "services-catalog";
@@ -1567,7 +1574,13 @@ const onErrorOnlyToggled = (value: boolean) => {
 
 // Handler for Search Mode toggle (Service Graph / Traces / Spans / Services Catalog)
 const onSearchModeChange = (mode: TraceSearchMode) => {
-  searchObj.meta.searchMode = mode;
+  // Defense in depth, mirroring logs/SearchBar.vue's onSearchModeChange: every
+  // caller resolves through `supportedTraceSearchMode` first (the URL restore, the
+  // route watcher, the tab control's locked-tab refusal), but THIS is the sink that
+  // writes the paid-capability field, so it resolves again rather than trusting its
+  // callers to have done so. Control flow below still branches on the requested
+  // mode, so an entitled `service-graph` switch behaves exactly as before.
+  searchObj.meta.searchMode = supportedTraceSearchMode(mode);
   if (mode === "service-graph" || mode === "services-catalog") return;
   if (
     mode === "traces" &&
@@ -2003,7 +2016,10 @@ const onApplySavedView = async (view: TracesSavedView) => {
     if (seq !== savedViewApplySeq) return;
   }
 
-  searchObj.meta.searchMode = view.searchMode;
+  // The view payload is client-writable server data: restore the tab through the
+  // same resolver the URL paths use, or a non-enterprise apply desyncs state and URL.
+  const searchMode = supportedTraceSearchMode(view.searchMode);
+  searchObj.meta.searchMode = searchMode;
   searchObj.data.datetime = { ...searchObj.data.datetime, ...view.datetime };
   await syncSavedViewDateTime(view.datetime);
   if (seq !== savedViewApplySeq) return;
@@ -2015,10 +2031,10 @@ const onApplySavedView = async (view: TracesSavedView) => {
   // A zero-hit search never rebuilds the columns, so the view's columns are applied here.
   searchObj.data.stream.selectedFields = [...(view.selectedFields ?? [])];
   rebuildColumns();
-  updatedLocalLogFilterField(view.searchMode);
+  updatedLocalLogFilterField(searchMode);
 
   // getUrlQueryParams copies trace_id/span_id from the route, which would reopen a trace.
-  const query = { ...router.currentRoute.value.query, tab: view.searchMode };
+  const query = { ...router.currentRoute.value.query, tab: searchMode };
   delete query.trace_id;
   delete query.span_id;
   await router.replace({ query });
@@ -2124,8 +2140,10 @@ watch(
 
 // Handler for service graph view traces event
 const handleServiceGraphViewTraces = (data: any) => {
-  // Switch to search tab
-  searchObj.meta.searchMode = data.mode;
+  // Switch to search tab. Same defense in depth as `onSearchModeChange`: this
+  // child emit is only reachable from the entitled Service Graph view, and the
+  // payload's own mode is not trusted by the sink that writes it.
+  searchObj.meta.searchMode = supportedTraceSearchMode(data.mode);
 
   // Set the selected stream in dropdown
   if (data.stream) {

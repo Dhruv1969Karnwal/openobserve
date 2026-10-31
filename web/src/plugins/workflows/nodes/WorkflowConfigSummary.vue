@@ -167,7 +167,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <p
           v-if="destinationMissing"
           data-test="workflow-config-summary-destination-missing"
-          class="text-text-warning text-sm"
+          class="text-status-warning-text text-sm"
         >
           {{ t("workflow.results.destinationMissing") }}
         </p>

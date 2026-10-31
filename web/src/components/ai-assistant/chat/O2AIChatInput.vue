@@ -58,7 +58,7 @@ const forwardChatInput = (instance: Element | ComponentPublicInstance | null) =>
           :aria-label="t('common.remove')"
           variant="ghost"
           size="icon-xs-circle"
-          class="image-remove-btn bg-status-negative! hover:bg-status-negative! absolute! -top-1.5! -right-1.5! z-10 h-5! min-h-5! w-5! min-w-5! p-0!"
+          class="image-remove-btn bg-status-negative! hover:bg-status-negative! text-on-status-fill-text! absolute! -top-1.5! -right-1.5! z-10 h-5! min-h-5! w-5! min-w-5! p-0!"
           @click.stop="emit('remove-image', index)"
         >
           <OIcon name="close" size="xs" />
@@ -153,7 +153,7 @@ const forwardChatInput = (instance: Element | ComponentPublicInstance | null) =>
           @click="emit('cancel')"
           variant="ghost"
           size="icon-xs-circle"
-          class="stop-button shadow-status-negative/30! hover:shadow-status-negative/40! active:shadow-status-negative/30! bg-gradient-danger! hover:bg-gradient-danger-hover! shadow-lg! [transition:all_0.3s_ease]! hover:-translate-y-px! hover:shadow-lg! active:translate-y-0! active:shadow-md!"
+          class="stop-button text-on-status-fill-text! shadow-status-negative/30! hover:shadow-status-negative/40! active:shadow-status-negative/30! bg-gradient-danger! hover:bg-gradient-danger-hover! shadow-lg! [transition:all_0.3s_ease]! hover:-translate-y-px! hover:shadow-lg! active:translate-y-0! active:shadow-md!"
         >
           <OIcon name="stop" size="sm" />
         </OButton>

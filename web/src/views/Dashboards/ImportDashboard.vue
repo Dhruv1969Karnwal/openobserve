@@ -181,7 +181,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   >
                     <span
                       v-if="errorMessage.field == 'dashboard_title'"
-                      class="text-status-negative"
+                      class="text-status-error-text"
                       data-test="dashboard-import-error-title-message"
                     >
                       {{ errorMessage.message }}
@@ -201,7 +201,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </span>
                     <span
                       v-else-if="errorMessage.field == 'stream_type'"
-                      class="text-status-negative"
+                      class="text-status-error-text"
                     >
                       {{ errorMessage.message }}
                       <div class="w-75">
@@ -224,7 +224,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                     <span
                       v-else-if="errorMessage.field == 'dashboard_validation'"
-                      class="text-status-negative"
+                      class="text-status-error-text"
                       data-test="dashboard-import-error-validation-message"
                     >
                       {{ errorMessage.message }}
@@ -245,7 +245,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <div v-for="(importResult, index) in filesImportResults" :key="'file-' + index">
                   <div
                     v-if="importResult.status == 'rejected'"
-                    class="error-item text-status-negative py-1.25 text-sm"
+                    class="error-item text-status-error-text py-1.25 text-sm"
                     data-test="dashboard-import-file-rejected"
                   >
                     <code v-if="importResult?.reason?.file" class="bg-surface-panel p-0.75">{{

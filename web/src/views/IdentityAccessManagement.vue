@@ -141,6 +141,7 @@ const sectionGroups = computed<SectionHubGroup[]>(() => {
           description: t("iam.groupsDesc"),
           icon: "group",
           to: { name: "groups", query: orgQuery.value },
+          visible: rbacAccess.visible,
           locked: !rbacAccess.allowed,
           lockedMessage: rbacAccess.message,
           lockedShowUpgradeCta: rbacAccess.ctaRelevant,
@@ -152,6 +153,7 @@ const sectionGroups = computed<SectionHubGroup[]>(() => {
           description: t("iam.rolesDesc"),
           icon: "shield",
           to: { name: "roles", query: orgQuery.value },
+          visible: rbacAccess.visible,
           locked: !rbacAccess.allowed,
           lockedMessage: rbacAccess.message,
           lockedShowUpgradeCta: rbacAccess.ctaRelevant,
@@ -163,9 +165,8 @@ const sectionGroups = computed<SectionHubGroup[]>(() => {
           description: t("iam.quotaDesc"),
           icon: "speed",
           to: { name: "quota", query: orgQuery.value },
-          // Meta-org is a cluster-topology restriction, not an edition
-          // upsell — stays a hide, not a lock.
-          visible: meta,
+          // Meta-org is a cluster-topology restriction, not an edition upsell — stays a hide, not a lock.
+          visible: meta && rbacAccess.visible,
           locked: !rbacAccess.allowed,
           lockedMessage: rbacAccess.message,
           lockedShowUpgradeCta: rbacAccess.ctaRelevant,

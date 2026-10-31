@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="14 72 96 96" role="img" aria-label="Retrace.ai">
+  <!-- Tab-icon rendering of the BrandWordmark lock-up: the viewBox and glyph path are shared with the in-app mark and pinned by brandAssets.spec.ts. The plate radius/stroke and the fixed light-plate / dark-glyph polarity are deliberate — a static icon cannot follow the app's theme, so it ships one polarity while the in-app mark stays theme-reactive. Literal colours because a standalone favicon document cannot read the app's CSS custom properties. -->
+  <rect x="16" y="74" width="92" height="92" rx="13" fill="#f5f6f7" stroke="#bebebe" stroke-width="4" />
+  <path
+    d="M36 120h14l10-26 12 52 10-26h16"
+    fill="none"
+    stroke="#0c0d0f"
+    stroke-width="10"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

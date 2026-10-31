@@ -64,7 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
         <div
           v-else
-          class="text-warning flex min-w-0 flex-1 flex-wrap items-center gap-1.5 ps-2 text-left max-md:min-w-32"
+          class="text-status-warning-text flex min-w-0 flex-1 flex-wrap items-center gap-1.5 ps-2 text-left max-md:min-w-32"
           data-test="logs-search-result-title"
           :data-search-state="
             searchObj.loading || searchObj.loadingCounter ? 'loading' : 'complete'
@@ -932,6 +932,7 @@ import { buildChipDimensionsFromFilters } from "@/services/service_streams";
 import { buildWorkloadChipDimensions } from "@/composables/useMetricSubjectButtons";
 import { extractSeverity } from "@/utils/sourceEventSeverity";
 import config from "@/aws-exports";
+import { buildFeatureGateContext, checkFeatureAccess } from "@/utils/enterpriseFeatures";
 import ORefreshButton from "@/lib/core/RefreshButton/ORefreshButton.vue";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
@@ -3045,13 +3046,15 @@ export default defineComponent({
     showActionLabels() {
       return this.containerWidth >= 900;
     },
+    // Same `searchJobInspector` registry key as the route this button opens; the
+    // backend `search_inspector_enabled` flag is the caller-side conjunct.
     showInspectBtn() {
       return (
         this.searchObj.data?.queryResults?.hits?.length > 0 &&
         this.searchObj.data.lastSearchTraceId &&
-        this.config.isEnterprise == "true" &&
-        this.config.isCloud == "false" &&
-        this.store.state.zoConfig.search_inspector_enabled
+        checkFeatureAccess("searchJobInspector", buildFeatureGateContext(this.store.state.zoConfig))
+          .visible &&
+        !!this.store.state.zoConfig.search_inspector_enabled
       );
     },
     showWrapBtn() {

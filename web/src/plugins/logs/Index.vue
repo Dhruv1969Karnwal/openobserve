@@ -675,7 +675,12 @@ import { hasLineComment } from "@/utils/query/sqlComments";
 import useNotifications from "@/composables/useNotifications";
 import { checkIfConfigChangeRequiredApiCallOrNot } from "@/utils/dashboard/checkConfigChangeApiCall";
 import SearchBar from "@/plugins/logs/SearchBar.vue";
-import { type ActivationState, PageType } from "@/ts/interfaces/logs.ts";
+import {
+  type ActivationState,
+  PageType,
+  resolveLogsVisualizeToggle,
+} from "@/ts/interfaces/logs.ts";
+import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
 import { isWebSocketEnabled, isStreamingEnabled } from "@/utils/zincutils";
 import { allSelectionFieldsHaveAlias } from "@/utils/query/visualizationUtils";
 import { shouldReloadStreamFieldsForVisualize } from "@/utils/logs/visualizeStreamFields";
@@ -1461,7 +1466,10 @@ export default defineComponent({
         if (urlToggle === "visualize") {
           isInitialVisualizeRestore.value = true;
         }
-        searchObj.meta.logsVisualizeToggle = urlToggle;
+        searchObj.meta.logsVisualizeToggle = resolveLogsVisualizeToggle(
+          urlToggle,
+          checkFeatureAccess("logPatterns", buildFeatureGateContext(store.state.zoConfig)).allowed,
+        );
       }
 
       // Always setup logs tab on mount

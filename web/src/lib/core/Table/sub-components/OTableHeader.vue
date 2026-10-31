@@ -667,7 +667,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
               type="button"
               :class="[
                 'rounded-default focus-visible:ring-focus-ring-accent flex min-w-0 items-center gap-1 text-start focus-visible:ring-2 focus-visible:outline-none',
-                sortDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+                sortDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
                 isFillRemainingColumn(header) ? 'flex-none' : 'flex-1',
                 headerAlignClass(header),
               ]"
@@ -724,10 +724,11 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                 />
                 <OIcon
                   v-else
-                  name="unfold-more"
+                  :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  class="opacity-40"
+                  :class="sortDisabled ? 'text-text-secondary' : 'opacity-40'"
                   data-test="o2-table-sort-icon-inactive"
+                  :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
                 />
               </span>
@@ -774,7 +775,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                 type="button"
                 :class="[
                   'rounded-default focus-visible:ring-focus-ring-accent flex shrink-0 items-center focus-visible:ring-2 focus-visible:outline-none',
-                  sortDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+                  sortDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
                 ]"
                 data-test="o2-table-th-sort-trigger"
                 :aria-labelledby="headerLabelId(header)"
@@ -802,10 +803,11 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                 />
                 <OIcon
                   v-else
-                  name="unfold-more"
+                  :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  class="opacity-40"
+                  :class="sortDisabled ? 'text-text-secondary' : 'opacity-40'"
                   data-test="o2-table-sort-icon-inactive"
+                  :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
                 />
               </button>
@@ -1114,7 +1116,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
               type="button"
               :class="[
                 'rounded-default focus-visible:ring-focus-ring-accent flex items-center gap-1 overflow-hidden text-start whitespace-nowrap focus-visible:ring-2 focus-visible:outline-none',
-                sortDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+                sortDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
                 isFillRemainingColumn(header) ? 'flex-none' : 'flex-1',
                 headerAlignClass(header),
               ]"
@@ -1168,10 +1170,11 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                 />
                 <OIcon
                   v-else
-                  name="unfold-more"
+                  :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  class="shrink-0 opacity-40"
+                  :class="sortDisabled ? 'text-text-secondary shrink-0' : 'shrink-0 opacity-40'"
                   data-test="o2-table-sort-icon-inactive"
+                  :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
                 />
               </template>
@@ -1201,7 +1204,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                 type="button"
                 :class="[
                   'rounded-default focus-visible:ring-focus-ring-accent flex shrink-0 items-center focus-visible:ring-2 focus-visible:outline-none',
-                  sortDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+                  sortDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
                 ]"
                 data-test="o2-table-th-sort-trigger"
                 :aria-labelledby="headerLabelId(header)"
@@ -1229,10 +1232,11 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                 />
                 <OIcon
                   v-else
-                  name="unfold-more"
+                  :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  class="shrink-0 opacity-40"
+                  :class="sortDisabled ? 'text-text-secondary shrink-0' : 'shrink-0 opacity-40'"
                   data-test="o2-table-sort-icon-inactive"
+                  :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
                 />
               </button>

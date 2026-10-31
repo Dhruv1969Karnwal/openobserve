@@ -40,9 +40,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       data-test="llm-insights"
       all-agents
       agent-skeleton
-      :show-agent-toggle="genAiAgentMappingAccess.allowed"
+      :show-agent-toggle="genAiAgentMappingAccess.visible && genAiAgentMappingAccess.allowed"
       :agent-toggle-locked-message="
-        !genAiAgentMappingAccess.allowed ? genAiAgentMappingAccess.message : undefined
+        genAiAgentMappingAccess.visible ? genAiAgentMappingAccess.message : undefined
       "
       :show-version="!compareMode"
       :labels="{
@@ -80,11 +80,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             {{ t("traces.lLMInsightsDashboard.compareEntry") }}
           </OButton>
         </OTooltip>
-        <!-- OSS can't reach Agent mode at all, so `canCompare` (which needs
-             real agent-version data) is never meaningful here — show the
-             entry locked instead of hiding it, same treatment as the Agent
-             toggle above. -->
-        <template v-else-if="!genAiAgentMappingAccess.allowed && !compareMode">
+        <!-- Under "hide" the compare entry is dropped with the rest of the gated module; a locked button here would open a refused dialog. -->
+        <template
+          v-else-if="
+            !genAiAgentMappingAccess.allowed && genAiAgentMappingAccess.visible && !compareMode
+          "
+        >
           <OButton
             variant="outline"
             size="sm"

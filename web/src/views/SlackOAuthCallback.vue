@@ -56,7 +56,7 @@ onMounted(() => {
       <div v-else class="text-text-secondary flex items-center gap-3 text-sm">
         <OSpinner size="sm" />
         <span>{{
-          t("alert_destinations.slackOAuth.callbackWorking", { product: raw("OpenObserve") })
+          t("alert_destinations.slackOAuth.callbackWorking", { product: raw("Retrace.ai") })
         }}</span>
       </div>
     </div>

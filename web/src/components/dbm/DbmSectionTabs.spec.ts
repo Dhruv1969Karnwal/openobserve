@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { mount } from "@vue/test-utils";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import i18n from "@/locales";
 
@@ -41,6 +41,32 @@ vi.mock("vue-router", () => ({
 // plain const here is still in its TDZ when the factory runs.
 const mockConfig = vi.hoisted(() => ({ isEnterprise: "true" }));
 vi.mock("@/aws-exports", () => ({ default: mockConfig }));
+
+// Flip for the lock-simulated checkFeatureAccess below; the shipped constant is
+// fixed at module load, so a "lock" build is simulated at the consumer boundary
+// (same pattern as SearchBar.paidAffordances.spec.ts).
+const policy = vi.hoisted(() => ({ lockSim: false }));
+const { openUpgradeDialog } = vi.hoisted(() => ({ openUpgradeDialog: vi.fn() }));
+
+vi.mock("@/composables/useEnterpriseUpgradeDialog", () => ({
+  useEnterpriseUpgradeDialog: () => ({
+    isOpen: { value: false },
+    open: (...args: unknown[]) => openUpgradeDialog(...args),
+    close: () => undefined,
+  }),
+}));
+
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/enterpriseFeatures")>();
+  return {
+    ...actual,
+    checkFeatureAccess: (key: unknown, ctx: unknown) => {
+      const access = actual.checkFeatureAccess(key as never, ctx as never);
+      if (!policy.lockSim || access.allowed || key !== "enterprise") return access;
+      return { ...access, visible: true };
+    },
+  };
+});
 
 const mountAt = (name: string, query: Record<string, unknown> = {}) => {
   currentRoute = { name, query };
@@ -457,17 +483,21 @@ describe("DbmSectionTabs", () => {
         .filter((tab) => tab.attributes("aria-disabled") === "true")
         .map((tab) => tab.attributes("data-test"));
 
-    it("disables deadlocks, blocked and table health on an OSS build", () => {
+    const offeredKeys = (wrapper: ReturnType<typeof mountAt>) =>
+      tabsOf(wrapper).map((tab) => tab.attributes("data-test"));
+
+    // PAID_FEATURE_POLICY is "hide": the three tabs the OSS backend refuses are
+    // dropped from the strip rather than parked on it as inert furniture.
+    it("omits deadlocks, blocked and table health on an OSS build", () => {
       mockConfig.isEnterprise = "false";
       const wrapper = mountAt("dbmDatabases");
 
-      // All eight still RENDER — disabled, not hidden.
-      expect(tabsOf(wrapper)).toHaveLength(8);
-      expect(disabledKeys(wrapper)).toEqual([
-        "dbm-section-tab-deadlocks",
-        "dbm-section-tab-blocked",
-        "dbm-section-tab-tableHealth",
-      ]);
+      expect(tabsOf(wrapper)).toHaveLength(5);
+      const offered = offeredKeys(wrapper);
+      expect(offered).not.toContain("dbm-section-tab-deadlocks");
+      expect(offered).not.toContain("dbm-section-tab-blocked");
+      expect(offered).not.toContain("dbm-section-tab-tableHealth");
+      expect(disabledKeys(wrapper)).toHaveLength(0);
     });
 
     it("leaves every tab enabled on an enterprise build", () => {
@@ -486,25 +516,24 @@ describe("DbmSectionTabs", () => {
       "treats isEnterprise=%p as OSS — only the literal string true unlocks",
       (value) => {
         mockConfig.isEnterprise = value;
-        expect(disabledKeys(mountAt("dbmDatabases"))).toHaveLength(3);
+        const offered = offeredKeys(mountAt("dbmDatabases"));
+        expect(offered).toHaveLength(5);
+        expect(offered).not.toContain("dbm-section-tab-deadlocks");
       },
     );
 
-    /** A locked tab must say WHY it is locked and what unlocks it. */
-    it("explains the upgrade path on a locked tab", () => {
-      mockConfig.isEnterprise = "false";
-      const hint = mountAt("dbmDatabases")
-        .find("[data-test='dbm-section-tab-deadlocks']")
-        .findComponent({ name: "OTooltip" })
-        .props("content") as string;
-      expect(hint).toContain("Enterprise");
-    });
-
-    /** The lock is the visual cue; without it a disabled tab just reads as broken. */
-    it("marks a locked tab with a lock icon", () => {
+    /** Nothing is parked on the strip with an upsell tooltip behind it. */
+    it("offers no upgrade-path hint on an OSS build", () => {
       mockConfig.isEnterprise = "false";
       const wrapper = mountAt("dbmDatabases");
-      expect(wrapper.find("[data-test='dbm-section-tab-lock-deadlocks']").exists()).toBe(true);
+      expect(wrapper.find("[data-test='dbm-section-tab-deadlocks']").exists()).toBe(false);
+    });
+
+    /** A hidden tab leaves no lock affordance either — there is no dead tab. */
+    it("renders no lock affordance for a gated tab on an OSS build", () => {
+      mockConfig.isEnterprise = "false";
+      const wrapper = mountAt("dbmDatabases");
+      expect(wrapper.find("[data-test='dbm-section-tab-lock-deadlocks']").exists()).toBe(false);
       expect(wrapper.find("[data-test='dbm-section-tab-lock-queries']").exists()).toBe(false);
     });
 
@@ -538,6 +567,85 @@ describe("DbmSectionTabs", () => {
       mockConfig.isEnterprise = "false";
       const wrapper = mountAt("dbmDatabases");
       await selectTab(wrapper, "deadlocks");
+      expect(push).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * With the policy flipped to "lock", the gated tabs come back
+   * visible — and a DOM-disabled trigger swallows the click, which is exactly
+   * how the dead-click was born. A locked tab must therefore stay clickable
+   * and route its click to the upgrade dialog; the shipped hide build must
+   * keep omitting the tabs entirely.
+   */
+  describe("lock policy contract", () => {
+    const DESCENDANT_PREFIXES = [
+      "dbm-section-tab-badge-",
+      "dbm-section-tab-vantage-",
+      "dbm-section-tab-lock-",
+    ];
+
+    const tabsOf = (wrapper: ReturnType<typeof mountAt>) =>
+      wrapper.findAll("[data-test^='dbm-section-tab-']").filter((tab) => {
+        const name = tab.attributes("data-test") ?? "";
+        return !DESCENDANT_PREFIXES.some((prefix) => name.startsWith(prefix));
+      });
+
+    beforeEach(() => {
+      policy.lockSim = true;
+      mockConfig.isEnterprise = "false";
+      openUpgradeDialog.mockClear();
+    });
+
+    afterEach(() => {
+      policy.lockSim = false;
+    });
+
+    it("renders the gated tabs visible-but-locked instead of dropping them", () => {
+      const wrapper = mountAt("dbmDatabases");
+      expect(tabsOf(wrapper)).toHaveLength(8);
+      expect(wrapper.find("[data-test='dbm-section-tab-lock-deadlocks']").exists()).toBe(true);
+      expect(wrapper.find("[data-test='dbm-section-tab-lock-blocked']").exists()).toBe(true);
+      expect(wrapper.find("[data-test='dbm-section-tab-lock-tableHealth']").exists()).toBe(true);
+    });
+
+    /** A disabled trigger eats the click before any handler runs — so it must not be disabled. */
+    it("keeps the locked tabs clickable so their click can reach the dialog", () => {
+      const wrapper = mountAt("dbmDatabases");
+      expect(
+        wrapper.find("[data-test='dbm-section-tab-deadlocks']").attributes("aria-disabled"),
+      ).toBeUndefined();
+    });
+
+    it("opens the upgrade dialog when a locked tab is clicked, without navigating", async () => {
+      const wrapper = mountAt("dbmDatabases");
+      await selectTab(wrapper, "deadlocks");
+      expect(openUpgradeDialog).toHaveBeenCalledTimes(1);
+      expect(push).not.toHaveBeenCalled();
+    });
+
+    it("still navigates the ungated tabs under the lock build", async () => {
+      const wrapper = mountAt("dbmDatabases");
+      await selectTab(wrapper, "queries");
+      expect(push).toHaveBeenCalledWith({ name: "dbmQueries", query: {} });
+      expect(openUpgradeDialog).not.toHaveBeenCalled();
+    });
+
+    it("restores live navigation on an entitled lock build", async () => {
+      mockConfig.isEnterprise = "true";
+      const wrapper = mountAt("dbmQueries");
+      await selectTab(wrapper, "deadlocks");
+      expect(push).toHaveBeenCalledWith({ name: "dbmDeadlocks", query: {} });
+      expect(openUpgradeDialog).not.toHaveBeenCalled();
+    });
+
+    /** The shipped direction: hide omits, and the dialog never fires for a non-rendered tab. */
+    it("shows no locked tab and opens no dialog on the shipped hide build", async () => {
+      policy.lockSim = false;
+      const wrapper = mountAt("dbmDatabases");
+      expect(wrapper.find("[data-test='dbm-section-tab-deadlocks']").exists()).toBe(false);
+      await selectTab(wrapper, "deadlocks");
+      expect(openUpgradeDialog).not.toHaveBeenCalled();
       expect(push).not.toHaveBeenCalled();
     });
   });

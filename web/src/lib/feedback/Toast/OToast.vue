@@ -61,8 +61,8 @@ const badgeColorClasses: Record<NonNullable<ToastProps["variant"]>, string> = {
   success: "bg-toast-success-icon text-white",
   error: "bg-toast-error-icon text-white",
   warning: "bg-toast-warning-icon text-white",
-  info: "bg-toast-info-icon text-white",
-  loading: "bg-toast-loading-icon text-white",
+  info: "bg-toast-info-icon text-on-fill-foreground",
+  loading: "bg-toast-loading-icon text-toast-loading-fg",
   default: "bg-toast-default-border text-toast-fg",
 };
 
@@ -229,7 +229,7 @@ onUnmounted(() => {
               'rounded-default inline-flex items-center justify-center gap-1 px-2.5 py-0.5 text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none',
               actionSucceeded
                 ? 'bg-toast-success-icon focus-visible:ring-toast-success-icon text-white'
-                : 'bg-toast-action-text hover:bg-toast-action-hover focus-visible:ring-toast-action-text text-white',
+                : 'bg-toast-action-text text-toast-action-foreground hover:bg-toast-action-hover hover:text-toast-action-foreground-hover focus-visible:ring-toast-action-text',
             ]"
             @click.stop="handleActionClick"
           >

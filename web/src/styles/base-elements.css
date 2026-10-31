@@ -197,6 +197,14 @@ body {
     text-decoration: none;
   }
 
+  /* Monochrome brand: colour cannot mark a link, so prose links get an underline; chrome links carry a class. */
+  a:not([class]) {
+    text-decoration: underline;
+    text-underline-offset: 0.125em;
+    text-decoration-thickness: 0.0625em;
+    text-decoration-color: var(--color-border-strong);
+  }
+
   a:hover {
     color: var(--color-text-link-hover);
     text-decoration: underline;

@@ -88,7 +88,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                        screens do. Typing writes straight back into the JSON on the
                        left, so the document and these fields never disagree. -->
                   <template v-if="typeof errorMessage === 'object'">
-                    <span class="text-status-negative">{{ errorMessage.message }}</span>
+                    <span class="text-status-error-text">{{ errorMessage.message }}</span>
 
                     <!-- Missing, unusable, repeated in the file, or already taken:
                          four checks, one fix — a name that is free and valid. -->
@@ -199,7 +199,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       />
                     </div>
                   </template>
-                  <span v-else class="text-status-negative">{{ errorMessage }}</span>
+                  <span v-else class="text-status-error-text">{{ errorMessage }}</span>
                 </div>
               </div>
             </div>
@@ -238,6 +238,7 @@ import OButton from "@/lib/core/Button/OButton.vue";
 import OSeparator from "@/lib/core/Separator/OSeparator.vue";
 import BaseImport from "../common/BaseImport.vue";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 import { functionNameRegex } from "./AddFunction.schema";
 import { toast } from "@/lib/feedback/Toast/useToast";
 import jsTransformService from "@/services/jstransform";
@@ -323,12 +324,12 @@ export default defineComponent({
         store.state.selectedOrganization?.identifier === "_meta",
     );
 
-    // JavaScript always appears in the dropdown — selectable (not hidden,
-    // not disabled) in builds that don't unlock it, same as the Add form's
-    // toggle; picking it opens the upgrade dialog instead (see updateTransType).
+    // An un-entitled build under "hide" omits JavaScript rather than offering a dead option.
     const transTypeOptions = computed(() => [
       { label: t("function.vrl"), value: "0" },
-      { label: raw("JavaScript"), value: "1" },
+      ...(isJsAllowed.value || showsLockedAffordances
+        ? [{ label: raw("JavaScript"), value: "1" }]
+        : []),
     ]);
 
     // Set at each call site, so one declared mutation covers both create and override.
@@ -353,7 +354,7 @@ export default defineComponent({
     const triggerImport = () => baseImportRef.value?.handleImport();
 
     const resultClass = (status: ImportStatus) =>
-      status === "failed" ? "text-status-negative" : "text-status-positive";
+      status === "failed" ? "text-status-error-text" : "text-status-success-text";
 
     // Describes one org's functions and means nothing in the next.
     watch(orgId, () => {

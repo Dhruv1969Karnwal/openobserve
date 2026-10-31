@@ -29,6 +29,7 @@ import type {
   StreamsByType,
   StreamDataState,
 } from "@/types/alertLibrary";
+import { hidesPaidFeatures } from "@/utils/enterpriseFeatures";
 
 // Reads the curated alert library from S3: one GET for the manifest (which
 // renders the entire gallery) and one GET per alert file, on drawer-open or
@@ -332,7 +333,8 @@ export function useAnomalyLibraryAccess() {
     // Both halves, as in AlertList: an enterprise UI can be pointed at an OSS backend.
     const entitled =
       store.state.zoConfig?.build_type !== "opensource" && config.isEnterprise === "true";
-    if (!entitled) return "locked";
+    // Under "hide" the tag would open a dialog the policy refuses, so the anomaly list is dropped.
+    if (!entitled) return hidesPaidFeatures ? "hidden" : "locked";
     return store.state.zoConfig?.anomaly_detection_enabled === true ? "enabled" : "hidden";
   });
 }

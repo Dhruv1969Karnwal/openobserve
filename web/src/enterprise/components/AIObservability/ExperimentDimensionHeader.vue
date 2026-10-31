@@ -90,7 +90,7 @@ const entries = computed(() => [
     key: "improved" as const,
     count: props.counts.improved,
     icon: "trending-up" as IconName,
-    tone: "text-status-positive",
+    tone: "text-status-success-text",
     tooltip: t(
       "aiObservability.experiments.comparePage.panel.dimensionImproved",
       { count: props.counts.improved },

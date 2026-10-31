@@ -277,7 +277,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </div>
           </ODropdown>
           <!-- A disabled button fires no pointer events, so the span is the tooltip's hover target. -->
-          <OTooltip v-else :content="drilldownBlockedReason" max-width="22.5rem">
+          <!-- Under "hide" the un-entitled case renders nothing: a disabled lock advertises an edition this product does not sell. -->
+          <OTooltip
+            v-else-if="showsLockedAffordances || drilldown.availability.value !== 'oss'"
+            :content="drilldownBlockedReason"
+            max-width="22.5rem"
+          >
             <span class="inline-flex">
               <OButton
                 variant="outline"
@@ -612,6 +617,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script lang="ts">
 import { computed, defineComponent, onBeforeUnmount, ref, watch, type PropType } from "vue";
 import { raw, useI18nTyped } from "@/types/i18n";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 import MetricCardChart, { type ChartForecast, type ShiftedResult } from "./MetricCardChart.vue";
 import MetricBreakdown from "./MetricBreakdown.vue";
 import MetricChartTile, {
@@ -1224,6 +1230,7 @@ export default defineComponent({
       drilldown,
       drilldownMenu,
       drilldownBlockedReason,
+      showsLockedAffordances,
       onDrilldownOpen,
       onDrilldownPick,
       onDrilldownRetry,

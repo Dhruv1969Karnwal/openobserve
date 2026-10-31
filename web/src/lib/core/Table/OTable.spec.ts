@@ -3400,6 +3400,36 @@ describe("OTable sort header button", () => {
     expect(tooltip!.props("disabled")).toBe(false);
   });
 
+  it("T-A8: sortDisabled keeps a VISIBLE marker — the neutral sort icon becomes a solid dash", () => {
+    // A6: keyboard users never see the cursor, so the disabled header must differ from an
+    // enabled unsorted one without opacity (tonal token) and without an ungated transition.
+    wrapper = mountServer({
+      sortClearable: false,
+      sortDisabled: true,
+      sortBy: "",
+      sortOrder: undefined,
+    });
+    const icon = wrapper.find('[data-test="o2-table-sort-icon-inactive"]');
+    expect(icon.exists()).toBe(true);
+    expect(icon.attributes("data-test-sort-disabled")).toBe("true");
+    expect(wrapper.findComponent('[data-test="o2-table-sort-icon-inactive"]').props("name")).toBe(
+      "remove",
+    );
+    expect(icon.classes()).toContain("text-text-secondary");
+    expect(icon.classes()).not.toContain("opacity-40");
+  });
+
+  it("T-A8: an ENABLED unsorted header keeps the ghosted unfold-more (bidirectional pin)", () => {
+    wrapper = mountServer({ sortBy: "", sortOrder: undefined });
+    const icon = wrapper.find('[data-test="o2-table-sort-icon-inactive"]');
+    expect(icon.exists()).toBe(true);
+    expect(icon.attributes("data-test-sort-disabled")).toBeUndefined();
+    expect(wrapper.findComponent('[data-test="o2-table-sort-icon-inactive"]').props("name")).toBe(
+      "unfold-more",
+    );
+    expect(icon.classes()).toContain("opacity-40");
+  });
+
   it("T-A8: the tooltip stays off while sorting is enabled", () => {
     wrapper = mountServer({ sortDisabledReason: "unused" as I18nText });
     const tooltip = wrapper

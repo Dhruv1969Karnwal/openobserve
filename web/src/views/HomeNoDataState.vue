@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <!--
   HomeNoDataState — empty state for the Home/Usage tab when the org has no ingested data.
-  Each card and chip routes to a distinct, real ingestion path in OpenObserve,
+  Each card and chip routes to a distinct, real in-app ingestion path,
   covering logs, traces, metrics, and AI integrations.
 -->
 <template>
@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         >{{ t("ingestion.firstDataPanel.anotherWay") }}</span
       >
       <template v-else-if="tab">{{
-        t("logs.noData.title", { product: raw("OpenObserve") })
+        t("logs.noData.title", { product: raw("Retrace.ai") })
       }}</template>
       <template v-else>{{ t("home.noDataState.title") }}</template>
     </template>

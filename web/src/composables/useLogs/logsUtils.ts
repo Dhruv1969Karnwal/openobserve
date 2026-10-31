@@ -44,6 +44,7 @@ import {
   shownSearch,
   urlWriteMode,
   writeLogsUrl,
+  writeVisualizeToggleParam,
   type LogsUrlMode,
   type ShownEntry,
   type ShownInputs,
@@ -535,9 +536,14 @@ export const logsUtils = () => {
       query["clusters"] = inputs.clusters.join(",");
     }
 
-    if (searchObj.meta.logsVisualizeToggle) {
-      query["logs_visualize_toggle"] = searchObj.meta.logsVisualizeToggle;
-    }
+    // Absence IS the default panel. This builder feeds every write that can name
+    // the panel (`updateUrlQueryParams` on the search/pagination paths and
+    // `patchUrlViewState`, whose governed set includes this param), so writing
+    // `=logs` here would re-materialise on the first search the param a restored
+    // link arrived without — the restore-side rule would hold only until then.
+    // Share links take the same shape: the reader's cold state is the default, so
+    // omitting the param says exactly what the author's panel was.
+    writeVisualizeToggleParam(query, searchObj.meta.logsVisualizeToggle);
 
     // Preserve visualization data in URL
     // - If in visualize mode and panel data is provided, encode the dashboardPanelData

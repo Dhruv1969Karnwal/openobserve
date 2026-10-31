@@ -119,6 +119,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     data-test="status-page-branding-row"
                   >
                     <StatusPageImageField
+                      v-if="logoUploadEnabled || showsLockedAffordances"
                       :label="t('statusPages.fields.logo')"
                       :upload-label="t('statusPages.fields.logoUpload')"
                       :clear-label="
@@ -140,6 +141,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     />
 
                     <StatusPageImageField
+                      v-if="logoUploadEnabled || showsLockedAffordances"
                       :label="t('statusPages.fields.favicon')"
                       :upload-label="t('statusPages.fields.faviconUpload')"
                       :clear-label="t('statusPages.fields.faviconRemove')"
@@ -358,6 +360,7 @@ import OSpinner from "@/lib/feedback/Spinner/OSpinner.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 import type { FileValue } from "@/lib/forms/File/OFile.types";
 import StatusPagePreview from "./StatusPagePreview.vue";
 import StatusPageImageField from "./StatusPageImageField.vue";
@@ -398,10 +401,7 @@ const orgIdentifier = computed<string>(
   () => (store.state as any).selectedOrganization?.identifier ?? "",
 );
 
-// Logo upload itself is available on any licensed build (cloud or self-hosted
-// enterprise) — same split as Notices/Custom Domains (see StatusPagesList's
-// `advancedEnabled`), using the same isCloud || isEnterprise check as the
-// Billing route (`router/index.ts`).
+// Upload needs a licensed build; where it is missing the field is locked under "lock", omitted under "hide".
 const logoUploadEnabled = computed(
   () => config.isCloud === "true" || config.isEnterprise === "true",
 );

@@ -201,9 +201,9 @@ const timelineChartOptions = computed(() => {
     rootStyle.getPropertyValue(name).trim() || fallback;
   // Touch the theme so colors recompute when it toggles.
   void store.state.theme;
-  const accent = readVar("--color-accent", "#7c6cf6");
-  const axisText = readVar("--color-text-secondary", "#9ca3af");
-  const axisLine = readVar("--color-border-default", "#e5e7eb");
+  const accent = readVar("--color-accent", "#3f7994");
+  const axisText = readVar("--color-text-secondary", "#525252");
+  const axisLine = readVar("--color-border-default", "#d4d4d4");
 
   const times = timeline.value.map((b) => b.keyMs);
   const counts = timeline.value.map((b) => b.num);
@@ -831,7 +831,7 @@ function openInLogs() {
       <!-- ── Error ────────────────────────────────────────────────────── -->
       <div v-if="errorMsg" class="flex shrink-0 items-start gap-2 px-4 py-3">
         <OIcon name="error-outline" size="sm" class="text-error-500 mt-0.5 shrink-0" />
-        <code class="text-error-500 font-mono text-xs break-all whitespace-pre-wrap">{{
+        <code class="text-status-error-text font-mono text-xs break-all whitespace-pre-wrap">{{
           errorMsg
         }}</code>
       </div>
@@ -849,7 +849,7 @@ function openInLogs() {
           v-if="!loading && !events.length"
           class="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-10"
         >
-          <OIcon name="manage-search" size="xl" class="text-text-secondary opacity-30" />
+          <OIcon name="manage-search" size="xl" class="text-text-secondary" />
           <span class="text-text-secondary text-sm">{{ t("panel.logExplorer.noEvents") }}</span>
           <code
             class="text-text-secondary bg-surface-subtle rounded-default max-w-full overflow-x-auto px-3 py-2 text-center font-mono text-xs break-all whitespace-pre-wrap"

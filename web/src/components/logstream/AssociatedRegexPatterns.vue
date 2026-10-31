@@ -6,7 +6,7 @@
         <div class="col-auto"></div>
         <div class="flex items-center" data-test="associated-regex-patterns-title-text">
           <span
-            class="breadcrumb-text text-brand-indigo cursor-pointer text-lg leading-6 font-normal"
+            class="breadcrumb-text text-brand-indigo-text cursor-pointer text-lg leading-6 font-normal"
             @click="closeDialog"
             >{{ t("regex_patterns.associated_breadcrumb") }} &gt; &nbsp;
           </span>
