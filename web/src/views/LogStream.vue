@@ -581,7 +581,7 @@ export default defineComponent({
         size: 320,
         minSize: 160,
         // Flex: fills the leftover width on load, freezes on first resize.
-        meta: { align: "left", flex: true },
+        meta: { align: "left", flex: true, mono: true },
       },
       {
         id: "doc_time_max",
@@ -892,10 +892,10 @@ export default defineComponent({
       const s = streamState(row);
       const color =
         s === "stale"
-          ? "var(--color-warning-500)"
+          ? "var(--color-row-rail-warning)"
           : s === "empty"
-            ? "var(--color-grey-400)"
-            : "var(--color-success-500)";
+            ? "var(--color-row-rail-muted)"
+            : "var(--color-row-rail-positive)";
       return { boxShadow: `var(--shadow-rail-geom) ${color}` };
     };
 

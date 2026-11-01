@@ -183,6 +183,12 @@ export interface OTableColumnMeta {
   /** Additional class applied to the <td> */
   cellClass?: string;
   /**
+   * Identifier role: the cell's text renders in the mono face (`--font-mono`),
+   * at the cell's own size. For hostnames, emails, stream/metric names, tokens —
+   * values an operator compares character by character.
+   */
+  mono?: boolean;
+  /**
    * Mark this as the primary "name" column. The record-name column renders at
    * weight 500 — enough to separate it from metadata columns (which stay 400 /
    * --text-3) without the "wall of bold". Only affects default-rendered cells;

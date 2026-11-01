@@ -255,7 +255,13 @@ const statusLabel = (status: string) =>
 
 // ── Table ─────────────────────────────────────────────────────────────────────
 const columns = computed<OTableColumnDef<HostRow>[]>(() => [
-  { id: "host", header: t("infra.hosts.columnHost"), accessorKey: "display_name", sortable: true },
+  {
+    id: "host",
+    header: t("infra.hosts.columnHost"),
+    accessorKey: "display_name",
+    sortable: true,
+    meta: { mono: true },
+  },
   { id: "os", header: t("infra.hosts.columnOs"), accessorKey: "os_type", size: 96, sortable: true },
   {
     id: "status",
@@ -574,13 +580,16 @@ const osToggleLabel = (slug: string) =>
             @pagination-change="(p) => (page = p.page)"
           >
             <template #cell-host="{ row }">
+              <!-- The label is the only thing that tells 12 near-identical hosts
+                   apart, so it ellipsises instead of being cut mid-name. -->
               <OButton
                 variant="ghost-primary"
                 size="xs"
+                class="max-w-full min-w-0"
                 :data-test="`hosts-row-${row.host_name}`"
                 @click="openDrawer(row.host_name)"
               >
-                {{ raw(row.display_name) }}
+                <OTruncatedText>{{ raw(row.display_name) }}</OTruncatedText>
               </OButton>
             </template>
             <template #cell-os="{ row }">

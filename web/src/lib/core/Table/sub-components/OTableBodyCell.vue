@@ -186,6 +186,9 @@ const isSizeClamped = computed(
 
 const cellStyle = computed(() => {
   const base: Record<string, any> = {};
+  // Inline, not a class: slot content (a link button, a chip) inherits the role
+  // instead of fighting its own typography, as TableRenderer already does.
+  if (meta.value?.mono) base.fontFamily = "var(--font-mono)";
   if (isAutoWidth.value) {
     // Elastic column: no width (absorbs the table's leftover space), but honour
     // minSize so it can't collapse — it pushes the table to scroll instead.

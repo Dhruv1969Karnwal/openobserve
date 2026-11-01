@@ -497,7 +497,7 @@ export default defineComponent({
           hideable: true,
           size: COL.email,
           minSize: 200,
-          meta: { align: "left", flex: true },
+          meta: { align: "left", flex: true, mono: true },
         },
         {
           id: "first_name",
