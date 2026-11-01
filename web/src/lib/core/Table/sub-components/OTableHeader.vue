@@ -666,7 +666,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
             <button
               type="button"
               :class="[
-                'rounded-default focus-visible:ring-focus-ring-accent flex min-w-0 items-center gap-1 text-start focus-visible:ring-2 focus-visible:outline-none',
+                'rounded-default focus-visible:ring-focus-ring-accent flex min-h-6 min-w-0 items-center gap-1 text-start focus-visible:ring-2 focus-visible:outline-none',
                 sortDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
                 isFillRemainingColumn(header) ? 'flex-none' : 'flex-1',
                 headerAlignClass(header),
@@ -774,7 +774,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
               <button
                 type="button"
                 :class="[
-                  'rounded-default focus-visible:ring-focus-ring-accent flex shrink-0 items-center focus-visible:ring-2 focus-visible:outline-none',
+                  'rounded-default focus-visible:ring-focus-ring-accent flex min-h-6 shrink-0 items-center focus-visible:ring-2 focus-visible:outline-none',
                   sortDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
                 ]"
                 data-test="o2-table-th-sort-trigger"
@@ -1115,7 +1115,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
             <button
               type="button"
               :class="[
-                'rounded-default focus-visible:ring-focus-ring-accent flex items-center gap-1 overflow-hidden text-start whitespace-nowrap focus-visible:ring-2 focus-visible:outline-none',
+                'rounded-default focus-visible:ring-focus-ring-accent flex min-h-6 items-center gap-1 overflow-hidden text-start whitespace-nowrap focus-visible:ring-2 focus-visible:outline-none',
                 sortDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
                 isFillRemainingColumn(header) ? 'flex-none' : 'flex-1',
                 headerAlignClass(header),
@@ -1207,7 +1207,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
               <button
                 type="button"
                 :class="[
-                  'rounded-default focus-visible:ring-focus-ring-accent flex shrink-0 items-center focus-visible:ring-2 focus-visible:outline-none',
+                  'rounded-default focus-visible:ring-focus-ring-accent flex min-h-6 shrink-0 items-center focus-visible:ring-2 focus-visible:outline-none',
                   sortDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
                 ]"
                 data-test="o2-table-th-sort-trigger"
@@ -1396,3 +1396,18 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
     </tr>
   </thead>
 </template>
+
+<style scoped>
+/* keep(generated-content): SC 2.5.8 — the trigger paints one text line tall and the
+   header row has the slack, so the clickable box grows into it instead of moving the
+   label baseline. A pseudo-element is the only expansion that costs no layout. */
+[data-test="o2-table-th-sort-trigger"] {
+  position: relative;
+}
+
+[data-test="o2-table-th-sort-trigger"]::after {
+  content: "";
+  position: absolute;
+  inset: -0.25rem 0;
+}
+</style>

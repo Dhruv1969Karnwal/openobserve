@@ -34,12 +34,28 @@ function handleUpdate(val: CheckboxModelValue) {
 </script>
 
 <template>
-  <OCheckbox
-    :model-value="checkboxModel"
-    :data-test="`o2-table-select-${rowId ?? 'header'}`"
-    size="sm"
-    :aria-label="label"
-    :disabled="disabled"
-    @update:model-value="handleUpdate"
-  />
+  <div class="o2-table-select-hit">
+    <OCheckbox
+      :model-value="checkboxModel"
+      :data-test="`o2-table-select-${rowId ?? 'header'}`"
+      size="sm"
+      :aria-label="label"
+      :disabled="disabled"
+      @update:model-value="handleUpdate"
+    />
+  </div>
 </template>
+
+<style scoped>
+/* keep(lib-override): SC 2.5.8 — the tick paints 14px and the selection cell is 24px,
+   so the focusable box is grown into that dead space rather than into the column. */
+.o2-table-select-hit :deep([role="checkbox"]) {
+  position: relative;
+}
+
+.o2-table-select-hit :deep([role="checkbox"])::after {
+  content: "";
+  position: absolute;
+  inset: -0.4375rem;
+}
+</style>

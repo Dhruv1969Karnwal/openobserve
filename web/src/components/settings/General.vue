@@ -87,12 +87,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <div class="flex flex-wrap items-center gap-2">
               <!-- Light Mode Theme -->
               <div
-                class="group/chip bg-surface-subtle border-border-default hover:bg-surface-subtle-hover hover:border-accent inline-flex cursor-pointer items-center gap-2 rounded-full border py-1.5 ps-1.5 pe-3 transition-all duration-200 hover:-translate-y-px hover:shadow-md"
+                class="group/chip bg-surface-subtle border-border-control hover:bg-surface-subtle-hover hover:border-accent inline-flex cursor-pointer items-center gap-2 rounded-full border py-1.5 ps-1.5 pe-3 transition-all duration-200 hover:-translate-y-px hover:shadow-md"
                 @click="handleThemeChipClick('light')"
                 data-test="theme-light-chip"
               >
                 <div
-                  class="color-circle relative flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full shadow-sm"
+                  class="color-circle ring-border-strong relative flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full shadow-sm ring-1 ring-inset"
                   :style="{ backgroundColor: customLightColor }"
                 >
                   <!-- eslint-disable local/no-hardcoded-px -- optical effect, not layout — scaling it with text makes elevation bloom -->
@@ -115,12 +115,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
               <!-- Dark Mode Theme -->
               <div
-                class="group/chip bg-surface-subtle border-border-default hover:bg-surface-subtle-hover hover:border-accent inline-flex cursor-pointer items-center gap-2 rounded-full border py-1.5 ps-1.5 pe-3 transition-all duration-200 hover:-translate-y-px hover:shadow-md"
+                class="group/chip bg-surface-subtle border-border-control hover:bg-surface-subtle-hover hover:border-accent inline-flex cursor-pointer items-center gap-2 rounded-full border py-1.5 ps-1.5 pe-3 transition-all duration-200 hover:-translate-y-px hover:shadow-md"
                 @click="handleThemeChipClick('dark')"
                 data-test="theme-dark-chip"
               >
                 <div
-                  class="color-circle relative flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full shadow-sm"
+                  class="color-circle ring-border-strong relative flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full shadow-sm ring-1 ring-inset"
                   :style="{ backgroundColor: customDarkColor }"
                 >
                   <!-- eslint-disable local/no-hardcoded-px -- optical effect, not layout — scaling it with text makes elevation bloom -->

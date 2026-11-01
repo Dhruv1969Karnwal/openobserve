@@ -75,7 +75,7 @@ function resetToDefault(): void {
              trigger and leave the real <button> without aria-expanded. -->
         <span
           v-if="hiddenCount > 0"
-          class="bg-count-badge-bg text-button-primary-foreground text-3xs pointer-events-none absolute -top-1 -right-1 inline-flex h-4 w-4 items-center justify-center rounded-full leading-none font-medium"
+          class="bg-count-badge-bg text-button-primary-foreground text-2xs pointer-events-none absolute -top-1 -right-1 inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-0.5 leading-none font-medium"
           data-test="o2-table-column-toggle-hidden-badge"
         >
           {{ hiddenCount }}
