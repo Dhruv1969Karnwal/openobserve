@@ -68,11 +68,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             v-if="!isFullscreen && !isEditingLayout"
             v-show="store.state.printMode !== true"
             variant="outline"
-            size="icon-toolbar"
+            :size="isMobile ? 'icon-toolbar' : 'sm-toolbar'"
             @click="addPanelData"
             data-test="dashboard-panel-add"
             icon-left="add"
+            :aria-label="t('panel.add')"
           >
+            <template v-if="!isMobile">{{ t("panel.add") }}</template>
             <OTooltip :content="t('panel.add')" shortcut-id="dashboardAddPanel" />
           </OButton>
           <!-- <DateTimePicker 
@@ -301,100 +303,58 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           />
           <!-- These save, print or reload outside the draft, so edit mode hides them until Save or Discard. -->
           <template v-if="!isEditingLayout">
+            <!-- Labelling Export and Share costs width the title needs, so below
+                 80rem Export steps into the overflow instead of going icon-only. -->
             <ExportDashboard
-              v-if="!isFullscreen"
+              v-if="toolbarLabels && !isFullscreen"
               v-show="store.state.printMode !== true"
-              :dashboardId="currentDashboardData.data?.dashboardId"
+              :dashboardId="(dashboardId as string) || ''"
+              show-label
+              size="sm-toolbar"
             />
             <ShareButton
-              v-if="!isFullscreen"
+              v-if="toolbarLabels && !isFullscreen"
               v-show="store.state.printMode !== true"
               :url="dashboardShareURL"
               @copy:success="onDashboardShared"
               variant="outline"
-              size="icon-toolbar"
+              show-label
+              size="sm-toolbar"
               data-test="dashboard-share-btn"
             />
-            <OButton
-              v-if="!isFullscreen"
-              v-show="store.state.printMode !== true"
-              variant="outline"
-              size="icon-toolbar"
-              data-test="dashboard-setting-btn"
-              @click="openSettingsDialog"
-              icon-left="settings"
+            <!-- Everything the rule cannot fit as a labelled verb: one overflow,
+                 every row named in the dashboard's own words. -->
+            <DashboardToolbarActions
+              :actions="toolbarOverflowActions"
+              :flat="isMobile"
+              :trigger-label="t('dashboard.moreActions')"
+              data-test="dashboard-toolbar-overflow"
+              @select="runToolbarAction"
             >
-              <OTooltip :content="t('dashboard.setting')" />
-            </OButton>
-            <OButton
-              variant="outline"
-              size="icon-toolbar"
-              @click="printDashboard"
-              data-test="dashboard-print-btn"
-            >
-              <template #icon-left
-                ><OIcon :name="store.state.printMode === true ? 'close' : 'print'" size="sm"
-              /></template>
-              <OTooltip
-                :content="store.state.printMode === true ? t('common.close') : t('dashboard.print')"
-              />
-            </OButton>
-            <OButton
-              v-show="store.state.printMode !== true"
-              variant="outline"
-              size="icon-toolbar"
-              @click="toggleFullscreen"
-              data-test="dashboard-fullscreen-btn"
-            >
-              <template #icon-left
-                ><OIcon :name="isFullscreen ? 'fullscreen-exit' : 'fullscreen'" size="sm"
-              /></template>
-              <OTooltip
-                :content="isFullscreen ? t('dashboard.exitFullscreen') : t('dashboard.fullscreen')"
-                shortcut-id="dashboardFullscreen"
-              />
-            </OButton>
-            <OButton
-              v-if="!isFullscreen"
-              v-show="store.state.printMode !== true"
-              variant="outline"
-              size="icon-toolbar"
-              @click="openScheduledReports"
-              data-test="view-dashboard-scheduled-reports"
-            >
-              <template #icon-left><OIcon name="description" size="sm" /></template>
-              <OTooltip :content="t('dashboard.scheduledDashboards')" />
-            </OButton>
-            <OButton
-              v-if="!isFullscreen"
-              v-show="store.state.printMode !== true"
-              variant="outline"
-              size="icon-toolbar"
-              data-test="dashboard-json-edit-btn"
-              @click="openJsonEditor"
-              icon-left="code"
-            >
-              <OTooltip :content="t('dashboard.editJson')" />
-            </OButton>
-            <!-- Pin as org-wide home dashboard: a low-frequency, set-once
-                   action, so it sits at the far right, icon-only. Filled pin +
-                   highlighted variant signal the "already home" state. -->
-            <OButton
-              v-if="!isFullscreen"
-              v-show="store.state.printMode !== true"
-              :variant="isHome(dashboardId) ? 'secondary' : 'outline'"
-              size="icon-toolbar"
-              :class="isHome(dashboardId) ? 'text-primary border-button-outline-border border' : ''"
-              @click="toggleHomeDashboard"
-              data-test="dashboard-view-set-home-btn"
-              :icon-left="isHome(dashboardId) ? 'keep' : 'keep-outline'"
-            >
-              <OTooltip
-                :content="
-                  isHome(dashboardId) ? t('dashboard.removeFromHome') : t('dashboard.setAsHomeDesc')
-                "
-              />
-            </OButton>
+              <!-- Share owns a short-link request of its own, so it stays the
+                   component rather than a row the header would have to re-do. -->
+              <template #before="{ close }">
+                <ShareButton
+                  v-if="!toolbarLabels && !isFullscreen"
+                  v-show="store.state.printMode !== true"
+                  :url="dashboardShareURL"
+                  variant="ghost"
+                  size="sm"
+                  show-label
+                  button-class="w-full justify-start"
+                  data-test="dashboard-share-btn"
+                  @copy:success="
+                    (payload) => {
+                      onDashboardShared(payload);
+                      close();
+                    }
+                  "
+                />
+                <ODropdownSeparator
+                  v-if="!toolbarLabels && !isFullscreen && store.state.printMode !== true"
+                />
+              </template>
+            </DashboardToolbarActions>
           </template>
           <template v-if="isEditingLayout && isMobile">
             <OButton
@@ -597,7 +557,12 @@ import {
   convertPanelTimeRangeToPicker,
 } from "@/utils/dashboard/panelTimeUtils";
 import AutoRefreshInterval from "@/components/AutoRefreshInterval.vue";
-import ExportDashboard from "@/components/dashboards/ExportDashboard.vue";
+import ExportDashboard, {
+  downloadDashboardJson,
+} from "@/components/dashboards/ExportDashboard.vue";
+import DashboardToolbarActions, {
+  type ToolbarAction,
+} from "@/components/dashboards/DashboardToolbarActions.vue";
 import RenderDashboardCharts from "./RenderDashboardCharts.vue";
 import useNotifications from "@/composables/useNotifications";
 import {
@@ -679,6 +644,7 @@ export default defineComponent({
     ShareButton,
     AutoRefreshInterval,
     ExportDashboard,
+    DashboardToolbarActions,
     DashboardSettings,
     RenderDashboardCharts,
     ScheduledDashboards,
@@ -698,6 +664,17 @@ export default defineComponent({
   setup() {
     const { t } = useI18nTyped();
     const { isMobile } = useBreakpoint();
+    // Export and Share carry their word only while the title still prints in
+    // full; 80rem is the width where the row has that much to spare.
+    const TOOLBAR_LABEL_QUERY = "(min-width: 80rem)";
+    const toolbarLabelQuery =
+      typeof window !== "undefined" && typeof window.matchMedia === "function"
+        ? window.matchMedia(TOOLBAR_LABEL_QUERY)
+        : null;
+    const toolbarLabels = ref(toolbarLabelQuery ? toolbarLabelQuery.matches : true);
+    const onToolbarLabelChange = (event: MediaQueryListEvent) => {
+      toolbarLabels.value = event.matches;
+    };
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
@@ -2183,9 +2160,11 @@ export default defineComponent({
     };
     onMounted(() => {
       onDashboardEvent(handleAiDashboardEvent);
+      toolbarLabelQuery?.addEventListener("change", onToolbarLabelChange);
     });
 
     onUnmounted(() => {
+      toolbarLabelQuery?.removeEventListener("change", onToolbarLabelChange);
       document.removeEventListener("fullscreenchange", onFullscreenChange);
       window.removeEventListener("beforeunload", onBeforeUnload);
       toggleLayoutEscape(false);
@@ -2297,6 +2276,58 @@ export default defineComponent({
       }
     });
 
+    // The actions the header rule cannot fit as labelled verbs. Ordered as the
+    // old icon row read, grouped: object settings, then how the dashboard is put
+    // out, then where it is shown.
+    const toolbarOverflowActions = computed<ToolbarAction[]>(() => {
+      const printMode = store.state.printMode === true;
+      const pinned = isHome(dashboardId.value as string);
+      const actions: ToolbarAction[] = [];
+      if (!isFullscreen.value && !printMode) {
+        if (!toolbarLabels.value) {
+          actions.push({ id: "export", label: t("dashboard.export"), icon: "download" });
+        }
+        actions.push({ id: "settings", label: t("dashboard.setting"), icon: "settings" });
+        actions.push({
+          id: "scheduled",
+          label: t("dashboard.scheduledDashboards"),
+          icon: "description",
+        });
+        actions.push({ id: "json", label: t("dashboard.editJson"), icon: "code" });
+      }
+      actions.push({
+        id: "print",
+        label: printMode ? t("common.close") : t("dashboard.print"),
+        icon: printMode ? "close" : "print",
+      });
+      if (!printMode) {
+        actions.push({
+          id: "fullscreen",
+          label: isFullscreen.value ? t("dashboard.exitFullscreen") : t("dashboard.fullscreen"),
+          icon: isFullscreen.value ? "fullscreen-exit" : "fullscreen",
+        });
+      }
+      if (!isFullscreen.value && !printMode) {
+        actions.push({
+          id: "home",
+          label: pinned ? t("dashboard.removeFromHome") : t("dashboard.setAsHome"),
+          icon: pinned ? "keep" : "keep-outline",
+        });
+      }
+      return actions;
+    });
+
+    const runToolbarAction = (id: string) => {
+      if (id === "export")
+        downloadDashboardJson(store, dashboardId.value as string, route.query.folder);
+      else if (id === "settings") openSettingsDialog();
+      else if (id === "scheduled") openScheduledReports();
+      else if (id === "json") openJsonEditor();
+      else if (id === "print") printDashboard();
+      else if (id === "fullscreen") toggleFullscreen();
+      else if (id === "home") toggleHomeDashboard();
+    };
+
     // ── Keyboard shortcuts ────────────────────────────────────────────────
     useShortcuts([
       {
@@ -2343,14 +2374,18 @@ export default defineComponent({
         id: "dashboardExport",
         handler: () => {
           if (isInputFocused()) return;
-          // Trigger the whole-dashboard export (ExportDashboard button).
-          (document.querySelector('[data-test="export-dashboard"]') as HTMLElement | null)?.click();
+          // The same export the toolbar row and the overflow row run: the row is
+          // not always on screen, the shortcut is always available.
+          downloadDashboardJson(store, dashboardId.value as string, route.query.folder);
         },
       },
     ]);
 
     return {
       isMobile,
+      toolbarLabels,
+      toolbarOverflowActions,
+      runToolbarAction,
       currentDashboardData,
       dashboardRemountKey,
       toggleFullscreen,

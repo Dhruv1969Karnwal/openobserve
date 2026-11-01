@@ -753,9 +753,11 @@ describe("Dashboards.vue", () => {
       const local = wrapper.vm.dashboards.find((r: any) => r.id === "dash1");
       expect(local.name).toBe("Dashboard 1");
 
-      // The favorites view shows the folder column, like cross-folder search.
-      const columnIds = wrapper.vm.columns.map((c: any) => c.id);
-      expect(columnIds).toContain("folder");
+      // Favorites span folders, so the folder groups the rows instead of
+      // costing a column beside an identity column that needs the width.
+      expect(wrapper.vm.spansFolders).toBe(true);
+      expect(wrapper.vm.columns.map((c: any) => c.id)).not.toContain("folder");
+      expect(wrapper.vm.rowSection({ folder: "Folder 1" } as any)).toBe("Folder 1");
     });
 
     it("selecting a folder exits the favorites view and shows that folder", async () => {
@@ -1455,6 +1457,86 @@ describe("Dashboards.vue", () => {
       await flushPromises();
 
       expect(notifications.showErrorNotification).toHaveBeenCalled();
+    });
+  });
+  describe("column set follows the space the list has", () => {
+    const row = {
+      id: "d1",
+      name: "Ingestion health",
+      description: "Delivery and latency for the ingest path",
+      owner: "root@example.com",
+      created: "2026-10-21T09:14:22",
+      folder: "Cost and storage",
+      folder_id: "f-cost",
+      actions: "true",
+    };
+
+    const mountAt = async (shellWidth: number) => {
+      const testStore = createMockStore();
+      testStore.state.organizationData.allDashboardList = {
+        default: [
+          {
+            dashboardId: "d1",
+            title: "Ingestion health",
+            description: "Delivery and latency for the ingest path",
+            owner: "root@example.com",
+            created: "2026-10-21T09:14:22.000Z",
+          },
+        ],
+      };
+      wrapper = shallowMount(Dashboards, {
+        global: buildGlobalConfig(testStore, router, i18n),
+      });
+      await nextTick();
+      await nextTick();
+      wrapper.vm.tableShellWidth = shellWidth;
+      await nextTick();
+      return wrapper;
+    };
+
+    const ids = () => wrapper.vm.columns.map((c: any) => c.id);
+
+    it("keeps every field beside the name while the frame is wide", async () => {
+      await mountAt(1112);
+      expect(ids()).toEqual(["name", "description", "owner", "created", "actions"]);
+      // Nothing is duplicated: the wide band paints no subline under the name.
+      expect(wrapper.vm.rowSublines(row)).toEqual([]);
+    });
+
+    it("moves the description under the name when the band cannot read it as a column", async () => {
+      await mountAt(700);
+      expect(ids()).toEqual(["name", "owner", "created", "actions"]);
+      expect(wrapper.vm.rowSublines(row)).toEqual(["Delivery and latency for the ingest path"]);
+    });
+
+    it("moves owner and date under the name too at list width", async () => {
+      await mountAt(388);
+      expect(ids()).toEqual(["name", "actions"]);
+      expect(wrapper.vm.rowSublines(row)).toEqual([
+        "Delivery and latency for the ingest path",
+        "root@example.com · 2026-10-21T09:14:22",
+      ]);
+    });
+
+    it("sections by folder only where the rows really span folders", async () => {
+      await mountAt(1112);
+      expect(wrapper.vm.spansFolders).toBe(false);
+      expect(wrapper.vm.rowSection(row as any)).toBeNull();
+
+      wrapper.vm.searchAcrossFolders = true;
+      wrapper.vm.searchQuery = "ingest";
+      await nextTick();
+      expect(wrapper.vm.spansFolders).toBe(true);
+      expect(wrapper.vm.rowSection(row as any)).toBe("Cost and storage");
+    });
+
+    it("keeps a row that names no folder inside a sectioned body", async () => {
+      await mountAt(1112);
+      wrapper.vm.searchAcrossFolders = true;
+      wrapper.vm.searchQuery = "ingest";
+      await nextTick();
+      // A null key would drop the row from a sectioned table entirely.
+      expect(wrapper.vm.rowSection({ folder: "", folder_id: "f-x" } as any)).toBe("f-x");
     });
   });
 });

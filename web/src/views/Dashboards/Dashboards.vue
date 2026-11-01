@@ -115,7 +115,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
       </div>
       <!-- Right: dashboards table -->
-      <div class="h-full min-w-0 flex-1 max-md:h-auto max-md:min-h-0">
+      <div
+        ref="tableShellRef"
+        class="h-full min-w-0 flex-1 max-md:h-auto max-md:min-h-0"
+        data-test="dashboards-list-shell"
+      >
         <div class="bg-card-glass-bg flex h-full flex-col">
           <div
             v-show="showFirstData"
@@ -125,7 +129,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <FirstDataPanel v-if="showFirstData" signal="any" variant="compact" />
           </div>
           <OTable
-            class="min-h-0 w-full flex-1"
+            class="max-h-full min-h-0 w-full"
             ref="oTableRef"
             :data="dashboards"
             :columns="columns"
@@ -134,7 +138,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :forbidden="forbidden"
             :frame="false"
             :default-columns="false"
+            :fill-height="listFillsViewport"
             show-index
+            :row-section="spansFolders ? rowSection : undefined"
             :global-filter="filterQuery"
             :show-global-filter="false"
             :page-size="pageSize"
@@ -217,48 +223,73 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               />
             </template>
             <template #cell-name="{ row, value }">
-              <span class="flex min-w-0 items-center gap-1">
-                <!-- One-click favorite toggle — filled gold star when
-                     favorited, neutral outline otherwise. -->
-                <OButton
-                  variant="ghost"
-                  size="icon-xs-sq"
-                  :icon-left="isFavorite(row.id) ? 'star' : 'star-outline'"
-                  :class="isFavorite(row.id) ? 'text-favorite shrink-0' : 'shrink-0'"
-                  :title="
-                    isFavorite(row.id)
-                      ? t('dashboard.removeFromFavorites')
-                      : t('dashboard.addToFavorites')
-                  "
-                  :data-test="`dashboard-favorite-toggle-${value}`"
-                  @click.stop="toggleFavorite(row)"
-                />
+              <span class="flex min-w-0 flex-col">
+                <span class="flex min-w-0 items-center gap-1">
+                  <!-- One-click favorite toggle — filled gold star when
+                       favorited, neutral outline otherwise. -->
+                  <OButton
+                    variant="ghost"
+                    size="icon-xs-sq"
+                    :icon-left="isFavorite(row.id) ? 'star' : 'star-outline'"
+                    :class="isFavorite(row.id) ? 'text-favorite shrink-0' : 'shrink-0'"
+                    :title="
+                      isFavorite(row.id)
+                        ? t('dashboard.removeFromFavorites')
+                        : t('dashboard.addToFavorites')
+                    "
+                    :data-test="`dashboard-favorite-toggle-${value}`"
+                    @click.stop="toggleFavorite(row)"
+                  />
+                  <OTruncatedText
+                    class="text-text-body"
+                    :data-test="`dashboard-name-cell-${value}`"
+                    >{{ value }}</OTruncatedText
+                  >
+                  <!-- At-a-glance indicator: shows which dashboard is the org
+                       home dashboard without an interactive icon on every row. -->
+                  <OIcon
+                    v-if="isHome(row.id)"
+                    name="keep"
+                    size="xs"
+                    class="text-primary shrink-0"
+                    :data-test="`dashboard-home-indicator-${value}`"
+                  />
+                  <OTooltip
+                    v-if="isHome(row.id)"
+                    side="bottom"
+                    :content="t('dashboard.pinnedOnHome')"
+                  />
+                </span>
+                <!-- A field the band cannot fit as a column comes back under the
+                     name rather than off the screen. -->
                 <OTruncatedText
-                  class="text-text-body"
-                  :data-test="`dashboard-name-cell-${value}`"
-                  >{{ value }}</OTruncatedText
+                  v-for="(line, index) in rowSublines(row)"
+                  :key="index"
+                  class="text-text-secondary text-xs"
+                  :data-test="`dashboard-row-subline-${value}`"
+                  >{{ line }}</OTruncatedText
                 >
-                <!-- At-a-glance indicator: shows which dashboard is the org
-                     home dashboard without an interactive icon on every row. -->
-                <OIcon
-                  v-if="isHome(row.id)"
-                  name="keep"
-                  size="xs"
-                  class="text-primary shrink-0"
-                  :data-test="`dashboard-home-indicator-${value}`"
-                />
-                <OTooltip
-                  v-if="isHome(row.id)"
-                  side="bottom"
-                  :content="t('dashboard.pinnedOnHome')"
-                />
               </span>
+            </template>
+            <template #group-header="{ sectionKey, rows: sectionRows }">
+              <div
+                class="text-text-heading flex items-center gap-1.5 px-2 py-1 text-xs font-medium"
+                :data-test="`dashboard-folder-section-${sectionKey}`"
+              >
+                <OIcon name="folder-outline" size="xs" class="shrink-0" />
+                <OTruncatedText>{{ sectionKey }}</OTruncatedText>
+                <span class="text-text-secondary shrink-0 tabular-nums"
+                  >· {{ sectionRows.length }}</span
+                >
+              </div>
             </template>
             <template #cell-identifier="{ value }">
               <span class="text-text-body font-mono text-xs" :title="value">{{ value }}</span>
             </template>
             <template #cell-description="{ value }">
-              <span class="text-text-body">{{ value || "—" }}</span>
+              <span :class="value ? 'text-text-body' : 'text-text-secondary'">{{
+                value || "—"
+              }}</span>
             </template>
             <template #cell-owner="{ value }">
               <OUserCell :value="value" />
@@ -270,20 +301,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :timezone="store.state.timezone"
               />
             </template>
-            <template #cell-folder="{ row }">
-              <button
-                type="button"
-                class="bg-surface-subtle text-text-body hover:bg-surface-subtle-hover hover:text-text-body focus-visible:ring-focus-ring-accent inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-xs leading-5 transition-colors outline-none focus-visible:ring-4 focus-visible:ring-inset"
-                @click.stop="updateActiveFolderId(row.folder_id)"
-              >
-                <OIcon name="folder-outline" size="xs" />
-                <OTruncatedText>{{ row.folder }}</OTruncatedText>
-              </button>
-            </template>
             <template #cell-actions="{ row }">
               <span class="row-actions flex items-center justify-end gap-0.5">
                 <OButton
-                  v-if="row.actions == 'true'"
+                  v-if="row.actions == 'true' && inlineRowActions"
                   icon-left="drive-file-move"
                   :title="t('dashboard.move_to_another_folder')"
                   variant="ghost"
@@ -293,7 +314,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   @click.stop="showMoveDashboardPanel(row)"
                 />
                 <OButton
-                  v-if="row.actions == 'true'"
+                  v-if="row.actions == 'true' && inlineRowActions"
                   icon-left="content-copy"
                   :title="t('dashboard.duplicate')"
                   variant="ghost"
@@ -304,7 +325,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   @click.stop="duplicateDashboard(row.id, row.folder_id)"
                 />
                 <OButton
-                  v-if="row.actions == 'true'"
+                  v-if="row.actions == 'true' && inlineRowActions"
                   icon-left="delete"
                   :title="t('dashboard.delete')"
                   variant="ghost-destructive"
@@ -329,25 +350,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     />
                   </template>
                   <ODropdownItem
+                    v-if="compactRowActions"
                     icon-left="drive-file-move"
-                    class="md:hidden"
                     data-test="dashboard-move-to-another-folder-menu"
                     @select="showMoveDashboardPanel(row)"
                   >
                     <span>{{ t("dashboard.move_to_another_folder") }}</span>
                   </ODropdownItem>
                   <ODropdownItem
+                    v-if="compactRowActions"
                     icon-left="content-copy"
-                    class="md:hidden"
                     data-test="dashboard-duplicate-menu"
                     @select="duplicateDashboard(row.id, row.folder_id)"
                   >
                     <span>{{ t("dashboard.duplicate") }}</span>
                   </ODropdownItem>
                   <ODropdownItem
+                    v-if="compactRowActions"
                     icon-left="delete"
                     variant="destructive"
-                    class="md:hidden"
                     data-test="dashboard-delete-menu"
                     @select="showDeleteDialogFn({ row })"
                   >
@@ -547,6 +568,7 @@ import {
   ref,
   watch,
   toRaw,
+  nextTick,
 } from "vue";
 import { useStore } from "vuex";
 import { isCancelledError } from "@tanstack/vue-query";
@@ -594,6 +616,8 @@ import { useHomeDashboard } from "@/composables/useHomeDashboard";
 import analytics from "@/services/product_analytics";
 import { useFavoriteDashboards, FAVORITES_FOLDER_ID } from "@/composables/useFavoriteDashboards";
 import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
+import useBreakpoint from "@/composables/useBreakpoint";
+import { shouldFillHeight } from "@/lib/core/Table/fillPolicy";
 
 const MoveDashboardToAnotherFolder = defineAsyncComponent(() => {
   return import("@/components/dashboards/MoveDashboardToAnotherFolder.vue");
@@ -669,6 +693,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { t } = useI18nTyped();
+    const { isMobile } = useBreakpoint();
     const dashboard = ref({});
     const showAddDashboardDialog = ref(false);
     const showAddDashboardFromGitHub = ref(false);
@@ -856,7 +881,60 @@ export default defineComponent({
     });
 
     let currentSearchAbortController: AbortController | null = null;
+    // The folder rail and the phone stack both eat width the viewport number does
+    // not know about, so the column set follows the space the list actually has.
+    const WIDE_SHELL_PX = 920;
+    const LIST_SHELL_PX = 560;
+    // Which of the optional columns each band can carry. Below the wide band no
+    // description column is wide enough to read, and below the list band the owner
+    // and the date cannot hold their header label beside the identity column; a
+    // field a band drops comes back under the name rather than off the screen.
+    const BAND_COLUMNS: Record<string, string[]> = {
+      wide: ["description", "owner", "created"],
+      medium: ["owner", "created"],
+      narrow: [],
+    };
+    const tableShellRef = ref<HTMLElement | null>(null);
+    const tableShellWidth = ref(0);
+    // OTable's own `fill-height="auto"` measures the scroll box, which a stretched
+    // flex host hands back at its own height; here the decision needs the rows.
+    const listFillsViewport = ref(true);
+    let shellObserver: ResizeObserver | null = null;
+    const columnBand = computed(() => {
+      const width = tableShellWidth.value;
+      if (!width) return "wide";
+      if (width >= WIDE_SHELL_PX) return "wide";
+      return width >= LIST_SHELL_PX ? "medium" : "narrow";
+    });
+    const bandColumns = computed(() => BAND_COLUMNS[columnBand.value] ?? BAND_COLUMNS.wide);
+    const showsColumn = (id: string) => bandColumns.value.includes(id);
+    // Only the wide band can pay for three always-on row buttons beside the
+    // identity column; the compact bands carry the one kebab they already have.
+    const inlineRowActions = computed(() => columnBand.value === "wide");
+    const compactRowActions = computed(() => isMobile.value || !inlineRowActions.value);
+    const actionsColumnSize = computed(() => (isMobile.value ? 56 : 124));
+    const rowSublines = (row: DashboardRow) => {
+      const lines: string[] = [];
+      if (!showsColumn("description") && row.description) lines.push(String(row.description));
+      if (!showsColumn("owner") || !showsColumn("created")) {
+        const meta = [row.owner, row.created].filter(Boolean).join(" · ");
+        if (meta) lines.push(meta);
+      }
+      return lines;
+    };
+    // Rows carry a folder only where the view spans folders (Favorites, search
+    // across folders); there it is what a reader groups by, so it becomes a
+    // section header instead of a column.
+    const spansFolders = computed(
+      () => (searchAcrossFolders.value && searchQuery.value !== "") || showFavoritesOnly.value,
+    );
+    // Never a null key once sectioning is on: a row without a section is dropped
+    // from a sectioned body, and every row the view returned must stay readable.
+    const rowSection = (row: DashboardRow) =>
+      spansFolders.value ? row.folder || row.folder_id || "—" : null;
+
     const columns = computed(() => {
+      const wide = columnBand.value === "wide";
       const baseColumns: OTableColumnDef[] = [
         {
           id: "name",
@@ -866,72 +944,73 @@ export default defineComponent({
           resizable: true,
           hideable: true,
           size: COL.name,
-          minSize: 160,
+          // The identity column is never the one cut off while another has room.
+          minSize: wide ? 220 : 200,
           meta: { align: "left", flex: true },
         },
-        // {
-        //   id: "identifier",
-        //   header: t("dashboard.identifier"),
-        //   accessorKey: "identifier",
-        //   sortable: true,
-        //   resizable: true,
-        //   hideable: true,
-        //   meta: { align: "left" },
-        // },
-        {
-          id: "description",
-          header: t("dashboard.description"),
-          accessorKey: "description",
-          sortable: true,
-          resizable: true,
-          hideable: true,
-          // Every row has a name and almost none have a description: the fixed
-          // 300px description left the flex identity column as the one that truncated.
-          size: 220,
-          meta: { align: "left" },
-        },
-        {
-          id: "owner",
-          header: t("dashboard.owner"),
-          accessorKey: "owner",
-          sortable: true,
-          resizable: true,
-          hideable: true,
-          size: COL.owner,
-          meta: { align: "left" },
-        },
-        {
-          id: "created",
-          header: t("dashboard.created"),
-          accessorKey: "created",
-          sortable: true,
-          resizable: true,
-          hideable: true,
-          size: COL.date,
-          meta: { align: "left" },
-        },
+        ...(showsColumn("description")
+          ? [
+              {
+                id: "description",
+                header: t("dashboard.description"),
+                accessorKey: "description",
+                sortable: true,
+                resizable: true,
+                hideable: true,
+                // Wide band: 44 select + 56 index + 260 description + 180 owner +
+                // 160 created + 156 actions = 856, so the identity column keeps
+                // the remaining quarter of a 1112px frame.
+                size: 260,
+                minSize: 140,
+                meta: { align: "left" },
+              },
+            ]
+          : []),
+        ...(showsColumn("owner")
+          ? [
+              {
+                id: "owner",
+                header: t("dashboard.owner"),
+                accessorKey: "owner",
+                sortable: true,
+                resizable: true,
+                hideable: true,
+                size: wide ? 180 : 150,
+                minSize: 130,
+                meta: { align: "left" },
+              },
+            ]
+          : []),
+        ...(showsColumn("created")
+          ? [
+              {
+                id: "created",
+                header: t("dashboard.created"),
+                accessorKey: "created",
+                sortable: true,
+                resizable: true,
+                hideable: true,
+                // Medium band: 44 select + 56 index + 200 name + 150 owner +
+                // 120 created + 124 actions = 694, inside the 696 the rail leaves.
+                size: wide ? 160 : 120,
+                minSize: 120,
+                meta: { align: "left" },
+              },
+            ]
+          : []),
         {
           id: "actions",
           header: t("dashboard.actions"),
           sortable: false,
           isAction: true,
-          size: 124,
-          meta: { align: "center", cellClass: "actions-column", actionCount: 4 },
+          size: actionsColumnSize.value,
+          meta: {
+            align: "center",
+            cellClass: "actions-column",
+            actionCount: compactRowActions.value ? 1 : 4,
+          },
         },
       ];
-
-      if ((searchAcrossFolders.value && searchQuery.value != "") || showFavoritesOnly.value) {
-        baseColumns.splice(2, 0, {
-          id: "folder",
-          header: t("dashboard.folder"),
-          accessorKey: "folder",
-          sortable: true,
-          resizable: true,
-          hideable: true,
-          size: COL.folder,
-          meta: { align: "left" },
-        });
-      }
 
       return baseColumns;
     });
@@ -1120,6 +1199,8 @@ export default defineComponent({
       }
 
       // Clear reactive refs to prevent memory leaks
+      shellObserver?.disconnect();
+      shellObserver = null;
       if (oTableRef.value) {
         oTableRef.value = null;
       }
@@ -1374,10 +1455,10 @@ export default defineComponent({
       // Favorites view is folder-independent, but yield to an active
       // cross-folder search so results from all folders show.
       const crossFolderSearchActive = searchAcrossFolders.value && searchQuery.value !== "";
+      const folderNames = new Map(
+        (store.state.organizationData?.folders ?? []).map((f: any) => [f.folderId, f.name]),
+      );
       if (showFavoritesOnly.value && !crossFolderSearchActive) {
-        const folderNames = new Map(
-          (store.state.organizationData?.folders ?? []).map((f: any) => [f.folderId, f.name]),
-        );
         const allLists = store.state.organizationData?.allDashboardList ?? {};
         return favorites.value.map((fav: any, _index: number) => {
           const cached = (allLists[fav.folderId] ?? []).find(
@@ -1407,12 +1488,44 @@ export default defineComponent({
       } else {
         return filteredResults.value.map((board: Record<string, any>, index: number) =>
           mapDashboard(board, index, {
-            name: board.folder_name,
+            name: board.folder_name || folderNames.get(board.folder_id) || board.folder_id,
             id: board.folder_id,
           }),
         );
       }
     });
+
+    function measureListFrame() {
+      const shell = tableShellRef.value;
+      if (!shell) return;
+      tableShellWidth.value = shell.clientWidth;
+      const frame = shell.querySelector<HTMLElement>('[data-test="dashboard-table"]');
+      const table = frame?.querySelector<HTMLTableElement>("table");
+      const scroller = table?.parentElement ?? null;
+      // Empty, loading and error paint outside the <table> and keep the full
+      // frame, which is the height their own floor is sized against.
+      if (!frame || !table || !scroller || !dashboards.value.length) {
+        listFillsViewport.value = true;
+        return;
+      }
+      const chrome = frame.offsetHeight - scroller.offsetHeight;
+      listFillsViewport.value = shouldFillHeight(
+        shell.clientHeight - chrome,
+        table.offsetHeight,
+        listFillsViewport.value,
+      );
+    }
+
+    const scheduleFrameMeasure = () => {
+      nextTick(() => requestAnimationFrame(measureListFrame));
+    };
+
+    onMounted(scheduleFrameMeasure);
+
+    watch(
+      () => [dashboards.value.length, loading.value, pageSize.value, columnBand.value],
+      scheduleFrameMeasure,
+    );
 
     // Clear selection whenever the derived list recomputes (favorites toggle,
     // folder switch, cross-folder search, store list changes). Runs sync so the
@@ -1859,6 +1972,16 @@ export default defineComponent({
       dashboards,
       dashboard,
       columns,
+      columnBand,
+      tableShellRef,
+      tableShellWidth,
+      measureListFrame,
+      listFillsViewport,
+      inlineRowActions,
+      compactRowActions,
+      spansFolders,
+      rowSection,
+      rowSublines,
       loading,
       showFirstData,
       refreshing,

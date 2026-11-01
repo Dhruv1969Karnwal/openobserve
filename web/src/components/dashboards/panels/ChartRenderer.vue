@@ -15,28 +15,85 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <template>
-  <div
-    data-test="chart-renderer"
-    ref="chartRef"
-    :id="chartId"
-    :role="label ? 'img' : undefined"
-    :aria-label="label || undefined"
-    class="chart-container h-full w-full"
-    @mouseover="
-      () => {
-        // if hoveredSeriesState is not null then set panelId
-        if (hoveredSeriesState) hoveredSeriesState.panelId = data?.extras?.panelId;
-      }
-    "
-    @mouseleave="
-      (e) => {
-        if ((e?.relatedTarget as Element | null)?.closest?.('.o2-echarts-tooltip')) return;
-        // if hoveredSeriesState is not null then set -1
-        if (hoveredSeriesState) hoveredSeriesState.setIndex(-1, -1, -1, null);
-      }
-    "
-    @contextmenu="handleNativeContextMenu"
-  ></div>
+  <div class="relative h-full w-full" data-test="chart-renderer-root">
+    <div
+      data-test="chart-renderer"
+      ref="chartRef"
+      :id="chartId"
+      role="img"
+      :aria-label="chartName"
+      :aria-describedby="textEquivalentId"
+      class="chart-container h-full w-full"
+      @mouseover="
+        () => {
+          // if hoveredSeriesState is not null then set panelId
+          if (hoveredSeriesState) hoveredSeriesState.panelId = data?.extras?.panelId;
+        }
+      "
+      @mouseleave="
+        (e) => {
+          if ((e?.relatedTarget as Element | null)?.closest?.('.o2-echarts-tooltip')) return;
+          // if hoveredSeriesState is not null then set -1
+          if (hoveredSeriesState) hoveredSeriesState.setIndex(-1, -1, -1, null);
+        }
+      "
+      @contextmenu="handleNativeContextMenu"
+    ></div>
+
+    <!-- The image says what is drawn; this says what it says. It sits next to the
+         chart in the accessibility tree, so a screen reader reads it right after
+         the chart's name without the operator hunting for it. -->
+    <p :id="textEquivalentId" class="sr-only" data-test="chart-text-equivalent">
+      {{ summaryText }}
+    </p>
+
+    <!-- Keyboard-only until focused: the control is for the tree, not the picture. -->
+    <button
+      type="button"
+      class="focus:border-border-control focus:bg-surface-base sr-only focus:not-sr-only focus:absolute focus:start-1 focus:bottom-1 focus:z-10 focus:border focus:px-2 focus:py-1"
+      :aria-expanded="dataTableOpen ? 'true' : 'false'"
+      :aria-controls="dataTableId"
+      data-test="chart-data-table-toggle"
+      @click="dataTableOpen = !dataTableOpen"
+    >
+      {{ dataTableOpen ? t("panel.chartA11y.hideTable") : t("panel.chartA11y.showTable") }}
+    </button>
+
+    <div
+      v-if="dataTableOpen && chartTable"
+      :id="dataTableId"
+      class="bg-surface-base absolute inset-0 z-10 overflow-auto"
+      tabindex="0"
+      data-test="chart-data-table"
+    >
+      <table class="text-2xs w-full border-collapse">
+        <caption class="text-text-secondary text-start">
+          {{
+            chartTable.caption
+          }}
+          <span v-if="chartTable.strideNote"> · {{ chartTable.strideNote }}</span>
+        </caption>
+        <thead>
+          <tr>
+            <th
+              v-for="column in chartTable.columns"
+              :key="column"
+              scope="col"
+              class="text-text-heading text-start font-medium"
+            >
+              {{ column }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, index) in chartTable.rows" :key="`${row.label}-${index}`">
+            <th scope="row" class="text-text-secondary font-normal">{{ row.label }}</th>
+            <td v-for="(cell, cellIndex) in row.cells" :key="cellIndex">{{ cell }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -73,6 +130,7 @@ function findNearestIndex(sortedArray: any, target: any) {
 
 import { throttle } from "lodash-es";
 import {
+  computed,
   defineComponent,
   ref,
   useId,
@@ -85,7 +143,6 @@ import {
   inject,
   type PropType,
 } from "vue";
-import type { I18nText } from "@/types/i18n";
 import { useStore } from "vuex";
 import useBreakpoint from "@/composables/useBreakpoint";
 import { useTheme } from "@/composables/useTheme";
@@ -132,6 +189,15 @@ import {
   type LineSeriesPixels,
   type PixelPoint,
 } from "@/utils/dashboard/lineSeriesAtPoint";
+import { withSeriesNonColourCues } from "@/utils/dashboard/colorPalette";
+import {
+  chartAccessibleName,
+  chartSummaryText,
+  chartTableOf,
+  seriesFactsOf,
+  type ChartA11yLabels,
+} from "@/utils/dashboard/chartTextEquivalent";
+import { useI18nTyped, type I18nText } from "@/types/i18n";
 
 echarts.use([
   TitleComponent,
@@ -195,6 +261,9 @@ const isGap = (datum: unknown): boolean => {
   return y === null || y === undefined || y === "" || !Number.isFinite(Number(y));
 };
 
+let chartInstances = 0;
+const nextChartInstance = () => ++chartInstances;
+
 export default defineComponent({
   name: "ChartRenderer",
   emits: [
@@ -240,6 +309,69 @@ export default defineComponent({
     let chart: any;
     const store = useStore();
     const { isDark } = useTheme();
+
+    // ── the chart's non-visual equivalent (O18) ────────────────────────────
+    const { t } = useI18nTyped();
+    const dataTableOpen = ref(false);
+    // useId() is empty in some mount contexts, and two charts sharing an id
+    // would aim every description at the first one — so the ids are counted here.
+    const instanceId = [chartId || "chart", nextChartInstance()].join("-");
+    const textEquivalentId = [instanceId, "equivalent"].join("-");
+    const dataTableId = [instanceId, "table"].join("-");
+
+    const options = computed<any>(() => (props.data as any)?.options ?? {});
+    const labelText = (value: I18nText | undefined) => (value ? String(value) : "");
+
+    const a11yLabels = computed<ChartA11yLabels>(() => ({
+      fallbackTitle: t("panel.chartA11y.fallbackTitle"),
+      unitIn: (unit) => t("panel.chartA11y.unitIn", { unit }),
+      range: (start, end) => t("panel.chartA11y.range", { start, end }),
+      seriesCount: (count) => t("panel.chartA11y.seriesCount", { count }),
+      fromRange: (start, end) => t("panel.chartA11y.fromRange", { start, end }),
+      noValues: t("panel.chartA11y.noValues"),
+      seriesKey: t("panel.chartA11y.seriesKey"),
+      latestPeak: (name, latest, peak) => t("panel.chartA11y.latestPeak", { name, latest, peak }),
+      latest: (name, latest) => t("panel.chartA11y.latest", { name, latest }),
+      noValue: t("panel.chartA11y.noValue"),
+      moreSeries: (count) => t("panel.chartA11y.moreSeries", { count }),
+      tableHint: t("panel.chartA11y.tableHint"),
+      timeColumn: t("panel.chartA11y.timeColumn"),
+      sampleColumn: t("panel.chartA11y.sampleColumn"),
+      strideNote: (stride, total) => t("panel.chartA11y.strideNote", { stride, total }),
+      caption: (title) => t("panel.chartA11y.caption", { title }),
+    }));
+
+    const seriesFacts = computed(() => seriesFactsOf(options.value?.series));
+    const chartName = computed(() =>
+      chartAccessibleName(
+        labelText(props.label),
+        options.value,
+        seriesFacts.value,
+        a11yLabels.value,
+      ),
+    );
+    const summaryText = computed(() =>
+      chartSummaryText(labelText(props.label), options.value, seriesFacts.value, a11yLabels.value),
+    );
+    const chartTable = computed(() =>
+      chartTableOf(
+        labelText(props.label),
+        options.value,
+        (options.value as any)?.series,
+        a11yLabels.value,
+      ),
+    );
+
+    // ECharts paints into canvases it owns; a probe must find the name on the
+    // canvas as well as on the wrapper, so every canvas it injects is labelled.
+    const labelCanvases = () => {
+      const canvases = chartRef.value?.querySelectorAll?.("canvas");
+      canvases?.forEach((canvas: any) => {
+        canvas.setAttribute("role", "img");
+        canvas.setAttribute("aria-label", chartName.value);
+      });
+    };
+    let canvasObserver: MutationObserver | null = null;
 
     const cleanupChart = () => {
       // Remove all event listeners from chart
@@ -383,10 +515,14 @@ export default defineComponent({
     };
 
     const chartOptions = (options: Record<string, unknown>) =>
-      withChartFont(
-        withLineStrokeEvents(
-          { aria: { enabled: !props.label }, ...options },
-          props.findLineOnContextMenu,
+      withSeriesNonColourCues(
+        withChartFont(
+          withLineStrokeEvents(
+            // The name and the text equivalent are ours (see the template), so
+            // ECharts must not emit a second description of the same picture.
+            { aria: { enabled: false }, ...options },
+            props.findLineOnContextMenu,
+          ),
         ),
       );
 
@@ -936,6 +1072,12 @@ export default defineComponent({
     let isChartVisible: any = false;
 
     onMounted(() => {
+      // ECharts injects its canvas after init; label whatever appears in the mount.
+      if (typeof MutationObserver !== "undefined") {
+        canvasObserver = new MutationObserver(() => labelCanvases());
+        canvasObserver.observe(chartRef.value, { childList: true, subtree: true });
+      }
+      labelCanvases();
       // chart visibility observer
       isChartVisibleObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
@@ -956,6 +1098,8 @@ export default defineComponent({
     });
 
     onUnmounted(() => {
+      canvasObserver?.disconnect();
+      canvasObserver = null;
       // Never guard on chartRef: Vue nulls template refs before unmounted hooks run.
       isChartVisibleObserver?.disconnect();
       isChartVisibleObserver = null;
@@ -1068,6 +1212,13 @@ export default defineComponent({
       { deep: true },
     );
     return {
+      t,
+      dataTableOpen,
+      textEquivalentId,
+      dataTableId,
+      chartName,
+      summaryText,
+      chartTable,
       chartRef,
       chartId,
       hoveredSeriesState,
