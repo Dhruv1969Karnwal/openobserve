@@ -157,7 +157,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <div class="mb-2 flex items-center justify-between ps-1">
         <div class="text-text-heading text-sm font-medium tracking-[0.01em]">
           {{ t("overview.services") }}
-          <OTag type="countChip" value="warning">{{ services.length }}</OTag>
+          <OTag type="countChip" value="neutral">{{ services.length }}</OTag>
           <span
             v-if="servicePanelVisible && selectedService"
             class="text-text-secondary ms-1 text-xs font-normal"
@@ -410,7 +410,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <div class="mb-2 flex items-center justify-between ps-1">
         <div class="text-text-heading text-sm font-medium tracking-[0.01em]">
           {{ t("overview.recentEvents") }}
-          <OTag type="countChip" value="warning">{{ recentEvents.length }}</OTag>
+          <OTag type="countChip" value="neutral">{{ recentEvents.length }}</OTag>
         </div>
         <button
           class="text-text-link cursor-pointer border-none bg-none p-0 text-xs font-medium whitespace-nowrap opacity-80 transition-opacity duration-150 hover:underline hover:opacity-100"

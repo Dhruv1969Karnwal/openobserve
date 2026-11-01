@@ -111,9 +111,9 @@ export const THEME_STORAGE_KEYS = {
  * stops, classes read from <script>, scoped-style paint, and element-opacity composite states —
  * and measures it across the same twelve injected scopes this file's pickers run against.
  *
- * At this head — these figures are the gate's own output, transcribed 2026-10-28 at reviewed head
- * 07698e801 (identical when re-run after the gate-integrity fixes, which change enforcement, not
- * measurement): 5169 runtime pairs in 2450 booking groups — 2243 groups measured-pass, 207 groups
+ * At this head — these figures are the gate's own output, transcribed 2026-11-01 at reviewed head
+ * da2ce8c66 (identical when re-run after the gate-integrity fixes, which change enforcement, not
+ * measurement): 5145 runtime pairs in 2438 booking groups — 2231 groups measured-pass, 207 groups
  * (285 individual sites) booked with all twelve numbers each, 0 groups unbooked, and 0 groups
  * delegated to tokens/contrast-manifest.ts (none stand — the grey-tier light debt was paid by
  * re-tiering), of the bookings 34 are icon-only sites riding SC 1.4.11's 3:1 bar with a per-entry

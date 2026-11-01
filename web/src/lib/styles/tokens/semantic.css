@@ -47,18 +47,24 @@
      (Home resource/explore rows, KPI-card icons, section headers). Registered
      as semantic tokens so the pale light-mode fill flips to a dark accent tint
      in dark.css instead of staying light on the dark canvas. */
-  --color-icon-chip-primary-bg: var(--color-primary-50);
-  --color-icon-chip-primary-text: var(--color-primary-600);
+  /* The decorative chip tones are monochrome on purpose: a tinted square behind
+     a section header's or a card's glyph puts the palette on chrome, which is
+     where this system wants none of it — the accent stays on controls, links and
+     data. Success / warning / error keep their tint because there the colour IS
+     the message. Base greys, not the surface/text aliases: the injected themes
+     repaint those, and the chip has to hold its ratio in all twelve scopes. */
+  --color-icon-chip-primary-bg: var(--color-grey-100);
+  --color-icon-chip-primary-text: var(--color-grey-700);
   --color-icon-chip-success-bg: var(--color-success-50);
   --color-icon-chip-success-text: var(--color-success-600);
   --color-icon-chip-warning-bg: var(--color-warning-50);
   --color-icon-chip-warning-text: var(--color-warning-700);
   --color-icon-chip-error-bg: var(--color-error-50);
   --color-icon-chip-error-text: var(--color-error-600);
-  --color-icon-chip-info-bg: var(--color-blue-50);
-  --color-icon-chip-info-text: var(--color-blue-600);
-  --color-icon-chip-orange-bg: var(--color-orange-50);
-  --color-icon-chip-orange-text: var(--color-orange-700);
+  --color-icon-chip-info-bg: var(--color-grey-100);
+  --color-icon-chip-info-text: var(--color-grey-700);
+  --color-icon-chip-orange-bg: var(--color-grey-100);
+  --color-icon-chip-orange-text: var(--color-grey-700);
   /* App chrome (top bar + side rail + the gutter behind the content card) — a
      barely-tinted near-white, just a whisper of brand hue so the white content
      card floats on a calm backdrop. A strong tint reads as "too bright". */

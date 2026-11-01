@@ -648,12 +648,6 @@ const ACCENT_TINT_PICKS: {
     },
   },
   {
-    fg: "--color-icon-chip-primary-text",
-    host: "--color-icon-chip-primary-bg",
-    where: "primary icon chip glyph / step numbers (UsageTab.vue, HowItWorksDrawer.vue)",
-    booked: { "O2 Lens": "3.41", "O2 Crimson Ink": "4.36" },
-  },
-  {
     fg: "--color-badge-primary-soft-text",
     host: "--color-badge-primary-soft-bg",
     where: "OBadge primary tone (utils/dbm/tones.ts, alert_calibration/format.ts)",

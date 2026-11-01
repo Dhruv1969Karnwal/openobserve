@@ -1069,18 +1069,18 @@
   /* Soft-tinted icon chips — dark accent tint (mirrors the badge-soft
      treatment) so a chip reads as a faint coloured square, not a bright
      light block on the dark canvas. */
-  --color-icon-chip-primary-bg: color-mix(in srgb, var(--color-primary-400) 15%, transparent);
-  --color-icon-chip-primary-text: var(--color-primary-300);
+  --color-icon-chip-primary-bg: var(--color-grey-800);
+  --color-icon-chip-primary-text: var(--color-grey-300);
   --color-icon-chip-success-bg: color-mix(in srgb, var(--color-success-500) 15%, transparent);
   --color-icon-chip-success-text: var(--color-success-400);
   --color-icon-chip-warning-bg: color-mix(in srgb, var(--color-warning-400) 15%, transparent);
   --color-icon-chip-warning-text: var(--color-warning-400);
   --color-icon-chip-error-bg: color-mix(in srgb, var(--color-error-500) 15%, transparent);
   --color-icon-chip-error-text: var(--color-error-400);
-  --color-icon-chip-info-bg: color-mix(in srgb, var(--color-blue-500) 15%, transparent);
-  --color-icon-chip-info-text: var(--color-blue-400);
-  --color-icon-chip-orange-bg: color-mix(in srgb, var(--color-orange-500) 15%, transparent);
-  --color-icon-chip-orange-text: var(--color-orange-400);
+  --color-icon-chip-info-bg: var(--color-grey-800);
+  --color-icon-chip-info-text: var(--color-grey-300);
+  --color-icon-chip-orange-bg: var(--color-grey-800);
+  --color-icon-chip-orange-text: var(--color-grey-300);
 
   /* Alert priority ramp — one step lighter on the dark canvas, where a 600 is
      too dense to read as a 4px rail. */

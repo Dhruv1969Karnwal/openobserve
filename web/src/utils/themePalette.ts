@@ -227,7 +227,10 @@ export const libraryForegroundTokens = (
     // colour (primary-600 on primary-100 is 3.03:1 under O2 Lens light), so the
     // shade is walked against the tint the role actually paints on.
     tokens["--color-collapsible-icon-open"] = pickReadableShade(palette, palette["100"]);
-    tokens["--color-icon-chip-primary-text"] = pickReadableShade(palette, palette["50"]);
+    // --color-icon-chip-primary-* is deliberately NOT painted: the icon chip is a
+    // monochrome square in every theme (semantic.css / dark.css), and an accent
+    // glyph dropped onto a fixed grey measures 4.4:1 under the weakest theme.
+    // Walking the shade against a tint the role no longer paints was the defect.
     for (const name of ACCENT_SOFT_INK_TOKENS) {
       tokens[name] = pickReadableShade(palette, palette["100"], "700");
     }
