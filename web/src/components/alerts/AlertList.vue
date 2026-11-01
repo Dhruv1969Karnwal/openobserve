@@ -1467,10 +1467,10 @@ export default defineComponent({
       const s = alertState(row);
       const color =
         s === "failed"
-          ? "var(--color-error-500)"
+          ? "var(--color-row-rail-negative)"
           : s === "paused"
-            ? "var(--color-grey-400)"
-            : "var(--color-success-500)";
+            ? "var(--color-row-rail-muted)"
+            : "var(--color-row-rail-positive)";
       return { boxShadow: `var(--shadow-rail-geom) ${color}` };
     };
 

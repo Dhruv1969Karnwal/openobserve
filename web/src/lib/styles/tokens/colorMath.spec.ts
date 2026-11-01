@@ -421,8 +421,12 @@ describe("the real token sheets", () => {
     // −11 here is F-161c: the ten dead `--color-button-*-focus-ring` roles left behind by
     // feef74aa6 (only button-primary-focus-ring has a paint site) and the unbound
     // --color-button-confirm-hover deleted from component.css; counts move DOWN on purpose.
-    ["light", 1077, 1065],
-    ["dark", 1078, 1066],
+    // +4 light / +6 dark: the row-rail family (positive/negative/warning/muted, the
+    // boxShadow rails measured 1.90-2.54:1 on palette steps) and the flame-frame
+    // family (frames carry labels, so they own pale fills instead of borrowing the
+    // now-dark series ramp). Dark carries two of the rails as overrides only.
+    ["light", 1081, 1069],
+    ["dark", 1084, 1072],
   ] as const)("%s theme", (theme, total, resolved) => {
     const scope = THEMES[theme];
     const names = colorTokens(scope);

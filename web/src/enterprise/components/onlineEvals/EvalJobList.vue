@@ -505,10 +505,10 @@ function evalJobRowStyle(row: EvalJob): Record<string, string> {
   const color = needsAttention(row)
     ? "var(--color-orange-500)"
     : s === "active"
-      ? "var(--color-success-500)"
+      ? "var(--color-row-rail-positive)"
       : s === "paused"
-        ? "var(--color-warning-500)"
-        : "var(--color-grey-400)";
+        ? "var(--color-row-rail-warning)"
+        : "var(--color-row-rail-muted)";
   return { boxShadow: `var(--shadow-rail-geom) ${color}` };
 }
 

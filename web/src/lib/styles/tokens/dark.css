@@ -857,6 +857,10 @@
   /* Status/semantic colors driven by utils/theme.ts */
   --color-status-negative: #e37774;
   --color-status-positive: #89cc8e;
+  /* Row rails in dark: the light ramp's warning/muted steps are too dark to read
+     on a dark ground, so this family swaps with the status pair above it. */
+  --color-row-rail-warning: #fbbf24;
+  --color-row-rail-muted: var(--color-grey-400);
   --color-status-error-text: #eb938d;
   --color-status-error-bg: #402929;
   --color-status-success-text: #a0dba5;

@@ -566,10 +566,10 @@ import {
 type TypeFilter = "all" | "once" | "recurring";
 
 const RAIL_COLORS: Record<DowntimeListItem["status"], string> = {
-  active: "var(--color-warning-500)",
+  active: "var(--color-row-rail-warning)",
   scheduled: "var(--color-blue-500)",
-  ended: "var(--color-grey-400)",
-  ended_early: "var(--color-grey-400)",
+  ended: "var(--color-row-rail-muted)",
+  ended_early: "var(--color-row-rail-muted)",
   cancelled: "var(--color-grey-300)",
 };
 

@@ -364,10 +364,17 @@ const BLOCK_PADDING = 2;
 const tokenColor = (token: string, fallbackToken: string) =>
   cssToken(token, cssToken(fallbackToken, ""));
 
-// Cool hues of the dashboard series palette only: no red, pink, amber or green (mint included), which read as status.
-const palette = [1, 5, 7, 9].map((step) =>
-  tokenColor(`--color-chart-series-${step}`, "--color-chart-series-1"),
-);
+// Cool hues only: no red, pink, amber or green (mint included), which read as status.
+// The frames carry a label, so their fill is a surface, not data ink: these are
+// the frame's own pale tokens. The series ramp is now dark enough to read as a
+// 2px line, which made grey-800 text sitting on it 3.15:1.
+const FLAME_FRAME_TOKENS = [
+  "--color-flame-frame-1",
+  "--color-flame-frame-2",
+  "--color-flame-frame-3",
+  "--color-flame-frame-4",
+] as const;
+const palette = FLAME_FRAME_TOKENS.map((name) => tokenColor(name, FLAME_FRAME_TOKENS[0]));
 
 // Dark in both themes, because the frame fills are light in both.
 const textColor = tokenColor("--color-flame-frame-text", "--color-text-heading");

@@ -144,7 +144,8 @@
   --color-toggle-item-active-bg: var(--color-surface-accent-active);
   --color-toggle-item-active-text: var(--color-primary-700);
   --color-toggle-item-disabled: var(--color-text-disabled);
-  --color-toggle-border: var(--color-border-default);
+  /* A segmented toggle is a control, so its edge rides the operable-edge floor. */
+  --color-toggle-border: var(--color-border-control);
   --color-toggle-focus-ring: var(--color-focus-ring-accent);
   /* Insertion line shown while dragging to reorder (reorderable groups) */
   --color-toggle-drop-indicator: var(--color-primary-600);
@@ -630,6 +631,15 @@
 
   /* Flame graph (components/common/FlameGraphView.vue): label text on the light series fills, in both themes. */
   --color-flame-frame-text: var(--color-grey-800);
+  /* Flame-graph frames carry text, so they are surfaces, not data ink. They used
+     to borrow pale steps of the series palette; the series ramp is now dark
+     enough to read as a 2px line, which made grey-800 on it 3.15:1. These four
+     are cool, deliberately pale, and identical in both themes because the frame
+     label stays dark ink either way. */
+  --color-flame-frame-1: #dbe7ee;
+  --color-flame-frame-2: #dce4ea;
+  --color-flame-frame-3: #d7e8ea;
+  --color-flame-frame-4: #dde9e0;
 
   /* Switch (OSwitch) */
   --color-switch-label: var(--color-text-heading);
@@ -782,7 +792,9 @@
   /* Near-white header, barely distinct from the white body, not a grey band. */
   --color-table-header-bg: var(--color-surface-panel);
   --color-table-header-text: var(--color-text-secondary);
-  --color-table-header-border: var(--color-border-default);
+  /* The header underline is the structural edge of an interactive region (its cells
+     are sort triggers), so it rides the operable-edge floor, not a soft hairline. */
+  --color-table-header-border: var(--color-border-control);
   --color-table-row-hover-bg: var(--color-primary-50);
   --color-table-row-selected-bg: var(--color-primary-100);
   --color-table-row-striped-bg: var(--color-surface-subtle);
@@ -1564,6 +1576,10 @@
 
   /* Flame graph */
   --color-flame-frame-text: var(--color-flame-frame-text);
+  --color-flame-frame-1: var(--color-flame-frame-1);
+  --color-flame-frame-2: var(--color-flame-frame-2);
+  --color-flame-frame-3: var(--color-flame-frame-3);
+  --color-flame-frame-4: var(--color-flame-frame-4);
 
   /* Switch (OSwitch) */
   --color-switch-label: var(--color-switch-label);

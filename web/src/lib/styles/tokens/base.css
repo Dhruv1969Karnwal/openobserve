@@ -216,18 +216,26 @@
   /* --- Dashboard classic series palette — light values (dark overrides in dark.css).
      Read by utils/dashboard/colorPalette.ts getColorPalette() via chartColor(), so the
      light/dark swap lives in CSS instead of a `theme === "dark"` branch in JS. --- */
-  --color-chart-series-1: #5b8ef0;
-  --color-chart-series-2: #34d399;
-  --color-chart-series-3: #fb923c;
-  --color-chart-series-4: #f472b6;
-  --color-chart-series-5: #a78bfa;
-  --color-chart-series-6: #fbbf24;
-  --color-chart-series-7: #38bdf8;
-  --color-chart-series-8: #f87171;
-  --color-chart-series-9: #2dd4bf;
-  --color-chart-series-10: #4ade80;
-  --color-chart-series-11: #e879f9;
-  --color-chart-series-12: #facc15;
+  /* Series ramp. Two measured constraints:
+   1. every step clears the 3:1 graphic floor (SC 1.4.11) on the chart ground -
+      the previous 400/500-luminance ramp sampled 1.53-2.46:1 on white, so the
+      line was invisible rather than quiet;
+   2. steps alternate cool / warm / deep so neighbours separate for colour-blind
+      readers too. Step 1 is the brand hue, because that is where a hue belongs;
+      step 2 is ink, which reads as a second series without a colour claim.
+      Dark mode keeps its pastel ramp (dark.css), which already clears 3:1. */
+  --color-chart-series-1: #3f7994;
+  --color-chart-series-2: #1f2937;
+  --color-chart-series-3: #b45309;
+  --color-chart-series-4: #15803d;
+  --color-chart-series-5: #1e40af;
+  --color-chart-series-6: #be123c;
+  --color-chart-series-7: #0f766e;
+  --color-chart-series-8: #7e22ce;
+  --color-chart-series-9: #c2410c;
+  --color-chart-series-10: #4d7c0f;
+  --color-chart-series-11: #a21caf;
+  --color-chart-series-12: #475569;
 
   /* Map heat ramp, calm low (1) to hot high (5): every step keeps 3:1 against surface-base. */
   --color-map-seq-1: #05a92e;
@@ -618,16 +626,17 @@
   --color-json-object: #4b5563;
   --color-json-string: #047857;
   --color-latency-p95: #0a4ce8;
-  /* Logs severity spine/border: non-text, so each clears 3:1 on the page surface. */
+  /* Logs severity spine/border: non-text, so each clears 3:1 on every surface tier,
+     not just on the white plate (row canvas is surface-panel/-subtle). */
   --color-log-severity-emergency-indicator: #e53935;
   --color-log-severity-alert-indicator: #ea580c;
   --color-log-severity-critical-indicator: #f4511e;
   --color-log-severity-error-indicator: #ef5350;
-  --color-log-severity-warning-indicator: #dd7b00;
+  --color-log-severity-warning-indicator: #c26a00;
   --color-log-severity-notice-indicator: #16a34a;
   --color-log-severity-info-indicator: #1e88e5;
-  --color-log-severity-debug-indicator: #00a3b7;
-  --color-log-severity-trace-indicator: #8497a0;
+  --color-log-severity-debug-indicator: #00818f;
+  --color-log-severity-trace-indicator: #6d7f8b;
   --color-log-severity-ok-indicator: #43a047;
   --color-log-table-header-bg: #f1f3f7;
   --color-log-table-row-bg: #ffffff;

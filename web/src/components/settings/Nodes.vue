@@ -1136,10 +1136,10 @@ export default defineComponent({
       const h = nodeHealth(row);
       const color =
         h === "offline"
-          ? "var(--color-error-500)"
+          ? "var(--color-row-rail-negative)"
           : h === "prepare"
-            ? "var(--color-warning-500)"
-            : "var(--color-success-500)";
+            ? "var(--color-row-rail-warning)"
+            : "var(--color-row-rail-positive)";
       return { boxShadow: `var(--shadow-rail-geom) ${color}` };
     };
 

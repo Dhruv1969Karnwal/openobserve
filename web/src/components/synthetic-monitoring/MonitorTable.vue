@@ -636,9 +636,9 @@ const monitorRowStyle = (row: any): Record<string, string> => {
   const status = String(row?.status ?? "").toLowerCase();
   const color =
     status === "failed"
-      ? "var(--color-error-500)"
+      ? "var(--color-row-rail-negative)"
       : status === "warning"
-        ? "var(--color-warning-500)"
+        ? "var(--color-row-rail-warning)"
         : status === "passed"
           ? "var(--color-success-500)"
           : "var(--color-grey-400)";

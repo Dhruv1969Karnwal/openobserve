@@ -92,8 +92,9 @@
   --color-border-default: var(--color-grey-300);
   --color-border-strong: var(--color-grey-500);
   /* The operable-edge floor in light mode. Use for the edge of
-     anything the user operates — input, select, radio, textarea. */
-  --color-border-control: #949494;
+     anything the user operates — input, select, radio, textarea.
+     grey-500 holds 3:1 on every surface tier, not just on the white plate. */
+  --color-border-control: var(--color-grey-500);
   /* Soft divider — lighter than the structural border. Use for in-list row
      dividers and intra-card section splits. */
   --color-border-subtle: var(--color-grey-150);
@@ -432,6 +433,14 @@
   --shadow-sticky-left: var(--shadow-sticky-left-geom) var(--color-border-default);
   --shadow-sticky-right: var(--shadow-sticky-right-geom) var(--color-border-default);
   --shadow-sticky-footer: var(--shadow-sticky-footer-geom) var(--color-border-subtle);
+  /* Row state rails: the palette steps they used (success/error/warning-500,
+     grey-400) measured 1.90-2.54:1 against the row ground, which is below the
+     3:1 floor for a graphic that carries state. These four are the only rail
+     colours a list may paint; each clears 3:1 on its own ground in both themes. */
+  --color-row-rail-positive: var(--color-status-positive);
+  --color-row-rail-negative: var(--color-status-negative);
+  --color-row-rail-warning: #b45309;
+  --color-row-rail-muted: var(--color-grey-500);
   --shadow-rail: var(--shadow-rail-geom) var(--color-border-default);
   --shadow-ring-hairline: var(--shadow-ring-hairline-geom) var(--color-border-default);
   /* Coloured glows at the elevation steps, for the three states the pipeline
