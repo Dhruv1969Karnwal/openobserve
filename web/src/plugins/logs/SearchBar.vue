@@ -23,6 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         ref="toolbarLeftRef"
         class="flex min-w-0 flex-1 flex-nowrap items-center gap-1 max-md:w-full max-md:flex-none"
       >
+        <h1
+          class="text-text-heading shrink-0 text-xl! leading-[1.3]! font-semibold! tracking-[-0.02em]! whitespace-nowrap"
+          data-test="logs-page-title"
+        >
+          {{ t("menu.search") }}
+        </h1>
         <!-- Collapsible region — clips its overflow so the More button (a
              shrink-0 sibling below) always stays visible. Pinned items hide via
              the pinBudget computation before they would clip. `flex-initial`
@@ -2415,12 +2421,16 @@ export default defineComponent({
     // Responsive toolbar — width tracking via shared composable
     const { toolbarLeftRef, toolbarRightRef, availableLeftWidth } = useToolbarResponsive();
 
+    // The leading <h1> is shrink-0, so the budget must subtract it or pinned items clip.
+    const PAGE_TITLE_RESERVE = 56;
+    const toolbarRoom = computed(() => Math.max(0, availableLeftWidth.value - PAGE_TITLE_RESERVE));
+
     // Approximate rendered widths of left-section content at each collapse state:
     // Each threshold has a small buffer (+16px) so collapse fires before clipping.
-    const shouldHideToolbarButtonText = computed(() => availableLeftWidth.value < 810);
-    const toolbarToggleIconOnly = computed(() => availableLeftWidth.value < 658);
-    const toolbarMoveResetToMenu = computed(() => availableLeftWidth.value < 288);
-    const toolbarToggleAsDropdown = computed(() => availableLeftWidth.value < 216);
+    const shouldHideToolbarButtonText = computed(() => toolbarRoom.value < 810);
+    const toolbarToggleIconOnly = computed(() => toolbarRoom.value < 658);
+    const toolbarMoveResetToMenu = computed(() => toolbarRoom.value < 288);
+    const toolbarToggleAsDropdown = computed(() => toolbarRoom.value < 216);
 
     // ── Pinned toolbar items ──────────────────────────────────────────────
     // Items pinned out of the "More" menu render as fixed-position toolbar
@@ -2451,9 +2461,7 @@ export default defineComponent({
       return w;
     });
 
-    const pinBudget = computed(() =>
-      Math.max(0, availableLeftWidth.value - baseReservedWidth.value),
-    );
+    const pinBudget = computed(() => Math.max(0, toolbarRoom.value - baseReservedWidth.value));
 
     // Greedily fit pinned items within the budget. Order = kept-longest-first, so
     // the last item (syntax guide) is the first to drop when space runs out.

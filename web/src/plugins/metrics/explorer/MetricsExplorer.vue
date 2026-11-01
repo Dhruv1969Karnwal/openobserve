@@ -23,9 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <template>
   <div class="flex h-full min-h-0 w-full flex-col" data-test="metrics-explorer">
-    <!-- No page title: Metrics is an EXPLORE surface like Logs and Traces, so the
-         first row is the toolbar — scope on the left, time on the right, like the
-         Logs toolbar. -->
+    <!-- The page title rides the toolbar's leading slot; a header row of its own would cost 60px here. -->
     <!-- items-center: LabelFilterBar wraps its own chips internally (flex-wrap),
          so the row keeps every control on one centred line rather than items-start. -->
     <!-- `p-1.5`, the SAME padding the Logs and Traces toolbars use
@@ -34,6 +32,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       class="border-border-default flex shrink-0 items-center gap-2 border-b p-1.5 max-md:flex-wrap max-md:gap-x-1 max-md:gap-y-1"
       data-test="metrics-explorer-filter-bar"
     >
+      <h1
+        class="text-text-heading shrink-0 text-xl! leading-[1.3]! font-semibold! tracking-[-0.02em]! whitespace-nowrap"
+        data-test="metrics-page-title"
+      >
+        {{ t("menu.metrics") }}
+      </h1>
       <!-- Page mode toggle at the start of the toolbar — Explore (browse grid)
            vs Visualize (query workspace). Same OToggleGroup + icon-left pattern
            the Logs (Search/Visualize) and Traces toolbars use, so the mode

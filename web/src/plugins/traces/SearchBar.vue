@@ -23,6 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         ref="toolbarLeftRef"
         class="flex min-w-0 flex-1 flex-row items-center gap-1.5 max-lg:w-full max-lg:flex-none max-lg:flex-wrap max-lg:gap-y-1"
       >
+        <h1
+          class="text-text-heading shrink-0 text-xl! leading-[1.3]! font-semibold! tracking-[-0.02em]! whitespace-nowrap"
+          data-test="traces-page-title"
+        >
+          {{ t("menu.traces") }}
+        </h1>
         <!-- Clips its overflow so More, a shrink-0 sibling, is never clipped. -->
         <div
           class="flex min-w-0 flex-initial flex-row items-center gap-1.5 overflow-hidden max-lg:flex-wrap max-lg:gap-y-1 max-lg:overflow-visible"
@@ -1250,7 +1256,7 @@ export default defineComponent({
 
     // Responsive toolbar — shared composable tracks available left-section width
     const { toolbarLeftRef, toolbarRightRef, availableLeftWidth } = useToolbarResponsive();
-    const { lgUp } = useBreakpoint();
+    const { lgUp, isMobile } = useBreakpoint();
     const { isPinned, togglePin } = useToolbarPins("traces");
 
     const isSearchMode = computed(
@@ -1268,21 +1274,26 @@ export default defineComponent({
     const RESET_WIDTH = { text: 72, icon: 36 };
     const MORE_WIDTH = 70;
 
-    const metricsPinned = computed(() => isSearchMode.value && isPinned("histogram"));
-    const savedViewsPinned = computed(() => isSearchMode.value && isPinned("savedViews"));
+    // Below md the row can't fit the title plus the pinned group, so those live in the More menu there.
+    const metricsPinned = computed(
+      () => isSearchMode.value && isPinned("histogram") && !isMobile.value,
+    );
+    const savedViewsPinned = computed(
+      () => isSearchMode.value && isPinned("savedViews") && !isMobile.value,
+    );
     const pinnedGroupWidth = computed(
       () =>
         (metricsPinned.value ? METRICS_PINNED_WIDTH : 0) +
         (savedViewsPinned.value ? SAVED_VIEWS_GROUP_WIDTH : 0),
     );
 
+    // The leading <h1> is shrink-0, so it must come off the width the collapse thresholds read.
+    const PAGE_TITLE_RESERVE = 71;
+    const toolbarRoom = computed(() => Math.max(0, availableLeftWidth.value - PAGE_TITLE_RESERVE));
+
     // Traces-specific breakpoints, raised by the pinned group so labels shrink before it falls back into More.
-    const shouldHideToggleText = computed(
-      () => availableLeftWidth.value < 750 + pinnedGroupWidth.value,
-    );
-    const shouldHideResetText = computed(
-      () => availableLeftWidth.value < 540 + pinnedGroupWidth.value,
-    );
+    const shouldHideToggleText = computed(() => toolbarRoom.value < 750 + pinnedGroupWidth.value);
+    const shouldHideResetText = computed(() => toolbarRoom.value < 540 + pinnedGroupWidth.value);
 
     // Only while Index renders SearchResult with its header, since the click is routed to it.
     const showDrillDown = computed(
@@ -1319,7 +1330,7 @@ export default defineComponent({
     // Below lg the bar wraps and availableLeftWidth reads ~0, so pinned items need no budget there.
     const pinnedFit = computed(() => {
       if (!lgUp.value) return { metrics: metricsPinned.value, savedViews: savedViewsPinned.value };
-      let budget = availableLeftWidth.value - leftBaseWidth.value;
+      let budget = toolbarRoom.value - leftBaseWidth.value;
       const metrics = metricsPinned.value && budget >= METRICS_PINNED_WIDTH;
       if (metrics) budget -= METRICS_PINNED_WIDTH;
       return { metrics, savedViews: savedViewsPinned.value && budget >= SAVED_VIEWS_GROUP_WIDTH };

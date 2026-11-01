@@ -437,6 +437,9 @@ function mockToolbarWidth(width: number) {
   });
 }
 
+// The toolbar row carries a shrink-0 page <h1>, so a fixture row must be this much wider to leave the controls the same room.
+const TITLE_RESERVE = 71;
+
 // Minimal RFC 4180 reader so the test checks column alignment independently of the writer.
 function csvToRows(csv: string): string[][] {
   const rows: string[][] = [];
@@ -903,8 +906,8 @@ describe("SearchBar", () => {
     });
 
     it.each([
-      [359, false],
-      [360, true],
+      [359 + TITLE_RESERVE, false],
+      [360 + TITLE_RESERVE, true],
     ])(
       "admits the pinned copy at width %i only when its full width fits: %s",
       async (width, shown) => {
@@ -920,7 +923,7 @@ describe("SearchBar", () => {
     );
 
     it("keeps RED Metrics before Saved Views when only one fits", async () => {
-      useWidth(400);
+      useWidth(400 + TITLE_RESERVE);
       wrapper = mountSearchBar();
       await flushPromises();
       expect(savedViewsGroup().exists()).toBe(true);
@@ -937,7 +940,7 @@ describe("SearchBar", () => {
     it("shrinks the toggle labels for the pinned RED Metrics width", async () => {
       togglePin("savedViews");
       togglePin("histogram");
-      useWidth(800);
+      useWidth(800 + TITLE_RESERVE);
       wrapper = mountSearchBar();
       await flushPromises();
 
@@ -2322,7 +2325,7 @@ describe("SearchBar", () => {
 
       it("shrinks the toggle labels before the pinned group falls back", async () => {
         widthSpy.mockRestore();
-        widthSpy = mockToolbarWidth(800);
+        widthSpy = mockToolbarWidth(800 + TITLE_RESERVE);
         wrapper = mountSearchBar();
         await flushPromises();
 
