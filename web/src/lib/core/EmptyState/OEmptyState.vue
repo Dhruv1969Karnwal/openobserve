@@ -335,13 +335,13 @@ const SIZE_MAP: Record<
   // The max-md: half shrinks each size so the whole state, action included, fits one phone screen.
   hero: {
     root: "w-full h-full min-h-80 px-6 py-12 max-md:min-h-0 max-md:px-4 max-md:py-5",
-    stack: "gap-7 max-md:gap-3.5",
+    stack: "gap-5 max-md:gap-3",
     copy: "gap-2.5 max-md:gap-1.5",
-    actions: "gap-3 pt-1 max-md:gap-2 max-md:pt-0",
+    actions: "gap-2.5 pt-1 max-md:gap-2 max-md:pt-0",
     extra: "w-full flex flex-col items-center gap-3 pt-2 max-md:gap-2 max-md:pt-0",
-    title: raw("text-2xl! max-md:text-lg!"),
-    description: raw("text-base max-md:text-sm"),
-    illustrationWidth: 300,
+    title: raw("text-xl! max-md:text-base!"),
+    description: raw("text-sm"),
+    illustrationWidth: 176,
     // CSS width beats the SVG width attribute; h-auto keeps the viewBox ratio.
     illustration: "max-md:[&>svg]:h-auto max-md:[&>svg]:w-36",
     iconWrap: "",
