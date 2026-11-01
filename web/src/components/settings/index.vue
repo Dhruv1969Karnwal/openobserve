@@ -38,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       bleed
     >
       <ConstrainedPage
-        :size="activeSection === 'password_policy' ? 'full' : 'lg'"
+        :size="readingMeasure"
         align="left"
         :padded="false"
         class="min-h-0 flex-1 px-4 py-3"
@@ -134,6 +134,14 @@ export default defineComponent({
       "slack",
     ]);
     const isConstrainedSection = computed(() => CONSTRAINED_SECTIONS.has(activeSection.value));
+
+    // General is three fields: at the hub width the rows stretch past their own
+    // controls, so it takes the narrow reading column the library calls `md`.
+    const readingMeasure = computed(() => {
+      if (activeSection.value === "password_policy") return "full" as const;
+      if (activeSection.value === "general") return "md" as const;
+      return "lg" as const;
+    });
 
     const slackVisible = computed(() => {
       const edition = buildFeatureGateContext(store.state.zoConfig);
@@ -531,6 +539,7 @@ export default defineComponent({
       isMetaOrg,
       activeSection,
       isConstrainedSection,
+      readingMeasure,
       activeSectionItem,
       sectionGroups,
       handleSettingsRouting,

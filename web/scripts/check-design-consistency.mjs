@@ -473,7 +473,6 @@ const MOTION_LEDGER = {
   "components/rum/errorTracking/view/PrettyStackTrace.vue": 3,
   "components/settings/AddRegexPattern.vue": 2,
   "components/settings/AnnouncementColorSwatches.vue": 2,
-  "components/settings/General.vue": 7,
   "components/settings/License.vue": 2,
   "components/settings/OrgStorageEditor.vue": 2,
   "components/settings/OrgStorageSettings.vue": 2,

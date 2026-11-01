@@ -498,6 +498,26 @@ describe("SettingsIndex.vue", () => {
     });
   });
 
+  describe("readingMeasure computed property", () => {
+    it("gives General the narrow column its handful of fields needs", () => {
+      mockRouter.currentRoute.value.name = "general";
+      wrapper = createWrapper();
+      expect(wrapper.vm.readingMeasure).toBe("md");
+    });
+
+    it("keeps the other form sections at the hub width", () => {
+      mockRouter.currentRoute.value.name = "organization";
+      wrapper = createWrapper();
+      expect(wrapper.vm.readingMeasure).toBe("lg");
+    });
+
+    it("leaves password policy on the full width it already used", () => {
+      mockRouter.currentRoute.value.name = "passwordPolicy";
+      wrapper = createWrapper({ zoConfig: { meta_org: "_meta" } });
+      expect(wrapper.vm.readingMeasure).toBe("full");
+    });
+  });
+
   describe("password policy section", () => {
     const findEntry = (w: any) =>
       w.vm.sectionGroups

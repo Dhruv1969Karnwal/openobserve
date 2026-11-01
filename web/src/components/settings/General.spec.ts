@@ -810,6 +810,54 @@ describe("General", () => {
   });
 
   describe("Color picker ODialog", () => {
+    it("renders the mode chips as buttons that open the picker for their own mode", async () => {
+      const wrapper = createWrapper();
+      const light = wrapper.find('[data-test="theme-light-chip"]');
+      const dark = wrapper.find('[data-test="theme-dark-chip"]');
+      expect(light.element.tagName).toBe("BUTTON");
+      expect(dark.element.tagName).toBe("BUTTON");
+
+      await dark.trigger("click");
+      await nextTick();
+      expect(wrapper.vm.showColorPicker).toBe(true);
+      expect(wrapper.vm.currentPickerMode).toBe("dark");
+    });
+
+    it("marks the applied mode's chip pressed and the other one unpressed", () => {
+      const wrapper = createWrapper();
+      expect(wrapper.find('[data-test="theme-light-chip"]').attributes("aria-pressed")).toBe(
+        String(wrapper.vm.isModeActive("light")),
+      );
+      expect(wrapper.find('[data-test="theme-dark-chip"]').attributes("aria-pressed")).toBe(
+        String(wrapper.vm.isModeActive("dark")),
+      );
+    });
+
+    it("labels the chip group with the section heading it belongs to", () => {
+      const wrapper = createWrapper();
+      const group = wrapper.find('[data-test="general-settings-theme-chips"]');
+      expect(group.attributes("role")).toBe("group");
+      const labelledBy = group.attributes("aria-labelledby");
+      expect(labelledBy).toBe("general-settings-appearance-heading");
+      expect(wrapper.find(`#${labelledBy}`).element.tagName).toBe("H2");
+    });
+
+    it("groups the two number fields under their own section headings", () => {
+      const wrapper = createWrapper();
+      const headings = wrapper.findAll('[data-test="settings-section-title"]').map((h) => h.text());
+      expect(headings.slice(0, 3)).toEqual(["Metrics collection", "Query limits", "Appearance"]);
+      expect(headings).toContain("Custom branding");
+    });
+
+    it("gives every branding control its label above it, not beside it", () => {
+      const wrapper = createWrapper();
+      const html = wrapper.find('[data-test="settings-field-logo-text"]').element.innerHTML;
+      const labelAt = html.indexOf("Custom Logo Text");
+      const controlAt = html.indexOf("settings_ent_logo_custom_text");
+      expect(labelAt).toBeGreaterThanOrEqual(0);
+      expect(controlAt).toBeGreaterThan(labelAt);
+    });
+
     it("opens the color picker ODialog when a theme chip is clicked", async () => {
       const wrapper = createWrapper();
       await wrapper.vm.handleThemeChipClick("light");
