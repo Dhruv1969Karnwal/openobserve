@@ -33,14 +33,6 @@ function stripClasses(compact = false) {
   return wrapper.find('[data-test="o-stat-strip"]').classes();
 }
 
-function basisOf(compact: boolean) {
-  const wrapper = mount(OStatStrip, {
-    props: { items, compact },
-    global: { stubs: { OStatCard: { template: '<div v-bind="$attrs" />' } } },
-  });
-  return wrapper.findAll("[class]")[1]?.classes() ?? [];
-}
-
 describe("OStatStrip", () => {
   describe("loading", () => {
     it("holds a skeleton in place of each value until the first load lands", async () => {

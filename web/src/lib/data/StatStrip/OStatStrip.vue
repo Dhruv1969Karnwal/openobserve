@@ -15,8 +15,9 @@
 // It always occupies its space (fixed tile height + skeleton while `loading`) so
 // data arriving never shifts the layout below it.
 
-import { computed, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
+import { balancedColumns } from "./balancedColumns";
 import OStatCard from "./OStatCard.vue";
 import type { StatItem } from "./OStatStrip.types";
 
@@ -74,10 +75,32 @@ const activeKey = computed(() => {
 const onCardClick = (item: StatItem) => {
   if (props.selectable && item.selectable !== false) emit("select", item.key);
 };
+
+// Columns are chosen from the tile count as well as the width, so a six-tile
+// strip lands as four-then-two rather than five-plus-one alone.
+const stripRef = ref<HTMLElement | null>(null);
+const stripWidth = ref(0);
+let observer: ResizeObserver | null = null;
+onMounted(() => {
+  if (!stripRef.value || typeof ResizeObserver === "undefined") return;
+  stripWidth.value = stripRef.value.clientWidth;
+  observer = new ResizeObserver((entries) => {
+    stripWidth.value = entries[0]?.contentRect.width ?? stripWidth.value;
+  });
+  observer.observe(stripRef.value);
+});
+onBeforeUnmount(() => observer?.disconnect());
+const gridStyle = computed(() => {
+  if (!stripWidth.value) return {};
+  const cols = balancedColumns(props.items.length, stripWidth.value, props.compact ? 144 : 208);
+  return { gridTemplateColumns: "repeat(" + cols + ", minmax(0, 1fr))" };
+});
 </script>
 
 <template>
   <div
+    ref="stripRef"
+    :style="gridStyle"
     :class="[
       'grid gap-2 max-lg:gap-1.5',
       compact
