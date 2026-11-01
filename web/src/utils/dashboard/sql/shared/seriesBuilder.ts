@@ -174,6 +174,7 @@ export function createSeriesBuilders(deps: SeriesDeps) {
     seriesData: Array<number> = [],
     seriesConfig: Record<string, any>,
     seriesName: string,
+    seriesIndex = 0,
   ): SeriesObject => {
     const seriesColor =
       getSeriesColor(
@@ -184,6 +185,7 @@ export function createSeriesBuilders(deps: SeriesDeps) {
         chartMax,
         store.state.theme,
         panelSchema?.config?.color?.colorBySeries,
+        seriesIndex,
       ) ?? null;
 
     // For area charts, fade the fill into a bottom-to-top transparent
@@ -231,7 +233,9 @@ export function createSeriesBuilders(deps: SeriesDeps) {
         panelSchema.type == "h-bar" ||
         panelSchema.type == "stacked" ||
         panelSchema.type == "h-stacked") &&
-        panelSchema.queries[0].fields.breakdown?.length)
+        // `breakDownKeys`, not the raw field: a `GROUP BY time, category` panel
+        // carries its group column in `fields.x`, and its series need that name.
+        breakDownKeys?.length)
     ) {
       // Display "(empty)" for empty breakdown values instead of falling
       // through to the y-axis label, which produces misleading legends
@@ -245,6 +249,7 @@ export function createSeriesBuilders(deps: SeriesDeps) {
   const getSeries = (seriesConfig: Record<string, any> = {}) => {
     let stackedXAxisUniqueValue: any[] = [];
     let breakdownKey = "";
+    let seriesOrdinal = 0;
 
     // Area-stacked, stacked, h-stacked and trellis needs breakdown field
     if (breakDownKeys?.length) {
@@ -274,7 +279,7 @@ export function createSeriesBuilders(deps: SeriesDeps) {
                 yAxisGroup: index,
               };
               // Can create different method to get series
-              return getSeriesObj(yAxisName, seriesData, updatedSeriesConfig, key);
+              return getSeriesObj(yAxisName, seriesData, updatedSeriesConfig, key, seriesOrdinal++);
             });
           } else {
             const seriesData = getAxisDataFromKey(yAxis);
@@ -282,7 +287,7 @@ export function createSeriesBuilders(deps: SeriesDeps) {
               ...seriesConfig,
               yAxisGroup: index,
             };
-            return getSeriesObj(yAxisName, seriesData, updatedSeriesConfig, "");
+            return getSeriesObj(yAxisName, seriesData, updatedSeriesConfig, "", seriesOrdinal++);
           }
         })
         .flat() || []

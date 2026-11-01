@@ -286,6 +286,9 @@ export const getSeriesColor = (
   chartMax: number,
   theme: string,
   colorBySeries?: any,
+  /** Position of this series in its chart. Only the SQL builder passes it; the
+   *  PromQL builder deliberately lets ECharts colour its own series. */
+  seriesIndex?: number,
 ): string | null => {
   const colorPalette = getColorPalette(theme);
 
@@ -313,7 +316,12 @@ export const getSeriesColor = (
   } else if (colorCfg.mode === "palette-classic-by-series") {
     return colorPalette[getSeriesHash(seriesName?.toString() ?? "", colorPalette)];
   } else if (colorCfg.mode === "palette-classic") {
-    return null;
+    // With a series position known, the classic mode is index-based. Leaving it to
+    // ECharts meant the SQL builder's explicit `color: null` pinned EVERY series to
+    // the theme default, so a five-series panel drew five identical lines under a
+    // legend that could not tell them apart.
+    if (seriesIndex === undefined) return null;
+    return colorPalette[seriesIndex % colorPalette.length];
   } else {
     const d3ColorObj = scaleLinear(
       getDomainPartitions(chartMin, chartMax, colorCfg?.fixedColor?.length ?? colorPalette.length),

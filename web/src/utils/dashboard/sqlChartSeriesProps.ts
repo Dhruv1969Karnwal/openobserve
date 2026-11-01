@@ -25,7 +25,7 @@ export const getPropsByChartTypeForSeries = (panelSchema: any) => {
       return {
         type: "bar",
         emphasis: { focus: "series" },
-        lineStyle: { width: 1.5 },
+        lineStyle: { width: 2 },
       };
     case "line":
       return {
@@ -42,7 +42,7 @@ export const getPropsByChartTypeForSeries = (panelSchema: any) => {
           : false,
         showSymbol: panelSchema.config?.show_symbol ?? false,
         areaStyle: null,
-        lineStyle: { width: panelSchema.config?.line_thickness ?? 1.5 },
+        lineStyle: { width: panelSchema.config?.line_thickness ?? 2 },
       };
     case "scatter":
       return {
@@ -68,7 +68,7 @@ export const getPropsByChartTypeForSeries = (panelSchema: any) => {
           show: true,
         },
         radius: "50%",
-        lineStyle: { width: 1.5 },
+        lineStyle: { width: 2 },
       };
     case "donut":
       return {
@@ -89,13 +89,13 @@ export const getPropsByChartTypeForSeries = (panelSchema: any) => {
         labelLine: {
           show: false,
         },
-        lineStyle: { width: 1.5 },
+        lineStyle: { width: 2 },
       };
     case "h-bar":
       return {
         type: "bar",
         emphasis: { focus: "series" },
-        lineStyle: { width: 1.5 },
+        lineStyle: { width: 2 },
       };
     case "area":
       return {
@@ -111,7 +111,7 @@ export const getPropsByChartTypeForSeries = (panelSchema: any) => {
         emphasis: { focus: "series" },
         areaStyle: {},
         showSymbol: panelSchema.config?.show_symbol ?? false,
-        lineStyle: { width: panelSchema.config?.line_thickness ?? 1.5 },
+        lineStyle: { width: panelSchema.config?.line_thickness ?? 2 },
       };
     case "stacked":
       return {
@@ -119,7 +119,7 @@ export const getPropsByChartTypeForSeries = (panelSchema: any) => {
         emphasis: {
           focus: "series",
         },
-        lineStyle: { width: 1.5 },
+        lineStyle: { width: 2 },
       };
     case "heatmap":
       return {
@@ -133,7 +133,7 @@ export const getPropsByChartTypeForSeries = (panelSchema: any) => {
             shadowColor: "rgba(0, 0, 0, 0.5)",
           },
         },
-        lineStyle: { width: 1.5 },
+        lineStyle: { width: 2 },
       };
     case "area-stacked":
       return {
@@ -152,7 +152,7 @@ export const getPropsByChartTypeForSeries = (panelSchema: any) => {
           focus: "series",
         },
         showSymbol: panelSchema.config?.show_symbol ?? false,
-        lineStyle: { width: panelSchema.config?.line_thickness ?? 1.5 },
+        lineStyle: { width: panelSchema.config?.line_thickness ?? 2 },
       };
     case "metric":
       return {
@@ -165,7 +165,7 @@ export const getPropsByChartTypeForSeries = (panelSchema: any) => {
         emphasis: {
           focus: "series",
         },
-        lineStyle: { width: 1.5 },
+        lineStyle: { width: 2 },
       };
     case "gauge":
       return {

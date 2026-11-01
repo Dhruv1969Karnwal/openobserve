@@ -99,9 +99,11 @@ describe("sqlChartSeriesProps - getPropsByChartTypeForSeries", () => {
       expect(result.lineStyle.width).toBe(3);
     });
 
-    it("defaults line thickness to 1.5", () => {
+    it("defaults line thickness to the studied 2px", () => {
+      // 1.5px antialiases to ~1 device px on a 1x screen, which is what the
+      // accessibility review measured as an invisible series.
       const result = getPropsByChartTypeForSeries(makeSchema("line")) as any;
-      expect(result.lineStyle.width).toBe(1.5);
+      expect(result.lineStyle.width).toBe(2);
     });
 
     it("areaStyle is null for line (not area)", () => {

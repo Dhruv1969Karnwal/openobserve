@@ -124,7 +124,29 @@ export function buildSQLContext(
 
   const zAxisKeys = getZAxisKeys();
 
-  const breakDownKeys = getBreakDownKeys();
+  // A SQL `GROUP BY time, category` panel arrives with BOTH columns in `x` and an
+  // empty `breakdown`. A category is not a position on a time scale: plotting it as
+  // a second axis put two label rows in one bottom band (they printed over each
+  // other) and drew ONE line that zig-zags between categories at every bucket. A
+  // trailing x column is therefore the grouping dimension — what `breakdown` already
+  // means — so the series split, one axis remains, and the legend names the groups.
+  // Chart types whose second x is a real coordinate keep both.
+  const GROUPABLE_CHART_TYPES = [
+    "line",
+    "area",
+    "bar",
+    "stacked",
+    "area-stacked",
+    "h-bar",
+    "h-stacked",
+    "combo",
+  ];
+  const groupKeysFromX =
+    GROUPABLE_CHART_TYPES.includes(panelSchema?.type) && xAxisKeys.length > 1
+      ? xAxisKeys.slice(1)
+      : [];
+
+  const breakDownKeys = [...getBreakDownKeys(), ...groupKeysFromX];
 
   const getMarkLineData = (panelSchema: any) => {
     return (
@@ -173,6 +195,10 @@ export function buildSQLContext(
   );
 
   // get the axis data using key
+  // The axes rendered under the plot are the POSITIONAL x keys; a column moved into
+  // `breakDownKeys` is a series identity, not an axis.
+  const axisXKeys = xAxisKeys.filter((key: any) => !groupKeysFromX.includes(key));
+
   const getAxisDataFromKey = (key: string) => {
     const data =
       missingValueData?.filter((item: any) => {
@@ -458,9 +484,7 @@ export function buildSQLContext(
                   ? 30
                   : legendConfig.orient === "vertical" && panelSchema.config?.show_legends
                     ? 0
-                    : breakDownKeys.length > 0
-                      ? 25
-                      : 0;
+                    : 0; // a breakdown paints no second label band, so nothing to reserve
               return baseBottom + additionalBottomSpace;
             })()) + (reserveYLabelLeft || reserveHorizontalYName ? X_AXIS_TICK_LABEL_BAND : 0),
     },
@@ -503,11 +527,7 @@ export function buildSQLContext(
 
                 //we does not required any linebreaks for h-stacked because we only use one x axis
                 if (panelSchema.type === "h-stacked") return params?.value?.toString();
-                for (
-                  let i = 0;
-                  i < xAxisKeys.length + breakDownKeys.length - params?.axisIndex - 1;
-                  i++
-                ) {
+                for (let i = 0; i < axisXKeys.length - params?.axisIndex - 1; i++) {
                   lineBreaks += " \n \n";
                 }
                 params.value = params?.value?.toString();
@@ -522,11 +542,7 @@ export function buildSQLContext(
                     panelSchema.config?.decimals,
                   ),
                 );
-              for (
-                let i = 0;
-                i < xAxisKeys.length + breakDownKeys.length - params?.axisIndex - 1;
-                i++
-              ) {
+              for (let i = 0; i < axisXKeys.length - params?.axisIndex - 1; i++) {
                 lineBreaks += " \n \n";
               }
               params.value = params?.value?.toString();
@@ -599,8 +615,19 @@ export function buildSQLContext(
         }
       },
     },
-    xAxis: [...xAxisKeys, ...breakDownKeys]?.map((key: any, index: number) => {
-      const data = getAxisDataFromKey(key);
+    // A breakdown is a SERIES dimension, not an axis: `getSeries` emits one series
+    // per breakdown value (named in the legend) and `getSeriesData` positions every
+    // series on xAxis[0]. Emitting an axis per breakdown key put a second row of
+    // category labels in the same bottom band as the time ticks, so the two printed
+    // over each other. Trellis already keeps only xAxis[0].
+    xAxis: axisXKeys?.map((key: any, index: number) => {
+      // With a breakdown the rows are (x, breakdown) pairs, so the raw x column
+      // repeats each bucket; the axis wants one slot per bucket and the lookup map
+      // already resolves `breakdown||x`. Without a breakdown the rows are 1:1 with
+      // the axis, so leave them exactly as they are.
+      const data = breakDownKeys.length
+        ? Array.from(new Set(getAxisDataFromKey(key)))
+        : getAxisDataFromKey(key);
 
       //unique value index array
       const arr: any = [];
@@ -652,12 +679,12 @@ export function buildSQLContext(
           interval:
             panelSchema.type == "h-stacked"
               ? "auto"
-              : index == xAxisKeys.length + breakDownKeys.length - 1
+              : index == axisXKeys.length - 1
                 ? "auto"
                 : function (i: any) {
                     return shownLabelIndexes.has(i);
                   },
-          overflow: index == xAxisKeys.length + breakDownKeys.length - 1 ? "none" : "truncate",
+          overflow: index == axisXKeys.length - 1 ? "none" : "truncate",
           // hide axis label if overlaps
           hideOverlap: true,
           width: labelWidth,
@@ -674,7 +701,7 @@ export function buildSQLContext(
             : (panelSchema.config?.axis_border_show ?? false),
         },
         axisTick: {
-          show: xAxisKeys.length + breakDownKeys.length == 1 ? false : true,
+          show: axisXKeys.length == 1 ? false : true,
           align: "left",
           alignWithLabel: false,
           length: 5,
