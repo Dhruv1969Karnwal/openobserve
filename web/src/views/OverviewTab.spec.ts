@@ -1242,4 +1242,204 @@ describe("OverviewTab", () => {
       expect(streamService.nameList).not.toHaveBeenCalled();
     });
   });
+
+  // The window's payloads answer more than the sections used to print: the
+  // anomaly history returns `value`/`lower_bound`/`upper_bound` per bucket and
+  // the alert history returns every run, not only the ones that fired.
+  describe("what the already-fetched payloads answer", () => {
+    const MONITORS = '[data-test="overview-anomaly-monitors-section"]';
+    const PLOT = '[data-test="overview-anomaly-series-plot"]';
+
+    /** µs, `secondsAgo` before mount — inside the default 15-minute window. */
+    const ago = (secondsAgo: number) => (Date.now() - secondsAgo * 1000) * 1000;
+    const digits = (text: string) => text.replace(/[,\s]/g, "");
+
+    const givenAnomalyConfigs = (configs: Array<Record<string, unknown>>) => {
+      vi.mocked(anomalyService.list).mockResolvedValue({ data: configs } as never);
+    };
+    const givenAnomalyHistory = (entries: Array<Record<string, unknown>>) => {
+      vi.mocked(anomalyService.getAllHistory).mockResolvedValue({
+        data: { configs: entries },
+      } as never);
+    };
+    const bucket = (secondsAgo: number, anomalous: number) => ({
+      id: `anh-${secondsAgo}`,
+      timestamp: ago(secondsAgo),
+      anomaly_count: anomalous,
+      value: 1258,
+      lower_bound: 718,
+      upper_bound: 2418,
+    });
+
+    it("should draw the bounds the anomaly history returned as a series", async () => {
+      givenAnomalyConfigs([{ id: "anm-1", name: "ingest-drift", stream_name: "ingest_gateway" }]);
+      givenAnomalyHistory([
+        {
+          cfg: { id: "anm-1" },
+          hits: [bucket(60, 2), bucket(300, 0), bucket(600, 0), bucket(780, 1)],
+        },
+      ]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      const card = wrapper.find(ANOMALIES);
+      expect(card.find(PLOT).exists()).toBe(true);
+      expect(digits(card.text())).toContain("1258");
+      expect(digits(card.text())).toContain("718–2418");
+    });
+
+    it("should print the bounds as figures when the range holds too few buckets to draw", async () => {
+      givenAnomalyConfigs([{ id: "anm-1", name: "ingest-drift", stream_name: "ingest_gateway" }]);
+      givenAnomalyHistory([{ cfg: { id: "anm-1" }, hits: [bucket(60, 2), bucket(300, 0)] }]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      expect(wrapper.find(PLOT).exists()).toBe(false);
+      expect(digits(wrapper.find(ANOMALIES).text())).toContain("1258");
+    });
+
+    it("should not draw a series for a bucket whose bounds never arrived", async () => {
+      givenAnomalyConfigs([{ id: "anm-1", name: "ingest-drift", stream_name: "ingest_gateway" }]);
+      givenAnomalyHistory([
+        {
+          cfg: { id: "anm-1" },
+          hits: [
+            { id: "a", timestamp: ago(60), anomaly_count: 2 },
+            { id: "b", timestamp: ago(300), anomaly_count: 0 },
+            { id: "c", timestamp: ago(600), anomaly_count: 0 },
+          ],
+        },
+      ]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      expect(wrapper.find(ANOMALIES).exists()).toBe(true);
+      expect(wrapper.find(PLOT).exists()).toBe(false);
+    });
+
+    it("should list the monitors that answered nothing in this range, once each", async () => {
+      givenAnomalyConfigs([
+        { id: "anm-1", name: "ingest-drift", stream_name: "ingest_gateway" },
+        { id: "anm-2", name: "checkout-drift", stream_name: "app_checkout" },
+      ]);
+      givenAnomalyHistory([{ cfg: { id: "anm-1" }, hits: [bucket(60, 2)] }]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      const monitors = wrapper.find(MONITORS);
+      expect(monitors.exists()).toBe(true);
+      expect(monitors.text()).toContain("checkout-drift");
+      expect(monitors.text()).toContain("Stream: app_checkout");
+      expect(monitors.text()).toContain("0 anomalous point");
+      expect(monitors.text()).not.toContain("ingest-drift");
+    });
+
+    it("should not let quiet monitors stand in for content on an empty page", async () => {
+      givenAnomalyConfigs([{ id: "anm-2", name: "checkout-drift", stream_name: "app_checkout" }]);
+      givenAnomalyHistory([{ cfg: { id: "anm-2" }, hits: [bucket(60, 0)] }]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      expect(wrapper.find(MONITORS).exists()).toBe(false);
+      expect(wrapper.find(EMPTY_STATE).exists()).toBe(true);
+    });
+
+    it("should show the runs that evaluated clean, from the rows already fetched", async () => {
+      vi.mocked(alertsService.getHistory).mockResolvedValue({
+        data: {
+          hits: [
+            {
+              id: "h1",
+              status: "firing",
+              stream_name: "k8s",
+              alert_name: "Container OOM",
+              timestamp: ago(30),
+            },
+            {
+              id: "h2",
+              status: "succeeded",
+              stream_name: "app_cart",
+              alert_name: "Cart latency",
+              timestamp: ago(20),
+            },
+            {
+              id: "h3",
+              status: "succeeded",
+              stream_name: "app_cart",
+              alert_name: "Cart latency",
+              timestamp: ago(40),
+            },
+          ],
+        },
+      } as never);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      const events = wrapper.find(RECENT_EVENTS);
+      expect(events.text()).toContain("Container OOM");
+      expect(events.text()).toContain("Cart latency");
+      expect(events.text()).toContain("2 evaluations");
+      expect(events.findAll(".text-compact")).toHaveLength(2);
+    });
+
+    it("should tally the runs the listed rows cannot show", async () => {
+      const TALLY = '[data-test="overview-run-tally"]';
+      const hits = [
+        { id: "f1", status: "firing", stream_name: "k8s", alert_name: "OOM", timestamp: ago(30) },
+      ];
+      ["cart", "payments"].forEach((alert) => {
+        [20, 40, 60, 80].forEach((s) =>
+          hits.push({
+            id: `${alert}-${s}`,
+            status: "succeeded",
+            stream_name: `app_${alert}`,
+            alert_name: `${alert} latency`,
+            timestamp: ago(s),
+          }),
+        );
+      });
+      vi.mocked(alertsService.getHistory).mockResolvedValue({ data: { hits } } as never);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      const tally = wrapper.find(TALLY);
+      expect(tally.exists()).toBe(true);
+      expect(tally.text()).toContain("1 Firing");
+      expect(tally.text()).toContain("8 Ok");
+      expect(wrapper.find(RECENT_EVENTS).text()).toContain("4 evaluations");
+    });
+
+    it("should not tally a window the listed rows already cover", async () => {
+      givenRecentEvents();
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      expect(wrapper.find(RECENT_EVENTS).exists()).toBe(true);
+      expect(wrapper.find('[data-test="overview-run-tally"]').exists()).toBe(false);
+    });
+
+    it("should fill the fold without asking for anything the page did not already read", async () => {
+      givenRecentEvents();
+      givenAnomalyConfigs([{ id: "anm-1", name: "ingest-drift", stream_name: "ingest_gateway" }]);
+      givenAnomalyHistory([{ cfg: { id: "anm-1" }, hits: [bucket(60, 2)] }]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      expect(wrapper.find(RECENT_EVENTS).exists()).toBe(true);
+      expect(organizationsService.get_organization_summary).not.toHaveBeenCalled();
+      expect(streamService.nameList).not.toHaveBeenCalled();
+      expect(alertsService.getHistory).toHaveBeenCalledTimes(1);
+      expect(anomalyService.list).toHaveBeenCalledTimes(1);
+      expect(anomalyService.getAllHistory).toHaveBeenCalledTimes(1);
+    });
+  });
 });
