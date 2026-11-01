@@ -16,8 +16,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <template>
   <!-- Grouped left rail (prototype admin model): the rail is always present;
-       the chosen section renders its own page (header + table) to the right. -->
-  <OPageLayout bleed :sidebar-width="230" data-test="iam-page">
+       the chosen section renders its own page (header + table) to the right.
+       delegate-sidebar puts that header in the page frame, above the rail. -->
+  <OPageLayout bleed delegate-sidebar :sidebar-width="230" data-test="iam-page">
     <template #sidebar>
       <SectionRail :groups="sectionGroups" :active-key="activeSection" :title="t('menu.iam')" />
     </template>

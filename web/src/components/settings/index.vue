@@ -16,8 +16,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <template>
   <!-- Grouped left rail (prototype admin model) — same shell as IAM. The rail is
-       always present; the chosen section renders to the right. -->
-  <OPageLayout bleed :sidebar-width="230">
+       always present; the chosen section renders to the right. delegate-sidebar
+       puts the section's header in the page frame, above the rail. -->
+  <OPageLayout bleed delegate-sidebar :sidebar-width="230">
     <template #sidebar>
       <SectionRail
         :groups="sectionGroups"
@@ -28,14 +29,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     <!-- Form-style sections (general, org params, license, domain): a section
          header above a centered reading column. -->
-    <div v-if="isConstrainedSection" class="flex h-full min-h-0 flex-col">
-      <OPageHeader
-        :title="raw(activeSectionItem?.label || '')"
-        :title-data-test="`settings-${activeSectionItem?.key}-page-title`"
-        :subtitle="raw(activeSectionItem?.description || '')"
-        :icon="activeSectionItem?.icon as any"
-        class="border-border-default shrink-0 border-b"
-      />
+    <OPageLayout
+      v-if="isConstrainedSection"
+      :title="raw(activeSectionItem?.label || '')"
+      :subtitle="raw(activeSectionItem?.description || '')"
+      :icon="activeSectionItem?.icon as any"
+      :title-data-test="`settings-${activeSectionItem?.key}-page-title`"
+      bleed
+    >
       <ConstrainedPage
         :size="activeSection === 'password_policy' ? 'full' : 'lg'"
         align="left"
@@ -44,7 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       >
         <router-view title="" />
       </ConstrainedPage>
-    </div>
+    </OPageLayout>
     <!-- Table/list sections render their own header (OPageLayout) inside. Do NOT
          pass a `title` attr here: these children are OPageLayout-rooted, so a
          fallthrough `title` would clobber their own `:title` prop and blank the
@@ -56,7 +57,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 </template>
 
 <script lang="ts">
-import OPageHeader from "@/lib/core/PageHeader/OPageHeader.vue";
 import ConstrainedPage from "@/components/common/ConstrainedPage.vue";
 import OPageLayout from "@/lib/core/PageLayout/OPageLayout.vue";
 import SectionRail from "@/components/common/SectionRail.vue";
@@ -75,7 +75,6 @@ import { isSlackSettingsVisible, readSlackOrgConfig } from "@/utils/slackSetting
 export default defineComponent({
   name: "AppSettings",
   components: {
-    OPageHeader,
     ConstrainedPage,
     OPageLayout,
     SectionRail,
