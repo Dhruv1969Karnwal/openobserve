@@ -461,8 +461,12 @@ export interface OTableProps<TData = any> {
   persistColumns?: boolean;
 
   // ── Layout ──
-  /** When false, table shrinks to fit its content instead of filling the container height (default: true) */
-  fillHeight?: boolean;
+  /**
+   * When false, table shrinks to fit its content instead of filling the container
+   * height (default: true). "auto" fills only when the rows actually need the room:
+   * a short list draws a short frame rather than a viewport-tall empty box.
+   */
+  fillHeight?: boolean | "auto";
 
   // ── Display ──
   loading?: boolean;

@@ -17,6 +17,7 @@ import { useI18nTyped } from "@/types/i18n";
 import { useTableColumnPersistence } from "./composables/useTableColumnPersistence";
 import OTableColumnToggle from "./sub-components/OTableColumnToggle.vue";
 import { FlexRender, type Row } from "@tanstack/vue-table";
+import { shouldFillHeight } from "./fillPolicy";
 import {
   TOOLTIP_OFF_ATTR,
   TOOLTIP_TRIGGER_ATTR,
@@ -934,6 +935,51 @@ onBeforeUnmount(() => {
   containerRO = null;
 });
 
+// ── fillHeight="auto": the frame sizes to its content until it must scroll ──
+const tableRootRef = ref<HTMLElement | null>(null);
+const autoFills = ref(false);
+const fillsFrame = computed(
+  () => props.fillHeight === true || (props.fillHeight === "auto" && autoFills.value),
+);
+function measureAutoFill() {
+  if (props.fillHeight !== "auto") return;
+  const root = tableRootRef.value;
+  const scroller = scrollContainerRef.value;
+  const parent = root?.parentElement;
+  if (!root || !scroller || !parent) return;
+  // Measure the ROW STACK, never the scroll box: the box is what this decision
+  // stretches, so reading its height would confirm whatever it already chose.
+  // A tbody's height is content-driven and does not change when the frame grows.
+  const body = scroller.querySelector("tbody");
+  const head = scroller.querySelector("thead");
+  const frameChrome = root.offsetHeight - scroller.offsetHeight;
+  const content = body
+    ? (head?.offsetHeight ?? 0) + body.offsetHeight + frameChrome
+    : scroller.scrollHeight;
+  const next = shouldFillHeight(parent.clientHeight, content, autoFills.value);
+  if (next !== autoFills.value) autoFills.value = next;
+}
+let fillRO: ResizeObserver | null = null;
+onMounted(() => {
+  if (props.fillHeight !== "auto") return;
+  autoFills.value = true; // before the first measurement, behave as today
+  nextTick(() => requestAnimationFrame(measureAutoFill));
+  if (typeof ResizeObserver !== "undefined" && tableRootRef.value?.parentElement) {
+    fillRO = new ResizeObserver(() => measureAutoFill());
+    fillRO.observe(tableRootRef.value.parentElement);
+  }
+});
+onBeforeUnmount(() => {
+  fillRO?.disconnect();
+  fillRO = null;
+});
+watch(
+  () => [props.data?.length, props.loading, props.fillHeight],
+  () => nextTick(() => requestAnimationFrame(measureAutoFill)),
+);
+// The chrome term depends on the current stretch, so settle with one more pass.
+watch(autoFills, () => nextTick(() => requestAnimationFrame(measureAutoFill)));
+
 // ── Flex columns (fill-until-first-resize) ──────────────────────
 // Columns the page marks `meta.flex` divide the leftover width on initial
 // render (so the table fills the viewport with no empty space). The first time
@@ -1328,13 +1374,14 @@ defineExpose({
 
 <template>
   <div
+    ref="tableRootRef"
     data-test="o2-table-root"
     :class="[
       'flex flex-col',
       // Delegated-scroll tables must not clip, or the horizontally-overflowing
       // table is swallowed and the grid loses its bottom scrollbar.
       isDelegatedScroll ? 'overflow-visible' : 'overflow-hidden',
-      props.fillHeight ? 'h-full' : 'h-auto',
+      fillsFrame ? 'h-full' : 'h-auto',
     ]"
   >
     <!-- ── Top slot (search bar, title, actions) ─────────────── -->
@@ -1437,7 +1484,7 @@ defineExpose({
           isDelegatedScroll
             ? 'overflow-visible'
             : ['overflow-y-auto', allowHorizontalScroll ? 'overflow-x-auto' : 'overflow-x-hidden'],
-          props.fillHeight && !isDelegatedScroll ? 'flex-1' : '',
+          fillsFrame && !isDelegatedScroll ? 'flex-1' : '',
         ]"
         :style="{
           maxHeight: props.maxHeight
@@ -1773,12 +1820,12 @@ defineExpose({
         </table>
 
         <!-- ── Access Denied State ───────────────────────────── -->
-        <OTableEmpty v-if="showForbidden" :floor="!props.fillHeight" data-test="o2-table-forbidden">
+        <OTableEmpty v-if="showForbidden" :floor="!fillsFrame" data-test="o2-table-forbidden">
           <OEmptyState size="hero" preset="no-access" />
         </OTableEmpty>
 
         <!-- ── Empty State ───────────────────────────────────── -->
-        <OTableEmpty v-else-if="showEmpty" :message="props.emptyMessage" :floor="!props.fillHeight">
+        <OTableEmpty v-else-if="showEmpty" :message="props.emptyMessage" :floor="!fillsFrame">
           <template v-if="slots.empty" #default>
             <slot name="empty" />
           </template>
