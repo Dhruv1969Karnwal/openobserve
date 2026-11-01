@@ -123,7 +123,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         >
           <h1
             v-if="titleOverflow === 'visible'"
-            class="text-text-heading min-h-6 min-w-0 text-base! leading-[1.45]! font-semibold! tracking-[-0.02em]!"
+            class="text-text-heading min-h-7 min-w-0 text-xl! leading-[1.3]! font-semibold! tracking-[-0.02em]!"
             :data-test="titleDataTest"
           >
             <slot name="title">{{ title }}</slot>
@@ -131,7 +131,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <OTruncatedText
             v-else
             as="h1"
-            class="text-text-heading min-h-6 text-base! leading-[1.45]! font-semibold! tracking-[-0.02em]!"
+            class="text-text-heading min-h-7 text-xl! leading-[1.3]! font-semibold! tracking-[-0.02em]!"
             :data-test="titleDataTest"
           >
             <slot name="title">{{ title }}</slot>
