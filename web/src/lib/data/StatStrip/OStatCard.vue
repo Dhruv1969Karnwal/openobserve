@@ -117,7 +117,6 @@ const TONES: Record<StatTone, { chip: string; value: string; bar: string }> = {
   },
 };
 
-const tc = computed(() => TONES[props.tone ?? "neutral"] ?? TONES.neutral);
 // Empty ("" / null / "—") shows a dash; a real 0 shows "0". Both render MUTED
 // (nothing to draw attention to) — only a positive value gets the tone colour.
 const displayValue = computed(() => {
@@ -128,17 +127,31 @@ const isMuted = computed(() => {
   const v = props.value;
   return v === 0 || v === "0" || v === "" || v == null || v === "—";
 });
-// Proportion-bar fill %. The track is ALWAYS rendered (so height never shifts as
-// data loads); only the fill width changes:
-//   empty / "—" / 0  → 0% (empty track)
-//   value, no max    → 0%: a full line with no denominator encodes nothing
-//   value with max   → its share of the total
+// Proportion-bar fill %: a share of `max`, or 0 when there is no denominator.
 const pct = computed(() => {
   if (isMuted.value) return 0;
   const v = Number(props.value);
   if (props.max == null || props.max <= 0 || !Number.isFinite(v)) return 0;
   return Math.max(0, Math.min(100, (v / props.max) * 100));
 });
+// The track only means something when a denominator exists; kept while loading
+// so the card height does not jump as data lands.
+const showTrack = computed(() => props.loading || (props.max != null && props.max > 0));
+// Colour on a tile is a signal, never a label: only a real state (healthy, at
+// risk, failing) tints the figure. A decorative tone would put the palette on
+// chrome, where a KPI has nothing to warn about.
+const SEMANTIC_TONE: Partial<Record<StatTone, true>> = {
+  success: true,
+  warning: true,
+  error: true,
+};
+const semanticTone = computed(() =>
+  props.tone && SEMANTIC_TONE[props.tone] ? TONES[props.tone] : null,
+);
+const valueClass = computed(() =>
+  isMuted.value ? "text-text-muted" : (semanticTone.value?.value ?? "text-text-heading"),
+);
+const barClass = computed(() => semanticTone.value?.bar ?? "bg-text-muted");
 const trendArrow = computed(() =>
   props.trend?.direction === "up" ? "▲" : props.trend?.direction === "down" ? "▼" : "—",
 );
@@ -178,7 +191,7 @@ const trendClass = computed(() =>
              bare number under an icon does not say which metric it is. -->
         <span
           class="shrink-0 text-2xl leading-none font-semibold whitespace-nowrap max-lg:text-lg"
-          :class="isMuted ? 'text-text-muted' : tc.value"
+          :class="valueClass"
         >
           <OSkeleton
             v-if="loading"
@@ -214,8 +227,7 @@ const trendClass = computed(() =>
       </div>
       <span
         v-if="icon || slots.icon"
-        class="rounded-default grid h-7 w-7 shrink-0 place-items-center max-lg:h-6 max-lg:w-6"
-        :class="tc.chip"
+        class="bg-surface-subtle text-text-secondary rounded-default grid h-7 w-7 shrink-0 place-items-center max-lg:h-6 max-lg:w-6"
       >
         <slot name="icon">
           <!-- 20px glyph: the step between OIcon's sm (16px) and md (24px), so the
@@ -224,12 +236,10 @@ const trendClass = computed(() =>
         </slot>
       </span>
     </div>
-    <!-- Track is always rendered so the card height never shifts as data loads;
-         only the fill width changes. -->
-    <div class="bg-surface-subtle h-1 overflow-hidden rounded-full">
+    <div v-if="showTrack" class="bg-surface-subtle h-1 overflow-hidden rounded-full">
       <div
         class="h-full rounded-full transition-all duration-300"
-        :class="tc.bar"
+        :class="barClass"
         :style="{ width: pct + '%' }"
       />
     </div>
