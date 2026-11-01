@@ -77,15 +77,23 @@ const onCardClick = (item: StatItem) => {
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-2 max-lg:gap-1.5" data-test="o-stat-strip">
-    <!-- The basis is the wrap threshold, not a fixed width: tiles still grow to
-         fill a wide strip. The default suits long labels; `compact` is for short
-         ones, where basis-52 would wrap a five-tile strip onto two rows. -->
+  <div
+    :class="[
+      'grid gap-2 max-lg:gap-1.5',
+      compact
+        ? 'grid-cols-[repeat(auto-fit,minmax(9rem,1fr))]'
+        : 'grid-cols-[repeat(auto-fit,minmax(13rem,1fr))]',
+    ]"
+    data-test="o-stat-strip"
+  >
+    <!-- An auto-fit grid, not a growing flex row: every tile in the strip is the
+         same width and the columns line up down the strip. Under flex, a strip
+         whose last row held one tile stretched that tile across the canvas, so
+         the same component measured 256px on one screen and 210px plus a full-
+         width orphan on the next. -->
     <OStatCard
       v-for="item in items"
       :key="item.key"
-      class="grow max-lg:shrink-0 max-lg:basis-auto"
-      :class="compact ? 'basis-36' : 'basis-52'"
       :label="item.label"
       :value="item.value"
       :sub="item.sub"
