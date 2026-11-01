@@ -143,7 +143,13 @@ const selectionLabel = computed(() => {
         />
       </div>
 
-      <nav class="flex items-center gap-1" :aria-label="t('components.pagination.pagination')">
+      <!-- One page has nothing to page through: four disabled arrows read as a
+           control that is broken, so the range and the page size carry the row. -->
+      <nav
+        v-if="totalPages > 1"
+        class="flex items-center gap-1"
+        :aria-label="t('components.pagination.pagination')"
+      >
         <OButton
           variant="outline"
           size="icon"
