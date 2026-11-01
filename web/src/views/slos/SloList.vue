@@ -858,7 +858,9 @@ function hasBudget(row: SloListItem): boolean {
  *  an overspent budget still reads "-38.0%" rather than being flattened to 0. */
 function budgetBarValue(row: SloListItem): number {
   const v = row.status?.error_budget_remaining ?? 0;
-  return Math.max(0, Math.min(100, v));
+  // OProgressBar takes a 0..1 ratio; this field is a percentage, so handing it
+  // over raw made every bar read full beside a number that said otherwise.
+  return Math.max(0, Math.min(1, v / 100));
 }
 
 function budgetTone(row: SloListItem): string {
