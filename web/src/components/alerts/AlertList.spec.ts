@@ -591,6 +591,13 @@ describe("AlertList - data fetching and columns", () => {
       }),
       makeAlert(3, { is_real_time: true, name: "RealTime Alert" }),
     ];
+    // WHY: cadence moved to the identity row's second line, so the column is
+    // default-hidden; this pins the CELL renderer, which needs the picker's own
+    // (persisted) "show it" choice to reach the DOM at all.
+    localStorage.setItem(
+      "o2-tables-column-state-v1",
+      JSON.stringify({ "alerts-alert-list": { visibility: { frequency: true } } }),
+    );
     const wrapper: any = await mountAlertList();
     await waitData(wrapper);
 
@@ -601,6 +608,33 @@ describe("AlertList - data fetching and columns", () => {
       .findAll('[data-test="o2-table-cell-frequency"]')
       .map((c: any) => c.text());
     expect(texts).toEqual(["15 Mins", "*/10 * * * *", "--"]);
+    localStorage.removeItem("o2-tables-column-state-v1");
+  });
+
+  it("prints cadence and the rule's own expression on the identity row's second line", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+    wrapper.vm.activeTab = "all";
+    // Rows in the shape `renderAlerts` produces: the line reads the mapped row.
+    wrapper.vm.filteredResults = [
+      {
+        alert_id: "a1",
+        name: "Interval Alert",
+        alert_type: "Scheduled",
+        enabled: true,
+        stream_name: "app_checkout",
+        rawCondition: { type: "threshold", column: "duration_ms", operator: ">", value: 800 },
+        frequency: 15,
+        frequency_type: "minutes",
+      },
+    ];
+    await flushPromises();
+
+    const line = wrapper.find('[data-test="alert-list-Interval Alert-rule-facts"]');
+    expect(line.exists()).toBe(true);
+    expect(line.text()).toContain("app_checkout");
+    expect(line.text()).toContain("duration_ms > 800");
+    expect(line.text()).toContain("every 15 minutes");
   });
 
   // Feature 2 (PT-3/PT-6): the columns that REPLACED them.
@@ -610,6 +644,56 @@ describe("AlertList - data fetching and columns", () => {
     const ids = wrapper.vm.columns.map((c: any) => c.id ?? c.name);
     expect(ids).toContain("priority");
     expect(ids).toContain("tags");
+  });
+
+  describe("dataset-aware optional columns (O16)", () => {
+    const visibleIds = (wrapper: any) =>
+      Object.keys(wrapper.vm.columnVisibilityPlan.visibility).filter(
+        (id) => wrapper.vm.columnVisibilityPlan.visibility[id],
+      );
+
+    it("hides an optional column that is empty across the whole loaded dataset", async () => {
+      const wrapper: any = await mountAlertList();
+      await waitData(wrapper);
+      wrapper.vm.activeTab = "all";
+      await flushPromises();
+
+      const plan = wrapper.vm.columnVisibilityPlan;
+      expect(plan.hidden.priority).toBe("dataset-empty");
+      expect(plan.hidden.tags).toBe("dataset-empty");
+      expect(plan.hidden.groups).toBe("dataset-empty");
+      // Hidden, never removed: the picker still lists them.
+      const ids = wrapper.vm.columns.map((c: any) => c.id);
+      expect(ids).toContain("priority");
+      expect(visibleIds(wrapper)).not.toContain("priority");
+    });
+
+    it("keeps the mandatory columns visible even when they are empty", async () => {
+      alertsDB = [{ ...makeAlert(1, { name: "Bare Alert" }), last_outcome: null } as any];
+      const wrapper: any = await mountAlertList();
+      await waitData(wrapper);
+      wrapper.vm.activeTab = "all";
+      await flushPromises();
+
+      for (const id of ["name", "last_outcome", "actions"]) {
+        expect(wrapper.vm.columnVisibilityPlan.visibility[id], id).toBe(true);
+      }
+    });
+
+    it("brings the columns back when one row of the dataset carries a value", async () => {
+      const wrapper: any = await mountAlertList();
+      await waitData(wrapper);
+      wrapper.vm.activeTab = "all";
+      wrapper.vm.filteredResults = [
+        { alert_id: "a1", name: "Plain Alert", enabled: true, priority: null, tags: [] },
+        { alert_id: "a2", name: "Titled Alert", enabled: true, priority: 1, tags: ["prod"] },
+      ];
+      await flushPromises();
+
+      expect(wrapper.vm.columnVisibilityPlan.visibility.priority).toBe(true);
+      expect(wrapper.vm.columnVisibilityPlan.visibility.tags).toBe(true);
+      expect(wrapper.find('[data-test="alert-list-Titled Alert-priority"]').exists()).toBe(true);
+    });
   });
 
   it("renders the summary strip with operational counts", async () => {
@@ -751,6 +835,55 @@ describe("AlertList - filtering behaviors", () => {
 });
 
 // 4. Actions: toggle, delete, clone, edit, export
+describe("AlertList - paused legibility and outcome wording", () => {
+  it("names the paused state in the row and gives the toggle the row in its accessible name", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+    wrapper.vm.activeTab = "all";
+    await flushPromises();
+
+    // Fixture row 2 is disabled.
+    const paused = wrapper.find('[data-test="alert-list-RealTime Alert B-paused-chip"]');
+    expect(paused.exists()).toBe(true);
+    expect(paused.text()).toBe("Paused");
+    expect(wrapper.find('[data-test="alert-list-Scheduled Alert A-paused-chip"]').exists()).toBe(
+      false,
+    );
+
+    const pausedBtn = wrapper.find('[data-test="alert-list-RealTime Alert B-pause-start-alert"]');
+    expect(pausedBtn.attributes("aria-label")).toBe("Resume RealTime Alert B");
+    expect(
+      wrapper
+        .find('[data-test="alert-list-Scheduled Alert A-pause-start-alert"]')
+        .attributes("aria-label"),
+    ).toBe("Pause Scheduled Alert A");
+  });
+
+  it("prints the ok bucket as Not firing and keeps the server token in the tooltip", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+
+    const row = {
+      alert_id: "a1",
+      name: "Quiet Alert",
+      enabled: true,
+      last_outcome: "succeeded",
+      last_outcome_at: 1793550720000000,
+    };
+    wrapper.vm.filteredResults = [row];
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.vm.outcomePrintLabel(row)).toBe("Not firing");
+    expect(wrapper.find('[data-test="alert-list-Quiet Alert-last-outcome"]').text()).toBe(
+      "Not firing",
+    );
+    // The word is ours; the token stays readable so the mapping is auditable.
+    expect(String(wrapper.vm.runOutcomeTooltip(row))).toContain("(succeeded)");
+    // A firing row keeps the badge's own word.
+    expect(wrapper.vm.outcomePrintLabel({ last_outcome: "firing" })).toBeUndefined();
+  });
+});
+
 describe("AlertList - row actions", () => {
   it("toggles alert enabled state via pause/start button", async () => {
     const wrapper = await mountAlertList();

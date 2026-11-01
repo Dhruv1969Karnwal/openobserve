@@ -91,11 +91,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           </div>
         </div>
         <!-- Right: Table -->
-        <div class="h-full min-w-0 flex-1 max-md:h-auto max-md:min-h-0">
+        <div
+          ref="tableFrameRef"
+          class="h-full min-w-0 flex-1 max-md:h-auto max-md:min-h-0"
+          data-test="alert-list-table-frame"
+        >
           <div class="bg-card-glass-bg flex h-full flex-col">
             <!-- Alert List Table (shows all alert types including anomaly detection rows) -->
             <OTable
-              class="min-h-0 flex-1"
+              class="min-h-0"
               ref="oTableRef"
               :frame="false"
               v-model:selected-ids="selectedAlertIds"
@@ -103,6 +107,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               data-test="alert-list-table"
               :data="displayedAlerts"
               :columns="columns"
+              :column-visibility="columnVisibilityPlan.visibility"
+              :fill-height="'auto'"
               show-index
               row-key="alert_id"
               :loading="loading"
@@ -139,6 +145,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <OStatStrip
                     :items="summaryStats"
                     :loading="loading"
+                    compact
                     selectable
                     :selected-key="stateFilter"
                     default-key="total"
@@ -246,6 +253,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <OIcon :name="typeIconName(row)" size="sm" :class="typeIconClass(row)" />
                   </span>
                   <OTruncatedText>{{ row.name || "--" }}</OTruncatedText>
+                  <!-- A paused row has no outcome pill (a frozen outcome is not a current one), so the state needs a word here. -->
+                  <OTag
+                    v-if="!row.enabled"
+                    variant="default-soft"
+                    icon="pause"
+                    size="sm"
+                    :label="t('alerts.summaryPaused')"
+                    :data-test="`alert-list-${row.name}-paused-chip`"
+                  />
                   <MutedChip
                     v-if="row.active_downtime"
                     :downtime="row.active_downtime"
@@ -329,6 +345,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 >
                   {{ row.conditions }}
                 </OTruncatedText>
+                <!-- Line 2 carries what the hidden columns used to claim: where the
+                     rule reads and what it fires on (app-screens §7.3/§7.4). -->
+                <AlertRuleFacts v-else :row="row" class="mt-0.5" />
               </template>
 
               <template #cell-owner="{ row }">
@@ -511,6 +530,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <OTag
                     type="alertState"
                     :value="row.last_outcome"
+                    :label="outcomePrintLabel(row)"
                     size="sm"
                     :data-test="`alert-list-${row.name}-last-outcome`"
                   />
@@ -543,11 +563,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     :variant="row.enabled ? 'ghost-destructive' : 'ghost-success'"
                     size="icon-sm"
                     :icon-left="row.enabled ? 'pause' : 'play-arrow'"
+                    :aria-label="
+                      row.enabled
+                        ? t('alerts.pauseRow', { name: row.name })
+                        : t('alerts.resumeRow', { name: row.name })
+                    "
                     @click.stop="toggleAlertState(row)"
                   >
                     <OTooltip
                       side="bottom"
-                      :content="row.enabled ? t('alerts.pause') : t('alerts.start')"
+                      :content="row.enabled ? t('alerts.pause') : t('alerts.resume')"
                       :shortcut-id="row.enabled ? 'alertsRowPause' : undefined"
                     />
                   </OButton>
@@ -634,7 +659,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       <template #icon-left>
                         <OIcon :name="row.enabled ? 'pause' : 'play-arrow'" size="sm" />
                       </template>
-                      {{ row.enabled ? t("alerts.pause") : t("alerts.start") }}
+                      {{ row.enabled ? t("alerts.pause") : t("alerts.resume") }}
                     </ODropdownItem>
                     <ODropdownItem
                       class="md:hidden"
@@ -989,7 +1014,12 @@ import useStreams from "@/composables/useStreams";
 
 import { convertUnixToDateFormat as convertUnixToFormat } from "@/utils/date";
 import { raw, useI18nTyped, type I18nText } from "@/types/i18n";
-import { isFiringOutcome, outcomeLabel, shouldShowRunOutcome } from "@/utils/alerts/runOutcome";
+import {
+  isFiringOutcome,
+  outcomeBucket,
+  outcomeLabel,
+  shouldShowRunOutcome,
+} from "@/utils/alerts/runOutcome";
 import { debounce } from "lodash-es";
 import alertsService from "@/services/alerts";
 import { oncallTeamsQuery } from "@/services/oncall.queries";
@@ -1018,6 +1048,8 @@ import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDi
 import FolderList from "../common/sidebar/FolderList.vue";
 
 import MoveAcrossFolders from "../common/sidebar/MoveAcrossFolders.vue";
+import AlertRuleFacts from "./AlertRuleFacts.vue";
+import { resolveColumnVisibility } from "./alertColumns";
 import MutedChip from "./downtimes/MutedChip.vue";
 import MuteMenuItems from "./downtimes/MuteMenuItems.vue";
 import QuickMuteDialog from "./downtimes/QuickMuteDialog.vue";
@@ -1097,6 +1129,7 @@ export default defineComponent({
     ExportResourceDialog,
     IacRegistryLinks,
     AlertSectionTabs,
+    AlertRuleFacts,
   },
   emits: ["update:changeRecordPerPage", "update:maxRecordToReturn"],
   setup() {
@@ -1435,21 +1468,28 @@ export default defineComponent({
     const isFiringRow = (row: any): boolean =>
       showRunOutcome(row) && isFiringOutcome(row?.last_outcome);
 
+    // On-call reads the server's "succeeded" as a verdict on the service; the ok bucket prints its negation of Firing and the tooltip keeps the token.
+    const outcomePrintLabel = (row: any): I18nText | undefined =>
+      outcomeBucket(row?.last_outcome) === "ok" ? t("alerts.outcomeNotFiring") : undefined;
+
     // Never present the outcome as live state: it is the result of the LAST
     // evaluation, so it is always qualified with when that ran.
     const runOutcomeTooltip = (row: any) => {
       const at = row?.last_outcome_at ? convertUnixToDateFormat(row.last_outcome_at) : null;
       // Pass every label: outcomeLabel's own defaults are English.
-      const label = outcomeLabel(
-        row?.last_outcome,
-        t("alerts.historyTimeline.firing"),
-        t("alerts.historyTimeline.ok"),
-        t("alerts.historyTimeline.error"),
-        t("alerts.historyTimeline.skipped"),
-        t("alerts.historyTimeline.unknown"),
-        t("alerts.historyTimeline.pending"),
-      );
-      return raw(at ? `${label} ${t("alerts.asOf")} ${at}` : label);
+      const label =
+        outcomePrintLabel(row) ??
+        outcomeLabel(
+          row?.last_outcome,
+          t("alerts.historyTimeline.firing"),
+          t("alerts.historyTimeline.ok"),
+          t("alerts.historyTimeline.error"),
+          t("alerts.historyTimeline.skipped"),
+          t("alerts.historyTimeline.unknown"),
+          t("alerts.historyTimeline.pending"),
+        );
+      const token = row?.last_outcome ? ` (${row.last_outcome})` : "";
+      return raw(at ? `${label} ${t("alerts.asOf")} ${at}${token}` : `${label}${token}`);
     };
 
     // Full-row highlight — only the EXCEPTIONS get a wash, so attention goes to
@@ -1525,65 +1565,60 @@ export default defineComponent({
     // Stat tiles for the summary strip. `tone` is the single source of colour so
     // states stay consistent with the row-level State pills. When the folder is
     // empty (no data at all) every tile shows a muted "—"; once there IS data,
-    // real counts show — including a legitimate "0". The `max` gives each state
-    // tile a proportion bar (its share of the total).
+    // real counts show — including a legitimate "0". The proportion track is
+    // passed only where a fill exists: an empty groove under a zero read as a
+    // broken progress bar (R10).
     const summaryStats = computed<StatItem[]>(() => {
       const c = stateCounts.value;
       const hasData = c.total > 0;
       const v = (n: number): string | number => (hasData ? n : "—");
-      const share = hasData ? c.total : undefined;
+      const shareOf = (n: number): number | undefined => (hasData && n > 0 ? c.total : undefined);
       // Severity-descending, matching the Incidents / Eval Jobs strips; Total stays last.
       return [
         {
           key: "failed",
           label: t("alerts.summaryFailed"),
           value: v(c.failed),
-          icon: "error-outline",
           tone: "error",
-          max: share,
+          max: shareOf(c.failed),
           dataTest: "alert-summary-failed",
         },
         {
           key: "firing",
           label: t("alerts.summaryFiring"),
           value: v(c.firing),
-          icon: "notifications-active",
           tone: "error",
-          max: share,
+          max: shareOf(c.firing),
           dataTest: "alert-summary-firing",
         },
         {
           key: "recent",
           label: t("alerts.summaryRecent"),
           value: v(c.recent),
-          icon: "bolt",
           tone: "warning",
-          max: share,
+          max: shareOf(c.recent),
           dataTest: "alert-summary-recent",
         },
         {
           key: "active",
           label: t("alerts.summaryActive"),
           value: v(c.active),
-          icon: "check-circle",
           tone: "success",
-          max: share,
+          max: shareOf(c.active),
           dataTest: "alert-summary-active",
         },
         {
           key: "paused",
           label: t("alerts.summaryPaused"),
           value: v(c.paused),
-          icon: "pause",
           tone: "neutral",
-          max: share,
+          max: shareOf(c.paused),
           dataTest: "alert-summary-paused",
         },
         {
           key: "total",
           label: t("alerts.summaryTotal"),
           value: v(c.total),
-          icon: "format-list-bulleted",
           tone: "primary",
           // Total is clickable (clears the filter) but never shows the ring — the
           // selected key is only ever a real state, never "total". No bar (its
@@ -1691,7 +1726,7 @@ export default defineComponent({
           sortable: true,
           resizable: true,
           hideable: true,
-          size: COL.status,
+          size: 130,
           minSize: 130,
           meta: { align: "left" },
         },
@@ -1738,7 +1773,9 @@ export default defineComponent({
                 resizable: true,
                 hideable: true,
                 size: 200,
-                meta: { align: "left" },
+                // The cell's per-row fallback was the same sentence on every
+                // row, so it now explains itself in the header instead.
+                meta: { align: "left", headerTooltip: t("alerts.oncallTeamFromRules") },
               } as OTableColumnDef,
             ]
           : []),
@@ -1763,8 +1800,8 @@ export default defineComponent({
           sortable: true,
           resizable: true,
           hideable: true,
-          size: COL.owner,
-          meta: { align: "left" },
+          size: 160,
+          meta: { align: "left", mono: true },
         },
         // "frequency" — the "Check every" cadence, meaningless for real-time alerts
         ...(activeTab.value !== "realTime"
@@ -1790,7 +1827,7 @@ export default defineComponent({
           sortable: true,
           resizable: true,
           hideable: true,
-          size: COL.dateAbsolute,
+          size: 150,
           meta: { align: "left" },
         },
         {
@@ -1847,6 +1884,41 @@ export default defineComponent({
 
       return baseColumns;
     });
+
+    // ── Dataset-aware column visibility (O16) ───────────────────────────────
+    // The frame, not the viewport: the folder rail squeezes the table at any width.
+    const tableFrameRef = ref<HTMLElement | null>(null);
+    const tableFrameWidth = ref(0);
+    // Set once the first payload has been rendered: hiding on an un-fetched empty array would be guessing.
+    const datasetLoaded = ref(false);
+    let frameObserver: ResizeObserver | null = null;
+    const measureFrame = () => {
+      const el = tableFrameRef.value;
+      if (el) tableFrameWidth.value = el.clientWidth;
+    };
+    onMounted(() => {
+      measureFrame();
+      if (typeof ResizeObserver !== "undefined" && tableFrameRef.value) {
+        frameObserver = new ResizeObserver(measureFrame);
+        frameObserver.observe(tableFrameRef.value);
+      }
+      window.addEventListener("resize", measureFrame);
+    });
+    onBeforeUnmount(() => {
+      frameObserver?.disconnect();
+      frameObserver = null;
+      window.removeEventListener("resize", measureFrame);
+    });
+
+    // Per dataset, never per row; OTable merges the persisted picker map over this prop, so a user's choice outranks the policy.
+    const columnVisibilityPlan = computed(() =>
+      resolveColumnVisibility({
+        columns: columns.value,
+        rows: filteredResults.value || [],
+        datasetEvaluated: datasetLoaded.value && !loading.value,
+        frameWidth: tableFrameWidth.value,
+      }),
+    );
 
     const destinations = ref([]);
     const templates = ref([0]);
@@ -2167,6 +2239,7 @@ export default defineComponent({
         }
         //here we are actually assigning the localAllAlerts to the allAlerts to avoid the side effects of allAlerts are overriding the actual alerts if users are rapidly moving from one folder to another folder
         allAlerts.value = localAllAlerts;
+        datasetLoaded.value = true;
         //this is the condition where we are setting the filteredResults
         //1. If it is search across folders then also we are setting the filteredResults(which contains the filtered alerts)
         //2. If it is not search across folders then we are setting the filteredResults to the alerts(which contains all the alerts)
@@ -3904,6 +3977,9 @@ export default defineComponent({
       router,
       onDependencyDeleted,
       columns,
+      columnVisibilityPlan,
+      tableFrameRef,
+      datasetLoaded,
       recencyLevel,
       alertRowClass,
       alertRowStyle,
@@ -3971,6 +4047,7 @@ export default defineComponent({
       showRunOutcome,
       isMutedFiring,
       runOutcomeTooltip,
+      outcomePrintLabel,
       toggleAlertState,
       templates,
       routeTo,
