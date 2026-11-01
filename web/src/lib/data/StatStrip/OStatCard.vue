@@ -225,16 +225,6 @@ const trendClass = computed(() =>
           sub
         }}</OTruncatedText>
       </div>
-      <span
-        v-if="icon || slots.icon"
-        class="bg-surface-subtle text-text-secondary rounded-default grid h-7 w-7 shrink-0 place-items-center max-lg:h-6 max-lg:w-6"
-      >
-        <slot name="icon">
-          <!-- 20px glyph: the step between OIcon's sm (16px) and md (24px), so the
-               icon fills the w-7 chip without touching the surrounding background. -->
-          <OIcon v-if="icon" :name="icon" size="sm" class="size-5!" />
-        </slot>
-      </span>
     </div>
     <div v-if="showTrack" class="bg-surface-subtle h-1 overflow-hidden rounded-full">
       <div
