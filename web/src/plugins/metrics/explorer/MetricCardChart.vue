@@ -85,6 +85,8 @@ export default defineComponent({
     /** Overrides the precision read off `results`, so heatmaps drawn together label buckets alike. */
     decimals: { type: Number, default: null },
     color: { type: String, required: true },
+    /** What the card is titled. The chart's accessible name is built from it. */
+    title: { type: String, default: "" },
     height: { type: String, default: "100%" },
     /**
      * The window these results were queried for, in MICROSECONDS — the same unit
@@ -132,17 +134,27 @@ export default defineComponent({
 
     /**
      * A single series keeps the card's accent colour — that colour is the card's
-     * identity, and a lone line needs no distinguishing. The moment there is more
-     * than one, `fixed` paints them all the SAME colour (colorPalette resolves
-     * `fixed` to `fixedColor[0]` for every series name), which on a legend-less
-     * tile makes a Percentiles or Min/Max variant unreadable: three lines you
-     * cannot tell apart, or — when they coincide — indistinguishable from one.
-     * Hashing the series NAME into the palette also keeps p50 the same colour on
-     * every re-render and between the tile and the card it applies to.
+     * identity, and a lone line needs no distinguishing. More than one takes the
+     * classic ramp BY POSITION, the same seat assignment the SQL builder uses:
+     * hashing the name into 12 seats collides as soon as a card draws four
+     * series, which is how two `le` buckets of one histogram ended up painted the
+     * same colour under a legend that could not separate them.
      */
     const colorConfig = () => {
       if (seriesCount() <= 1) return { mode: "fixed", fixedColor: [props.color] };
-      return { mode: props.legend ? "palette-classic" : "palette-classic-by-series" };
+      return { mode: "palette-classic" };
+    };
+
+    /**
+     * A template that only repeats the metric names nothing: every series of that
+     * query would print the same legend entry, which is how a card came to carry
+     * four lines labelled with one name. Dropping it lets the series-name builder
+     * fall back to the labels that actually differ, the same rule the drill-in
+     * applies (metricsHandoff's legendFor).
+     */
+    const legendTemplateOf = (query: any) => {
+      const template = query?.legendTemplate ?? "";
+      return !template || template === query?.stream ? "" : template;
     };
 
     /**
@@ -152,7 +164,7 @@ export default defineComponent({
      */
     const panelSchema = computed(() => ({
       id: "metrics-explorer-card",
-      title: "",
+      title: props.title,
       type: props.chartType,
       queryType: "promql",
       queries: (props.queries ?? []).map((q: any) => ({
@@ -160,13 +172,13 @@ export default defineComponent({
         query: withBareMetricNames(q.expr),
         customQuery: true,
         fields: { ...(q.stream ? { stream: q.stream } : {}), stream_type: "metrics" },
-        config: { promql_legend: q.legendTemplate ?? "" },
+        config: { promql_legend: legendTemplateOf(q) },
       })),
       config: {
         unit: props.unit,
         unit_custom: props.unitCustom,
         decimals: props.decimals ?? adaptiveDecimals(props.results),
-        show_legends: props.legend,
+        show_legends: props.legend || seriesCount() > 1,
         // Gridlines make a small chart readable — without them a sparkline is
         // just a shape. The heatmap is solid colour, so they'd only add noise.
         show_gridlines: props.chartType !== "heatmap",

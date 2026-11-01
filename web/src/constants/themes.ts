@@ -113,7 +113,7 @@ export const THEME_STORAGE_KEYS = {
  *
  * At this head — these figures are the gate's own output, transcribed 2026-11-01 after the
  * non-text-contrast pass (re-inked control edges, severity rails, code-block caption):
- * 5164 runtime pairs in 2446 booking groups — 2239 groups measured-pass, 207 groups
+ * 5172 runtime pairs in 2459 booking groups — 2252 groups measured-pass, 207 groups
  * (285 individual sites) booked with all twelve numbers each, 0 groups unbooked, and 0 groups
  * delegated to tokens/contrast-manifest.ts (none stand — the grey-tier light debt was paid by
  * re-tiering), of the bookings 34 are icon-only sites riding SC 1.4.11's 3:1 bar with a per-entry

@@ -566,6 +566,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 v-for="row in related"
                 :key="row.name"
                 class="hover:border-primary h-56 cursor-pointer"
+                :title="row.name"
                 :queries="row.chart.queries"
                 :chart-type="row.chart.chartType"
                 :unit="row.chart.unit"

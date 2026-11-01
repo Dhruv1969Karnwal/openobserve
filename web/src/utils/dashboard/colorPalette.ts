@@ -408,6 +408,143 @@ export const getGridLineStyle = (_theme?: string) => ({
 });
 
 /**
+ * Non-colour series cues (O20). The luminance-stepped `--color-chart-series-*`
+ * ramp separates NEIGHBOURING seats by hue and tone, but seats that share a tone
+ * (odd seats with odd, even with even) are luminance-twins, so two of them
+ * overlapping is separable by hue alone. These cues give every seat a second,
+ * colour-free identity: a dash pattern on the stroke and a mark shape that shows
+ * on hover and in the legend swatch.
+ *
+ * Seats 1 and 2 stay solid — they are the pair every chart is most likely to
+ * draw and they already measure 2.27:1 apart in greyscale, so a pattern there
+ * would be noise, not information.
+ */
+export const SERIES_LINE_DASHES: Array<number[] | "solid"> = [
+  "solid",
+  "solid",
+  [6, 3],
+  [2, 2],
+  [10, 3, 2, 3],
+  [12, 4],
+  [4, 2, 1, 2],
+  [8, 3, 2, 3],
+  [1, 2],
+  [14, 4, 2, 4],
+  [5, 2],
+  [3, 3],
+];
+
+/** Mark shapes, one per seat. Every legend swatch is the mark it explains. */
+export const SERIES_MARK_SHAPES = [
+  "circle",
+  "diamond",
+  "rect",
+  "triangle",
+  "roundRect",
+  "pin",
+  "arrow",
+  "circle",
+  "diamond",
+  "rect",
+  "triangle",
+  "roundRect",
+] as const;
+
+/** A series that actually paints something: at least one non-null sample. */
+const hasPlottedPoint = (series: any): boolean => {
+  const data = series?.data;
+  if (!Array.isArray(data)) return true;
+  return data.some((point: any) =>
+    Array.isArray(point) ? point[1] != null : point != null && point !== "",
+  );
+};
+
+/**
+ * Non-colour series cues (O20). The luminance-stepped `--color-chart-series-*`
+ * ramp separates NEIGHBOURING seats by hue and tone, but seats that share a tone
+ * (odd seats with odd, even with even) are luminance-twins, so two of them
+ * overlapping is separable by hue alone. These cues give every seat a second,
+ * colour-free identity: a dash pattern on the stroke and a mark shape that shows
+ * on hover and in the legend swatch.
+ *
+ * Seats 1 and 2 stay solid — they are the pair every chart is most likely to
+ * draw and they already measure 2.27:1 apart in greyscale, so a pattern there
+ * would be noise, not information.
+ */
+export const getSeriesLineStyleType = (index: number): number[] | "solid" =>
+  SERIES_LINE_DASHES[index % SERIES_LINE_DASHES.length];
+
+export const getSeriesMarkShape = (index: number): string =>
+  SERIES_MARK_SHAPES[index % SERIES_MARK_SHAPES.length];
+
+/**
+ * Stamps the per-seat dash pattern and mark shape onto line/area series, and
+ * gives the legend the same shape as its swatch. A legend with no `data` is
+ * filled from the series that carry data, so an empty series is never listed.
+ * Returns the options untouched when a single series is drawn, when a series
+ * already carries an explicit dash (a panel override wins), or when the payload
+ * is not the plain array shape ECharts expects.
+ */
+export const withSeriesNonColourCues = (options: any): any => {
+  const series = options?.series;
+  if (!Array.isArray(series) || series.length < 2) return options;
+
+  const isLine = (entry: any) =>
+    entry && typeof entry === "object" && (entry.type ?? "line") === "line";
+  if (!series.some(isLine)) return options;
+
+  let seat = -1;
+  const seats = new Map<string, number>();
+  const nextSeries = series.map((entry: any) => {
+    if (!isLine(entry)) return entry;
+    seat += 1;
+    if (entry?.name) seats.set(entry.name, seat);
+    const lineStyle = entry.lineStyle ?? {};
+    return {
+      ...entry,
+      lineStyle: { ...lineStyle, type: lineStyle.type ?? getSeriesLineStyleType(seat) },
+      symbol: entry.symbol ?? getSeriesMarkShape(seat),
+    };
+  });
+
+  const markOf = (name: any, fallback: number) =>
+    getSeriesMarkShape(typeof name === "string" ? (seats.get(name) ?? fallback) : fallback);
+
+  const legend = options?.legend;
+  let nextLegend = legend;
+  if (legend && typeof legend === "object" && legend.show !== false) {
+    if (Array.isArray(legend.data)) {
+      nextLegend = {
+        ...legend,
+        data: legend.data.map((item: any, index: number) => {
+          const name = typeof item === "string" ? item : item?.name;
+          const icon = markOf(name, index);
+          return item && typeof item === "object"
+            ? { ...item, icon: item.icon ?? icon }
+            : { name: item, icon };
+        }),
+      };
+    } else {
+      // ECharts lists every series name it is given, including the ones with no
+      // sample in this window; an entry for an empty series is a lie in the key.
+      const drawn = nextSeries.filter((entry: any) => isLine(entry) && entry?.name);
+      const listed = drawn.filter(hasPlottedPoint);
+      if (listed.length > 1) {
+        nextLegend = {
+          ...legend,
+          data: listed.map((entry: any) => ({
+            name: entry.name,
+            icon: markOf(entry.name, drawn.indexOf(entry)),
+          })),
+        };
+      }
+    }
+  }
+
+  return { ...options, series: nextSeries, ...(nextLegend ? { legend: nextLegend } : {}) };
+};
+
+/**
  * Builds a top-to-bottom vertical gradient for area chart fills that fades
  * from a translucent series color at the top to fully transparent at the
  * bottom. `color` should be the resolved concrete series color.

@@ -60,18 +60,19 @@ const FALLBACKS: Record<string, string> = {
   "--color-service-health-warning": "#fa8c16",
   // Dashboard classic series palette (light values) — so getColorPalette() has
   // sensible colors before the token stylesheet is live (jsdom / very-early render).
+  // Mirrors base.css seat-for-seat; chartTheme.fallbacks.spec.ts keeps them equal.
   "--color-chart-series-1": "#3f7994",
-  "--color-chart-series-2": "#1f2937",
+  "--color-chart-series-2": "#581c87",
   "--color-chart-series-3": "#b45309",
-  "--color-chart-series-4": "#15803d",
-  "--color-chart-series-5": "#1e40af",
-  "--color-chart-series-6": "#be123c",
-  "--color-chart-series-7": "#0f766e",
-  "--color-chart-series-8": "#7e22ce",
-  "--color-chart-series-9": "#c2410c",
-  "--color-chart-series-10": "#4d7c0f",
-  "--color-chart-series-11": "#a21caf",
-  "--color-chart-series-12": "#475569",
+  "--color-chart-series-4": "#14532d",
+  "--color-chart-series-5": "#c026d3",
+  "--color-chart-series-6": "#0f172a",
+  "--color-chart-series-7": "#e11d48",
+  "--color-chart-series-8": "#134e4a",
+  "--color-chart-series-9": "#4d7c0f",
+  "--color-chart-series-10": "#831843",
+  "--color-chart-series-11": "#047857",
+  "--color-chart-series-12": "#7c2d12",
   // Mark-line drop shadow (light value) — dark override lives in dark.css.
   "--color-chart-markline-shadow": "rgba(255, 255, 255, 0.7)",
   // Dashboard table row-highlight palette (light values) + grid line.

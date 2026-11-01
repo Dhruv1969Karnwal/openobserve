@@ -744,22 +744,27 @@
   --shadow-lg-c2: rgb(0 0 0 / 0.4);
 }
 
-/* Dashboard classic series palette — dark overrides (light values in base.css) */
+/* Dashboard classic series palette — dark overrides (light values in base.css).
+   Same 12 hues in the same seat order as the light ramp, re-toned for the dark
+   plot ground: odd seats .58-.75 relative luminance, even seats .22-.41, so
+   neighbours keep BOTH a hue difference (>=72 deg) and a luminance difference
+   (weakest neighbour pair 1.58:1), and every seat clears 3:1 on #15171a /
+   #1e2126 / #232730 (worst seat 3.78:1). All figures from series-luminance.mjs. */
 :root.dark,
 .dark :root,
 .dark {
-  --color-chart-series-1: #60a5fa;
-  --color-chart-series-2: #6ee7b7;
-  --color-chart-series-3: #fdba74;
-  --color-chart-series-4: #f9a8d4;
-  --color-chart-series-5: #c4b5fd;
-  --color-chart-series-6: #fde68a;
-  --color-chart-series-7: #7dd3fc;
-  --color-chart-series-8: #fca5a5;
-  --color-chart-series-9: #5eead4;
-  --color-chart-series-10: #86efac;
-  --color-chart-series-11: #f5d0fe;
-  --color-chart-series-12: #fef08a;
+  --color-chart-series-1: #7dd3fc;
+  --color-chart-series-2: #a855f7;
+  --color-chart-series-3: #fcd34d;
+  --color-chart-series-4: #22c55e;
+  --color-chart-series-5: #f5d0fe;
+  --color-chart-series-6: #06b6d4;
+  --color-chart-series-7: #fecdd3;
+  --color-chart-series-8: #14b8a6;
+  --color-chart-series-9: #bef264;
+  --color-chart-series-10: #ec4899;
+  --color-chart-series-11: #6ee7b7;
+  --color-chart-series-12: #f97316;
 
   --color-map-seq-1: #03a92e;
   --color-map-seq-2: #9db303;

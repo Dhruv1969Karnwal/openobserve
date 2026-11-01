@@ -71,9 +71,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
            the freshness clock. None of it truncates; the metric name is what
            gives way when the row runs short. -->
       <div class="flex shrink-0 flex-nowrap items-center">
+        <!-- The name outranks the function·unit note: on a narrow card the right
+             cluster would otherwise squeeze the identifier out of the row. -->
         <span
           v-if="restInfo"
-          class="text-2xs text-text-secondary whitespace-nowrap"
+          class="text-2xs text-text-secondary hidden whitespace-nowrap @min-[24rem]/panelbar:inline"
           :title="restInfo"
           :data-test="`metrics-explorer-card-rest-info-${card.name}`"
           >{{ restInfo }}</span
@@ -398,6 +400,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         v-else-if="preview?.results?.length"
         :results="preview.results"
         :queries="chartQueries"
+        :title="card.name"
         :chart-type="preview.chartType"
         :unit="o2Unit.unit"
         :unit-custom="o2Unit.unitCustom ?? undefined"

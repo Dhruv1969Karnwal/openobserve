@@ -15,8 +15,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 import { alignShiftedPromQLResults, convertPromQLData } from "./convertPromQLData";
-import { getAreaGradientColor } from "./colorPalette";
-import echartsTokens from "echarts/lib/visual/tokens.js";
+import { getAreaGradientColor, getColorPalette } from "./colorPalette";
 
 vi.mock("./chartDimensionUtils", () => ({
   calculateOptimalFontSize: vi.fn(() => 14),
@@ -374,7 +373,7 @@ describe("convertPromQLData with time-shifted results", () => {
       expect(shifted.lineStyle.type).toBe("dotted");
     });
 
-    it("in the Explorer's classic palette, keeps ECharts' own primary colours and gives them to the twins", async () => {
+    it("in the Explorer's classic palette, seats primaries on the token ramp and gives them to the twins", async () => {
       const classic = explorer({ color: { mode: "palette-classic" } });
       const alone = await convert(
         classic,
@@ -383,7 +382,10 @@ describe("convertPromQLData with time-shifted results", () => {
         stepMeta(1, 60),
       );
       const overlaid = await convert(classic, [twoPods(), twoPods(DAY_S)], oneDay, stepMeta(2, 60));
-      const theme = echartsTokens.color.theme;
+      // The classic palette IS the --color-chart-series-* ramp (colorPalette.ts);
+      // letting ECharts cycle its own theme colours was the off-token 1.5:1 series
+      // that O20 measured, and it is now re-inked for PromQL as it was for SQL.
+      const theme = getColorPalette();
 
       ["api-1", "api-2"].forEach((name, position) => {
         const [before] = pair(alone, name);
@@ -394,12 +396,15 @@ describe("convertPromQLData with time-shifted results", () => {
       });
     });
 
-    it("on a dashboard, leaves the classic palette to ECharts", async () => {
+    it("on a dashboard, seats the classic palette on the token ramp too", async () => {
       const classic = { ...panel("line"), config: { color: { mode: "palette-classic" } } };
       const result = await convert(classic, [twoPods(), twoPods(DAY_S)], oneDay, stepMeta(2, 60));
       const [primary, shifted] = pair(result, "api-1");
-      expect(primary.itemStyle.color).toBeNull();
-      expect(shifted.itemStyle.color).toBeNull();
+      const theme = getColorPalette();
+      // Both periods of a compared series read as one series only while they share
+      // a colour, and that colour now comes from the token ramp, not from ECharts.
+      expect(theme).toContain(primary.itemStyle.color);
+      expect(shifted.itemStyle.color).toBe(primary.itemStyle.color);
     });
 
     it("keeps the twins out of the Explorer's legend, and in a dashboard's", async () => {

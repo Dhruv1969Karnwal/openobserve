@@ -165,11 +165,16 @@ describe("MetricCard (ported to @/lib)", () => {
       const { info, fresh } = status(wrapper);
       expect(info.text()).toBe("sum(rate) · s");
       expect(fresh.text()).toContain("33");
-      expect(hidingClasses(info.element, wrapper.element)).toEqual([]);
+      // The unit note is the one element allowed to yield, and only to a container
+      // query: at 390 the right cluster was squeezing the metric NAME to zero
+      // width. It stays visible on every card at or above 24rem, and is never
+      // hover-gated.
+      expect(hidingClasses(info.element, wrapper.element)).toEqual(["hidden"]);
+      expect(info.classes()).toContain("@min-[24rem]/panelbar:inline");
       expect(hidingClasses(fresh.element, wrapper.element)).toEqual([]);
     });
 
-    it("lets the metric name give way, never the function · unit or the freshness", () => {
+    it("lets the function · unit give way below a card width, never the name or the freshness", () => {
       wrapper = createWrapper({
         preview: preview({ footerLabel: "sum(rate)", lastTriggeredAt: Date.now() }),
       });
@@ -184,6 +189,7 @@ describe("MetricCard (ported to @/lib)", () => {
       ).toBe(true);
       expect(cluster.className).toContain("shrink-0");
       expect(info.classes()).toContain("whitespace-nowrap");
+      expect(info.classes()).toContain("@min-[24rem]/panelbar:inline");
       // The name is the row's one shrinkable element.
       const title = wrapper.find(
         '[data-test="metrics-explorer-card-title-node_cpu_seconds_total"]',
