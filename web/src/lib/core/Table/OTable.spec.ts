@@ -3427,7 +3427,9 @@ describe("OTable sort header button", () => {
     expect(wrapper.findComponent('[data-test="o2-table-sort-icon-inactive"]').props("name")).toBe(
       "unfold-more",
     );
-    expect(icon.classes()).toContain("opacity-40");
+    // Quieter than the active caret, but at the 3:1 graphic floor rather than
+    // 40% opacity, which measured 1.93:1 and so hid the affordance entirely.
+    expect(icon.classes()).toContain("text-table-sort-icon-inactive");
   });
 
   it("T-A8: the tooltip stays off while sorting is enabled", () => {

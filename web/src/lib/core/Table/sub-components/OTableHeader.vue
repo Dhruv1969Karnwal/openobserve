@@ -429,7 +429,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
             size="sm"
             class="text-table-sort-icon-active"
           />
-          <OIcon v-else name="unfold-more" size="sm" class="opacity-40" />
+          <OIcon v-else name="unfold-more" size="sm" class="text-table-sort-icon-inactive" />
         </div>
       </th>
 
@@ -485,7 +485,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
             v-else-if="level.isLeaf && cell._sortColumn"
             name="unfold-more"
             size="sm"
-            class="shrink-0 opacity-40"
+            class="text-table-sort-icon-inactive shrink-0"
           />
         </div>
       </th>
@@ -726,7 +726,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                   v-else
                   :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  :class="sortDisabled ? 'text-text-secondary' : 'opacity-40'"
+                  :class="sortDisabled ? 'text-text-secondary' : 'text-table-sort-icon-inactive'"
                   data-test="o2-table-sort-icon-inactive"
                   :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
@@ -805,7 +805,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                   v-else
                   :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  :class="sortDisabled ? 'text-text-secondary' : 'opacity-40'"
+                  :class="sortDisabled ? 'text-text-secondary' : 'text-table-sort-icon-inactive'"
                   data-test="o2-table-sort-icon-inactive"
                   :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
@@ -1172,7 +1172,11 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                   v-else
                   :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  :class="sortDisabled ? 'text-text-secondary shrink-0' : 'shrink-0 opacity-40'"
+                  :class="
+                    sortDisabled
+                      ? 'text-text-secondary shrink-0'
+                      : 'text-table-sort-icon-inactive shrink-0'
+                  "
                   data-test="o2-table-sort-icon-inactive"
                   :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
@@ -1234,7 +1238,11 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
                   v-else
                   :name="sortDisabled ? 'remove' : 'unfold-more'"
                   size="sm"
-                  :class="sortDisabled ? 'text-text-secondary shrink-0' : 'shrink-0 opacity-40'"
+                  :class="
+                    sortDisabled
+                      ? 'text-text-secondary shrink-0'
+                      : 'text-table-sort-icon-inactive shrink-0'
+                  "
                   data-test="o2-table-sort-icon-inactive"
                   :data-test-sort-disabled="sortDisabled ? 'true' : undefined"
                   data-test-sort-direction="none"
