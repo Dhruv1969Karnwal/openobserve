@@ -1513,8 +1513,9 @@ describe("Dashboards.vue", () => {
       await mountAt(388);
       expect(ids()).toEqual(["name", "actions"]);
       expect(wrapper.vm.rowSublines(row)).toEqual([
+        // WHY: a subline is read at 12px under a name; the seconds were noise.
         "Delivery and latency for the ingest path",
-        "root@example.com · 2026-10-21T09:14:22",
+        "root@example.com · Oct 21, 2026",
       ]);
     });
 

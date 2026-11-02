@@ -138,8 +138,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :forbidden="forbidden"
             :frame="false"
             :default-columns="false"
-            :fill-height="listFillsViewport"
-            show-index
+            fill-height="auto"
             :row-section="spansFolders ? rowSection : undefined"
             :global-filter="filterQuery"
             :show-global-filter="false"
@@ -164,6 +163,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <template #toolbar>
               <!-- min-w-0: otherwise the wrapper can't shrink below the search's min-content and pushes controls off-edge. -->
               <div class="flex w-full min-w-0 items-center gap-2 max-md:contents">
+                <!-- The scope is a property of the list, not of the text field,
+                     so it leads the toolbar instead of hiding in the search's
+                     trailing slot; the rail says WHICH folder, this says how far
+                     the list reaches. -->
+                <OToggleGroup
+                  :model-value="searchAcrossFolders ? 'all' : 'this'"
+                  type="single"
+                  mobile-dropdown
+                  class="shrink-0"
+                  @update:model-value="(v) => (searchAcrossFolders = v === 'all')"
+                >
+                  <OToggleGroupItem
+                    value="this"
+                    size="sm"
+                    icon-left="folder-outline"
+                    data-test="dashboard-search-scope-current"
+                    :title="t('dashboard.searchThisFolderTitle')"
+                    >{{ t("dashboard.searchThisFolder") }}</OToggleGroupItem
+                  >
+                  <OToggleGroupItem
+                    value="all"
+                    size="sm"
+                    icon-left="search"
+                    data-test="dashboard-search-across-folders-toggle"
+                    :title="t('dashboard.searchAllFoldersTitle')"
+                    >{{ t("dashboard.searchAllFolders") }}</OToggleGroupItem
+                  >
+                </OToggleGroup>
                 <div class="min-w-0 flex-1 max-md:min-w-40">
                   <OInput
                     v-model="dynamicQueryModel"
@@ -177,35 +204,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   >
                     <template #icon-left>
                       <OIcon name="search" size="sm" />
-                    </template>
-                    <template #icon-right>
-                      <OToggleGroup
-                        :model-value="searchAcrossFolders ? 'all' : 'this'"
-                        type="single"
-                        class="me-1 self-center"
-                        @update:model-value="(v) => (searchAcrossFolders = v === 'all')"
-                      >
-                        <OToggleGroupItem
-                          value="this"
-                          size="xs"
-                          icon-left="folder-outline"
-                          data-test="dashboard-search-scope-current"
-                          :title="t('dashboard.searchThisFolderTitle')"
-                          ><span class="max-md:hidden">{{
-                            t("dashboard.searchThisFolder")
-                          }}</span></OToggleGroupItem
-                        >
-                        <OToggleGroupItem
-                          value="all"
-                          size="xs"
-                          icon-left="search"
-                          data-test="dashboard-search-across-folders-toggle"
-                          :title="t('dashboard.searchAllFoldersTitle')"
-                          ><span class="max-md:hidden">{{
-                            t("dashboard.searchAllFolders")
-                          }}</span></OToggleGroupItem
-                        >
-                      </OToggleGroup>
                     </template>
                   </OInput>
                 </div>
@@ -221,6 +219,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 data-test="dashboard-list-refresh"
                 @click="refreshDashboards"
               />
+            </template>
+            <template #subheader>
+              <!-- What this list IS, stated once above the rows: the scope the
+                   rail and the toolbar chose, how much is in it, and when any of
+                   it last moved. -->
+              <div
+                class="border-table-row-divider px-page-edge flex flex-wrap items-baseline gap-x-2 gap-y-0.5 border-b py-1.5 text-xs"
+                data-test="dashboards-scope-summary"
+              >
+                <span class="text-text-heading font-medium">{{ scopeLabel }}</span>
+                <span class="text-text-secondary tabular-nums">{{ scopeCount }}</span>
+              </div>
             </template>
             <template #cell-name="{ row, value }">
               <span class="flex min-w-0 flex-col">
@@ -286,10 +296,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <template #cell-identifier="{ value }">
               <span class="text-text-body font-mono text-xs" :title="value">{{ value }}</span>
             </template>
-            <template #cell-description="{ value }">
-              <span :class="value ? 'text-text-body' : 'text-text-secondary'">{{
-                value || "—"
-              }}</span>
+            <template #cell-description="{ row }">
+              <OTruncatedText
+                as="div"
+                :class="row.description ? 'text-text-body' : 'text-text-secondary'"
+                :tooltip="row.description"
+                data-test="dashboard-description-cell-text"
+                >{{ row.description || "—" }}</OTruncatedText
+              >
             </template>
             <template #cell-owner="{ value }">
               <OUserCell :value="value" />
@@ -617,7 +631,6 @@ import analytics from "@/services/product_analytics";
 import { useFavoriteDashboards, FAVORITES_FOLDER_ID } from "@/composables/useFavoriteDashboards";
 import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
 import useBreakpoint from "@/composables/useBreakpoint";
-import { shouldFillHeight } from "@/lib/core/Table/fillPolicy";
 
 const MoveDashboardToAnotherFolder = defineAsyncComponent(() => {
   return import("@/components/dashboards/MoveDashboardToAnotherFolder.vue");
@@ -632,7 +645,6 @@ const AddDashboardFromGitHub = defineAsyncComponent(() => {
 });
 
 interface DashboardRow {
-  "#": string | number;
   id: string;
   folder?: string;
   folder_id?: string;
@@ -896,9 +908,6 @@ export default defineComponent({
     };
     const tableShellRef = ref<HTMLElement | null>(null);
     const tableShellWidth = ref(0);
-    // OTable's own `fill-height="auto"` measures the scroll box, which a stretched
-    // flex host hands back at its own height; here the decision needs the rows.
-    const listFillsViewport = ref(true);
     let shellObserver: ResizeObserver | null = null;
     const columnBand = computed(() => {
       const width = tableShellWidth.value;
@@ -913,12 +922,16 @@ export default defineComponent({
     const inlineRowActions = computed(() => columnBand.value === "wide");
     const compactRowActions = computed(() => isMobile.value || !inlineRowActions.value);
     const actionsColumnSize = computed(() => (isMobile.value ? 56 : 124));
+    // A subline carries a date, not a timestamp: the ISO string with seconds is
+    // noise at 12px under a name.
+    const shortDay = (value?: string) => (value ? formatDate(value, "MMM d, yyyy") : "");
+
     const rowSublines = (row: DashboardRow) => {
       const lines: string[] = [];
       if (!showsColumn("description") && row.description) lines.push(String(row.description));
       if (!showsColumn("owner") || !showsColumn("created")) {
-        const meta = [row.owner, row.created].filter(Boolean).join(" · ");
-        if (meta) lines.push(meta);
+        const meta = [row.owner, shortDay(row.created_raw || row.created)].filter(Boolean);
+        if (meta.length) lines.push(meta.join(" · "));
       }
       return lines;
     };
@@ -932,6 +945,33 @@ export default defineComponent({
     // from a sectioned body, and every row the view returned must stay readable.
     const rowSection = (row: DashboardRow) =>
       spansFolders.value ? row.folder || row.folder_id || "—" : null;
+
+    const folderNamesById = computed(
+      () =>
+        new Map<string, string>(
+          (store.state.organizationData?.folders ?? []).map((f: any) => [f.folderId, f.name]),
+        ),
+    );
+    // The three-second answer this screen never gave: which scope is on screen,
+    // how many rows it holds, and when any of them last moved. All three come
+    // from the rows the view already returned.
+    const scopeLabel = computed(() => {
+      if (spansFolders.value && searchAcrossFolders.value && searchQuery.value !== "")
+        return t("dashboard.searchAllFolders");
+      if (showFavoritesOnly.value) return t("dashboard.favorites");
+      const id = activeFolderId.value ?? "default";
+      return folderNamesById.value.get(id) ?? id;
+    });
+    const scopeCount = computed(() => {
+      // §11: a count is computed from the rows in view. While a text filter is
+      // on the table narrows the rows itself, so the line names the filter
+      // instead of claiming a total it no longer describes.
+      const query = filterQuery.value.trim();
+      if (query) return t("dashboard.scopeMatching", { query });
+      return t("dashboard.dashboardCount", dashboards.value.length, {
+        count: dashboards.value.length,
+      });
+    });
 
     const columns = computed(() => {
       const wide = columnBand.value === "wide";
@@ -957,11 +997,11 @@ export default defineComponent({
                 sortable: true,
                 resizable: true,
                 hideable: true,
-                // Wide band: 44 select + 56 index + 260 description + 180 owner +
-                // 160 created + 156 actions = 856, so the identity column keeps
-                // the remaining quarter of a 1112px frame.
-                size: 260,
-                minSize: 140,
+                // Wide band: 44 select + 300 description + 180 owner + 150 created
+                // + 156 actions = 830, so the identity column keeps 282 of a
+                // 1112px frame — the widest cell on the row, as §7.4 asks.
+                size: 300,
+                minSize: 160,
                 meta: { align: "left" },
               },
             ]
@@ -990,10 +1030,10 @@ export default defineComponent({
                 sortable: true,
                 resizable: true,
                 hideable: true,
-                // Medium band: 44 select + 56 index + 200 name + 150 owner +
-                // 120 created + 124 actions = 694, inside the 696 the rail leaves.
-                size: wide ? 160 : 120,
-                minSize: 120,
+                // Medium band: 44 select + 200 name + 150 owner + 130 created +
+                // 124 actions = 648, inside the 696 the rail leaves.
+                size: wide ? 150 : 130,
+                minSize: 130,
                 meta: { align: "left" },
               },
             ]
@@ -1499,21 +1539,6 @@ export default defineComponent({
       const shell = tableShellRef.value;
       if (!shell) return;
       tableShellWidth.value = shell.clientWidth;
-      const frame = shell.querySelector<HTMLElement>('[data-test="dashboard-table"]');
-      const table = frame?.querySelector<HTMLTableElement>("table");
-      const scroller = table?.parentElement ?? null;
-      // Empty, loading and error paint outside the <table> and keep the full
-      // frame, which is the height their own floor is sized against.
-      if (!frame || !table || !scroller || !dashboards.value.length) {
-        listFillsViewport.value = true;
-        return;
-      }
-      const chrome = frame.offsetHeight - scroller.offsetHeight;
-      listFillsViewport.value = shouldFillHeight(
-        shell.clientHeight - chrome,
-        table.offsetHeight,
-        listFillsViewport.value,
-      );
     }
 
     const scheduleFrameMeasure = () => {
@@ -1974,9 +1999,10 @@ export default defineComponent({
       columns,
       columnBand,
       tableShellRef,
+      scopeLabel,
+      scopeCount,
       tableShellWidth,
       measureListFrame,
-      listFillsViewport,
       inlineRowActions,
       compactRowActions,
       spansFolders,
