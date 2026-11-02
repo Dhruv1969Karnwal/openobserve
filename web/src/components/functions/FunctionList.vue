@@ -48,199 +48,222 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           {{ t(`function.add`) }}
         </OButton>
       </template>
-      <div class="min-h-0 w-full flex-1 overflow-hidden">
-        <div class="h-full">
-          <OTable
-            ref="oTableRef"
-            :frame="false"
-            :data="visibleRows"
-            :columns="columns"
-            row-key="name"
-            :loading="loading"
-            :forbidden="forbidden"
-            pagination="client"
-            :current-page="currentPage"
-            @update:current-page="onPageChange"
-            :page-size="pageSize"
-            :page-size-options="pageSizeOptions"
-            @update:page-size="pageSize = $event"
-            :sort-by="sortBy"
-            :sort-order="sortOrder"
-            @update:sort-by="sortBy = $event"
-            @update:sort-order="sortOrder = $event"
-            selection="multiple"
-            v-model:selected-ids="selectedFunctionIds"
-            show-index
-            :show-global-filter="false"
-            :default-columns="false"
-            width="100%"
-            class="h-full w-full"
+      <div class="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+        <div
+          class="relative flex min-h-0 w-full flex-1 flex-col gap-4 overflow-y-auto xl:flex-row xl:gap-6 xl:overflow-hidden"
+        >
+          <div
+            class="flex min-w-0 shrink-0 flex-col xl:min-h-0 xl:flex-1 xl:shrink"
+            data-test="function-list-cell"
           >
-            <template #toolbar>
-              <div class="flex w-full min-w-0 items-center gap-2 max-md:contents">
-                <OSearchInput
-                  data-test="functions-list-search-input"
-                  v-model="filterQuery"
-                  class="flex-1"
-                  :placeholder="t('function.search')"
+            <OTable
+              ref="oTableRef"
+              :frame="false"
+              :data="visibleRows"
+              :columns="columns"
+              row-key="name"
+              :loading="loading"
+              :forbidden="forbidden"
+              :error="loadError"
+              pagination="client"
+              :current-page="currentPage"
+              @update:current-page="onPageChange"
+              :page-size="pageSize"
+              :page-size-options="pageSizeOptions"
+              @update:page-size="pageSize = $event"
+              :sort-by="sortBy"
+              :sort-order="sortOrder"
+              @update:sort-by="sortBy = $event"
+              @update:sort-order="sortOrder = $event"
+              selection="multiple"
+              v-model:selected-ids="selectedFunctionIds"
+              fill-height="auto"
+              :row-class="focusedRowClass"
+              @row-click="onRowClick"
+              :show-global-filter="false"
+              :default-columns="false"
+              width="100%"
+              class="w-full"
+            >
+              <template #toolbar>
+                <div class="flex w-full min-w-0 items-center gap-2 max-md:contents">
+                  <OSearchInput
+                    data-test="functions-list-search-input"
+                    v-model="filterQuery"
+                    class="max-w-96 min-w-0 flex-1"
+                    :placeholder="t('function.search')"
+                  />
+                </div>
+              </template>
+              <template #toolbar-trailing>
+                <ORefreshButton
+                  layout="inline"
+                  variant="outline"
+                  :last-run-at="lastUpdatedAt"
+                  :loading="fetching"
+                  shortcut-id="functionsRefresh"
+                  data-test="functions-list-refresh-btn"
+                  @click="refreshJSTransforms"
                 />
-              </div>
-            </template>
-            <template #toolbar-trailing>
-              <ORefreshButton
-                layout="inline"
-                variant="outline"
-                :last-run-at="lastUpdatedAt"
-                :loading="fetching"
-                shortcut-id="functionsRefresh"
-                data-test="functions-list-refresh-btn"
-                @click="refreshJSTransforms"
-              />
-            </template>
-            <template #empty>
-              <OEmptyState
-                size="hero"
-                preset="no-functions"
-                :filtered="!!filterQuery"
-                @action="
-                  (id) => (id === 'clear-filters' ? (filterQuery = '') : showAddUpdateFn({}))
-                "
-              />
-            </template>
+              </template>
+              <template #error>
+                <div data-test="function-list-error">
+                  <OEmptyState size="hero" preset="load-error" @action="refreshJSTransforms" />
+                </div>
+              </template>
 
-            <template #cell-name="{ row, value }">
-              <span
-                class="text-text-body"
-                :data-test="`function-list-name-cell-${row?.name ?? value}`"
-                >{{ value }}</span
-              >
-            </template>
+              <template #empty>
+                <OEmptyState
+                  size="hero"
+                  preset="no-functions"
+                  :filtered="!!filterQuery"
+                  @action="
+                    (id) => (id === 'clear-filters' ? (filterQuery = '') : showAddUpdateFn({}))
+                  "
+                />
+              </template>
 
-            <!-- Language of the transform. Its own column (sortable + hideable)
-                   rather than a glyph on the name, so JS vs VRL reads at a glance. -->
-            <template #cell-transType="{ row }">
-              <OBadge
-                size="xs"
-                :variant="row?.transType === '1' ? 'amber-soft' : 'blue-soft'"
-                :data-test="`function-list-type-badge-${row?.transType === '1' ? 'js' : 'vrl'}`"
-              >
-                {{ row?.transType === "1" ? raw("JavaScript") : t("function.vrl") }}
-              </OBadge>
-            </template>
+              <template #cell-name="{ row, value }">
+                <div class="flex min-w-0 items-center gap-2">
+                  <button
+                    type="button"
+                    class="text-text-heading focus-visible:ring-focus-ring-accent min-w-0 cursor-pointer truncate rounded-none text-start font-medium outline-none focus-visible:ring-2"
+                    :aria-current="selectionShown && row?.name === focusedName ? 'true' : undefined"
+                    :data-test="`function-list-name-cell-${row?.name ?? value}`"
+                    @click="focusFunction(row)"
+                  >
+                    {{ value }}
+                  </button>
+                  <!-- The payload's default language is VRL, so only the exception is marked. -->
+                  <OTag
+                    v-if="row?.transType === '1'"
+                    :label="raw('JavaScript')"
+                    variant="amber-soft"
+                    size="xs"
+                    class="shrink-0"
+                    data-test="function-list-type-badge-js"
+                  />
+                </div>
+              </template>
 
-            <template #cell-actions="{ row }">
-              <div class="actions-container flex items-center">
-                <OButton
-                  variant="ghost"
-                  size="icon-sm"
-                  :title="t('function.updateTitle')"
-                  data-test="function-list-edit-function-btn"
-                  data-row-action="edit"
-                  class="max-md:hidden"
-                  @click="showAddUpdateFn({ row })"
-                  icon-left="edit"
-                />
-                <OButton
-                  variant="ghost"
-                  size="icon-sm"
-                  icon-left="account-tree"
-                  :title="t('function.associatedPipelines')"
-                  data-row-action="view"
-                  class="max-md:hidden"
-                  @click="getAssociatedPipelines({ row })"
-                />
-                <OButton
-                  variant="ghost"
-                  size="icon-sm"
-                  icon-left="download"
-                  :title="t('common.export')"
-                  data-test="function-list-export-function-btn"
-                  data-row-action="export"
-                  class="max-md:hidden"
-                  @click="exportFunction(row)"
-                />
-                <OButton
-                  variant="ghost-destructive"
-                  size="icon-sm"
-                  :title="t('function.delete')"
-                  data-test="function-list-delete-function-btn"
-                  data-row-action="delete"
-                  class="max-md:hidden"
-                  @click="showDeleteDialogFn({ row })"
-                  icon-left="delete"
-                />
-                <ODropdown side="bottom" align="end">
-                  <template #trigger>
-                    <OButton
-                      :aria-label="t('common.moreActions')"
-                      icon-left="more-vert"
-                      variant="ghost"
-                      size="icon-xs-sq"
-                      class="md:hidden"
-                      data-test="function-list-row-more-actions"
-                      @click.stop
-                    />
-                  </template>
-                  <ODropdownItem
+              <template #cell-appliedIn="{ row }">
+                <span
+                  v-if="row?.view?.streams.length"
+                  data-test="function-list-applied-in"
+                  data-o2-cell-clip
+                  >{{ row.view.streams.join(streamSeparator) }}</span
+                >
+                <span
+                  v-else
+                  class="text-text-secondary"
+                  data-test="function-list-applied-in-none"
+                  >{{ raw("—") }}</span
+                >
+              </template>
+
+              <template #cell-actions="{ row }">
+                <!-- One labelled frequent job plus the rest grouped, so no row is four anonymous glyphs. -->
+                <div class="actions-container flex items-center gap-1">
+                  <OButton
+                    v-if="!isMobile"
+                    variant="ghost"
+                    size="xs"
                     icon-left="edit"
-                    class="md:hidden"
-                    data-test="function-list-edit-function-btn-menu"
-                    @select="showAddUpdateFn({ row })"
+                    :title="t('function.updateTitle')"
+                    data-test="function-list-edit-function-btn"
+                    data-row-action="edit"
+                    @click="showAddUpdateFn({ row })"
                   >
-                    <span>{{ t("function.updateTitle") }}</span>
-                  </ODropdownItem>
-                  <ODropdownItem
-                    icon-left="account-tree"
-                    class="md:hidden"
-                    data-test="function-list-associated-pipelines-menu"
-                    @select="getAssociatedPipelines({ row })"
-                  >
-                    <span>{{ t("function.associatedPipelines") }}</span>
-                  </ODropdownItem>
-                  <ODropdownItem
-                    icon-left="download"
-                    class="md:hidden"
-                    data-test="function-list-export-function-btn-menu"
-                    @select="exportFunction(row)"
-                  >
-                    <span>{{ t("common.export") }}</span>
-                  </ODropdownItem>
-                  <ODropdownItem
-                    icon-left="delete"
-                    variant="destructive"
-                    class="md:hidden"
-                    data-test="function-list-delete-function-btn-menu"
-                    @select="showDeleteDialogFn({ row })"
-                  >
-                    <span>{{ t("function.delete") }}</span>
-                  </ODropdownItem>
-                </ODropdown>
-              </div>
-            </template>
+                    {{ t("common.edit") }}
+                  </OButton>
+                  <ODropdown side="bottom" align="end">
+                    <template #trigger>
+                      <OButton
+                        :aria-label="t('common.moreActions')"
+                        variant="ghost"
+                        size="icon-xs-sq"
+                        data-test="function-list-row-more-actions"
+                        data-row-action="more"
+                        @click.stop
+                      >
+                        <OIcon name="more-vert" size="sm" />
+                        <OTooltip :content="t('common.moreActions')" side="left" />
+                      </OButton>
+                    </template>
+                    <ODropdownItem
+                      v-if="isMobile"
+                      icon-left="edit"
+                      data-test="function-list-edit-function-btn-menu"
+                      @select="showAddUpdateFn({ row })"
+                    >
+                      <span>{{ t("function.updateTitle") }}</span>
+                    </ODropdownItem>
+                    <ODropdownItem
+                      icon-left="account-tree"
+                      data-test="function-list-associated-pipelines-menu"
+                      data-row-action="view"
+                      @select="getAssociatedPipelines({ row })"
+                    >
+                      <span>{{ t("function.associatedPipelines") }}</span>
+                    </ODropdownItem>
+                    <ODropdownItem
+                      icon-left="download"
+                      data-test="function-list-export-function-btn"
+                      data-row-action="export"
+                      @select="exportFunction(row)"
+                    >
+                      <span>{{ t("common.export") }}</span>
+                    </ODropdownItem>
+                    <ODropdownItem
+                      icon-left="delete"
+                      variant="destructive"
+                      data-test="function-list-delete-function-btn"
+                      data-row-action="delete"
+                      @select="showDeleteDialogFn({ row })"
+                    >
+                      <span>{{ t("function.delete") }}</span>
+                    </ODropdownItem>
+                  </ODropdown>
+                </div>
+              </template>
 
-            <template #selection-actions>
-              <OButton
-                data-test="function-list-export-functions-btn"
-                variant="outline"
-                size="sm"
-                :loading="exportLoading"
-                @click="exportSelectedFunctions"
-                icon-left="download"
-              >
-                {{ t("common.export") }}
-              </OButton>
-              <OButton
-                data-test="function-list-delete-functions-btn"
-                variant="outline-destructive"
-                size="sm"
-                :loading="bulkDeleteLoading"
-                @click="openBulkDeleteDialog"
-                icon-left="delete"
-              >
-                {{ t("common.delete") }}
-              </OButton>
-            </template>
-          </OTable>
+              <template #selection-actions>
+                <OButton
+                  data-test="function-list-export-functions-btn"
+                  variant="outline"
+                  size="sm"
+                  :loading="exportLoading"
+                  @click="exportSelectedFunctions"
+                  icon-left="download"
+                >
+                  {{ t("common.export") }}
+                </OButton>
+                <OButton
+                  data-test="function-list-delete-functions-btn"
+                  variant="outline-destructive"
+                  size="sm"
+                  :loading="bulkDeleteLoading"
+                  @click="openBulkDeleteDialog"
+                  icon-left="delete"
+                >
+                  {{ t("common.delete") }}
+                </OButton>
+              </template>
+            </OTable>
+          </div>
+          <FunctionDetail
+            v-if="paneVisible"
+            :view="focusedView"
+            :loading="loading"
+            :filtered="!!filterQuery"
+            :pushed="isMobile"
+            class="w-full shrink-0 xl:w-104 xl:self-start"
+            @back="closePhoneDetail"
+            @edit="showAddUpdateFn({ row: focusedRow })"
+            @pipelines="getAssociatedPipelines({ row: focusedRow })"
+            @export="exportFunction(focusedRow)"
+            @delete="showDeleteDialogFn({ row: focusedRow })"
+          />
         </div>
       </div>
     </OPageLayout>
@@ -302,7 +325,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script lang="ts">
 import { defineAsyncComponent, defineComponent, ref, computed, watch } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useListViewState } from "@/composables/useListViewState";
 import { useI18nTyped, raw } from "@/types/i18n";
 
@@ -316,13 +339,17 @@ import { getImageURL, verifyOrganizationStatus } from "../../utils/zincutils";
 import { useReo } from "@/services/reodotdev_analytics";
 import searchState from "@/composables/useLogs/searchState";
 import OButton from "@/lib/core/Button/OButton.vue";
-import OBadge from "@/lib/core/Badge/OBadge.vue";
+import OTag from "@/lib/core/Badge/OTag.vue";
+import OIcon from "@/lib/core/Icon/OIcon.vue";
+import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 import ODialog from "@/lib/overlay/Dialog/ODialog.vue";
 import ODropdown from "@/lib/overlay/Dropdown/ODropdown.vue";
 import ODropdownItem from "@/lib/overlay/Dropdown/ODropdownItem.vue";
 import OSearchInput from "@/lib/forms/SearchInput/OSearchInput.vue";
 import OPageLayout from "@/lib/core/PageLayout/OPageLayout.vue";
 import PipelineSectionTabs from "@/components/pipeline/PipelineSectionTabs.vue";
+import FunctionDetail from "./FunctionDetail.vue";
+import { functionRowView } from "./functionRows";
 import ORefreshButton from "@/lib/core/RefreshButton/ORefreshButton.vue";
 import { toast } from "@/lib/feedback/Toast/useToast";
 import { useShortcuts } from "@/lib/vue-shortcut-manager";
@@ -335,6 +362,10 @@ import {
   functionsQuery,
 } from "@/services/jstransform.queries";
 import { useOrgId } from "@/composables/query/useOrgId";
+import useBreakpoint from "@/composables/useBreakpoint";
+
+/** Query key the focused function is mirrored to, so a selection is linkable. */
+const FOCUSED_QUERY = "function";
 
 export default defineComponent({
   name: "functionList",
@@ -342,11 +373,14 @@ export default defineComponent({
     OEmptyState,
     OPageLayout,
     PipelineSectionTabs,
+    FunctionDetail,
     OTable,
     AddFunction: defineAsyncComponent(() => import("./AddFunction.vue")),
     ConfirmDialog,
     OButton,
-    OBadge,
+    OTag,
+    OIcon,
+    OTooltip,
     ODialog,
     ODropdown,
     ODropdownItem,
@@ -363,6 +397,8 @@ export default defineComponent({
     const store = useStore();
     const { t } = useI18nTyped();
     const router = useRouter();
+    const route = useRoute();
+    const { isMobile } = useBreakpoint();
     const formData: any = ref({});
     const showAddJSTransformDialog: any = ref(false);
     const selectedDelete: any = ref(null);
@@ -383,29 +419,40 @@ export default defineComponent({
     });
     const filterQuery = ref(viewState.filterQuery);
     const { track } = useReo();
-    const columns: OTableColumnDef[] = [
-      {
-        id: "name",
-        accessorKey: "name",
-        header: t("common.name"),
-        sortable: true,
-        meta: { align: "left", autoWidth: true },
-      },
-      {
-        id: "transType",
-        accessorKey: "transType",
-        header: t("common.type"),
-        sortable: true,
-        size: 120,
-        meta: { align: "left" },
-      },
-      {
-        id: "actions",
-        header: t("function.actions"),
-        isAction: true,
-        meta: { align: "center", cellClass: "actions-column", actionCount: 4 },
-      },
-    ];
+    const nameColumn = (mobile: boolean): OTableColumnDef => ({
+      id: "name",
+      accessorKey: "name",
+      header: t("common.name"),
+      sortable: true,
+      // A content-derived measure, never the leftover of a full-bleed frame.
+      size: mobile ? 200 : 340,
+      minSize: mobile ? 160 : 220,
+      maxSize: mobile ? 260 : 460,
+      meta: { align: "left", mono: true, isName: true },
+    });
+
+    const actionsColumn: OTableColumnDef = {
+      id: "actions",
+      header: t("function.actions"),
+      isAction: true,
+      meta: { align: "center", cellClass: "actions-column", actionCount: 3 },
+    };
+
+    const columns = computed<OTableColumnDef[]>(() =>
+      isMobile.value
+        ? [nameColumn(true), actionsColumn]
+        : [
+            nameColumn(false),
+            {
+              id: "appliedIn",
+              header: t("logStream.header"),
+              accessorFn: (row: any) => row?.view?.streams ?? [],
+              // Stream lists are the longest values, so the filler takes the canvas slack.
+              meta: { align: "left", autoWidth: true, mono: true },
+            },
+            actionsColumn,
+          ],
+    );
 
     const onPipelineSelect = (pipeline: any) => {
       const routeUrl = router.resolve({
@@ -474,6 +521,7 @@ export default defineComponent({
         function: data.function,
         params: data.params,
         transType: data.transType.toString(),
+        view: functionRowView(data),
         actions: "",
       })),
     );
@@ -483,7 +531,9 @@ export default defineComponent({
     watch(functions.error, (err: any) => {
       if (!err) return;
       console.error("Error while pulling function", err);
-      if (err?.response?.status && err?.response?.status != 403) {
+      // With no rows on screen the table's own error block names the failure; the
+      // toast is for the refresh that could not confirm rows already being read.
+      if (err?.response?.status && err?.response?.status != 403 && jsTransforms.value.length) {
         toast({
           variant: "error",
           message: t("toastMessages.functions.errorWhilePullingFunction"),
@@ -534,6 +584,7 @@ export default defineComponent({
       });
     });
     const pageSizeOptions = [20, 50, 100, 250, 500];
+    const streamSeparator = " · ";
 
     const selectedFunctionIds = ref<string[]>([]);
     const selectedFunctions = computed({
@@ -729,6 +780,76 @@ export default defineComponent({
       return filterData(jsTransforms.value || [], filterQuery.value);
     });
     const hasVisibleRows = computed(() => visibleRows.value.length > 0);
+
+    // Deep links and reloads restore the selection the URL names.
+    const urlFunctionName = () => String(route.query[FOCUSED_QUERY] ?? "");
+    const syncFocusedName = (name: string) => {
+      const query = { ...route.query };
+      if (name) query[FOCUSED_QUERY] = name;
+      else delete query[FOCUSED_QUERY];
+      void router.replace({ query });
+    };
+
+    // The pane shows one row at a time, so the first visible row is its subject
+    // until the operator picks another.
+    const focusedName = ref("");
+    const focusedRow = computed(() => {
+      const rows = visibleRows.value;
+      if (!rows.length) return null;
+      return rows.find((row: any) => row.name === focusedName.value) ?? rows[0];
+    });
+    watch(
+      focusedRow,
+      (row) => {
+        focusedName.value = row?.name ?? "";
+        const linked = urlFunctionName();
+        // A link to a function that has gone must not keep naming it while the
+        // pane shows somebody else.
+        if (row && linked && linked !== row.name) syncFocusedName(row.name);
+      },
+      { immediate: true },
+    );
+    const focusedView = computed(() => focusedRow.value?.view ?? null);
+
+    // A tap pushes the pane over the list on a phone; wider it just stacks.
+    const phoneDetailOpen = ref(false);
+    const closePhoneDetail = () => {
+      phoneDetailOpen.value = false;
+    };
+    watch(isMobile, (mobile) => {
+      if (!mobile) phoneDetailOpen.value = false;
+    });
+
+    const focusFunction = (row: any) => {
+      if (!row?.name || row.name === focusedName.value) return;
+      focusedName.value = row.name;
+      syncFocusedName(row.name);
+      if (isMobile.value) phoneDetailOpen.value = true;
+    };
+    const onRowClick = (row: any) => focusFunction(row);
+    // A read that failed is not an empty list. Rows already on screen stay: they
+    // are stale-but-true, and the toast names the refresh that could not confirm them.
+    const readFailed = computed(() => !!functions.error.value && !forbidden.value);
+    const loadError = computed(() =>
+      readFailed.value && !jsTransforms.value.length ? t("functions.fetchFunctionsError") : null,
+    );
+    const paneVisible = computed(
+      () => !forbidden.value && !loadError.value && (!isMobile.value || phoneDetailOpen.value),
+    );
+    // A row is marked only while its detail is actually on screen: a phone shows
+    // the list alone until a row is chosen, and a marked row with nothing to read
+    // is a promise the screen has not kept.
+    const selectionShown = computed(() => !isMobile.value || phoneDetailOpen.value);
+    const focusedRowClass = (row: any) =>
+      selectionShown.value && row?.name === focusedName.value ? "bg-table-row-selected-bg" : "";
+    watch(
+      () => route.query[FOCUSED_QUERY],
+      (value) => {
+        const name = String(value ?? "");
+        if (name && name !== focusedName.value) focusedName.value = name;
+      },
+      { immediate: true },
+    );
 
     const openBulkDeleteDialog = () => {
       confirmBulkDelete.value = true;
@@ -988,6 +1109,19 @@ export default defineComponent({
       sendToAiChat,
       visibleRows,
       hasVisibleRows,
+      focusedName,
+      focusedRow,
+      focusedView,
+      focusFunction,
+      focusedRowClass,
+      selectionShown,
+      paneVisible,
+      loadError,
+      onRowClick,
+      phoneDetailOpen,
+      closePhoneDetail,
+      isMobile,
+      streamSeparator,
       openBulkDeleteDialog,
       exportLoading,
       exportFunction,
