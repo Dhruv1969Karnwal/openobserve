@@ -62,44 +62,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         />
       </div>
     </div>
-    <div v-if="!searchObj.data.stream.selectedStream.length" class="index-table mt-1">
-      <OEmptyState
-        data-test="logs-search-no-stream-selected"
-        preset="no-stream-selected"
-        size="inline"
-        icon="database"
-      >
-        <template v-if="quickPickStreams.length" #extra>
-          <div data-test="logs-search-stream-quick-pick" class="flex w-full flex-col gap-1">
-            <span class="text-text-secondary mb-0.5 text-center text-xs font-medium">
-              {{ t("search.quickPickStreamsLabel") }}
-            </span>
-            <OButton
-              v-for="stream in quickPickStreams"
-              :key="stream.value"
-              :data-test="`logs-search-stream-quick-pick-${stream.value}`"
-              variant="outline"
-              size="sm"
-              icon-left="database"
-              class="w-full justify-start"
-              @click="quickSelectStream(stream.value)"
-            >
-              <OTruncatedText class="flex-1 text-left">{{ stream.label }}</OTruncatedText>
-            </OButton>
-            <span
-              v-if="streamList.length > quickPickStreams.length"
-              data-test="logs-search-stream-quick-pick-more"
-              class="text-text-secondary mt-0.5 text-center text-xs"
-            >
-              {{
-                t("search.quickPickMoreStreams", {
-                  count: streamList.length - quickPickStreams.length,
-                })
-              }}
-            </span>
-          </div>
-        </template>
-      </OEmptyState>
+    <!-- This panel IS the picker while no stream is chosen, so it lists streams
+         rather than repeating the canvas' one empty-state sentence; with no
+         streams in the org it yields nothing and stays quiet. -->
+    <div
+      v-if="!searchObj.data.stream.selectedStream.length"
+      class="index-table mt-1 min-h-0 overflow-y-auto"
+      data-test="logs-search-stream-quick-pick"
+    >
+      <div class="flex w-full flex-col gap-1">
+        <OButton
+          v-for="stream in quickPickStreams"
+          :key="stream.value"
+          :data-test="`logs-search-stream-quick-pick-${stream.value}`"
+          variant="outline"
+          size="sm"
+          icon-left="database"
+          class="w-full justify-start"
+          @click="quickSelectStream(stream.value)"
+        >
+          <OTruncatedText class="flex-1 text-left">{{ stream.label }}</OTruncatedText>
+        </OButton>
+      </div>
     </div>
     <div v-else class="index-table mt-1">
       <GroupedFieldList
@@ -291,7 +275,6 @@ import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
 import OSelect from "@/lib/forms/Select/OSelect.vue";
 import type { SelectModelValue } from "@/lib/forms/Select/OSelect.types";
 import OSkeleton from "@/lib/feedback/Skeleton/OSkeleton.vue";
-import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import { captureFromValuesApi } from "@/composables/fieldValueStore";
 import { saveLogsStreamType } from "@/utils/streamPersist";
 import { bumpSelectionToken, currentSelectionToken } from "@/composables/useLogs/useSearchBar";
@@ -326,7 +309,6 @@ export default defineComponent({
     OIcon,
     OTooltip,
     OTruncatedText,
-    OEmptyState,
     OSkeleton,
   },
   emits: ["setInterestingFieldInSQLQuery"],
@@ -476,22 +458,18 @@ export default defineComponent({
       return searchObj.data.stream.streamLists;
     });
 
-    // First few streams surfaced as one-click picks in the no-stream empty
-    // state. Ordered by most recently ingested data (stats.doc_time_max desc)
-    // so the streams most likely worth exploring sit at the top. Capped so a
-    // narrow panel stays scannable; the rest stay reachable through the
-    // dropdown's search. Falls back to the plain stream-list order when
-    // ingestion stats aren't available.
-    const QUICK_PICK_LIMIT = 8;
+    // The panel's whole no-stream job: every stream the org has, newest data
+    // first, one click each. Uncapped so the list fills its frame instead of
+    // showing eight of twenty and pointing at the dropdown. Falls back to the
+    // plain stream-list order when ingestion stats aren't available.
     const quickPickStreams = computed(() => {
       const detailed = searchObj.data.streamResults?.list;
       if (Array.isArray(detailed) && detailed.length) {
         return [...detailed]
           .sort(compareStreamsByLatest)
-          .slice(0, QUICK_PICK_LIMIT)
           .map((item: any) => ({ label: item.name, value: item.name }));
       }
-      return (streamList.value || []).slice(0, QUICK_PICK_LIMIT);
+      return streamList.value || [];
     });
 
     const checkSelectedFields = computed(() => {

@@ -178,9 +178,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         @go-to-page="onSharedPageGo"
                       />
                       <LogsNoStreamState
-                        :org-id="store.state.selectedOrganization.identifier"
-                        :stream-type="searchObj.data.stream.streamType"
-                        :auto-run="isAutoRunOn"
+                        :streams="noStreamPicks"
                         data-test="logs-search-no-stream-selected-text"
                         @select-stream="onSelectStream"
                         @pick-stream="onPickStream"
@@ -493,9 +491,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 searchObj.data.stream.selectedStream.length == 0 &&
                 searchObj.data.filterErrMsg === ''
               "
-              :org-id="store.state.selectedOrganization.identifier"
-              :stream-type="searchObj.data.stream.streamType"
-              :auto-run="isAutoRunOn"
+              :streams="noStreamPicks"
               data-test="logs-drill-down-no-stream-selected-text"
               @select-stream="onSelectStream"
               @pick-stream="onPickStream"
@@ -711,6 +707,7 @@ import LogsNoDataState from "@/plugins/logs/LogsNoDataState.vue";
 import FirstDataPanel from "@/components/ingestion/FirstDataPanel.vue";
 import type { FirstEventResult } from "@/composables/firstEvent/useFirstEventWatch";
 import LogsNoStreamState from "@/plugins/logs/LogsNoStreamState.vue";
+import { buildStreamPicks, type LogsStreamPick } from "@/plugins/logs/logsStreamPicks";
 import LogsErrorState from "@/plugins/logs/LogsErrorState.vue";
 import LogsNoFtsPanel from "@/plugins/logs/LogsNoFtsPanel.vue";
 import LogsMissingStreamBanner from "@/plugins/logs/LogsMissingStreamBanner.vue";
@@ -2017,6 +2014,12 @@ export default defineComponent({
       searchObj.data.stream.selectedStream = [stream];
       onStreamChange("", { origin: "selector" });
     };
+
+    // The no-stream canvas lists real streams from the list the page already
+    // fetched, so picking one is one click and never a fabricated figure.
+    const noStreamPicks = computed<LogsStreamPick[]>(() =>
+      buildStreamPicks(searchObj.data.streamResults, searchObj.data.stream.streamLists),
+    );
 
     const firstDataArrival = ref<FirstEventResult | null>(null);
     // query_on_stream_selection leaves the selection empty, so the arrival names the stream and its range itself
@@ -4102,6 +4105,7 @@ export default defineComponent({
       isAiEnabled,
       onSelectStream,
       onPickStream,
+      noStreamPicks,
       onWidenRange,
       onRemoveFilter,
       onAskAiFixQuery,

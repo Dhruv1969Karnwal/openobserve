@@ -60,17 +60,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           :is-row-selectable="(row: any) => row.enableDelete"
           filter-mode="client"
           :default-columns="false"
+          :column-visibility="defaultColumnVisibility"
           show-index
           :enable-column-resize="true"
           :persist-columns="true"
+          :fill-height="'auto'"
           table-id="iam-users-list"
           @update:selected-ids="handleSelectedIdsUpdate"
         >
-          <!-- Access screens have no health state, so the strip counts ROLE
-               MEMBERSHIP and doubles as the role facet: the org's biggest roles
-               first, the tail folded into one tile, Total last and never
-               highlighted. Deliberately no green/amber/red — a role is a category,
-               not a severity. -->
+          <!-- Access screens have no health state, so the strip is a FACET, not a
+               summary: roles ordered by privilege (who can do the most damage is
+               read first), each tile filtering the roster below it. Counts come
+               from the rows in view; the pager states the total, so no tile
+               restates it. -->
           <template #subheader>
             <div
               class="px-page-edge border-table-row-divider border-b py-1.5"
@@ -79,6 +81,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <OStatStrip
                 :items="summaryStats"
                 :loading="loading"
+                compact
                 selectable
                 :selected-key="roleFilter"
                 default-key="total"
@@ -132,6 +135,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 />
               </template>
             </OEmptyState>
+          </template>
+
+          <!-- Identity: the email is what an operator scans for, so it keeps the
+               width; the person and how their credential is held ride underneath
+               as the row's secondary line, and the cut email carries a title. -->
+          <template #cell-email="{ row }">
+            <div class="min-w-0 py-0.5">
+              <div
+                class="text-text-heading truncate text-left font-mono"
+                :title="row.email"
+                data-test="user-list-email-text"
+              >
+                {{ row.email }}
+              </div>
+              <div class="text-text-secondary truncate text-xs" :title="userSubline(row)">
+                {{ userSubline(row) }}
+              </div>
+            </div>
           </template>
 
           <!-- Auth type badge (Native / SSO / LDAP) — enterprise/cloud only -->
@@ -354,7 +375,6 @@ import ODropdownItem from "@/lib/overlay/Dropdown/ODropdownItem.vue";
 import OTag from "@/lib/core/Badge/OTag.vue";
 import OStatStrip from "@/lib/data/StatStrip/OStatStrip.vue";
 import type { StatItem } from "@/lib/data/StatStrip/OStatStrip.types";
-import type { IconName } from "@/lib/core/Icon/OIcon.icons";
 import ODialog from "@/lib/overlay/Dialog/ODialog.vue";
 import OPageLayout from "@/lib/core/PageLayout/OPageLayout.vue";
 import OTable from "@/lib/core/Table/OTable.vue";
@@ -492,6 +512,10 @@ export default defineComponent({
           id: "email",
           header: t("user.email"),
           accessorKey: "email",
+          // The name columns are folded into this row as a subline, so search
+          // still finds a person by name while those columns stay off by default.
+          accessorFn: (row: any) =>
+            [row.email, row.first_name, row.last_name].filter(Boolean).join(" "),
           sortable: true,
           resizable: true,
           hideable: true,
@@ -560,6 +584,16 @@ export default defineComponent({
 
       return cols;
     });
+
+    // A person's two names read as one identity line under their email; keeping
+    // them as columns cost two widths and left the email ellipsised.
+    const defaultColumnVisibility = { first_name: false, last_name: false };
+
+    const userSubline = (row: any): string => {
+      const name = [row?.first_name, row?.last_name].filter(Boolean).join(" ").trim();
+      const auth = row?.is_external ? raw("SSO") : t("user.password");
+      return name ? `${name} · ${auth}` : String(auth);
+    };
 
     // Built-in role names get the muted (yellow) outline badge; anything else
     // is treated as a custom role and gets the destructive (red) outline badge.
@@ -632,14 +666,13 @@ export default defineComponent({
       return tally;
     });
 
-    // BIGGEST roles first, so the tiles are the org's actual top roles rather than
-    // whichever ones happen to outrank the others: a two-user built-in must not
-    // take a slot from a role half the org holds. Privilege breaks ties (Admin
-    // before Viewer at equal size), then the name for stability.
+    // MOST DANGEROUS first, not biggest first: the strip is read as "who can do
+    // the most damage here", so a single root must not rank below five viewers
+    // because it lost a count comparison. Size breaks ties, then the name.
     const rankedRoles = computed(() => {
       return Array.from(roleTally.value.entries())
         .map(([key, entry]) => ({ key, ...entry, rank: PRIVILEGE_RANK[key] ?? 0 }))
-        .sort((a, b) => b.count - a.count || b.rank - a.rank || a.key.localeCompare(b.key));
+        .sort((a, b) => b.rank - a.rank || b.count - a.count || a.key.localeCompare(b.key));
     });
     const visibleRoles = computed(() => rankedRoles.value.slice(0, MAX_ROLE_TILES));
     const overflowRoles = computed(() => rankedRoles.value.slice(MAX_ROLE_TILES));
@@ -662,13 +695,10 @@ export default defineComponent({
       if (key === "serviceaccount") return "purple";
       return "teal";
     };
-    const roleIcon = (key: string): IconName => {
-      if (key === "root" || key === "admin") return "admin-panel-settings";
-      if (key === "editor" || key === "member") return "edit";
-      if (key === "user" || key === "viewer") return "visibility";
-      if (key === "serviceaccount") return "key";
-      return "manage-accounts";
-    };
+    // The Role column's pill title-cases a built-in ("Admin"); the tile says the
+    // same thing the same way. A custom role keeps the name its author gave it.
+    const roleTileLabel = (role: { key: string; label: string }): I18nText =>
+      isBuiltinRole(role.key) ? raw(toCamelCase(role.label)) : raw(role.label);
 
     // ── Role facet + summary strip ──────────────────────────────────────────
     // Counts run over the full row set (not the facet-filtered one) so the tiles
@@ -705,16 +735,14 @@ export default defineComponent({
       const total = (rows.value || []).length;
       const hasData = total > 0;
       const v = (n: number): string | number => (hasData ? n : "—");
-      const share = hasData ? total : undefined;
 
+      // No `max`: the denominator is one tile away in the same row, so a track
+      // under every count would draw a comparison the figures already state.
       const tiles: StatItem[] = visibleRoles.value.map((role) => ({
         key: role.key,
-        // The label is the role name itself — data, not a translatable string.
-        label: raw(role.label),
+        label: roleTileLabel(role),
         value: v(role.count),
-        icon: roleIcon(role.key),
         tone: roleTone(role.key),
-        max: share,
         dataTest: `user-summary-role-${role.key}`,
       }));
 
@@ -723,9 +751,7 @@ export default defineComponent({
           key: OVERFLOW_KEY,
           label: t("iam.summaryOtherRoles", { count: overflowRoles.value.length }),
           value: v(overflowUserCount.value),
-          icon: "more-horiz",
           tone: "teal",
-          max: share,
           dataTest: "user-summary-other-roles",
         });
       }
@@ -736,20 +762,17 @@ export default defineComponent({
           key: INVITED_KEY,
           label: t("iam.summaryInvited"),
           value: v(invitedCount.value),
-          icon: "person-add",
           tone: "purple",
-          max: share,
           dataTest: "user-summary-invited",
         });
       }
 
       tiles.push({
         key: "total",
-        label: t("iam.summaryTotalUsers"),
+        // The facet's reset. "Users" under a page titled Users restated nothing.
+        label: t("iam.all"),
         value: v(total),
-        icon: "group-work",
         tone: "primary",
-        // Clickable (it clears the facet) but never shows the ring.
         dataTest: "user-summary-total",
       });
       return tiles;
@@ -1555,6 +1578,8 @@ export default defineComponent({
       config,
       isBuiltinRole,
       toCamelCase,
+      defaultColumnVisibility,
+      userSubline,
       usersState,
       columns,
       loading,
