@@ -66,7 +66,7 @@ const TONES: Record<StatTone, { chip: string; value: string; bar: string }> = {
   success: {
     chip: "bg-icon-chip-success-bg text-icon-chip-success-text",
     value: "text-icon-chip-success-text",
-    bar: "bg-success-500",
+    bar: "bg-status-positive",
   },
   warning: {
     chip: "bg-icon-chip-warning-bg text-icon-chip-warning-text",

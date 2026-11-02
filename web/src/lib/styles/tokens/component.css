@@ -720,7 +720,9 @@
 
   /* Date / Time / Color (ODate, OTime, OColor) — share input surface */
   --color-datepicker-bg: var(--color-surface-base);
-  --color-datepicker-border: var(--color-border-default);
+  /* The date/time trigger is an operable edge, not a card frame: like input/select it
+     rides the operable-edge floor (grey-300 measured 1.48:1), matching dark's border-strong. */
+  --color-datepicker-border: var(--color-border-control);
   --color-datepicker-hover-border: var(--color-primary-600);
   --color-datepicker-focus-border: var(--color-primary-600);
   --color-datepicker-focus-ring: var(--color-focus-ring-accent);

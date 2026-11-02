@@ -14,12 +14,17 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The series ramp must stay separable WITHOUT colour. An accessibility round measured
- * adjacent seats at 1.00:1 in relative luminance (seats 5 and 7), which makes the
- * separation hue-only and therefore invisible to greyscale and to colour-blind users;
- * the floors below are what the re-stepped ramp now measures with room to spare
- * (worst light ground 3.26:1, worst dark 3.47:1, weakest neighbour 1.66/1.72:1,
- * seat 5 to 7 1.97/1.67:1 — see ui-review/tools/ramp-separation-probe.mjs).
+ * The series ramp must stay separable WITHOUT colour. An accessibility round measured two
+ * tone-twin seats (3~5 orange/magenta and 9~11 teal/olive) at ~1.1:1 in relative luminance —
+ * separable by hue alone, so invisible to greyscale and to colour-blind users — and the
+ * neighbour test only walked the 11 linear pairs, missing the 12->1 seat ECharts cycles to.
+ * The re-stepped ramp holds three floors, pinned so they fail on mutation:
+ *   · every seat clears the 3:1 graphic floor on every plot ground (worst 3.15 light / 3.47 dark);
+ *   · all 12 ring-neighbour pairs (including the 12->1 wrap) clear 1.6 in greyscale AND hue;
+ *   · the flagged tone-twin pairs 3~5, 5~7, 9~11 clear 1.6 on GREYSCALE ALONE, no hue help.
+ * A pair that shares a tone but is not one of those is separated by its per-seat legend dash
+ * (colorPalette SERIES_LINE_DASHES), so the whole matrix is checked: greyscale OR a distinct
+ * legend cue. See ui-review/tools/ramp-separation-probe.mjs for the probe behind the numbers.
  */
 
 import { readFileSync } from "node:fs";
@@ -41,6 +46,14 @@ const RAMPS = [
   { theme: "dark", file: "dark.css", grounds: ["#15171a", "#1e2126", "#232730"] },
 ] as const;
 
+// The pairs an accessibility round measured ~1.1:1 apart (1-indexed seats); they must clear
+// the greyscale floor without leaning on hue.
+const TONE_TWIN_PAIRS: Array<[number, number]> = [
+  [3, 5],
+  [5, 7],
+  [9, 11],
+];
+
 const readRamp = (file: string): string[] => {
   const sheet = readFileSync(join(here, file), "utf8");
   return Array.from({ length: 12 }, (_, i) => {
@@ -48,6 +61,33 @@ const readRamp = (file: string): string[] => {
     if (!m) throw new Error(`--color-chart-series-${i + 1} missing from ${file}`);
     return m[1].toLowerCase();
   });
+};
+
+/** The per-seat legend dashes, read from the palette that paints both mark and swatch. */
+const readDashes = (): string[] => {
+  const src = readFileSync(join(here, "../../../utils/dashboard/colorPalette.ts"), "utf8");
+  const start = src.indexOf("export const SERIES_LINE_DASHES");
+  const open = src.indexOf("[", src.indexOf("=", start));
+  let depth = 0;
+  let close = open;
+  for (; close < src.length; close++) {
+    if (src[close] === "[") depth++;
+    else if (src[close] === "]" && --depth === 0) break;
+  }
+  const body = src.slice(open + 1, close);
+  const items: string[] = [];
+  let current = "";
+  let nest = 0;
+  for (const ch of body) {
+    if (ch === "[") nest++;
+    if (ch === "]") nest--;
+    if (ch === "," && nest === 0) {
+      items.push(current.trim());
+      current = "";
+    } else current += ch;
+  }
+  if (current.trim()) items.push(current.trim());
+  return items.filter((v) => v && !v.startsWith("//"));
 };
 
 const rgba = (hex: string): Rgba => {
@@ -76,9 +116,13 @@ const hueGap = (a: string, b: string): number => {
 
 describe.each(RAMPS)("%s series ramp", ({ theme, file, grounds }) => {
   const seats = readRamp(file);
+  const dashes = readDashes();
 
-  it("paints twelve seats", () => {
+  it("paints twelve seats and carries a legend dash for each", () => {
     expect(seats).toHaveLength(12);
+    expect(dashes).toHaveLength(12);
+    // Seats 1 and 2 are deliberately both solid; the matrix test proves any pair that shares a
+    // cue is separated on luminance instead.
   });
 
   it("clears the 3:1 graphic floor on every plot ground", () => {
@@ -92,18 +136,30 @@ describe.each(RAMPS)("%s series ramp", ({ theme, file, grounds }) => {
     }
   });
 
-  it("separates every neighbouring seat in luminance, not only in hue", () => {
-    for (let i = 0; i < seats.length - 1; i += 1) {
-      const pair = `${theme} seats ${i + 1}~${i + 2} ${seats[i]}/${seats[i + 1]}`;
-      expect(separation(seats[i], seats[i + 1]), pair).toBeGreaterThanOrEqual(SEAT_FLOOR);
-      expect(hueGap(seats[i], seats[i + 1]), `${pair} hue`).toBeGreaterThanOrEqual(HUE_FLOOR);
+  it("separates all twelve ring neighbours (ECharts cycles 12->1) in luminance and hue", () => {
+    for (let i = 0; i < 12; i++) {
+      const j = (i + 1) % 12;
+      const pair = `${theme} seats ${i + 1}~${j + 1} ${seats[i]}/${seats[j]}`;
+      expect(separation(seats[i], seats[j]), pair).toBeGreaterThanOrEqual(SEAT_FLOOR);
+      expect(hueGap(seats[i], seats[j]), `${pair} hue`).toBeGreaterThanOrEqual(HUE_FLOOR);
     }
   });
 
-  it("separates seats 5 and 7, the pair that measured 1.00:1 in greyscale", () => {
+  it.each(TONE_TWIN_PAIRS)("clears the greyscale floor on the %i~%i tone twins", (a, b) => {
     expect(
-      separation(seats[4], seats[6]),
-      `${theme} seats 5~7 ${seats[4]}/${seats[6]}`,
+      separation(seats[a - 1], seats[b - 1]),
+      `${theme} tone twins ${a}~${b} ${seats[a - 1]}/${seats[b - 1]}`,
     ).toBeGreaterThanOrEqual(SEAT_FLOOR);
+  });
+
+  it("separates every seat pair by greyscale or by its legend cue (whole matrix)", () => {
+    for (let i = 0; i < 12; i++) {
+      for (let j = i + 1; j < 12; j++) {
+        const pair = `${theme} seats ${i + 1}~${j + 1} ${seats[i]}/${seats[j]}`;
+        const byLuminance = separation(seats[i], seats[j]) >= SEAT_FLOOR;
+        const byLegendCue = dashes[i] !== dashes[j];
+        expect(byLuminance || byLegendCue, `${pair} inseparable without colour`).toBe(true);
+      }
+    }
   });
 });

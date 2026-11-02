@@ -20,7 +20,14 @@ import i18n from "@/locales";
 import searchService from "@/services/search";
 
 const { tokenColors, labelOverride, viewport } = vi.hoisted(() => ({
-  tokenColors: { "--color-latency-p95": "#0a4ce8" } as Record<string, string>,
+  tokenColors: {
+    "--color-grey-500": "#737373",
+    "--color-map-seq-2": "#819307",
+    "--color-map-seq-3": "#a57c04",
+    "--color-map-seq-4": "#bd6100",
+    "--color-map-seq-5": "#d72601",
+    "--color-status-error-text": "#b91c1c",
+  } as Record<string, string>,
   labelOverride: { value: null as string | null },
   viewport: { mdUp: true },
 }));
@@ -134,6 +141,11 @@ beforeEach(() => {
   search.mockReset();
   respond({ hits: HITS, histogram_interval: 10 });
   tokenColors["--color-latency-p95"] = "#0a4ce8";
+  tokenColors["--color-grey-500"] = "#737373";
+  tokenColors["--color-map-seq-2"] = "#819307";
+  tokenColors["--color-map-seq-3"] = "#a57c04";
+  tokenColors["--color-map-seq-4"] = "#bd6100";
+  tokenColors["--color-map-seq-5"] = "#d72601";
   tokenColors["--color-status-error-text"] = "#cc3645";
   tokenColors["--color-chart-band"] = "#737373";
   labelOverride.value = null;
@@ -292,19 +304,26 @@ describe("TracesLatencyHeatmap", () => {
       expect(options(wrapper).xAxis.data[0]).toMatch(/^\d{2}:\d{2}$/);
     });
 
-    it("colours cells from the latency token", async () => {
+    it("colours cells on a ramp whose every stop clears 3:1", async () => {
       wrapper = await mountHeatmap();
-      expect(chartColor).toHaveBeenCalledWith("--color-latency-p95");
-      expect(options(wrapper).visualMap.inRange.color).toEqual(["#0a4ce8"]);
-      expect(options(wrapper).visualMap.inRange.colorAlpha).toEqual([0.2, 1]);
+      expect(chartColor).toHaveBeenCalledWith("--color-grey-500");
+      expect(chartColor).toHaveBeenCalledWith("--color-map-seq-5");
+      expect(options(wrapper).visualMap.inRange.color).toEqual([
+        "#737373",
+        "#819307",
+        "#a57c04",
+        "#bd6100",
+        "#d72601",
+      ]);
+      expect(options(wrapper).visualMap.inRange.colorAlpha).toBeUndefined();
     });
 
     it("rebuilds the option when the theme flips", async () => {
       wrapper = await mountHeatmap();
-      tokenColors["--color-latency-p95"] = "#5586f7";
+      tokenColors["--color-grey-500"] = "#8a8f98";
       store.state.theme = "dark";
       await settle();
-      expect(options(wrapper).visualMap.inRange.color).toEqual(["#5586f7"]);
+      expect(options(wrapper).visualMap.inRange.color[0]).toEqual("#8a8f98");
     });
 
     it("escapes the tooltip text", async () => {
@@ -367,7 +386,9 @@ describe("TracesLatencyHeatmap", () => {
       expect(o.series).toHaveLength(1);
       expect(o.visualMap.dimension).toBe(2);
       expect(o.visualMap.seriesIndex).toBeUndefined();
-      expect(o.visualMap.inRange).toEqual({ color: ["#0a4ce8"], colorAlpha: [0.2, 1] });
+      expect(o.visualMap.inRange).toEqual({
+        color: ["#737373", "#819307", "#a57c04", "#bd6100", "#d72601"],
+      });
       expect(o.series[0].data).toHaveLength(2);
     });
 
@@ -385,12 +406,12 @@ describe("TracesLatencyHeatmap", () => {
       expect(errorsMap.dimension).toBe(4);
       expect(errorsMap.min).toBe(0);
       expect(errorsMap.max).toBe(1);
-      expect(errorsMap.inRange).toEqual({ color: ["#cc3645"], colorAlpha: [0.2, 1] });
+      expect(errorsMap.inRange).toEqual({ color: ["#737373", "#cc3645"] });
       expect(chartColor).toHaveBeenCalledWith("--color-status-error-text");
       expect(bandMap.show).toBe(false);
       expect(bandMap.seriesIndex).toBe(1);
       expect(bandMap.inRange).toEqual({ color: ["#737373"] });
-      expect(chartColor).toHaveBeenCalledWith("--color-chart-band");
+      expect(chartColor).toHaveBeenCalledWith("--color-grey-500");
     });
 
     it("labels the toggle Color by and collapses it to a dropdown on phones", async () => {
@@ -461,13 +482,14 @@ describe("TracesLatencyHeatmap", () => {
 
         it("rebuilds the option when the theme flips", async () => {
           wrapper = await mountIn();
-          tokenColors["--color-latency-p95"] = "#5586f7";
+          tokenColors["--color-grey-500"] = "#8a8f98";
           tokenColors["--color-status-error-text"] = "#eb938d";
           store.state.theme = "dark";
           await settle();
           const o = options(wrapper);
           const colourMap = mode === "spans" ? o.visualMap : o.visualMap[0];
-          expect(colourMap.inRange.color).toEqual([mode === "spans" ? "#5586f7" : "#eb938d"]);
+          if (mode === "spans") expect(colourMap.inRange.color[0]).toEqual("#8a8f98");
+          else expect(colourMap.inRange.color[1]).toEqual("#eb938d");
         });
       });
     }

@@ -270,6 +270,9 @@ const options = computed(() => {
       axisLine: { lineStyle: { color: chartAxisLine() } },
       axisLabel: { color: textColor, fontSize: 10 },
     },
+    // A latency/duration cell is data ink, so every stop clears 3:1 on both plot grounds:
+    // grey-500 is the visible low-activity neutral (never a near-background alpha wash), the
+    // heat ramp takes over for meaningful counts. Both ends flip with the theme in tokens.
     visualMap: byErrors
       ? [
           {
@@ -278,7 +281,9 @@ const options = computed(() => {
             dimension: 4,
             min: 0,
             max: 1,
-            inRange: { color: [chartColor("--color-status-error-text")], colorAlpha: [0.2, 1] },
+            inRange: {
+              color: [chartColor("--color-grey-500"), chartColor("--color-status-error-text")],
+            },
           },
           // ECharts refuses a heatmap series without a visual map, so the neutral series gets a constant one.
           {
@@ -287,7 +292,7 @@ const options = computed(() => {
             dimension: 5,
             min: 0,
             max: 1,
-            inRange: { color: [chartColor("--color-chart-band")] },
+            inRange: { color: [chartColor("--color-grey-500")] },
           },
         ]
       : {
@@ -295,7 +300,15 @@ const options = computed(() => {
           dimension: 2,
           min: 0,
           max: 1,
-          inRange: { color: [chartColor("--color-latency-p95")], colorAlpha: [0.2, 1] },
+          inRange: {
+            color: [
+              chartColor("--color-grey-500"),
+              chartColor("--color-map-seq-2"),
+              chartColor("--color-map-seq-3"),
+              chartColor("--color-map-seq-4"),
+              chartColor("--color-map-seq-5"),
+            ],
+          },
         },
     toolbox: {
       show: true,
