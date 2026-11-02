@@ -15,7 +15,7 @@
 
 import { scaleLinear } from "d3-scale";
 import { isNumber } from "lodash-es";
-import { chartColor, chartNumber } from "../chartTheme";
+import { chartColor, chartNumber, resolveChartInk } from "../chartTheme";
 
 export enum ColorModeWithoutMinMax {
   PALETTE_CLASSIC_BY_SERIES = "palette-classic-by-series",
@@ -80,8 +80,8 @@ export const getColorPalette = (_theme?: string): string[] => [
 // echarts needs resolved colours (not CSS vars), so these literals live here —
 // the sanctioned home for chart hex. Categorical *series* must instead draw from
 // getColorPalette() above; the constants below are single-purpose semantic /
-// status marks whose exact hue carries meaning (a threshold line; a severity
-// escalation) and so is kept deliberately fixed.
+// status marks whose identity carries meaning (a threshold line; a severity
+// escalation), so each one names the token it must follow rather than a seat index.
 
 /** Quality average-score trend line (the primary series on the trend chart). */
 export const QUALITY_SCORE_LINE_COLOR = "#2563eb";
@@ -89,18 +89,22 @@ export const QUALITY_SCORE_LINE_COLOR = "#2563eb";
 /** Reference / threshold + p95 marker on the Quality trend + distribution charts. */
 export const CHART_THRESHOLD_COLOR = "#b25400";
 
-/** LLM Insights latency percentiles — a severity escalation, p50 → p99. */
+/**
+ * LLM Insights latency percentiles — a severity escalation, p50 → p99. The hot steps
+ * name the heat ramp's tokens (measured 3.51/3.95/4.62 light, 7.95/6.74/5.17 dark)
+ * because a percentile that breaks is a state, and states go through tokens.
+ */
 export const LLM_LATENCY_SERIES_COLORS = {
   p50: "#64748b",
-  p90: "#f59e0b",
-  p95: "#f97316",
-  p99: "#ef4444",
+  p90: "var(--color-map-seq-3)",
+  p95: "var(--color-map-seq-4)",
+  p99: "var(--color-map-seq-5)",
 } as const;
 
 /** LLM Insights single-metric panel colours (mirror the KPI tile tones). */
-export const LLM_ERRORS_COLOR = "#ef4444";
-export const LLM_SPANS_COLOR = "#3b82f6";
-export const LLM_TOKENS_COLOR = "#a855f7";
+export const LLM_ERRORS_COLOR = "var(--color-severity-error-color)";
+export const LLM_SPANS_COLOR = "var(--color-chart-series-1)";
+export const LLM_TOKENS_COLOR = "var(--color-chart-series-2)";
 
 const isValidHexColor = (color: string): boolean => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
@@ -298,17 +302,18 @@ export const getSeriesColor = (
       (mapping: any) => mapping.value === seriesName && mapping.color,
     );
     if (customMapping) {
-      return customMapping.color;
+      return resolveChartInk(customMapping.color);
     }
   }
 
   if (!colorCfg) {
     return colorPalette[getSeriesHash(seriesName?.toString() ?? "", colorPalette)];
   } else if (colorCfg.mode === "fixed") {
-    return colorCfg?.fixedColor?.[0] ?? "#53ca53";
+    // A schema may name a token instead of a hex, so the ink follows the theme.
+    return resolveChartInk(colorCfg?.fixedColor?.[0]) ?? "#53ca53";
   } else if (colorCfg.mode === "shades") {
     return shadeColor(
-      colorCfg?.fixedColor?.[0] ?? "#53ca53",
+      (resolveChartInk(colorCfg?.fixedColor?.[0]) as string) ?? "#53ca53",
       getSeriesValueBasedOnSeriesBy(value, "last") ?? chartMin,
       chartMin,
       chartMax,
@@ -325,7 +330,9 @@ export const getSeriesColor = (
   } else {
     const d3ColorObj = scaleLinear(
       getDomainPartitions(chartMin, chartMax, colorCfg?.fixedColor?.length ?? colorPalette.length),
-      colorCfg?.fixedColor?.length ? colorCfg.fixedColor : colorPalette,
+      colorCfg?.fixedColor?.length
+        ? colorCfg.fixedColor.map((c: string) => resolveChartInk(c) || c)
+        : colorPalette,
     );
     return d3ColorObj(
       (getSeriesValueBasedOnSeriesBy(value, colorCfg?.seriesBy ?? "last") ?? chartMin) as number,
@@ -416,7 +423,7 @@ export const getGridLineStyle = (_theme?: string) => ({
  * on hover and in the legend swatch.
  *
  * Seats 1 and 2 stay solid — they are the pair every chart is most likely to
- * draw and they already measure 2.27:1 apart in greyscale, so a pattern there
+ * draw and they already measure 2.43:1 apart in greyscale, so a pattern there
  * would be noise, not information.
  */
 export const SERIES_LINE_DASHES: Array<number[] | "solid"> = [
@@ -459,18 +466,7 @@ const hasPlottedPoint = (series: any): boolean => {
   );
 };
 
-/**
- * Non-colour series cues (O20). The luminance-stepped `--color-chart-series-*`
- * ramp separates NEIGHBOURING seats by hue and tone, but seats that share a tone
- * (odd seats with odd, even with even) are luminance-twins, so two of them
- * overlapping is separable by hue alone. These cues give every seat a second,
- * colour-free identity: a dash pattern on the stroke and a mark shape that shows
- * on hover and in the legend swatch.
- *
- * Seats 1 and 2 stay solid — they are the pair every chart is most likely to
- * draw and they already measure 2.27:1 apart in greyscale, so a pattern there
- * would be noise, not information.
- */
+/** Per-seat dash pattern; see SERIES_LINE_DASHES for why seats need a cue at all. */
 export const getSeriesLineStyleType = (index: number): number[] | "solid" =>
   SERIES_LINE_DASHES[index % SERIES_LINE_DASHES.length];
 
@@ -478,12 +474,12 @@ export const getSeriesMarkShape = (index: number): string =>
   SERIES_MARK_SHAPES[index % SERIES_MARK_SHAPES.length];
 
 /**
- * Stamps the per-seat dash pattern and mark shape onto line/area series, and
- * gives the legend the same shape as its swatch. A legend with no `data` is
- * filled from the series that carry data, so an empty series is never listed.
- * Returns the options untouched when a single series is drawn, when a series
- * already carries an explicit dash (a panel override wins), or when the payload
- * is not the plain array shape ECharts expects.
+ * Stamps the per-seat dash pattern and mark shape onto line/area series; the legend
+ * marker is drawn from the same two properties, so a swatch is its mark. A legend
+ * with no `data` is filled from the series that carry data, so an empty series is
+ * never listed. Returns the options untouched when a single series is drawn, when a
+ * series already carries an explicit dash (a panel override wins), or when the
+ * payload is not the plain array shape ECharts expects.
  */
 export const withSeriesNonColourCues = (options: any): any => {
   const series = options?.series;
@@ -494,11 +490,9 @@ export const withSeriesNonColourCues = (options: any): any => {
   if (!series.some(isLine)) return options;
 
   let seat = -1;
-  const seats = new Map<string, number>();
   const nextSeries = series.map((entry: any) => {
     if (!isLine(entry)) return entry;
     seat += 1;
-    if (entry?.name) seats.set(entry.name, seat);
     const lineStyle = entry.lineStyle ?? {};
     return {
       ...entry,
@@ -507,22 +501,17 @@ export const withSeriesNonColourCues = (options: any): any => {
     };
   });
 
-  const markOf = (name: any, fallback: number) =>
-    getSeriesMarkShape(typeof name === "string" ? (seats.get(name) ?? fallback) : fallback);
-
   const legend = options?.legend;
   let nextLegend = legend;
   if (legend && typeof legend === "object" && legend.show !== false) {
+    // A line series draws its own legend marker from its lineStyle and symbol, so the
+    // swatch carries the seat colour, dash AND mark; an injected icon would drop the dash.
     if (Array.isArray(legend.data)) {
       nextLegend = {
         ...legend,
-        data: legend.data.map((item: any, index: number) => {
-          const name = typeof item === "string" ? item : item?.name;
-          const icon = markOf(name, index);
-          return item && typeof item === "object"
-            ? { ...item, icon: item.icon ?? icon }
-            : { name: item, icon };
-        }),
+        data: legend.data.map((item: any) =>
+          item && typeof item === "object" ? item : { name: item },
+        ),
       };
     } else {
       // ECharts lists every series name it is given, including the ones with no
@@ -530,13 +519,7 @@ export const withSeriesNonColourCues = (options: any): any => {
       const drawn = nextSeries.filter((entry: any) => isLine(entry) && entry?.name);
       const listed = drawn.filter(hasPlottedPoint);
       if (listed.length > 1) {
-        nextLegend = {
-          ...legend,
-          data: listed.map((entry: any) => ({
-            name: entry.name,
-            icon: markOf(entry.name, drawn.indexOf(entry)),
-          })),
-        };
+        nextLegend = { ...legend, data: listed.map((entry: any) => ({ name: entry.name })) };
       }
     }
   }

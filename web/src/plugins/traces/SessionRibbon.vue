@@ -186,13 +186,12 @@ const { t } = useI18nTyped();
 type Metric = "cost" | "latency" | "tokens";
 const metric = ref<Metric>("cost");
 
-// Bar colours match the LLM Insights dashboard chart palette (hex, as the panel
-// defs use). Error turns are always red regardless of the selected metric.
+// Same seats as the LLM KPI tiles; an error turn is a state, so it keeps the severity ink.
 const COLORS: Record<Metric | "error", string> = {
-  cost: "#3b82f6",
-  latency: "#f97316",
-  tokens: "#a855f7",
-  error: "#ef4444",
+  cost: "var(--color-chart-series-1)",
+  latency: "var(--color-chart-series-3)",
+  tokens: "var(--color-chart-series-2)",
+  error: "var(--color-severity-error-color)",
 };
 
 function metricValue(row: SessionTraceRow): number {

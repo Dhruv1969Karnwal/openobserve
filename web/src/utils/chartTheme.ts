@@ -62,17 +62,17 @@ const FALLBACKS: Record<string, string> = {
   // sensible colors before the token stylesheet is live (jsdom / very-early render).
   // Mirrors base.css seat-for-seat; chartTheme.fallbacks.spec.ts keeps them equal.
   "--color-chart-series-1": "#3f7994",
-  "--color-chart-series-2": "#581c87",
-  "--color-chart-series-3": "#b45309",
-  "--color-chart-series-4": "#14532d",
-  "--color-chart-series-5": "#c026d3",
-  "--color-chart-series-6": "#0f172a",
-  "--color-chart-series-7": "#e11d48",
-  "--color-chart-series-8": "#134e4a",
-  "--color-chart-series-9": "#4d7c0f",
-  "--color-chart-series-10": "#831843",
+  "--color-chart-series-2": "#521a7d",
+  "--color-chart-series-3": "#cf5f0a",
+  "--color-chart-series-4": "#0d361d",
+  "--color-chart-series-5": "#d050e0",
+  "--color-chart-series-6": "#243764",
+  "--color-chart-series-7": "#af1638",
+  "--color-chart-series-8": "#0d3634",
+  "--color-chart-series-9": "#528510",
+  "--color-chart-series-10": "#6d1437",
   "--color-chart-series-11": "#047857",
-  "--color-chart-series-12": "#7c2d12",
+  "--color-chart-series-12": "#46190a",
   // Mark-line drop shadow (light value) — dark override lives in dark.css.
   "--color-chart-markline-shadow": "rgba(255, 255, 255, 0.7)",
   // Dashboard table row-highlight palette (light values) + grid line.
@@ -183,6 +183,17 @@ export function chartColor(token: `--${string}`): string {
 /** Clear the resolved-token cache. Call on theme change so charts pick up new values. */
 export function invalidateChartTheme(): void {
   cache.clear();
+}
+
+/**
+ * A mark may be handed a token (`"--color-x"` / `"var(--color-x)"`) where a canvas or
+ * SVG attribute needs a pixel; this resolves it and passes any concrete colour through,
+ * so schema JSON can name a token instead of embedding a hex.
+ */
+export function resolveChartInk(color?: string | null): string | null | undefined {
+  if (typeof color !== "string" || !color) return color;
+  const token = color.trim().match(/^(?:var\(\s*)?(--[\w-]+)(?:\s*\))?$/)?.[1];
+  return token ? chartColor(token as `--${string}`) : color;
 }
 
 /**

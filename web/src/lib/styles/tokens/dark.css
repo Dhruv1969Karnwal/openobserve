@@ -746,25 +746,26 @@
 
 /* Dashboard classic series palette — dark overrides (light values in base.css).
    Same 12 hues in the same seat order as the light ramp, re-toned for the dark
-   plot ground: odd seats .58-.75 relative luminance, even seats .22-.41, so
-   neighbours keep BOTH a hue difference (>=72 deg) and a luminance difference
-   (weakest neighbour pair 1.58:1), and every seat clears 3:1 on #15171a /
-   #1e2126 / #232730 (worst seat 3.78:1). All figures from series-luminance.mjs. */
+   plot ground: odd seats .4786-.8352 relative luminance, even seats .1936-.2570,
+   so neighbours keep BOTH a hue difference (>=71 deg) and a luminance difference
+   (weakest neighbour pair 1.72:1), seats 5 and 7 sit 1.67:1 apart instead of the
+   1.03:1 they measured before, and every seat clears 3:1 on #15171a / #1e2126 /
+   #232730 (worst seat 3.47:1). All figures from ramp-separation-probe.mjs. */
 :root.dark,
 .dark :root,
 .dark {
   --color-chart-series-1: #7dd3fc;
-  --color-chart-series-2: #a855f7;
-  --color-chart-series-3: #fcd34d;
-  --color-chart-series-4: #22c55e;
-  --color-chart-series-5: #f5d0fe;
-  --color-chart-series-6: #06b6d4;
-  --color-chart-series-7: #fecdd3;
-  --color-chart-series-8: #14b8a6;
-  --color-chart-series-9: #bef264;
+  --color-chart-series-2: #ad60f7;
+  --color-chart-series-3: #fcda6b;
+  --color-chart-series-4: #198f44;
+  --color-chart-series-5: #fae5fe;
+  --color-chart-series-6: #0598b2;
+  --color-chart-series-7: #fd9da9;
+  --color-chart-series-8: #0f8d80;
+  --color-chart-series-9: #9ceb14;
   --color-chart-series-10: #ec4899;
-  --color-chart-series-11: #6ee7b7;
-  --color-chart-series-12: #f97316;
+  --color-chart-series-11: #49e1a5;
+  --color-chart-series-12: #cb5605;
 
   --color-map-seq-1: #03a92e;
   --color-map-seq-2: #9db303;
