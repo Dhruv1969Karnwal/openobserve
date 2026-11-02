@@ -78,15 +78,18 @@ describe("per-seat non-colour cues", () => {
     expect(options.series[0].symbol).toBeUndefined();
   });
 
-  it("mirrors the mark shape into an explicit legend list", () => {
+  it("leaves a line series swatch to the series, so the dash and mark carry over", () => {
     const out = withSeriesNonColourCues({
       series: [line("a"), line("b")],
       legend: { show: true, data: ["a", { name: "b" }] },
     });
-    expect(out.legend.data).toEqual([
-      { name: "a", icon: "circle" },
-      { name: "b", icon: "diamond" },
-    ]);
+    // ECharts draws a line series' marker from its own lineStyle + symbol: injecting an
+    // icon replaces that with a filled blob and drops the seat's dash from the key.
+    expect(out.legend.data).toEqual([{ name: "a" }, { name: "b" }]);
+    expect(out.series[0].lineStyle.type).toBe("solid");
+    expect(out.series[1].lineStyle.type).toBe("solid");
+    expect(out.series[0].symbol).toBe("circle");
+    expect(out.series[1].symbol).toBe("diamond");
   });
 
   it("keeps an icon the builder already chose", () => {
@@ -102,10 +105,7 @@ describe("per-seat non-colour cues", () => {
       series: [line("a"), empty("nothing"), line("c")],
       legend: { show: true },
     });
-    expect(out.legend.data).toEqual([
-      { name: "a", icon: "circle" },
-      { name: "c", icon: "rect" },
-    ]);
+    expect(out.legend.data).toEqual([{ name: "a" }, { name: "c" }]);
   });
 
   it("leaves the legend alone when the panel turned it off", () => {
