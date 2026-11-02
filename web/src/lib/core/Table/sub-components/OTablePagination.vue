@@ -72,6 +72,14 @@ const selectionLabel = computed(() => {
   const total = `${props.totalCount.toLocaleString()}${props.totalCountExact ? "" : "+"}`;
   return t("components.table.selectedOfTotal", { selected, total });
 });
+
+// A filter can leave the page painting nothing, and "1 - 2 of 2" over an empty
+// body reads as a broken count rather than a narrow search.
+const rangeLabel = computed(() =>
+  props.showingFrom === 0 || props.showingTo === 0
+    ? "0"
+    : `${props.showingFrom} - ${props.showingTo}`,
+);
 </script>
 
 <template>
@@ -124,7 +132,7 @@ const selectionLabel = computed(() => {
         class="text-primary text-xs whitespace-nowrap"
         data-test="o2-table-pagination-info"
       >
-        {{ t("search.showing") }} {{ showingFrom }} - {{ showingTo }} {{ t("search.of") }}
+        {{ t("search.showing") }} {{ rangeLabel }} {{ t("search.of") }}
         {{ totalCount.toLocaleString() }}{{ totalCountExact ? "" : "+" }}
       </span>
       <div

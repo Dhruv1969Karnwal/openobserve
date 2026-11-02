@@ -55,7 +55,8 @@ export const ROW_RAIL_TONE_CLASS: Record<RowRailTone, string> = {
   blue: "[&>td:first-child]:border-s-4 [&>td:first-child]:border-s-badge-blue-soft-text",
   teal: "[&>td:first-child]:border-s-4 [&>td:first-child]:border-s-badge-teal-soft-text",
   purple: "[&>td:first-child]:border-s-4 [&>td:first-child]:border-s-badge-purple-soft-text",
-  neutral: "[&>td:first-child]:border-s-4 [&>td:first-child]:border-s-border-default",
+  // A rail is a state mark, so even the receding one is a rail token, not a separator.
+  neutral: "[&>td:first-child]:border-s-4 [&>td:first-child]:border-s-row-rail-muted",
 };
 
 /** Tone → utility classes for a de-emphasised row. */

@@ -10,7 +10,7 @@ const i18n = createI18n({
   locale: "en",
   messages: {
     en: {
-      search: { noData: "No data available" },
+      search: { noData: "No data available", showing: "Showing", of: "of" },
       common: { loading: "Loading..." },
       components: {
         table: {
@@ -245,6 +245,47 @@ describe("OTable", () => {
       const info = wrapper.find('[data-test="o2-table-pagination-info"]');
       expect(info.text()).toContain("10");
       expect(info.text()).toContain("25");
+    });
+
+    // A global filter narrows what the body paints; the footer has to follow it.
+    describe("pagination info under a filter", () => {
+      async function filterTo(term: string) {
+        wrapper = mount(OTable, {
+          props: {
+            data: makeRows(25),
+            columns: makeColumns(),
+            pageSize: 10,
+            showGlobalFilter: true,
+          },
+        });
+        await flushPromises();
+        await wrapper.find('[data-test="o2-table-global-filter-input"]').setValue(term);
+        await flushPromises();
+        return wrapper.find('[data-test="o2-table-pagination-info"]').text();
+      }
+
+      it("prints a zero range when nothing matches", async () => {
+        expect(await filterTo("zzzzz")).toBe("Showing 0 of 25");
+      });
+
+      it("counts the matching rows, not the rows the caller passed in", async () => {
+        expect(await filterTo("User 12")).toBe("Showing 1 - 1 of 25");
+      });
+
+      it("keeps the full-page range when no filter is typed", async () => {
+        wrapper = mount(OTable, {
+          props: {
+            data: makeRows(25),
+            columns: makeColumns(),
+            pageSize: 10,
+            showGlobalFilter: true,
+          },
+        });
+        await flushPromises();
+        expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toBe(
+          "Showing 1 - 10 of 25",
+        );
+      });
     });
 
     it("has page size select", () => {
@@ -3048,7 +3089,7 @@ describe("OTable row rail + row tone", () => {
   it.each([
     ["p3", "border-s-priority-p3"],
     ["error", "border-s-icon-chip-error-text"],
-    ["neutral", "border-s-border-default"],
+    ["neutral", "border-s-row-rail-muted"],
   ])("rails tone %s with its own token", async (tone, expected) => {
     wrapper = mountWith({ rowRailTone: () => tone });
     await nextTick();
