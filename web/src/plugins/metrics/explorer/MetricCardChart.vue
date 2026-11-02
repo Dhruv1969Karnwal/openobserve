@@ -26,20 +26,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   axis) is expressed as panel config the shared converter already understands.
 -->
 <template>
-  <div ref="chartPanelRef" class="h-full w-full" :style="{ height }">
-    <PanelSchemaRenderer
-      :panel-schema="panelSchema"
-      :selected-time-obj="selectedTimeObj"
-      :variables-data="variablesData"
-      :injected-promql-data="injectedPromqlData"
-      :injected-exemplars="injectedExemplars"
-      :allow-alert-creation="allowAlertCreation"
-      alert-source="explorer"
-      :allow-annotations-add="false"
-      :allow-annotations-a-p-i="false"
-      @error="onPanelError"
-      @updated:data-zoom="$emit('zoom', $event)"
-    />
+  <div
+    ref="chartPanelRef"
+    class="metrics-chart-mount flex h-full w-full flex-col"
+    :style="{ height }"
+  >
+    <div class="relative min-h-0 flex-1">
+      <PanelSchemaRenderer
+        :panel-schema="panelSchema"
+        :selected-time-obj="selectedTimeObj"
+        :variables-data="variablesData"
+        :injected-promql-data="injectedPromqlData"
+        :injected-exemplars="injectedExemplars"
+        :allow-alert-creation="allowAlertCreation"
+        alert-source="explorer"
+        :allow-annotations-add="false"
+        :allow-annotations-a-p-i="false"
+        @error="onPanelError"
+        @updated:data-zoom="$emit('zoom', $event)"
+      />
+    </div>
+    <!-- A2. The Data-table toggle gets a row of its own. Painted over the plot
+         it covered the first x-axis tick and the legend marker; the band below
+         is where it lives, focused or not. -->
+    <div class="h-6 shrink-0" data-test="metrics-chart-a11y-band"></div>
   </div>
 </template>
 
@@ -284,3 +294,35 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+/* keep(lib-override:chart-renderer) — the toggle is ChartRenderer's DOM, which
+   metrics may not re-template; this re-points only where the card mounts it.
+   The data-table escape hatch lives inside the chart renderer: sr-only it is
+   invisible to a sighted keyboard user, and focus-anchored at the canvas corner
+   it lands on the first x-axis tick and the legend marker. In the metrics
+   mounts it gets the reserved band under the plot instead, visible at rest,
+   full label intact. */
+.metrics-chart-mount :deep([data-test="chart-data-table-toggle"]) {
+  position: absolute !important;
+  top: 100% !important;
+  bottom: auto !important;
+  inset-inline-start: 0 !important;
+  inset-inline-end: auto !important;
+  z-index: 10 !important;
+  width: auto !important;
+  height: 1.5rem !important;
+  margin: 0 !important;
+  padding: 0 0.5rem !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  white-space: nowrap !important;
+  font-size: var(--text-2xs);
+  line-height: 1.4;
+  border: 0.0625rem solid var(--color-border-control);
+  border-radius: var(--radius-default);
+  background-color: var(--color-surface-base);
+  color: var(--color-text-heading);
+}
+</style>

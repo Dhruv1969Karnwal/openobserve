@@ -461,6 +461,29 @@ describe("HostsPage", () => {
       );
     });
 
+    it("labels the utilization thresholds so the tint is not hue-guessing", async () => {
+      wrapper = await mountPage();
+      const legend = wrapper.find('[data-test="hosts-usage-legend"]');
+      expect(legend.exists()).toBe(true);
+      expect(legend.text()).toContain("amber bar at 70% used or above");
+      expect(legend.text()).toContain("red bar at 90% used or above");
+    });
+
+    it("paints an over-threshold bar with the row-rail warning ink, not the 1.9:1 palette step", async () => {
+      wrapper = await mountPage();
+      const warnBar = wrapper
+        .find('[data-test="hosts-cell-memory-web-01"]')
+        .find('[role="progressbar"]');
+      const fill = warnBar.find("div");
+      expect(fill.attributes("style")).toContain("--color-row-rail-warning");
+      expect(fill.classes().join(" ")).not.toContain("bg-progress-bar-warning");
+
+      const defaultBar = wrapper
+        .find('[data-test="hosts-cell-cpu-web-02"]')
+        .find('[role="progressbar"]');
+      expect(defaultBar.find("div").classes()).toContain("bg-progress-bar-default");
+    });
+
     it("draws no bar for a null reading but still prints the em-dash", async () => {
       wrapper = await mountPage();
       const cell = wrapper.find('[data-test="hosts-cell-cpu-db-01"]');

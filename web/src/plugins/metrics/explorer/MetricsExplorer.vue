@@ -799,8 +799,9 @@ const CARD_MIN_WIDTH = 400;
 
 /** Vertical gap between rows, carved out of the row box by `pb-3`. */
 const ROW_GAP = 12;
-/** How tall one card is, in both views. */
-const CARD_HEIGHT = 224;
+/** How tall one card is, in both views. The +24 is the card's a11y band (see
+ *  MetricCardChart): the plot keeps its height, the Data-table control gets a row. */
+const CARD_HEIGHT = 248;
 /**
  * Card height + the gap. The row box is sized to exactly this.
  * The same in both views (one constant rather than two, so they cannot drift).

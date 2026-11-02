@@ -40,6 +40,7 @@ import DateTime from "@/components/DateTime.vue";
 import DataSourceSetupCard from "@/components/ingestion/setupCard/DataSourceSetupCard.vue";
 import HostDetailDrawer from "./HostDetailDrawer.vue";
 import { useHostsList, utilizationTint, type HostRow } from "./useHostsList";
+import { usageBarFill } from "./usageBarFill";
 import { HOSTS_DEFAULT_RELATIVE_PERIOD, HOSTS_DEFAULT_WINDOW_US } from "./hostsQueries";
 import { useWorkloadDetection } from "@/composables/useWorkloadDetection";
 import { formatUnitValue, getUnitValue } from "@/utils/dashboard/convertDataIntoUnitValue";
@@ -560,6 +561,25 @@ const osToggleLabel = (slug: string) =>
           <OText variant="meta" class="px-1 pb-2" data-test="hosts-range-note">{{
             t("infra.hosts.rangeNote")
           }}</OText>
+          <div
+            class="text-2xs text-text-secondary flex flex-wrap items-center gap-x-3 gap-y-1 px-1 pb-2"
+            data-test="hosts-usage-legend"
+          >
+            <span class="inline-flex items-center gap-1.5">
+              <span
+                class="bg-row-rail-warning inline-block size-2 shrink-0 rounded-full"
+                aria-hidden="true"
+              ></span>
+              {{ t("infra.hosts.usageBarWarn", { threshold: 70 }) }}
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span
+                class="bg-row-rail-negative inline-block size-2 shrink-0 rounded-full"
+                aria-hidden="true"
+              ></span>
+              {{ t("infra.hosts.usageBarCritical", { threshold: 90 }) }}
+            </span>
+          </div>
         </div>
 
         <div class="min-h-0 flex-1">
@@ -620,6 +640,7 @@ const osToggleLabel = (slug: string) =>
                   class="min-w-0 flex-1"
                   :value="barValue(row.cpu)"
                   :variant="tintVariant(row.cpu)"
+                  :color="usageBarFill(tintVariant(row.cpu))"
                   :data-test="`hosts-bar-cpu-${row.host_name}`"
                 />
                 <span class="shrink-0 tabular-nums" :class="tintClass(row.cpu)">{{
@@ -640,6 +661,7 @@ const osToggleLabel = (slug: string) =>
                     class="min-w-0 flex-1"
                     :value="barValue(row.memoryPct)"
                     :variant="tintVariant(row.memoryPct)"
+                    :color="usageBarFill(tintVariant(row.memoryPct))"
                     :data-test="`hosts-bar-memory-${row.host_name}`"
                   />
                   <span class="shrink-0 tabular-nums" :class="tintClass(row.memoryPct)">{{
@@ -667,6 +689,7 @@ const osToggleLabel = (slug: string) =>
                   class="min-w-0 flex-1"
                   :value="barValue(row.disk)"
                   :variant="tintVariant(row.disk)"
+                  :color="usageBarFill(tintVariant(row.disk))"
                   :data-test="`hosts-bar-disk-${row.host_name}`"
                 />
                 <span class="shrink-0 tabular-nums" :class="tintClass(row.disk)">{{

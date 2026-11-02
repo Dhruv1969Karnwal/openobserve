@@ -21455,6 +21455,8 @@
       "retry": "Retry",
       "pageError": "Couldn't load the hosts list.",
       "rangeNote": "The time range decides which hosts are listed \u2014 widen it to see older hosts. CPU, memory, disk and load are each the latest sample at the end of that range, not an average or peak across it.",
+      "usageBarWarn": "amber bar at {threshold}% used or above",
+      "usageBarCritical": "red bar at {threshold}% used or above",
       "statusActive": "Active",
       "statusInactive": "Inactive",
       "statusUnknown": "Unknown",
