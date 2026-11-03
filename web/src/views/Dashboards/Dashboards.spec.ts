@@ -202,6 +202,20 @@ const createMockI18n = () => {
           folderLabel: "Folders",
           newFolderBtnLabel: "New Folder",
           name: "Name",
+          updated: "Updated",
+          updatedShort: "Updated {when}",
+          context: {
+            ariaLabel: "Ways to add a dashboard to this folder",
+            addTitle: "Add dashboards to {folder}",
+            newTitle: "New dashboard",
+            newDesc: "Start a blank dashboard in this folder",
+            importTitle: "Import",
+            importDesc: "Upload a JSON file or paste a dashboard URL",
+            templatesTitle: "Browse templates",
+            templatesDesc: "Import a ready-made dashboard from the gallery",
+            factFavorites: "In favorites",
+            factChanged: "Last updated",
+          },
           identifier: "Identifier",
           description: "Description",
           owner: "Owner",
@@ -464,6 +478,8 @@ describe("Dashboards.vue", () => {
 
   // T1.3 (design 4.3/§6): template cards render only on the true "new org" empty state.
   describe("Empty-state template suggestion cards", () => {
+    // The empty-state instance is the one the assertions are about; the
+    // short-list band below the pager is a second instance of the same component.
     const findCards = () => wrapper.findComponent({ name: "TemplateSuggestionCards" });
 
     it("renders TemplateSuggestionCards for the default folder with no filter", async () => {
@@ -1498,14 +1514,14 @@ describe("Dashboards.vue", () => {
 
     it("keeps every field beside the name while the frame is wide", async () => {
       await mountAt(1112);
-      expect(ids()).toEqual(["name", "description", "owner", "created", "actions"]);
+      expect(ids()).toEqual(["name", "description", "owner", "created", "updated", "actions"]);
       // Nothing is duplicated: the wide band paints no subline under the name.
       expect(wrapper.vm.rowSublines(row)).toEqual([]);
     });
 
     it("moves the description under the name when the band cannot read it as a column", async () => {
       await mountAt(700);
-      expect(ids()).toEqual(["name", "owner", "created", "actions"]);
+      expect(ids()).toEqual(["name", "owner", "updated", "actions"]);
       expect(wrapper.vm.rowSublines(row)).toEqual(["Delivery and latency for the ingest path"]);
     });
 
@@ -1515,7 +1531,7 @@ describe("Dashboards.vue", () => {
       expect(wrapper.vm.rowSublines(row)).toEqual([
         // WHY: a subline is read at 12px under a name; the seconds were noise.
         "Delivery and latency for the ingest path",
-        "root@example.com · Oct 21, 2026",
+        "root@example.com · Updated Oct 21, 2026",
       ]);
     });
 

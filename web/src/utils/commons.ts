@@ -147,12 +147,15 @@ const applyDashboards = (store: any, folderId: any, dashboards: any[]) => {
       version: dashboard.version,
       folderId: dashboard.folder_id,
       folderName: dashboard.folder_name,
-      dashboardId: dashboard.dashboard_id,
+      // The list endpoint names this camelCase; only the folder-scoped wrapper
+      // uses snake_case. Reading one spelling made every row's id undefined.
+      dashboardId: dashboard.dashboardId ?? dashboard.dashboard_id,
       title: dashboard.title,
       description: dashboard.description,
       role: dashboard.role,
       owner: dashboard.owner,
       created: dashboard.created,
+      modified: dashboard.modified ?? dashboard.created,
     },
     hash: dashboard.hash.toString(),
   }));

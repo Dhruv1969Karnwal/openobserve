@@ -225,11 +225,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                    rail and the toolbar chose, how much is in it, and when any of
                    it last moved. -->
               <div
-                class="border-table-row-divider px-page-edge flex flex-wrap items-baseline gap-x-2 gap-y-0.5 border-b py-1.5 text-xs"
+                class="border-table-row-divider px-page-edge border-b py-1.5"
                 data-test="dashboards-scope-summary"
               >
-                <span class="text-text-heading font-medium">{{ scopeLabel }}</span>
-                <span class="text-text-secondary tabular-nums">{{ scopeCount }}</span>
+                <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
+                  <span class="text-text-heading font-medium">{{ scopeLabel }}</span>
+                  <span
+                    v-if="scopeCountLabel"
+                    class="text-text-secondary tabular-nums"
+                    data-test="dashboards-scope-count"
+                    >· {{ scopeCountLabel }}</span
+                  >
+                  <span
+                    v-if="scopeDescription"
+                    class="text-text-secondary max-w-72 min-w-0 truncate"
+                    data-test="dashboards-scope-description"
+                    >· {{ scopeDescription }}</span
+                  >
+                </div>
+                <OStatStrip class="mt-1.5" :items="scopeStats" :loading="loading" />
               </div>
             </template>
             <template #cell-name="{ row, value }">
@@ -305,12 +319,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 >{{ row.description || "—" }}</OTruncatedText
               >
             </template>
-            <template #cell-owner="{ value }">
-              <OUserCell :value="value" />
+            <template #cell-owner="{ value, row }">
+              <span class="flex min-w-0 items-center gap-1.5">
+                <OUserCell :value="value" />
+                <OTag
+                  v-if="row.role && row.role !== 'owner'"
+                  :label="t(`dashboard.roleShort.`)"
+                  variant="default-soft"
+                  size="xs"
+                  class="shrink-0"
+                  :data-test="`dashboard-role-`"
+                />
+              </span>
             </template>
             <template #cell-created="{ row, value }">
               <OTimeCell
                 :value="row.created_raw || value"
+                unit="iso"
+                :timezone="store.state.timezone"
+              />
+            </template>
+            <template #cell-updated="{ row, value }">
+              <OTimeCell
+                :value="row.modified_raw || value"
                 unit="iso"
                 :timezone="store.state.timezone"
               />
@@ -338,20 +369,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   data-row-action="duplicate"
                   @click.stop="duplicateDashboard(row.id, row.folder_id)"
                 />
-                <OButton
-                  v-if="row.actions == 'true' && inlineRowActions"
-                  icon-left="delete"
-                  :title="t('dashboard.delete')"
-                  variant="ghost-destructive"
-                  size="icon-xs-sq"
-                  class="max-md:hidden"
-                  data-test="dashboard-delete"
-                  data-row-action="delete"
-                  @click.stop="showDeleteDialogFn({ row })"
-                />
-                <!-- Overflow menu (rightmost) — houses the low-frequency "set as
-                     home" action so it doesn't clutter every row with an
-                     always-on icon. Move/Duplicate/Delete stay inline. -->
                 <ODropdown v-if="row.actions == 'true'" side="bottom" align="end">
                   <template #trigger>
                     <OButton
@@ -380,7 +397,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <span>{{ t("dashboard.duplicate") }}</span>
                   </ODropdownItem>
                   <ODropdownItem
-                    v-if="compactRowActions"
                     icon-left="delete"
                     variant="destructive"
                     data-test="dashboard-delete-menu"
@@ -472,6 +488,63 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </OButton>
             </template>
           </OTable>
+          <!-- A folder with room under the pager spends it on the task that
+               actually fills one, instead of leaving the frame empty. Hidden, not
+               unmounted: the list repaints this on every folder switch. -->
+          <section
+            v-show="showContextPanel"
+            class="border-border-subtle px-page-edge flex min-w-0 shrink-0 flex-col gap-1.5 border-t py-2.5"
+            :aria-label="t('dashboard.context.ariaLabel')"
+            data-test="dashboard-folder-actions"
+          >
+            <OText variant="card-title" as="h2">{{
+              t("dashboard.context.addTitle", { folder: scopeLabel })
+            }}</OText>
+            <ul class="grid gap-x-8 gap-y-1 md:grid-cols-3">
+              <li class="flex min-w-0 flex-col">
+                <OButton
+                  variant="ghost-primary"
+                  size="xs"
+                  class="w-fit !px-0"
+                  data-test="dashboard-folder-action-new"
+                  @click="onContextAction('new')"
+                >
+                  {{ t("dashboard.context.newTitle") }}
+                </OButton>
+                <span class="text-text-secondary min-w-0 truncate text-xs">{{
+                  t("dashboard.context.newDesc")
+                }}</span>
+              </li>
+              <li class="flex min-w-0 flex-col">
+                <OButton
+                  variant="ghost-primary"
+                  size="xs"
+                  class="w-fit !px-0"
+                  data-test="dashboard-folder-action-import"
+                  @click="onContextAction('import')"
+                >
+                  {{ t("dashboard.context.importTitle") }}
+                </OButton>
+                <span class="text-text-secondary min-w-0 truncate text-xs">{{
+                  t("dashboard.context.importDesc")
+                }}</span>
+              </li>
+              <li class="flex min-w-0 flex-col">
+                <OButton
+                  variant="ghost-primary"
+                  size="xs"
+                  class="w-fit !px-0"
+                  data-test="dashboard-folder-action-templates"
+                  @click="onContextAction('templates')"
+                >
+                  {{ t("dashboard.context.templatesTitle") }}
+                </OButton>
+                <span class="text-text-secondary min-w-0 truncate text-xs">{{
+                  t("dashboard.context.templatesDesc")
+                }}</span>
+              </li>
+            </ul>
+          </section>
         </div>
       </div>
     </div>
@@ -630,6 +703,9 @@ import { useHomeDashboard } from "@/composables/useHomeDashboard";
 import analytics from "@/services/product_analytics";
 import { useFavoriteDashboards, FAVORITES_FOLDER_ID } from "@/composables/useFavoriteDashboards";
 import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
+import OTag from "@/lib/core/Badge/OTag.vue";
+import OStatStrip from "@/lib/data/StatStrip/OStatStrip.vue";
+import OText from "@/lib/core/Typography/OText.vue";
 import useBreakpoint from "@/composables/useBreakpoint";
 
 const MoveDashboardToAnotherFolder = defineAsyncComponent(() => {
@@ -652,8 +728,11 @@ interface DashboardRow {
   identifier: string;
   description: I18nText;
   owner: string;
+  role?: string;
   created_raw: string;
   created: string;
+  modified_raw: string;
+  modified: string;
   actions: string;
 }
 
@@ -678,6 +757,9 @@ export default defineComponent({
   components: {
     FirstDataPanel,
     OTruncatedText,
+    OTag,
+    OStatStrip,
+    OText,
     OUserCell,
     OTimeCell,
     OPageLayout,
@@ -902,8 +984,8 @@ export default defineComponent({
     // and the date cannot hold their header label beside the identity column; a
     // field a band drops comes back under the name rather than off the screen.
     const BAND_COLUMNS: Record<string, string[]> = {
-      wide: ["description", "owner", "created"],
-      medium: ["owner", "created"],
+      wide: ["description", "owner", "created", "updated"],
+      medium: ["owner", "updated"],
       narrow: [],
     };
     const tableShellRef = ref<HTMLElement | null>(null);
@@ -929,8 +1011,12 @@ export default defineComponent({
     const rowSublines = (row: DashboardRow) => {
       const lines: string[] = [];
       if (!showsColumn("description") && row.description) lines.push(String(row.description));
-      if (!showsColumn("owner") || !showsColumn("created")) {
-        const meta = [row.owner, shortDay(row.created_raw || row.created)].filter(Boolean);
+      if (!showsColumn("owner") || !showsColumn("updated")) {
+        const when = shortDay(row.modified_raw || row.created_raw || row.created);
+        const meta = [
+          row.owner,
+          showsColumn("updated") ? "" : t("dashboard.updatedShort", { when }),
+        ].filter(Boolean);
         if (meta.length) lines.push(meta.join(" · "));
       }
       return lines;
@@ -952,6 +1038,12 @@ export default defineComponent({
           (store.state.organizationData?.folders ?? []).map((f: any) => [f.folderId, f.name]),
         ),
     );
+    const foldersById = computed(
+      () =>
+        new Map<string, any>(
+          (store.state.organizationData?.folders ?? []).map((f: any) => [f.folderId, f]),
+        ),
+    );
     // The three-second answer this screen never gave: which scope is on screen,
     // how many rows it holds, and when any of them last moved. All three come
     // from the rows the view already returned.
@@ -962,16 +1054,69 @@ export default defineComponent({
       const id = activeFolderId.value ?? "default";
       return folderNamesById.value.get(id) ?? id;
     });
-    const scopeCount = computed(() => {
-      // §11: a count is computed from the rows in view. While a text filter is
-      // on the table narrows the rows itself, so the line names the filter
-      // instead of claiming a total it no longer describes.
+    // The scope's own total is a tile below, so the line only has to say when
+    // the rows on screen are NOT the whole scope.
+    const scopeCountLabel = computed(() => {
       const query = filterQuery.value.trim();
-      if (query) return t("dashboard.scopeMatching", { query });
-      return t("dashboard.dashboardCount", dashboards.value.length, {
-        count: dashboards.value.length,
-      });
+      return query ? t("dashboard.scopeMatching", { query }) : "";
     });
+    const scopeDescription = computed(() => {
+      if (spansFolders.value) return "";
+      const folder = foldersById.value.get(activeFolderId.value ?? "default");
+      return folder?.description ?? "";
+    });
+    const lastTouched = computed(() => {
+      let best: DashboardRow | null = null;
+      for (const row of dashboards.value) {
+        const when = row.modified_raw || row.created_raw;
+        if (!when) continue;
+        if (!best || when > (best.modified_raw || best.created_raw)) best = row;
+      }
+      return best;
+    });
+    const scopeFavoriteCount = computed(
+      () => dashboards.value.filter((row: DashboardRow) => isFavorite(row.id)).length,
+    );
+    // What a reader of a library page wants first: how much is here, how much is
+    // starred, and when any of it last moved. None of the three is a denominator
+    // for another, so no tile carries a proportion track.
+    const scopeStats = computed(() => {
+      const row = lastTouched.value;
+      return [
+        {
+          key: "dashboards",
+          label: t("dashboard.context.factDashboards"),
+          value: String(dashboards.value.length),
+          dataTest: "dashboard-stat-dashboards",
+        },
+        {
+          key: "favorites",
+          label: t("dashboard.context.factFavorites"),
+          value: String(scopeFavoriteCount.value),
+          dataTest: "dashboard-stat-favorites",
+        },
+        {
+          key: "updated",
+          label: t("dashboard.context.factChanged"),
+          value: row ? shortDay(row.modified_raw || row.created_raw) : "—",
+          sub: row?.owner ?? "",
+          dataTest: "dashboard-stat-updated",
+        },
+      ];
+    });
+    const showContextPanel = computed(
+      () =>
+        !loading.value &&
+        dashboards.value.length > 0 &&
+        dashboards.value.length <= 5 &&
+        filterQuery.value.trim() === "" &&
+        !spansFolders.value,
+    );
+    const onContextAction = (id: "new" | "import" | "templates") => {
+      if (id === "new") addDashboard();
+      else if (id === "import") importDashboard();
+      else showAddDashboardFromGitHub.value = true;
+    };
 
     const columns = computed(() => {
       const wide = columnBand.value === "wide";
@@ -983,7 +1128,7 @@ export default defineComponent({
           sortable: true,
           resizable: true,
           hideable: true,
-          size: COL.name,
+          size: wide ? 220 : 200,
           // The identity column is never the one cut off while another has room.
           minSize: wide ? 220 : 200,
           meta: { align: "left", flex: true },
@@ -997,10 +1142,10 @@ export default defineComponent({
                 sortable: true,
                 resizable: true,
                 hideable: true,
-                // Wide band: 44 select + 300 description + 180 owner + 150 created
-                // + 156 actions = 830, so the identity column keeps 282 of a
-                // 1112px frame — the widest cell on the row, as §7.4 asks.
-                size: 300,
+                // Wide band: 44 select + 220 name + 264 description + 170 owner +
+                // 122 created + 122 updated + 108 actions = 1050, inside the 1112
+                // the rail leaves, so the identity column stays the widest cell.
+                size: 264,
                 minSize: 160,
                 meta: { align: "left" },
               },
@@ -1015,7 +1160,7 @@ export default defineComponent({
                 sortable: true,
                 resizable: true,
                 hideable: true,
-                size: wide ? 180 : 150,
+                size: wide ? 170 : 150,
                 minSize: 130,
                 meta: { align: "left" },
               },
@@ -1030,10 +1175,23 @@ export default defineComponent({
                 sortable: true,
                 resizable: true,
                 hideable: true,
-                // Medium band: 44 select + 200 name + 150 owner + 130 created +
-                // 124 actions = 648, inside the 696 the rail leaves.
-                size: wide ? 150 : 130,
-                minSize: 130,
+                size: 122,
+                minSize: 112,
+                meta: { align: "left" },
+              },
+            ]
+          : []),
+        ...(showsColumn("updated")
+          ? [
+              {
+                id: "updated",
+                header: t("dashboard.updated"),
+                accessorKey: "modified",
+                sortable: true,
+                resizable: true,
+                hideable: true,
+                size: 122,
+                minSize: 112,
                 meta: { align: "left" },
               },
             ]
@@ -1047,7 +1205,7 @@ export default defineComponent({
           meta: {
             align: "center",
             cellClass: "actions-column",
-            actionCount: compactRowActions.value ? 1 : 4,
+            actionCount: compactRowActions.value ? 1 : 3,
           },
         },
       ];
@@ -1483,9 +1641,18 @@ export default defineComponent({
       identifier: folderInfo ? board.dashboard.dashboardId : board.dashboardId,
       description: folderInfo ? board.dashboard.description : board.description,
       owner: folderInfo ? board.dashboard.owner : board.owner,
+      role: folderInfo ? board.dashboard.role : board.role,
       created_raw: folderInfo ? board.dashboard.created : board.created,
       created: formatDate(
         folderInfo ? board.dashboard.created : board.created,
+        "YYYY-MM-DDTHH:mm:ss",
+      ),
+      modified_raw:
+        (folderInfo ? board.dashboard.modified : board.modified) ??
+        (folderInfo ? board.dashboard.created : board.created),
+      modified: formatDate(
+        (folderInfo ? board.dashboard.modified : board.modified) ??
+          (folderInfo ? board.dashboard.created : board.created),
         "YYYY-MM-DDTHH:mm:ss",
       ),
       actions: "true",
@@ -1512,8 +1679,15 @@ export default defineComponent({
             identifier: fav.dashboardId,
             description: cached?.description ?? "",
             owner: cached?.owner ?? "",
+            role: cached?.role ?? "",
             created_raw: cached?.created ?? "",
             created: cached?.created ? formatDate(cached.created, "YYYY-MM-DDTHH:mm:ss") : "",
+            modified_raw: cached?.modified ?? cached?.created ?? "",
+            modified: cached?.modified
+              ? formatDate(cached.modified, "YYYY-MM-DDTHH:mm:ss")
+              : cached?.created
+                ? formatDate(cached.created, "YYYY-MM-DDTHH:mm:ss")
+                : "",
             actions: "true",
           };
         });
@@ -2000,7 +2174,11 @@ export default defineComponent({
       columnBand,
       tableShellRef,
       scopeLabel,
-      scopeCount,
+      scopeCountLabel,
+      scopeDescription,
+      scopeStats,
+      showContextPanel,
+      onContextAction,
       tableShellWidth,
       measureListFrame,
       inlineRowActions,
