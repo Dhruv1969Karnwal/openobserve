@@ -126,6 +126,77 @@ describe("OTable fold clearance against a docked pager", () => {
     expect(report.defects).toEqual([]);
   });
 
+  describe("fold continuation cue", () => {
+    function setScrollMetrics(
+      el: HTMLElement,
+      m: { clientHeight: number; scrollHeight: number; offsetWidth: number; clientWidth: number },
+    ) {
+      for (const [k, v] of Object.entries(m))
+        Object.defineProperty(el, k, { value: v, configurable: true });
+    }
+
+    async function mountWith(m: {
+      clientHeight: number;
+      scrollHeight: number;
+      offsetWidth: number;
+      clientWidth: number;
+    }) {
+      const wrapper = mount(OTable, { props: { data: rows(20), columns, pageSize: 20 } as any });
+      await flushPromises();
+      await nextTick();
+      const sc = wrapper.find('[data-test="o2-table-scroll-container"]').element as HTMLElement;
+      setScrollMetrics(sc, m);
+      await wrapper.setProps({ data: rows(20) });
+      await flushPromises();
+      await nextTick();
+      return { wrapper, sc };
+    }
+
+    const overlay = { clientHeight: 473, scrollHeight: 792, offsetWidth: 926, clientWidth: 926 };
+    const classic = { clientHeight: 473, scrollHeight: 792, offsetWidth: 941, clientWidth: 926 };
+
+    it("is drawn while rows remain below and the platform scrollbar paints nothing", async () => {
+      const { wrapper } = await mountWith(overlay);
+      expect(wrapper.find('[data-test="o2-table-fold-cue"]').exists()).toBe(true);
+    });
+
+    it("is not drawn when a real scrollbar thumb already shows", async () => {
+      const { wrapper } = await mountWith(classic);
+      expect(wrapper.find('[data-test="o2-table-fold-cue"]').exists()).toBe(false);
+    });
+
+    it("is not drawn for a body that fits its frame", async () => {
+      const { wrapper } = await mountWith({
+        clientHeight: 473,
+        scrollHeight: 473,
+        offsetWidth: 926,
+        clientWidth: 926,
+      });
+      expect(wrapper.find('[data-test="o2-table-fold-cue"]').exists()).toBe(false);
+    });
+
+    it("goes away once the body is scrolled to its end, and returns on scroll up", async () => {
+      const { wrapper, sc } = await mountWith(overlay);
+      expect(wrapper.find('[data-test="o2-table-fold-cue"]').exists()).toBe(true);
+      Object.defineProperty(sc, "scrollTop", { value: 319, configurable: true });
+      await wrapper.find('[data-test="o2-table-scroll-container"]').trigger("scroll");
+      await nextTick();
+      expect(wrapper.find('[data-test="o2-table-fold-cue"]').exists()).toBe(false);
+      Object.defineProperty(sc, "scrollTop", { value: 120, configurable: true });
+      await wrapper.find('[data-test="o2-table-scroll-container"]').trigger("scroll");
+      await nextTick();
+      expect(wrapper.find('[data-test="o2-table-fold-cue"]').exists()).toBe(true);
+    });
+
+    it("never carries an accessible name, because every row is already in the a11y tree", async () => {
+      const { wrapper } = await mountWith(overlay);
+      const cue = wrapper.find('[data-test="o2-table-fold-cue"]');
+      expect(cue.attributes("aria-hidden")).toBe("true");
+      expect(cue.attributes("role")).toBeUndefined();
+      expect(cue.element.tabIndex).toBe(-1);
+    });
+  });
+
   it("still reports a real occlusion when a band is painted over the body", async () => {
     const wrapper = await mountTable(20, 473, 800);
     const root = wrapper.find('[data-test="o2-table-root"]').element;

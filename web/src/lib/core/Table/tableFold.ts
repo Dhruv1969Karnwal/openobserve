@@ -115,6 +115,21 @@ export function isFoldDefect(verdict: RowVerdict): boolean {
   return verdict.state === "occluded" || verdict.state === "unreachable";
 }
 
+/**
+ * Whether a bounded body needs a drawn scroll cue: enough content remains below, and the
+ * platform's own scrollbar paints nothing (an overlay scrollbar takes no layout space), so
+ * the half row at the fold would otherwise be the only cue that the list continues.
+ */
+export function shouldShowFoldCue(state: {
+  overflowPx: number;
+  atBottom: boolean;
+  scrollbarTakesSpace: boolean;
+  minOverflowPx?: number;
+}): boolean {
+  const min = state.minOverflowPx ?? 24;
+  return state.overflowPx > min && !state.atBottom && !state.scrollbarTakesSpace;
+}
+
 const boxOf = (el: Element): FoldBox => {
   const r = el.getBoundingClientRect();
   return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };

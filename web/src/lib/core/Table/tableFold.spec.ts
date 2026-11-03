@@ -6,6 +6,7 @@ import {
   clearBottomOf,
   foldReport,
   isFoldDefect,
+  shouldShowFoldCue,
   overlapHeight,
   type FoldBox,
   type FoldSample,
@@ -107,6 +108,30 @@ describe("tableFold", () => {
     });
     expect(verdict.state).toBe("outside-page");
     expect(isFoldDefect(verdict)).toBe(false);
+  });
+
+  describe("shouldShowFoldCue", () => {
+    const overlay = { atBottom: false, scrollbarTakesSpace: false };
+
+    it("shows the cue when rows remain below and the platform scrollbar paints nothing", () => {
+      expect(shouldShowFoldCue({ ...overlay, overflowPx: 319 })).toBe(true);
+    });
+
+    it("stays silent when the platform scrollbar already shows a thumb", () => {
+      expect(
+        shouldShowFoldCue({ overflowPx: 319, atBottom: false, scrollbarTakesSpace: true }),
+      ).toBe(false);
+    });
+
+    it("stays silent once the body is scrolled to its end", () => {
+      expect(shouldShowFoldCue({ ...overlay, overflowPx: 319, atBottom: true })).toBe(false);
+    });
+
+    it("stays silent for a body that fits, or overflows by less than a row", () => {
+      expect(shouldShowFoldCue({ ...overlay, overflowPx: 0 })).toBe(false);
+      expect(shouldShowFoldCue({ ...overlay, overflowPx: 6 })).toBe(false);
+      expect(shouldShowFoldCue({ ...overlay, overflowPx: 6, minOverflowPx: 4 })).toBe(true);
+    });
   });
 
   it("accepts the last row only when it can rest clear of the docked band", () => {

@@ -18,6 +18,7 @@ import { useTableColumnPersistence } from "./composables/useTableColumnPersisten
 import OTableColumnToggle from "./sub-components/OTableColumnToggle.vue";
 import { FlexRender, type Row } from "@tanstack/vue-table";
 import { shouldFillHeight } from "./fillPolicy";
+import { shouldShowFoldCue } from "./tableFold";
 import {
   TOOLTIP_OFF_ATTR,
   TOOLTIP_TRIGGER_ATTR,
@@ -983,17 +984,33 @@ watch(autoFills, () => nextTick(() => requestAnimationFrame(measureAutoFill)));
 
 // ── Fold clearance: un-gated, the last row's divider and the pager's rule draw as one ──
 const bodyOverflows = ref(false);
+const scrollOverflowPx = ref(0);
+const scrollAtBottom = ref(false);
+const scrollbarTakesSpace = ref(false);
 function measureBodyOverflow() {
   const sc = scrollContainerRef.value;
   if (!sc || isDelegatedScroll.value) {
     bodyOverflows.value = false;
+    scrollOverflowPx.value = 0;
     return;
   }
-  bodyOverflows.value = sc.scrollHeight > sc.clientHeight + 1;
+  scrollOverflowPx.value = Math.max(0, sc.scrollHeight - sc.clientHeight);
+  bodyOverflows.value = scrollOverflowPx.value > 1;
+  scrollbarTakesSpace.value = sc.offsetWidth - sc.clientWidth > 0;
+  scrollAtBottom.value = sc.scrollHeight - sc.scrollTop - sc.clientHeight < 4;
 }
 const hasDockedPager = computed(() => !!slots["pagination-bar"] || pagination.isEnabled.value);
 const foldClearance = computed(
   () => hasDockedPager.value && bodyOverflows.value && !isDelegatedScroll.value,
+);
+const foldCue = computed(
+  () =>
+    !isDelegatedScroll.value &&
+    shouldShowFoldCue({
+      overflowPx: scrollOverflowPx.value,
+      atBottom: scrollAtBottom.value,
+      scrollbarTakesSpace: scrollbarTakesSpace.value,
+    }),
 );
 onMounted(() => nextTick(() => requestAnimationFrame(measureBodyOverflow)));
 watch(
@@ -1324,6 +1341,7 @@ function handleScroll(event: Event) {
   const el = event.target as HTMLElement;
   if (!el) return;
   emit("scroll", { scrollTop: el.scrollTop, scrollLeft: el.scrollLeft });
+  scrollAtBottom.value = el.scrollHeight - el.scrollTop - el.clientHeight < 4;
 
   // Detect scroll end for lazy loading
   const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
@@ -1885,6 +1903,17 @@ defineExpose({
           class="bg-table-streaming-bar sticky bottom-0 z-10 h-1 w-full animate-pulse"
           :aria-label="t('common.dataStreamingInProgress')"
         />
+      </div>
+
+      <!-- The fold's own cue, in flow so it never covers a row: drawn only while rows remain
+           below the fold and the platform's scrollbar paints nothing. -->
+      <div
+        v-if="foldCue"
+        data-test="o2-table-fold-cue"
+        aria-hidden="true"
+        class="border-table-row-divider bg-surface-subtle flex h-4 shrink-0 items-center justify-center border-t"
+      >
+        <OIcon name="chevron-down" size="xs" class="text-text-secondary" />
       </div>
 
       <!-- A caller-drawn pager replaces the built-in bar and is kept with pagination off, where it may still carry a row count. -->
