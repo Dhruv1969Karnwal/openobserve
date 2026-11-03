@@ -106,6 +106,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   @click="refreshJSTransforms"
                 />
               </template>
+              <template #subheader>
+                <div
+                  class="border-table-row-divider px-page-edge flex flex-wrap items-baseline gap-x-2 border-b py-1.5 text-xs"
+                  data-test="functions-scope-summary"
+                >
+                  <span class="text-text-heading font-medium" data-test="function-list-scope">
+                    {{
+                      t("function.scopeCount", visibleRows.length, { count: visibleRows.length })
+                    }}
+                  </span>
+                  <span class="text-text-secondary tabular-nums" data-test="function-list-scope">
+                    · {{ t("function.scopeApplied", appliedCount, { count: appliedCount }) }}
+                  </span>
+                </div>
+              </template>
               <template #error>
                 <div data-test="function-list-error">
                   <OEmptyState size="hero" preset="load-error" @action="refreshJSTransforms" />
@@ -188,6 +203,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   data-test="function-list-applied-in-none"
                   >{{ raw("—") }}</span
                 >
+              </template>
+
+              <template #cell-updated="{ row }">
+                <OTimeCell
+                  :value="row?.view?.updatedUs"
+                  unit="us"
+                  :timezone="store.state.timezone"
+                  :empty-label="raw('—')"
+                  data-test="function-list-updated"
+                />
               </template>
 
               <template #cell-actions="{ row }">
@@ -286,7 +311,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :loading="loading"
             :filtered="!!filterQuery"
             :pushed="isMobile"
-            class="w-full shrink-0 xl:w-104 xl:self-start"
+            :used-by-pipelines="usedByPipelines"
+            class="w-full shrink-0 xl:w-2/5 xl:self-stretch"
             @back="closePhoneDetail"
             @edit="showAddUpdateFn({ row: focusedRow })"
             @pipelines="getAssociatedPipelines({ row: focusedRow })"
@@ -375,6 +401,7 @@ import ODialog from "@/lib/overlay/Dialog/ODialog.vue";
 import ODropdown from "@/lib/overlay/Dropdown/ODropdown.vue";
 import ODropdownItem from "@/lib/overlay/Dropdown/ODropdownItem.vue";
 import OSearchInput from "@/lib/forms/SearchInput/OSearchInput.vue";
+import OTimeCell from "@/lib/core/Table/cells/OTimeCell.vue";
 import OPageLayout from "@/lib/core/PageLayout/OPageLayout.vue";
 import PipelineSectionTabs from "@/components/pipeline/PipelineSectionTabs.vue";
 import FunctionDetail from "./FunctionDetail.vue";
@@ -415,6 +442,7 @@ export default defineComponent({
     ODropdownItem,
     OSearchInput,
     ORefreshButton,
+    OTimeCell,
   },
   emits: [
     "updated:fields",
@@ -454,7 +482,7 @@ export default defineComponent({
       header: t("common.name"),
       sortable: true,
       // A content-derived measure, never the leftover of a full-bleed frame.
-      size: mobile ? 200 : 340,
+      size: mobile ? 200 : 300,
       minSize: mobile ? 160 : 220,
       maxSize: mobile ? 260 : 460,
       meta: { align: "left", mono: true, isName: true },
@@ -480,6 +508,15 @@ export default defineComponent({
               accessorFn: (row: any) => row?.view?.streams ?? [],
               // Stream lists are the longest values, so the filler takes the canvas slack.
               meta: { align: "left", autoWidth: true, mono: true },
+            },
+            {
+              id: "updated",
+              header: t("function.updated"),
+              accessorFn: (row: any) => row?.view?.updatedUs ?? null,
+              sortable: true,
+              size: 132,
+              minSize: 116,
+              meta: { align: "left" },
             },
             actionsColumn,
           ],
@@ -811,6 +848,11 @@ export default defineComponent({
       return filterData(jsTransforms.value || [], filterQuery.value);
     });
     const hasVisibleRows = computed(() => visibleRows.value.length > 0);
+    const appliedCount = computed(
+      () =>
+        (visibleRows.value as any[]).filter((row: any) => (row?.view?.streams?.length ?? 0) > 0)
+          .length,
+    );
 
     // Deep links and reloads restore the selection the URL names.
     const urlFunctionName = () => String(route.query[FOCUSED_QUERY] ?? "");
@@ -841,6 +883,27 @@ export default defineComponent({
       { immediate: true },
     );
     const focusedView = computed(() => focusedRow.value?.view ?? null);
+
+    // "What breaks if I change this?" — the pipelines that call the focused
+    // function. Asked before a delete and never answerable from the row.
+    const usedByPipelines = ref<Array<{ pipeline_id: string; name: string; enabled: boolean }>>([]);
+    watch(
+      () => focusedRow.value?.name,
+      async (name: string | undefined) => {
+        usedByPipelines.value = [];
+        if (!name) return;
+        try {
+          const res: any = await jsTransformService.getAssociatedPipelines(
+            store.state.selectedOrganization.identifier,
+            name,
+          );
+          if (focusedRow.value?.name === name) usedByPipelines.value = res?.data?.list ?? [];
+        } catch {
+          // A missing back-link is not a reason to hide the pane.
+        }
+      },
+      { immediate: true },
+    );
 
     // A tap pushes the pane over the list on a phone; wider it just stacks.
     const phoneDetailOpen = ref(false);
@@ -1162,6 +1225,8 @@ export default defineComponent({
       closePhoneDetail,
       isMobile,
       streamSeparator,
+      appliedCount,
+      usedByPipelines,
       openBulkDeleteDialog,
       exportLoading,
       exportFunction,

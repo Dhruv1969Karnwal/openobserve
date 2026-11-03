@@ -52,7 +52,7 @@ describe("FunctionDetail", () => {
     expect(wrapper.find('[data-test="function-detail-body-redact_pii"]').text()).toContain(
       '.foo = "bar"',
     );
-    expect(wrapper.find('[data-test="function-detail-count"]').text()).toBe("2");
+    expect(wrapper.find('[data-test="function-detail-count"]').text()).toBe("2 statements");
     expect(wrapper.find('[data-test="function-detail-param-fields"]').text()).toContain("fields");
     expect(wrapper.find('[data-test="function-detail-param-fields"]').text()).toContain("*");
     expect(wrapper.find('[data-test="function-detail-stream-container_stdout"]').exists()).toBe(

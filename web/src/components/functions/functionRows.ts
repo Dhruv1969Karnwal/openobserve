@@ -33,6 +33,8 @@ export interface FunctionRowView {
   streams: string[];
   /** The server's own function count, or null when the payload carries none. */
   functionCount: number | null;
+  /** `z_meta._timestamp` in microseconds — the payload's only write time. */
+  updatedUs: number | null;
 }
 
 const asText = (value: unknown): string | null => {
@@ -101,6 +103,7 @@ export function functionRowView(data: any): FunctionRowView {
   const isJs = transType === "1";
   const declared = asText(data?.language)?.trim().toLowerCase() ?? "";
   const count = Number(data?.num_of_func ?? data?.numOfFunc);
+  const stamped = Number(data?.z_meta?._timestamp ?? data?.zMeta?._timestamp);
   return {
     name: asText(data?.name) ?? "",
     codeLang: declared || (isJs ? "javascript" : "vrl"),
@@ -109,5 +112,6 @@ export function functionRowView(data: any): FunctionRowView {
     params: parseParams(data?.params),
     streams: parseStreams(data),
     functionCount: Number.isFinite(count) ? count : null,
+    updatedUs: Number.isFinite(stamped) && stamped > 0 ? stamped : null,
   };
 }

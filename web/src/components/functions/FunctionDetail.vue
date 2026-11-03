@@ -43,7 +43,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           >
             {{ view.name }}
           </h2>
-          <OText variant="meta">{{ languageLabel }}</OText>
+          <div class="flex min-w-0 flex-wrap items-baseline gap-x-1.5 text-xs">
+            <OText variant="meta">{{ languageLabel }}</OText>
+            <span v-if="view.updatedUs" class="text-text-label" aria-hidden="true">·</span>
+            <OTimeCell
+              v-if="view.updatedUs"
+              :value="view.updatedUs"
+              unit="us"
+              :timezone="store.state.timezone"
+              :empty-label="raw('—')"
+              class="min-w-0"
+              data-test="function-detail-updated"
+            />
+          </div>
         </template>
         <template v-else-if="loading">
           <OSkeleton class="h-5 w-40" />
@@ -126,7 +138,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             v-if="view.functionCount !== null"
             class="text-text-secondary text-xs tabular-nums"
             data-test="function-detail-count"
-            >{{ view.functionCount }}</span
+            >{{
+              t("function.definitionCount", view.functionCount, { count: view.functionCount })
+            }}</span
           >
         </div>
         <OCodeBlock
@@ -160,7 +174,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </section>
 
       <section class="border-border-subtle flex min-w-0 flex-col gap-1.5 border-t pt-3">
-        <OText variant="card-title">{{ t("logStream.header") }}</OText>
+        <div class="flex items-center gap-2">
+          <OText variant="card-title">{{ t("function.usedByPipelines") }}</OText>
+        </div>
+        <div v-if="usedByPipelines.length" class="flex flex-wrap gap-1">
+          <span
+            v-for="pipe in usedByPipelines"
+            :key="pipe.pipeline_id"
+            class="border-border-control bg-surface-base rounded-default inline-flex min-w-0 items-center gap-1.5 border px-1.5 py-0.5"
+            :data-test="`function-detail-pipeline-`"
+          >
+            <OIcon
+              :name="pipe.enabled ? 'play-arrow' : 'pause'"
+              size="xs"
+              :class="pipe.enabled ? 'text-text-body' : 'text-text-secondary'"
+              :aria-label="
+                pipe.enabled ? t('function.pipelineEnabled') : t('function.pipelinePaused')
+              "
+            />
+            <OTooltip
+              :content="pipe.enabled ? t('function.pipelineEnabled') : t('function.pipelinePaused')"
+            />
+            <span class="min-w-0 truncate font-mono text-xs">{{ pipe.name }}</span>
+          </span>
+        </div>
+        <OText v-else variant="meta">{{ raw("—") }}</OText>
+      </section>
+
+      <section class="border-border-subtle flex min-w-0 flex-col gap-1.5 border-t pt-3">
+        <div class="flex items-center gap-2">
+          <OText variant="card-title">{{ t("logStream.header") }}</OText>
+          <span
+            v-if="view.streams.length"
+            class="text-text-secondary text-xs tabular-nums"
+            data-test="function-detail-stream-count"
+            >{{
+              t("function.streamsCount", view.streams.length, { count: view.streams.length })
+            }}</span
+          >
+        </div>
         <div v-if="view.streams.length" class="flex flex-wrap gap-1">
           <OTag
             v-for="stream in view.streams"
@@ -194,6 +246,8 @@ import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import ODescriptionList from "@/lib/lists/DescriptionList/ODescriptionList.vue";
 import ODescriptionItem from "@/lib/lists/DescriptionList/ODescriptionItem.vue";
 import OSkeleton from "@/lib/feedback/Skeleton/OSkeleton.vue";
+import OTimeCell from "@/lib/core/Table/cells/OTimeCell.vue";
+import { useStore } from "vuex";
 import type { FunctionRowView } from "./functionRows";
 
 const props = withDefaults(
@@ -204,8 +258,10 @@ const props = withDefaults(
     filtered?: boolean;
     /** The pane covers the list on a phone, so it owes the user a way back. */
     pushed?: boolean;
+    /** Pipelines that call this function — the blast radius of editing it. */
+    usedByPipelines?: Array<{ pipeline_id: string; name: string; enabled: boolean }>;
   }>(),
-  { view: null, loading: false, filtered: false, pushed: false },
+  { view: null, loading: false, filtered: false, pushed: false, usedByPipelines: () => [] },
 );
 
 const emit = defineEmits<{
@@ -217,6 +273,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18nTyped();
+const store = useStore();
 const panelEl = ref<HTMLElement | null>(null);
 
 const languageLabel = computed(() => (props.view?.isJs ? raw("JavaScript") : t("function.vrl")));
