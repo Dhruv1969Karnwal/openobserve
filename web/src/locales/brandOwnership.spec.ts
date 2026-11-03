@@ -210,6 +210,11 @@ const UPSTREAM_REFERENT_KEYS = [
   "rum.emptyState.webAppDesc",
   "ingestion.setupCard.k8sTroubleEndpointA",
   "ingestion.setupCard.k8sTroubleNoDataA",
+  // The landing page credits upstream in its own words: the open-source paragraph and the footer
+  // licence line. Both stay upstream-named by design; the product's name sits beside them in
+  // `welcome.footer.wordmark`, so neither string has to carry two brands.
+  "welcome.letter.p4link",
+  "welcome.footer.legal",
 ];
 
 // Ambiguous referents held back on purpose (collector/agent prose, a pipeline destination that may
@@ -399,6 +404,25 @@ describe("product referents name this product, upstream referents do not", () =>
     "storage_settings.heroBrand",
   ];
 
+  // The landing page (`welcome.*`) ships English-first: no other locale carries the node yet, so
+  // its product referents cannot live in PRODUCT_REFERENT_KEYS, whose lock demands a string in all
+  // sixteen locales. They are booked here, asserted in en-US below, and counted exactly once by
+  // the population equality — a new landing string that credits this product still has to be added.
+  const WELCOME_LANDING_REFERENT_KEYS = [
+    "welcome.footer.wordmark",
+    "welcome.letter.mark",
+    "welcome.letter.p2",
+    "welcome.letter.p4a",
+    "welcome.letter.role",
+    "welcome.nav.home",
+  ];
+
+  it("names this product in the English-only landing surface", () => {
+    for (const key of WELCOME_LANDING_REFERENT_KEYS) {
+      expect(String(atPath(enUs, key)), key).toContain(PRODUCT);
+    }
+  });
+
   it("covers every Retrace-naming English string exactly once", () => {
     const flat: [string, string][] = [];
     collectStrings(enUs, "", flat);
@@ -406,10 +430,14 @@ describe("product referents name this product, upstream referents do not", () =>
       .filter(([, value]) => /retrace/i.test(value))
       .map(([key]) => key)
       .sort();
-    const ledgers = [...PRODUCT_REFERENT_KEYS, ...PRODUCT_RENAMED_PINNED_ELSEWHERE_KEYS];
+    const ledgers = [
+      ...PRODUCT_REFERENT_KEYS,
+      ...PRODUCT_RENAMED_PINNED_ELSEWHERE_KEYS,
+      ...WELCOME_LANDING_REFERENT_KEYS,
+    ];
     expect(new Set(ledgers).size, "a key is booked by two product ledgers").toBe(ledgers.length);
     expect(ledgers.sort()).toEqual(population);
-    expect(population.length).toBe(73);
+    expect(population.length).toBe(79);
   });
 
   /**
@@ -433,7 +461,7 @@ describe("product referents name this product, upstream referents do not", () =>
     ];
     expect(new Set(ledgers).size, "a key is booked by two ledgers").toBe(ledgers.length);
     expect(ledgers.sort()).toEqual(population);
-    expect(population.length).toBe(95);
+    expect(population.length).toBe(97);
   });
 
   for (const [code, locale] of LOCALES) {

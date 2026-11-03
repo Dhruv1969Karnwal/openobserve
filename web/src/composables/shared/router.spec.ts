@@ -2570,9 +2570,24 @@ describe("useRoutes (router.ts)", () => {
   // 23. Edge cases
   // =========================================================================
   describe("Edge Cases", () => {
-    it("should have exactly 9 parentRoutes", () => {
+    it("should register exactly the public parent routes, and name them", () => {
       const { parentRoutes } = useRoutes();
-      expect(parentRoutes).toHaveLength(9);
+      // A bare count rots the moment a route is added; naming the set says WHICH route may exist
+      // outside the app shell. `/welcome` is the public landing surface, deliberately unauthenticated.
+      expect(parentRoutes.map((r: any) => r.path).sort()).toEqual(
+        [
+          "/login",
+          "/signup",
+          "/logout",
+          "/cb",
+          "/welcome",
+          "/ai/public/:token",
+          "/slack/oauth/callback",
+          "/slack/link",
+          "/slack/link/callback",
+          "/slack/connect/callback",
+        ].sort(),
+      );
     });
 
     it("should have unique paths in parentRoutes", () => {

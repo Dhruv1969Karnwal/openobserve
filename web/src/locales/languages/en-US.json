@@ -26997,7 +26997,7 @@
     "footer": {
       "aria": "Site footer",
       "statement": "One binary for logs, metrics, traces, dashboards and alerts.",
-      "legal": "\u00a9 2026 Dhruv Karnwal \u00b7 Retrace.ai is built on OpenObserve (AGPL-3.0), \u00a9 OpenObserve Inc. Product design and code by Dhruv Karnwal.",
+      "legal": "\u00a9 2026 Dhruv Karnwal \u00b7 Built on OpenObserve, released under AGPL-3.0.",
       "author": "Created by Dhruv Karnwal",
       "authorNote": "A single-edition observability surface you can self-host in minutes \u2014 the subject of everything above.",
       "wordmark": "Retrace.ai",
