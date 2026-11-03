@@ -95,14 +95,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <button
               type="button"
               :aria-label="t('settings.resetToDefaultColors')"
-              class="group/resetChip border-border-default hover:border-error-400 hover:bg-error-500/10 focus-visible:ring-text-heading inline-flex h-9.5 w-9.5 cursor-pointer items-center justify-center rounded-full border border-dashed bg-transparent opacity-60 transition-all duration-200 hover:-translate-y-px hover:rotate-180 hover:border-solid hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:rotate-0 max-md:h-11 max-md:w-11"
+              class="group/resetChip border-border-control hover:border-border-strong hover:bg-surface-subtle-hover focus-visible:ring-focus-ring-accent inline-flex size-9.5 cursor-pointer items-center justify-center rounded-full border bg-transparent transition-colors focus-visible:ring-2 focus-visible:outline-none max-md:size-11"
               @click="resetThemeColors"
               data-test="reset-theme-colors-btn"
             >
               <OIcon
                 name="refresh"
                 size="sm"
-                class="group-hover/resetChip:text-error-500 dark:group-hover/resetChip:text-error-400"
+                class="text-text-secondary group-hover/resetChip:text-text-heading"
               />
               <OTooltip :content="t('settings.resetToDefaultColors')" side="top" />
             </button>
@@ -544,7 +544,7 @@ import {
   ref,
   watch,
 } from "vue";
-import { raw, useI18nTyped } from "@/types/i18n";
+import { raw, useI18nTyped, type I18nText } from "@/types/i18n";
 import { useStore } from "vuex";
 import { useTheme } from "@/composables/useTheme";
 import { useRouter } from "vue-router";

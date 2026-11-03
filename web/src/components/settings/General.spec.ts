@@ -917,6 +917,82 @@ describe("General", () => {
     });
   });
 
+  describe("Appearance theme-mode chips", () => {
+    const MODE_OF = {
+      "theme-light-chip": "light",
+      "theme-dark-chip": "dark",
+    } as const;
+
+    /** What a sighted reader sees: the chip's text minus the screen-reader-only accent. */
+    const visibleText = (wrapper: any, hook: string) => {
+      const el = wrapper.find(`[data-test="${hook}"]`).element.cloneNode(true) as HTMLElement;
+      el.querySelector(".chip-accent-value")?.remove();
+      return (el.textContent || "").replace(/\s+/g, " ").trim();
+    };
+
+    it("labels each chip with the mode it configures, never with a hex", () => {
+      const wrapper = createWrapper();
+      expect(wrapper.find('[data-test="theme-light-chip"] .chip-label').text()).toBe("Light");
+      expect(wrapper.find('[data-test="theme-dark-chip"] .chip-label').text()).toBe("Dark");
+      for (const hook of Object.keys(MODE_OF)) {
+        expect(visibleText(wrapper, hook)).toBe(
+          wrapper.find(`[data-test="${hook}"] .chip-label`).text(),
+        );
+        expect(visibleText(wrapper, hook)).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+      }
+    });
+
+    it("exposes the mode name and the selected state of both chips to assistive tech", () => {
+      const wrapper = createWrapper();
+      for (const [hook, mode] of Object.entries(MODE_OF)) {
+        const button = wrapper.find(`[data-test="${hook}"]`);
+        expect(button.attributes("aria-pressed")).toBe(String(wrapper.vm.isModeActive(mode)));
+        // The accessible name leads with the visible mode name and still names the accent.
+        const name = button.text().replace(/\s+/g, " ").trim();
+        expect(name.startsWith(button.find(".chip-label").text())).toBe(true);
+        expect(name).toMatch(/#[0-9a-fA-F]{6}/);
+      }
+      // Exactly one chip is pressed, so "which one is applied" is never a guess.
+      const pressed = Object.keys(MODE_OF).filter(
+        (hook) => wrapper.find(`[data-test="${hook}"]`).attributes("aria-pressed") === "true",
+      );
+      expect(pressed).toHaveLength(1);
+    });
+
+    it("marks the selected chip with a glyph and leaves the other unmarked", () => {
+      const wrapper = createWrapper();
+      const activeHook = wrapper.vm.isModeActive("light") ? "theme-light-chip" : "theme-dark-chip";
+      const idleHook = wrapper.vm.isModeActive("light") ? "theme-dark-chip" : "theme-light-chip";
+      expect(wrapper.find(`[data-test="${activeHook}"] .chip-mark`).exists()).toBe(true);
+      expect(wrapper.find(`[data-test="${idleHook}"] .chip-mark`).exists()).toBe(false);
+    });
+
+    it("hides the decorative swatch from assistive tech, which cannot see a colour", () => {
+      const wrapper = createWrapper();
+      for (const hook of Object.keys(MODE_OF)) {
+        expect(wrapper.find(`[data-test="${hook}"] .color-circle`).attributes("aria-hidden")).toBe(
+          "true",
+        );
+      }
+    });
+
+    it("keeps both chips and the reset control hit-testable at 44px on touch", () => {
+      const wrapper = createWrapper();
+      for (const hook of Object.keys(MODE_OF)) {
+        expect(wrapper.find(`[data-test="${hook}"]`).classes()).toContain("max-md:min-h-11");
+      }
+      expect(wrapper.find('[data-test="reset-theme-colors-btn"]').classes()).toContain(
+        "max-md:size-11",
+      );
+    });
+
+    it("never dims the reset control, whose glyph and border are its whole affordance", () => {
+      const classes = createWrapper().find('[data-test="reset-theme-colors-btn"]').classes();
+      expect(classes.filter((c: string) => c.includes("opacity-"))).toEqual([]);
+      expect(classes).toContain("border-border-control");
+    });
+  });
+
   describe("Loading states", () => {
     it("should show spinner when loading", async () => {
       const wrapper = createWrapper();
