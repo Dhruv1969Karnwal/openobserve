@@ -872,6 +872,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
               <button
                 type="button"
                 :data-test="`o2-table-column-filter-btn-${header.column.id}`"
+                :aria-label="`${t('common.addFilter')}: ${String(header.column.columnDef.header ?? header.column.id)}`"
                 class="rounded-default ms-0.5 inline-flex shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0.5"
                 @click.stop
               >
@@ -1296,6 +1297,7 @@ function getStandardStickyTotalStyle(header: any): Record<string, any> {
               <button
                 type="button"
                 :data-test="`o2-table-column-filter-btn-${header.column.id}`"
+                :aria-label="`${t('common.addFilter')}: ${String(header.column.columnDef.header ?? header.column.id)}`"
                 class="rounded-default ms-0.5 inline-flex shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0.5"
                 @click.stop
               >

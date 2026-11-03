@@ -514,6 +514,7 @@ onBeforeUnmount(() => window.removeEventListener("scroll", onScrollDismiss, true
           class="rounded-default text-text-secondary hover:bg-table-row-hover-bg hover:text-text-body inline-flex h-4.5 w-4.5 cursor-pointer items-center justify-center border-0 bg-transparent p-0"
           :data-test="`o2-table-tree-toggle-${cell.column.id}`"
           :aria-expanded="treeMeta?.isExpanded ? 'true' : 'false'"
+          :aria-label="treeMeta?.isExpanded ? t('common.collapse') : t('common.expand')"
           @click="onTreeToggle"
         >
           <OIcon :name="treeMeta?.isExpanded ? 'expand-more' : 'chevron-right'" size="sm" />
