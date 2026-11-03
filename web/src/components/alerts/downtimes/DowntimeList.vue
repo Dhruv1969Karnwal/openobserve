@@ -772,7 +772,6 @@ const summaryStats = computed<StatItem[]>(() => {
   const count = (key: keyof DowntimeCounts, pred: (r: DowntimeListItem) => boolean) =>
     server ? (server.counts?.[key] ?? 0) : hasData ? rows.filter(pred).length : "—";
   const total = server ? server.total : rows.length;
-  const share = hasData ? total : undefined;
   return [
     {
       key: "active",
@@ -780,7 +779,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: count("active", (r) => r.status === "active"),
       icon: "notifications-paused",
       tone: "warning",
-      max: share,
       dataTest: "downtime-summary-active",
     },
     {
@@ -789,7 +787,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: count("scheduled", (r) => r.status === "scheduled"),
       icon: "schedule",
       tone: "blue",
-      max: share,
       dataTest: "downtime-summary-scheduled",
     },
     {
@@ -798,7 +795,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: count("recurring", (r) => r.schedule.repeat !== "none"),
       icon: "repeat",
       tone: "neutral",
-      max: share,
       dataTest: "downtime-summary-recurring",
     },
     {
@@ -807,7 +803,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: count("ended", (r) => r.status === "ended"),
       icon: "check-circle",
       tone: "neutral",
-      max: share,
       dataTest: "downtime-summary-ended",
     },
     {
@@ -816,7 +811,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: count("ended_early", (r) => r.status === "ended_early"),
       icon: "stop-circle",
       tone: "neutral",
-      max: share,
       dataTest: "downtime-summary-ended-early",
     },
     {
@@ -825,7 +819,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: count("cancelled", (r) => r.status === "cancelled"),
       icon: "cancel",
       tone: "neutral",
-      max: share,
       dataTest: "downtime-summary-cancelled",
     },
     {

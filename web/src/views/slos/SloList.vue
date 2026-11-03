@@ -140,7 +140,6 @@
               :compact="isMobile"
               selectable
               :selected-key="healthFilter"
-              default-key="total"
               @select="onStatSelect"
             />
           </div>
@@ -1011,7 +1010,6 @@ const stats = computed<StatItem[]>(() => {
       value: counts.budget_blown,
       icon: "local-fire-department",
       tone: "error",
-      max: total,
     },
     {
       key: "at_risk",
@@ -1020,7 +1018,6 @@ const stats = computed<StatItem[]>(() => {
       value: counts.at_risk,
       icon: "trending-down",
       tone: "warning",
-      max: total,
     },
     {
       key: "meeting",
@@ -1029,7 +1026,6 @@ const stats = computed<StatItem[]>(() => {
       value: counts.meeting,
       icon: "check-circle",
       tone: "success",
-      max: total,
     },
     {
       key: "no_data",
@@ -1038,7 +1034,6 @@ const stats = computed<StatItem[]>(() => {
       value: counts.no_data,
       icon: "help-outline",
       tone: "neutral",
-      max: total,
     },
     {
       key: "paused",
@@ -1047,7 +1042,6 @@ const stats = computed<StatItem[]>(() => {
       value: counts.paused,
       icon: "pause",
       tone: "neutral",
-      max: total,
     },
     {
       key: "total",

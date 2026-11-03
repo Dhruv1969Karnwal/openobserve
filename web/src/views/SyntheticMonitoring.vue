@@ -1271,7 +1271,6 @@ const summaryStats = computed<StatItem[]>(() => {
   const total = ms.length;
   const count = (status: string) => ms.filter((m) => m.status === status).length;
   const v = (n: number): string | number => (total > 0 ? n : "—");
-  const share = total > 0 ? total : undefined;
   const tiles: StatItem[] = [
     {
       key: "failed",
@@ -1279,7 +1278,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(count("failed")),
       icon: "error-outline",
       tone: "error",
-      max: share,
       dataTest: "synthetics-summary-failed",
     },
     {
@@ -1288,7 +1286,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(count("warning")),
       icon: "warning-amber",
       tone: "warning",
-      max: share,
       dataTest: "synthetics-summary-warning",
     },
     {
@@ -1297,7 +1294,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(count("passed")),
       icon: "check-circle",
       tone: "success",
-      max: share,
       dataTest: "synthetics-summary-passed",
     },
   ];
@@ -1309,7 +1305,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(count("unknown")),
       icon: "help-outline",
       tone: "neutral",
-      max: share,
       dataTest: "synthetics-summary-unknown",
     });
   }

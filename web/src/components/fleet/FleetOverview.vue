@@ -65,7 +65,6 @@ const expanded = ref(false);
 // The summary already covers only the fleets the caller may read; largest count first.
 const stats = computed<StatItem[]>(() => {
   const counts = summary.value?.collectors;
-  const total = counts?.total;
   const n = (key: keyof NonNullable<typeof counts>) => counts?.[key] ?? DASH;
   const items: StatItem[] = [
     {
@@ -81,7 +80,6 @@ const stats = computed<StatItem[]>(() => {
       value: n("online"),
       icon: "check-circle",
       tone: "success",
-      max: total,
     },
     {
       key: "offline",
@@ -89,7 +87,6 @@ const stats = computed<StatItem[]>(() => {
       value: n("offline"),
       icon: "cloud-off",
       tone: "error",
-      max: total,
     },
     {
       key: "degraded",
@@ -97,7 +94,6 @@ const stats = computed<StatItem[]>(() => {
       value: n("degraded"),
       icon: "warning",
       tone: "warning",
-      max: total,
     },
     {
       key: "unknown",
@@ -105,7 +101,6 @@ const stats = computed<StatItem[]>(() => {
       value: n("unknown"),
       icon: "help-outline",
       tone: "neutral",
-      max: total,
     },
   ];
   return items.map((item) => ({ ...item, dataTest: `fleet-overview-stat-${item.key}` }));

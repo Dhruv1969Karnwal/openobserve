@@ -134,9 +134,13 @@ const pct = computed(() => {
   if (props.max == null || props.max <= 0 || !Number.isFinite(v)) return 0;
   return Math.max(0, Math.min(100, (v / props.max) * 100));
 });
-// The track only means something when a denominator exists; kept while loading
-// so the card height does not jump as data lands.
-const showTrack = computed(() => props.loading || (props.max != null && props.max > 0));
+// A groove only means something when it can be filled: a real denominator, a
+// non-zero figure, and data that has arrived. An empty groove under a "0" reads
+// as a broken progress bar, and one painted before the numbers land is a bar
+// that promises a proportion the card cannot state.
+const showTrack = computed(
+  () => !props.loading && !isMuted.value && props.max != null && props.max > 0,
+);
 // Colour on a tile is a signal, never a label: only a real state (healthy, at
 // risk, failing) tints the figure. A decorative tone would put the palette on
 // chrome, where a KPI has nothing to warn about.

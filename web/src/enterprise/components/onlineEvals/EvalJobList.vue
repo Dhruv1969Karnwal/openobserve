@@ -148,7 +148,7 @@
             <OButton
               v-if="canPause(row.status)"
               :data-test="`eval-job-list-${row.name}-pause-btn`"
-              variant="ghost-destructive"
+              variant="ghost"
               size="icon-sm"
               :title="t('onlineEvals.actions.pause')"
               icon-left="pause"
@@ -445,7 +445,6 @@ const summaryStats = computed<StatItem[]>(() => {
   const c = statusCounts.value;
   const has = c.total > 0;
   const v = (n: number): string | number => (has ? n : "—");
-  const share = has ? c.total : undefined;
   return [
     {
       key: "paused",
@@ -453,7 +452,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.paused),
       icon: "pause",
       tone: "warning",
-      max: share,
       dataTest: "eval-job-summary-paused",
     },
     {
@@ -462,7 +460,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.active),
       icon: "play-arrow",
       tone: "success",
-      max: share,
       dataTest: "eval-job-summary-active",
     },
     {
@@ -471,7 +468,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.draft),
       icon: "draft",
       tone: "neutral",
-      max: share,
       dataTest: "eval-job-summary-draft",
     },
     {

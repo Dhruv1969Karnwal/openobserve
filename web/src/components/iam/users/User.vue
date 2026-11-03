@@ -84,7 +84,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 compact
                 selectable
                 :selected-key="roleFilter"
-                default-key="total"
                 @select="onStatSelect"
               />
             </div>

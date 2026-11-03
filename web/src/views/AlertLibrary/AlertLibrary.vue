@@ -687,7 +687,6 @@ const statItems = computed<StatItem[]>(() => [
     value: readinessKnown.value ? readyCount.value : "—",
     icon: "check-circle",
     tone: "success",
-    max: scopedEntries.value.length,
     dataTest: "alert-library-stat-ready",
   },
   {
@@ -698,7 +697,6 @@ const statItems = computed<StatItem[]>(() => [
     // Same tone as the chip on every card this tile selects — StatTone exists
     // so one semantic state reads as one colour across the screen.
     tone: "warning",
-    max: scopedEntries.value.length,
     dataTest: "alert-library-stat-missing",
   },
   // Last, and never highlighted: it is the way OUT of a filter, not a filter.

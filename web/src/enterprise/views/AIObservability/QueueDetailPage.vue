@@ -295,7 +295,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: value(pendingCount.value),
       icon: "fiber-manual-record",
       tone: "warning",
-      max: total || undefined,
       dataTest: "ai-queue-detail-summary-pending",
     },
     {
@@ -304,7 +303,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: value(reviewedCount.value),
       icon: "check-circle",
       tone: "success",
-      max: total || undefined,
       dataTest: "ai-queue-detail-summary-reviewed",
     },
     {

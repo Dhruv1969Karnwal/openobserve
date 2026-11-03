@@ -159,9 +159,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <OButton
                 :data-test="`pipeline-list-${row.name}-pause-start-action`"
                 :data-row-action="row.enabled ? 'pause' : 'resume'"
-                :variant="row.enabled ? 'ghost-destructive' : 'ghost'"
+                variant="ghost"
                 size="icon-sm"
                 :icon-left="row.enabled ? 'pause' : 'play-arrow'"
+                :aria-label="row.enabled ? t('alerts.pause') : t('alerts.start')"
                 class="max-md:hidden"
                 @click.stop="togglePipeline(row)"
               >
@@ -846,7 +847,6 @@ const summaryStats = computed<StatItem[]>(() => {
   const c = stateCounts.value;
   const hasData = c.total > 0;
   const v = (n: number): string | number => (hasData ? n : "—");
-  const share = hasData ? c.total : undefined;
   return [
     {
       key: "errored",
@@ -854,7 +854,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.errored),
       icon: "error-outline",
       tone: "error",
-      max: share,
       dataTest: "pipeline-summary-errored",
     },
     {
@@ -863,7 +862,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.paused),
       icon: "pause",
       tone: "neutral",
-      max: share,
       dataTest: "pipeline-summary-paused",
     },
     {
@@ -872,7 +870,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.active),
       icon: "check-circle",
       tone: "success",
-      max: share,
       dataTest: "pipeline-summary-active",
     },
     {
