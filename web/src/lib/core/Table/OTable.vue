@@ -926,6 +926,7 @@ onMounted(() => {
     containerWidth.value = scrollContainerRef.value.clientWidth;
     containerRO = new ResizeObserver(() => {
       containerWidth.value = scrollContainerRef.value?.clientWidth ?? 0;
+      measureBodyOverflow();
     });
     containerRO.observe(scrollContainerRef.value);
   }
@@ -979,6 +980,26 @@ watch(
 );
 // The chrome term depends on the current stretch, so settle with one more pass.
 watch(autoFills, () => nextTick(() => requestAnimationFrame(measureAutoFill)));
+
+// ── Fold clearance: un-gated, the last row's divider and the pager's rule draw as one ──
+const bodyOverflows = ref(false);
+function measureBodyOverflow() {
+  const sc = scrollContainerRef.value;
+  if (!sc || isDelegatedScroll.value) {
+    bodyOverflows.value = false;
+    return;
+  }
+  bodyOverflows.value = sc.scrollHeight > sc.clientHeight + 1;
+}
+const hasDockedPager = computed(() => !!slots["pagination-bar"] || pagination.isEnabled.value);
+const foldClearance = computed(
+  () => hasDockedPager.value && bodyOverflows.value && !isDelegatedScroll.value,
+);
+onMounted(() => nextTick(() => requestAnimationFrame(measureBodyOverflow)));
+watch(
+  () => [props.data?.length, props.loading, props.pageSize, fillsFrame.value],
+  () => nextTick(() => requestAnimationFrame(measureBodyOverflow)),
+);
 
 // ── Flex columns (fill-until-first-resize) ──────────────────────
 // Columns the page marks `meta.flex` divide the leftover width on initial
@@ -1485,6 +1506,7 @@ defineExpose({
             ? 'overflow-visible'
             : ['overflow-y-auto', allowHorizontalScroll ? 'overflow-x-auto' : 'overflow-x-hidden'],
           fillsFrame && !isDelegatedScroll ? 'flex-1' : '',
+          foldClearance ? 'o2-table-fold-clearance' : '',
         ]"
         :style="{
           maxHeight: props.maxHeight
@@ -1980,5 +2002,12 @@ defineExpose({
   position: sticky;
   top: 0;
   z-index: 1000;
+}
+
+/* The fold band a scrolled-away row ends in: keeps the last row's divider off the
+   docked pager's own rule, and lets scroll-into-view clear it too. */
+.o2-table-fold-clearance {
+  padding-bottom: 0.5rem;
+  scroll-padding-bottom: 0.5rem;
 }
 </style>
