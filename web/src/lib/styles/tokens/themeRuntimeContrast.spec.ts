@@ -1668,7 +1668,7 @@ describe("runtime theme contrast (the seam contrast.spec cannot see)", () => {
     "components/iam/serviceAccounts/AddServiceAccount.vue": 1,
     "components/oncall/OnCallRuleEditor.vue": 1,
     "components/oncall/OnCallScopePicker.vue": 1,
-    "components/settings/General.vue": 5,
+    "components/settings/General.vue": 3,
     "components/synthetics/configure/CheckVariablesPanel.vue": 1,
     "components/synthetics/variables/SyntheticsInheritedVariables.vue": 1,
     "components/synthetics/variables/VariableSuggestionRow.vue": 1,
