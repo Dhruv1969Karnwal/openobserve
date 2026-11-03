@@ -336,7 +336,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <div class="flex items-center justify-end gap-1">
               <template v-if="!isReadOnly(row)">
                 <OButton
-                  :variant="row.enabled ? 'ghost-destructive' : 'ghost-success'"
+                  variant="ghost"
                   size="icon-sm"
                   class="max-md:hidden"
                   :title="

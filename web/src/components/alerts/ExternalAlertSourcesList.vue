@@ -208,7 +208,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 @click="confirmRotate(row.integration)"
               />
               <OButton
-                :variant="row.integration.enabled ? 'ghost-destructive' : 'ghost-success'"
+                variant="ghost"
                 size="icon-sm"
                 :icon-left="row.integration.enabled ? 'pause' : 'play-arrow'"
                 class="max-md:hidden"
@@ -219,7 +219,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 @click="toggleEnabledFor(row.integration)"
               />
               <OButton
-                variant="ghost-destructive"
+                variant="ghost"
                 size="icon-sm"
                 icon-left="delete"
                 class="max-md:hidden"

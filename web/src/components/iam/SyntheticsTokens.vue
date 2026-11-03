@@ -143,7 +143,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <OButton
               :data-test="`synthetics-token-${row.name}-toggle`"
               :icon-left="row.enabled ? 'pause' : 'play-arrow'"
-              :variant="row.enabled ? 'ghost-destructive' : 'ghost-success'"
+              variant="ghost"
               size="icon-sm"
               :disabled="loading || (row.enabled && row.is_default)"
               :title="

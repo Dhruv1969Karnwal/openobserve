@@ -289,7 +289,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
         <OButton
           v-else
-          :variant="(row as any).enabled ? 'ghost-destructive' : 'ghost'"
+          variant="ghost"
           size="icon-sm"
           :icon-left="(row as any).enabled ? 'pause' : 'play-arrow'"
           class="max-md:hidden"
