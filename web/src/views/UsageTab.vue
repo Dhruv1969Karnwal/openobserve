@@ -80,7 +80,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               class="text-text-heading text-2xl leading-tight font-semibold tabular-nums"
               aria-live="polite"
               data-test="home-usage-tab-streams-count"
-              >{{ animatedStreamsCount || summary.streams_count }}</span
+              >{{
+                Number(animatedStreamsCount || summary.streams_count || 0).toLocaleString()
+              }}</span
             >
           </template>
         </KpiCard>

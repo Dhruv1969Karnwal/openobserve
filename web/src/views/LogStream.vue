@@ -447,10 +447,10 @@ import { COL, type OTableColumnDef } from "@/lib/core/Table/OTable.types";
 import type { EmptyStateAction } from "@/lib/core/EmptyState/presets";
 import OTimeCell from "@/lib/core/Table/cells/OTimeCell.vue";
 import OStatStrip from "@/lib/data/StatStrip/OStatStrip.vue";
-import type { StatItem, StatTrend } from "@/lib/data/StatStrip/OStatStrip.types";
+import type { StatItem } from "@/lib/data/StatStrip/OStatStrip.types";
 import OPageLayout from "@/lib/core/PageLayout/OPageLayout.vue";
 import streamService from "../services/stream";
-import { addCommasToNumber, formatEventCount } from "@/utils/formatters";
+import { addCommasToNumber } from "@/utils/formatters";
 import SchemaIndex from "../components/logstream/schema.vue";
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import EmptyStateIngestionChip from "@/lib/core/EmptyState/EmptyStateIngestionChip.vue";
@@ -945,15 +945,15 @@ export default defineComponent({
     // none of these numbers is a health signal.
     const summaryStats = computed<StatItem[]>(() => {
       const s = streamSummary.value;
-      const count = (n: unknown): string => (Number(n) > 0 ? formatEventCount(Number(n)) : "—");
+      // Same formatter as the Events column, so the tile above the table and the
+      // rows under it cannot state the same quantity two ways.
+      const count = (n: unknown): string => formatCount(n);
       const size = (n: unknown): string => (Number(n) > 0 ? formatSizeFromMB(Number(n)) : "—");
-      // How much smaller the data is on disk than as ingested — shown as a trend
-      // beside the compressed size, so the tile keeps Home's number AND answers
-      // "how good is that?" without a second size to divide.
-      const compressionTrend = (): StatTrend | undefined => {
+      // A ratio is not a delta: an arrow would say "it fell", which nothing here
+      // measured. It qualifies the figure instead.
+      const compressionNote = () => {
         const ratio = compressionRatio(s?.total_storage_size, s?.total_compressed_size);
-        if (!ratio) return undefined;
-        return { direction: "down", label: raw(ratio), tone: "success" };
+        return ratio ? t("logStream.compressedAtRatio", { ratio }) : undefined;
       };
       return [
         {
@@ -990,7 +990,7 @@ export default defineComponent({
                 value: size(s?.total_compressed_size),
                 icon: "compress",
                 tone: "neutral",
-                trend: compressionTrend(),
+                sub: compressionNote(),
                 dataTest: "log-stream-summary-compressed",
               } as StatItem,
               {

@@ -135,7 +135,9 @@ export const formatLargeNumber = (number: number) => {
  */
 export const formatEventCount = (num: number): string => {
   if (!Number.isFinite(num)) return "";
-  if (num < 100000) return num.toString();
+  // Below the compact tiers the number is printed in full, and a full number is
+  // always grouped: `49925` next to `49,925,037` on one screen reads as two units.
+  if (num < 100000) return num.toLocaleString("en-US");
 
   const units = ["", "K", "M", "B", "T"];
   let tier = Math.floor(Math.log10(num) / 3);
