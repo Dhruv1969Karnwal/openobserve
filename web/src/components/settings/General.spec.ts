@@ -1107,4 +1107,22 @@ describe("General", () => {
       }
     });
   });
+
+  describe("mobile action-bar space reservation", () => {
+    it("reserves the Save action bar in flow instead of floating over the controls", () => {
+      const w = createWrapper();
+      const footer = w.find('[data-test="general-settings-form-footer"]');
+      const classes = (footer.attributes("class") || "").split(/\s+/);
+      expect(classes).toContain("pb-safe");
+      for (const floating of ["sticky", "bottom-0", "z-10", "fixed"]) {
+        expect(classes).not.toContain(floating);
+      }
+    });
+
+    it("wraps the theme-chip row so a narrow measure never clips a pill", () => {
+      const w = createWrapper();
+      const group = w.find('[data-test="general-settings-theme-chips"]');
+      expect(group.attributes("class") || "").toContain("flex-wrap");
+    });
+  });
 });

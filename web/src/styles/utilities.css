@@ -117,3 +117,10 @@
     background-color: color-mix(in srgb, currentColor 14%, transparent);
   }
 }
+
+/* Bottom padding for a full-width action bar that closes a scroll region: the
+   device safe-area inset is not a Tailwind token, so the reservation combines
+   the standard action-bar step with it in one declaration. */
+@utility pb-safe {
+  padding-bottom: calc(var(--spacing-5) + env(safe-area-inset-bottom));
+}

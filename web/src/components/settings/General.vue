@@ -110,10 +110,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </SettingsSection>
 
         <!-- The form's single commit, on the sheet's own rule and closing the panel
-             column, so it reads as the page's action rather than Appearance's. -->
+             column, so it reads as the page's action rather than Appearance's.
+             In flow, not a `sticky bottom-0` overlay: the scroll viewport is the
+             page shell, so a pinned bar floats over whatever lands in the bottom
+             band — on a phone that was the Appearance controls. A reserved action
+             bar the content scrolls above is what keeps the last control usable. -->
         <div
           data-test="general-settings-form-footer"
-          class="bg-surface-base border-border-subtle sticky bottom-0 z-10 mt-8 border-t pt-5 pb-1 max-lg:flex max-lg:justify-end lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-8"
+          class="border-border-subtle pb-safe mt-8 border-t pt-5 max-lg:flex max-lg:justify-end lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-8"
         >
           <OButton
             data-test="dashboard-add-submit"
