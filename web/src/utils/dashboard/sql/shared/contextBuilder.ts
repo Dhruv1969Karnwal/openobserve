@@ -273,16 +273,28 @@ export function buildSQLContext(
 
   const [min, max] = getSQLMinMaxValue(yAxisKeys, missingValueData);
 
+  const dataExtent = Math.max(
+    Math.abs(Number.isFinite(min) ? min : 0),
+    Math.abs(Number.isFinite(max) ? max : 0),
+  );
+
   // Predict the exact y-axis ticks (mirrors ECharts' nice-interval algo) to
   // measure the widest label and extend decimals when ticks would collide.
   const getYAxisTickInfo = (): {
     decimals: number;
     widestLabelWidth: number;
+    axisExtent: number;
   } => {
     const configured = panelSchema?.config?.decimals ?? 2;
-    const format = (v: number, decimals: number) =>
+    const format = (v: number, decimals: number, extent = dataExtent) =>
       formatUnitValue(
-        getUnitValue(v, panelSchema?.config?.unit, panelSchema?.config?.unit_custom, decimals),
+        getUnitValue(
+          v,
+          panelSchema?.config?.unit,
+          panelSchema?.config?.unit_custom,
+          decimals,
+          extent,
+        ),
       );
     try {
       const usesStackExtent =
@@ -311,10 +323,22 @@ export function buildSQLContext(
       const ticks = calculateNiceTickValues(lo, hi);
       if (!ticks?.length) throw new Error("no ticks");
 
+      // The pin sizes on the largest tick the axis paints; the safety tick below is a width reservation only.
+      const axisExtent = ticks.reduce(
+        (widest: number, tick: number) => Math.max(widest, Math.abs(tick)),
+        0,
+      );
+
       let decimals = configured;
       if (ticks.length > 1) {
         const toDisplay = (v: number) => {
-          const u = getUnitValue(v, panelSchema?.config?.unit, panelSchema?.config?.unit_custom, 8);
+          const u = getUnitValue(
+            v,
+            panelSchema?.config?.unit,
+            panelSchema?.config?.unit_custom,
+            8,
+            axisExtent,
+          );
           return { n: parseFloat(u?.value), unit: u?.unit };
         };
         const a = toDisplay(ticks[ticks.length - 2]);
@@ -333,18 +357,22 @@ export function buildSQLContext(
       const interval = ticks.length > 1 ? ticks[1] - ticks[0] : 0;
       const candidates = interval > 0 ? [...ticks, ticks[ticks.length - 1] + interval] : ticks;
       const widestLabelWidth = Math.max(
-        ...candidates.map((v: number) => calculateWidthText(format(v, decimals))),
+        ...candidates.map((v: number) => calculateWidthText(format(v, decimals, axisExtent))),
       );
-      return { decimals, widestLabelWidth };
+      return { decimals, widestLabelWidth, axisExtent };
     } catch {
       return {
         decimals: configured,
         widestLabelWidth: calculateWidthText(format(Number.isFinite(max) ? max : 0, configured)),
+        axisExtent: dataExtent,
       };
     }
   };
-  const { decimals: yAxisTickDecimals, widestLabelWidth: widestYAxisTickLabel } =
-    getYAxisTickInfo();
+  const {
+    decimals: yAxisTickDecimals,
+    widestLabelWidth: widestYAxisTickLabel,
+    axisExtent: yAxisTickExtent,
+  } = getYAxisTickInfo();
 
   const getFinalAxisValue = (
     configValue: number | null | undefined,
@@ -522,6 +550,7 @@ export function buildSQLContext(
                       panelSchema.config?.unit,
                       panelSchema.config?.unit_custom,
                       panelSchema.config?.decimals,
+                      yAxisTickExtent,
                     ),
                   );
 
@@ -540,6 +569,7 @@ export function buildSQLContext(
                     panelSchema.config?.unit,
                     panelSchema.config?.unit_custom,
                     panelSchema.config?.decimals,
+                    yAxisTickExtent,
                   ),
                 );
               for (let i = 0; i < axisXKeys.length - params?.axisIndex - 1; i++) {
@@ -742,6 +772,7 @@ export function buildSQLContext(
                 panelSchema?.config?.unit,
                 panelSchema?.config?.unit_custom,
                 yAxisTickDecimals,
+                yAxisTickExtent,
               ),
             );
           } catch (error) {
