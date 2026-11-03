@@ -78,7 +78,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           variant="outline"
           size="sm"
           icon-left="database"
-          class="w-full justify-start"
+          class="w-full justify-start max-md:h-auto! max-md:min-h-11"
           @click="quickSelectStream(stream.value)"
         >
           <OTruncatedText class="flex-1 text-left">{{ stream.label }}</OTruncatedText>

@@ -14,22 +14,20 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<!--
-  LogsNoStreamState — the ONE screen-level state for "streams exist, none chosen".
-  Lists the streams the page already fetched so the primary job (see events) is a
-  single click from the canvas, which is also the only path on the phone where the
-  stream rail lives in a drawer.
--->
+<!-- LogsNoStreamState — the ONE screen-level state for "streams exist, none chosen". -->
 <template>
   <OEmptyState size="hero" :hide-action="true">
     <template #title>{{ t("logs.noStream.title") }}</template>
 
     <template #actions>
       <div class="w-full max-w-2xl min-w-0" data-test="logs-no-stream-quick-list">
-        <div class="text-text-secondary flex items-end justify-between gap-2 px-2 pb-1 text-xs">
+        <div
+          v-if="!isMobile"
+          class="text-text-secondary flex items-end justify-between gap-2 px-2 pb-1 text-xs"
+        >
           <span>{{ t("logStream.name") }}</span>
           <span class="flex shrink-0 items-center gap-3">
-            <span class="w-20 text-right max-sm:hidden">{{ t("logStream.docNum") }}</span>
+            <span class="w-20 text-right">{{ t("logStream.docNum") }}</span>
             <span class="w-24 text-right">{{ t("logStream.lastIngested") }}</span>
           </span>
         </div>
@@ -38,21 +36,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           :key="stream.name"
           :data-test="`logs-no-stream-pick-${stream.name}`"
           variant="ghost"
-          size="sm"
-          class="border-border-subtle w-full justify-between border-b py-2 last:border-b-0"
+          :size="isMobile ? 'md' : 'sm'"
+          :class="[
+            'border-border-subtle w-full border-b py-2 text-left last:border-b-0',
+            isMobile ? 'h-auto! min-h-11 flex-col items-start gap-0.5' : 'justify-between',
+          ]"
           @click="emit('pick-stream', stream.name)"
         >
-          <OTruncatedText
-            class="text-text-heading min-w-0 flex-1 text-left font-mono"
-            :tooltip="stream.name"
-          >
-            {{ stream.name }}
-          </OTruncatedText>
-          <span class="flex shrink-0 items-center gap-3">
-            <span class="text-text-secondary w-20 text-right text-xs tabular-nums max-sm:hidden">
-              {{ stream.events == null ? "—" : addCommasToNumber(stream.events) }}
-            </span>
-            <span class="text-text-secondary w-24 text-right text-xs">
+          <template v-if="isMobile">
+            <OTruncatedText
+              class="text-text-heading max-w-full min-w-0 font-mono text-sm"
+              :tooltip="stream.name"
+            >
+              {{ stream.name }}
+            </OTruncatedText>
+            <span class="text-text-secondary flex items-center gap-1.5 text-xs">
+              <span>{{ t("logStream.docNum") }}</span>
+              <span class="tabular-nums">{{
+                stream.events == null ? "—" : addCommasToNumber(stream.events)
+              }}</span>
+              <span aria-hidden="true">·</span>
               <OTimeCell
                 :value="stream.lastUs"
                 unit="us"
@@ -61,7 +64,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :empty-label="t('logStream.neverIngested')"
               />
             </span>
-          </span>
+          </template>
+          <template v-else>
+            <OTruncatedText
+              class="text-text-heading min-w-0 flex-1 text-left font-mono"
+              :tooltip="stream.name"
+            >
+              {{ stream.name }}
+            </OTruncatedText>
+            <span class="flex shrink-0 items-center gap-3">
+              <span class="text-text-secondary w-20 text-right text-xs tabular-nums">
+                {{ stream.events == null ? "—" : addCommasToNumber(stream.events) }}
+              </span>
+              <span class="text-text-secondary w-24 text-right text-xs">
+                <OTimeCell
+                  :value="stream.lastUs"
+                  unit="us"
+                  mode="relative"
+                  :timezone="timezone"
+                  :empty-label="t('logStream.neverIngested')"
+                />
+              </span>
+            </span>
+          </template>
         </OButton>
       </div>
     </template>
@@ -94,6 +119,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { computed } from "vue";
 import { useStore } from "vuex";
 import { useI18nTyped } from "@/types/i18n";
+import useBreakpoint from "@/composables/useBreakpoint";
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OTimeCell from "@/lib/core/Table/cells/OTimeCell.vue";
@@ -116,6 +142,7 @@ const emit = defineEmits<{
 
 const { t } = useI18nTyped();
 const store = useStore();
+const { isMobile } = useBreakpoint();
 
 const timezone = computed(() => store.state.timezone);
 
