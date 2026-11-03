@@ -148,7 +148,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     compact
                     selectable
                     :selected-key="stateFilter"
-                    default-key="total"
                     @select="onStatSelect"
                   />
                 </div>
@@ -560,7 +559,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     :data-row-action="row.enabled ? 'pause' : 'resume'"
                     :data-test="`alert-list-${row.name}-pause-start-alert`"
                     class="ms-1 max-md:hidden"
-                    :variant="row.enabled ? 'ghost-destructive' : 'ghost-success'"
+                    variant="ghost"
                     size="icon-sm"
                     :icon-left="row.enabled ? 'pause' : 'play-arrow'"
                     :aria-label="
@@ -1572,7 +1571,6 @@ export default defineComponent({
       const c = stateCounts.value;
       const hasData = c.total > 0;
       const v = (n: number): string | number => (hasData ? n : "—");
-      const shareOf = (n: number): number | undefined => (hasData && n > 0 ? c.total : undefined);
       // Severity-descending, matching the Incidents / Eval Jobs strips; Total stays last.
       return [
         {
@@ -1580,7 +1578,6 @@ export default defineComponent({
           label: t("alerts.summaryFailed"),
           value: v(c.failed),
           tone: "error",
-          max: shareOf(c.failed),
           dataTest: "alert-summary-failed",
         },
         {
@@ -1588,7 +1585,6 @@ export default defineComponent({
           label: t("alerts.summaryFiring"),
           value: v(c.firing),
           tone: "error",
-          max: shareOf(c.firing),
           dataTest: "alert-summary-firing",
         },
         {
@@ -1596,7 +1592,6 @@ export default defineComponent({
           label: t("alerts.summaryRecent"),
           value: v(c.recent),
           tone: "warning",
-          max: shareOf(c.recent),
           dataTest: "alert-summary-recent",
         },
         {
@@ -1604,7 +1599,6 @@ export default defineComponent({
           label: t("alerts.summaryActive"),
           value: v(c.active),
           tone: "success",
-          max: shareOf(c.active),
           dataTest: "alert-summary-active",
         },
         {
@@ -1612,7 +1606,6 @@ export default defineComponent({
           label: t("alerts.summaryPaused"),
           value: v(c.paused),
           tone: "neutral",
-          max: shareOf(c.paused),
           dataTest: "alert-summary-paused",
         },
         {
@@ -1710,7 +1703,7 @@ export default defineComponent({
           header: t("alerts.name"),
           sortable: true,
           hideable: true,
-          size: 280,
+          size: 320,
           minSize: 320,
           // Flex: fills the leftover width on load, freezes on first resize.
           meta: { align: "left", flex: true },
@@ -1800,7 +1793,10 @@ export default defineComponent({
           sortable: true,
           resizable: true,
           hideable: true,
-          size: 160,
+          // An owner is an identity: the shared email width, not a width that cuts
+          // the address in half while a metric column still has room.
+          size: COL.owner,
+          minSize: 180,
           meta: { align: "left", mono: true },
         },
         // "frequency" — the "Check every" cadence, meaningless for real-time alerts
