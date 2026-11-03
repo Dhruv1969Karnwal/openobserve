@@ -75,10 +75,20 @@ const selectionLabel = computed(() => {
 
 // A filter can leave the page painting nothing, and "1 - 2 of 2" over an empty
 // body reads as a broken count rather than a narrow search.
+const EMPTY_RANGE = "0";
 const rangeLabel = computed(() =>
   props.showingFrom === 0 || props.showingTo === 0
-    ? "0"
-    : `${props.showingFrom} - ${props.showingTo}`,
+    ? EMPTY_RANGE
+    : `${props.showingFrom.toLocaleString()}–${props.showingTo.toLocaleString()}`,
+);
+const totalCountText = computed(
+  () => `${props.totalCount.toLocaleString()}${props.totalCountExact ? "" : "+"}`,
+);
+// One sentence and one dash for every list footer in the product.
+const rangeSentence = computed(() =>
+  rangeLabel.value === EMPTY_RANGE
+    ? `${t("search.showing")} ${EMPTY_RANGE} ${t("search.of")} ${totalCountText.value}`
+    : t("components.table.range", { from: rangeLabel.value, total: totalCountText.value }),
 );
 </script>
 
@@ -129,17 +139,19 @@ const rangeLabel = computed(() =>
       />
       <span
         v-else
-        class="text-primary text-xs whitespace-nowrap"
+        class="text-text-secondary text-xs whitespace-nowrap"
         data-test="o2-table-pagination-info"
       >
-        {{ t("search.showing") }} {{ rangeLabel }} {{ t("search.of") }}
-        {{ totalCount.toLocaleString() }}{{ totalCountExact ? "" : "+" }}
+        {{ rangeSentence }}
       </span>
       <div
         class="bg-border-default h-4 w-px shrink-0 max-md:hidden"
         v-if="pageSizeOptions.length > 0"
       />
-      <div v-if="pageSizeOptions.length > 0" class="text-primary flex items-center gap-1.5 text-xs">
+      <div
+        v-if="pageSizeOptions.length > 0"
+        class="text-text-secondary flex items-center gap-1.5 text-xs"
+      >
         <span class="whitespace-nowrap max-md:hidden">{{ t("search.recordsPerPage") }}</span>
         <OSelect
           v-model="pageSizeModel"

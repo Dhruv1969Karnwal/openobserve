@@ -269,7 +269,7 @@ describe("OTable", () => {
       });
 
       it("counts the matching rows, not the rows the caller passed in", async () => {
-        expect(await filterTo("User 12")).toBe("Showing 1 - 1 of 25");
+        expect(await filterTo("User 12")).toBe("Showing 1–1 of 25");
       });
 
       it("keeps the full-page range when no filter is typed", async () => {
@@ -283,7 +283,7 @@ describe("OTable", () => {
         });
         await flushPromises();
         expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toBe(
-          "Showing 1 - 10 of 25",
+          "Showing 1–10 of 25",
         );
       });
     });
@@ -400,11 +400,11 @@ describe("OTable", () => {
           currentPage: 1,
         },
       });
-      expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toContain("1 - 20");
+      expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toContain("1–20");
 
       await wrapper.setProps({ pageSize: 10 });
 
-      expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toContain("1 - 10");
+      expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toContain("1–10");
       expect(wrapper.findComponent(OSelect).props("modelValue")).toBe(10);
     });
 
