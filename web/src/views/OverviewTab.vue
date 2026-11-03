@@ -15,8 +15,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <template>
   <div class="px-page-edge text-text-body flex h-full flex-col gap-0 overflow-y-auto pt-2.5 pb-2.5">
     <!-- Header: refresh + time picker -->
-    <div v-if="pageState !== 'forbidden'" class="mb-4 flex justify-end">
-      <div class="flex items-center gap-2">
+    <div v-if="pageState !== 'forbidden'" class="mb-4 flex flex-wrap items-center gap-2">
+      <p
+        v-if="windowSummary"
+        class="text-text-secondary min-w-0 flex-1 text-xs tabular-nums"
+        data-test="overview-window-summary"
+      >
+        {{ windowSummary }}
+      </p>
+      <div class="ms-auto flex items-center gap-2">
         <ORefreshButton
           :last-run-at="lastFetched ? lastFetched.getTime() : null"
           :loading="isLoading"
@@ -47,7 +54,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       data-test="overview-incidents-section"
     >
       <div class="mb-2 flex items-center justify-between ps-1">
-        <div class="text-text-heading text-sm font-medium tracking-[0.01em]">
+        <OText variant="card-title" class="tracking-[0.01em]">
           {{ t("overview.activeIncidents") }}
           <OTag type="countChip" value="warning">{{ incidentsTotal }}</OTag>
           <span
@@ -55,7 +62,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             class="text-text-secondary ms-2 align-middle text-xs font-normal"
             >{{ t("overview.showingOf", { shown: incidents.length, total: incidentsTotal }) }}</span
           >
-        </div>
+        </OText>
         <button
           class="text-text-link cursor-pointer border-none bg-none p-0 text-xs font-medium whitespace-nowrap opacity-80 transition-opacity duration-150 hover:underline hover:opacity-100"
           @click="goToIncidentList"
@@ -135,9 +142,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       data-test="overview-incidents-locked"
     >
       <div class="mb-2 flex items-center justify-between ps-1">
-        <div class="text-text-heading text-sm font-medium tracking-[0.01em]">
+        <OText variant="card-title" class="tracking-[0.01em]">
           {{ t("overview.activeIncidents") }}
-        </div>
+        </OText>
       </div>
       <div
         class="border-border-default bg-surface-subtle rounded-default flex cursor-pointer items-center gap-3 border border-[0.0625em] px-4 py-5"
@@ -155,7 +162,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       data-test="overview-services-section"
     >
       <div class="mb-2 flex items-center justify-between ps-1">
-        <div class="text-text-heading text-sm font-medium tracking-[0.01em]">
+        <OText variant="card-title" class="tracking-[0.01em]">
           {{ t("overview.services") }}
           <OTag type="countChip" value="neutral">{{ services.length }}</OTag>
           <span
@@ -167,7 +174,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               selectedService.label ?? selectedService.id
             }}</strong>
           </span>
-        </div>
+        </OText>
         <button
           class="text-text-link cursor-pointer border-none bg-none p-0 text-xs font-medium whitespace-nowrap opacity-80 transition-opacity duration-150 hover:underline hover:opacity-100"
           @click="goToServiceGraph"
@@ -317,9 +324,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       data-test="overview-services-locked"
     >
       <div class="mb-2 flex items-center justify-between ps-1">
-        <div class="text-text-heading text-sm font-medium tracking-[0.01em]">
+        <OText variant="card-title" class="tracking-[0.01em]">
           {{ t("overview.services") }}
-        </div>
+        </OText>
       </div>
       <div
         class="border-border-default bg-surface-subtle rounded-default flex cursor-pointer items-center gap-3 border border-[0.0625em] px-4 py-5"
@@ -351,10 +358,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <!-- ACTIVE ANOMALIES -->
     <section v-if="anomalies.length > 0" class="mb-5" data-test="overview-anomalies-section">
       <div class="mb-2 flex items-center justify-between ps-1">
-        <div class="text-text-heading text-sm font-medium tracking-[0.01em]">
+        <OText variant="card-title" class="tracking-[0.01em]">
           {{ t("overview.activeAnomalies") }}
           <OTag type="countChip" value="warning">{{ anomalies.length }}</OTag>
-        </div>
+        </OText>
         <button
           class="text-text-link cursor-pointer border-none bg-none p-0 text-xs font-medium whitespace-nowrap opacity-80 transition-opacity duration-150 hover:underline hover:opacity-100"
           @click="goToAnomalies"
@@ -422,10 +429,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       data-test="overview-recent-events-section"
     >
       <div class="mb-2 flex items-center justify-between ps-1">
-        <div class="text-text-heading text-sm font-medium tracking-[0.01em]">
+        <OText variant="card-title" class="tracking-[0.01em]">
           {{ t("overview.recentEvents") }}
           <OTag type="countChip" value="neutral">{{ eventRows.length }}</OTag>
-        </div>
+          <span
+            v-if="alertRuns.length > eventRows.length"
+            class="text-text-secondary ms-2 align-middle text-xs font-normal"
+            data-test="overview-recent-events-of"
+            >{{
+              t("overview.showingOf", { shown: eventRows.length, total: alertRuns.length })
+            }}</span
+          >
+        </OText>
         <button
           class="text-text-link cursor-pointer border-none bg-none p-0 text-xs font-medium whitespace-nowrap opacity-80 transition-opacity duration-150 hover:underline hover:opacity-100"
           @click="goToAlertList"
@@ -667,6 +682,7 @@ import ORefreshButton from "@/lib/core/RefreshButton/ORefreshButton.vue";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
+import OText from "@/lib/core/Typography/OText.vue";
 import OverviewSkeleton from "./OverviewSkeleton.vue";
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import EmptyStateActionCard from "@/lib/core/EmptyState/EmptyStateActionCard.vue";
@@ -819,6 +835,15 @@ const sectionFailure = reactive<Record<SectionKey, unknown>>({
 const alertCount = ref<number | null>(null);
 const summaryFailed = ref(false);
 const anomalyConfigCount = ref<number | null>(null);
+// Two numbers the page already held and never painted: how many monitors the org
+// watches, and how many alert runs the selected range actually returned.
+const windowSummary = computed(() => {
+  if (anomalyConfigCount.value === null) return "";
+  return t("overview.windowSummary", {
+    monitors: anomalyConfigCount.value,
+    runs: alertRuns.value.length,
+  });
+});
 // null keeps all clear: only answered lists prove an org empty, and only the flag-off page asks
 const noUserStreams = ref<boolean | null>(null);
 // a probe that failed for any reason but 403 leaves "no streams" unproven, so all clear may not show

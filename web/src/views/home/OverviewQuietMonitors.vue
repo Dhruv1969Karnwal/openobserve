@@ -23,10 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <template>
   <section class="mb-5" data-test="overview-anomaly-monitors-section">
     <div class="mb-2 flex items-center ps-1">
-      <div class="text-text-heading text-sm font-medium tracking-[0.01em]">
-        {{ t("alerts.anomaly.detectionCharts") }}
+      <OText variant="card-title" class="tracking-[0.01em]">
+        {{ t("overview.quietMonitors") }}
         <OTag type="countChip" value="neutral">{{ rows.length }}</OTag>
-      </div>
+      </OText>
     </div>
     <div
       class="border-border-default rounded-default bg-surface-base flex flex-col overflow-hidden border border-[0.0625em]"
@@ -53,6 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script setup lang="ts">
 import OTag from "@/lib/core/Badge/OTag.vue";
 import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
+import OText from "@/lib/core/Typography/OText.vue";
 import { useI18nTyped } from "@/types/i18n";
 
 defineProps<{
