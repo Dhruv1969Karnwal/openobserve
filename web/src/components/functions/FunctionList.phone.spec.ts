@@ -167,4 +167,56 @@ describe("FunctionList on a phone", () => {
     ).toBe(false);
     expect(wrapper.find('[data-test="function-list-name-cell-add_geo"]').exists()).toBe(true);
   });
+
+  it("opens the pane from the auto-focused first row, without any hover", async () => {
+    const wrapper = await mountList();
+    expect(wrapper.find('[data-test="function-detail-panel"]').exists()).toBe(false);
+
+    await wrapper.find('[data-test="function-list-name-cell-redact_pii"]').trigger("click");
+    await nextTick();
+
+    const panel = wrapper.find('[data-test="function-detail-panel"]');
+    expect(panel.exists()).toBe(true);
+    expect(panel.find('[data-test="function-detail-name"]').text()).toBe("redact_pii");
+    expect(panel.find('[data-test="function-detail-back"]').exists()).toBe(true);
+  });
+
+  it("reopens the pane when the same row is chosen again after Back", async () => {
+    const wrapper = await mountList();
+    await wrapper.find('[data-test="function-list-name-cell-add_geo"]').trigger("click");
+    await nextTick();
+    await wrapper.find('[data-test="function-detail-back"]').trigger("click");
+    await nextTick();
+    expect(wrapper.find('[data-test="function-detail-panel"]').exists()).toBe(false);
+
+    await wrapper.find('[data-test="function-list-name-cell-add_geo"]').trigger("click");
+    await nextTick();
+    expect(wrapper.find('[data-test="function-detail-panel"]').exists()).toBe(true);
+  });
+
+  it("pushes the pane that a ?function= deep link names", async () => {
+    await router.push({ path: "/functions", query: { function: "add_geo" } });
+    const wrapper = await mountList();
+
+    const panel = wrapper.find('[data-test="function-detail-panel"]');
+    expect(panel.exists()).toBe(true);
+    expect(panel.find('[data-test="function-detail-name"]').text()).toBe("add_geo");
+    expect(panel.find('[data-test="function-detail-back"]').exists()).toBe(true);
+  });
+
+  it("marks rows as opening a detail and strands no action column", async () => {
+    const wrapper = await mountList();
+    expect(wrapper.find('[data-test="o2-table-th-actions"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test="function-list-row-more-actions"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test="function-list-row-open"]').exists()).toBe(true);
+    // The applied-in column dropped by the phone column set rides line 2 instead.
+    expect(wrapper.find('[data-test="function-list-applied-in"]').text()).toContain(
+      "container_stdout",
+    );
+  });
+
+  it("keeps bulk selection controls on the phone list", async () => {
+    const wrapper = await mountList();
+    expect(wrapper.find('[data-test="o2-table-th-select"]').exists()).toBe(true);
+  });
 });

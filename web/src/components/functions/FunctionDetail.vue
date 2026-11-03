@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         icon-left="arrow-back"
         :aria-label="t('common.back')"
         data-test="function-detail-back"
-        class="mt-px shrink-0"
+        class="mt-px shrink-0 max-md:min-h-11 max-md:min-w-11"
         @click="emit('back')"
       />
       <div class="flex min-w-0 flex-1 flex-col gap-1">

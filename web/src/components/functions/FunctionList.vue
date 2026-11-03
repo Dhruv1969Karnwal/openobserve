@@ -143,6 +143,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     class="shrink-0"
                     data-test="function-list-type-badge-js"
                   />
+                  <!-- The row pushes the detail pane; a touch screen shows no hover, so the chevron is the affordance. -->
+                  <OIcon
+                    v-if="isMobile"
+                    name="chevron-right"
+                    size="xs"
+                    class="text-text-secondary ms-auto shrink-0"
+                    data-test="function-list-row-open"
+                    aria-hidden="true"
+                  />
+                </div>
+                <!-- A dropped column is a defect on every band: applied-in rides line 2 of the phone row. -->
+                <div
+                  v-if="isMobile"
+                  class="min-w-0 truncate text-xs"
+                  data-test="function-list-applied-in-line"
+                >
+                  <span
+                    v-if="row?.view?.streams.length"
+                    data-test="function-list-applied-in"
+                    data-o2-cell-clip
+                    class="text-text-secondary"
+                    >{{ row.view.streams.join(streamSeparator) }}</span
+                  >
+                  <span
+                    v-else
+                    class="text-text-secondary"
+                    data-test="function-list-applied-in-none"
+                    >{{ raw("—") }}</span
+                  >
                 </div>
               </template>
 
@@ -439,8 +468,10 @@ export default defineComponent({
     };
 
     const columns = computed<OTableColumnDef[]>(() =>
+      // On a phone the row is a button into the pane, which carries every row
+      // action; a lone kebab column is the stranded band.
       isMobile.value
-        ? [nameColumn(true), actionsColumn]
+        ? [nameColumn(true)]
         : [
             nameColumn(false),
             {
@@ -821,9 +852,13 @@ export default defineComponent({
     });
 
     const focusFunction = (row: any) => {
-      if (!row?.name || row.name === focusedName.value) return;
-      focusedName.value = row.name;
-      syncFocusedName(row.name);
+      if (!row?.name) return;
+      if (row.name !== focusedName.value) {
+        focusedName.value = row.name;
+        syncFocusedName(row.name);
+      }
+      // The first row is focused by default, so refusing to act on it strands the
+      // pane: a tap on any row must push the detail on a phone.
       if (isMobile.value) phoneDetailOpen.value = true;
     };
     const onRowClick = (row: any) => focusFunction(row);
@@ -846,7 +881,12 @@ export default defineComponent({
       () => route.query[FOCUSED_QUERY],
       (value) => {
         const name = String(value ?? "");
-        if (name && name !== focusedName.value) focusedName.value = name;
+        if (name && name !== focusedName.value) {
+          focusedName.value = name;
+          // A shared link on a phone must open the pane it names, not preselect a
+          // row that is never revealed without a second tap.
+          if (isMobile.value) phoneDetailOpen.value = true;
+        }
       },
       { immediate: true },
     );

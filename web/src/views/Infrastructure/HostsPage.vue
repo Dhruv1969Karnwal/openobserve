@@ -43,12 +43,17 @@ import { useHostsList, utilizationTint, type HostRow } from "./useHostsList";
 import { usageBarFill } from "./usageBarFill";
 import { HOSTS_DEFAULT_RELATIVE_PERIOD, HOSTS_DEFAULT_WINDOW_US } from "./hostsQueries";
 import { useWorkloadDetection } from "@/composables/useWorkloadDetection";
+import useBreakpoint from "@/composables/useBreakpoint";
 import { formatUnitValue, getUnitValue } from "@/utils/dashboard/convertDataIntoUnitValue";
 
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18nTyped();
+const { isMobile, isTablet } = useBreakpoint();
+// Below lg the split cannot hold a 1047px table beside the rail, so the page
+// switches to the chips-and-cards composition instead of clipping columns.
+const compactView = computed(() => isMobile.value || isTablet.value);
 
 const detection = useWorkloadDetection();
 const list = useHostsList();
@@ -347,6 +352,12 @@ const sortColumnId = computed(() => {
   return Object.entries(SORT_FIELD_BY_COLUMN).find(([, f]) => f === field)?.[0] ?? "cpu";
 });
 
+// One server-paged window feeds both the desktop table and the phone pager.
+const PAGE_SIZE = 50;
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / PAGE_SIZE)));
+const prevPage = () => (page.value = Math.max(1, page.value - 1));
+const nextPage = () => (page.value = Math.min(totalPages.value, page.value + 1));
+
 const tintClass = (value: number | null) => {
   const tint = utilizationTint(value);
   return tint === "critical"
@@ -496,7 +507,221 @@ const osToggleLabel = (slug: string) =>
         <OText variant="meta">{{ t("infra.hosts.lastSeenBanner") }}</OText>
       </div>
 
-      <div class="flex min-h-0 flex-1">
+      <!-- Phones/tablets: the split keeps the table's min-content wider than the
+           canvas, so every metric sits off-screen with no scroll cue. Cards carry
+           the deciding numbers, and the existing drawer (same ?host= route) carries
+           the deep dive. -->
+      <div v-if="compactView" class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
+        <OSearchInput
+          v-model="nameFilter"
+          :placeholder="t('infra.hosts.filterPlaceholder')"
+          data-test="hosts-name-filter"
+        />
+        <div class="flex flex-col gap-1.5" data-test="hosts-mobile-facets">
+          <div
+            class="flex flex-wrap items-center gap-1.5"
+            role="group"
+            :aria-label="t('infra.hosts.statusFacet')"
+          >
+            <button
+              v-for="facet in facets.status"
+              :key="facet.value"
+              type="button"
+              :data-test="`hosts-facet-status-${facet.value}`"
+              :aria-pressed="statusFilter.includes(facet.value)"
+              class="rounded-default min-h-11 border px-3 text-xs"
+              :class="
+                statusFilter.includes(facet.value)
+                  ? 'border-border-default bg-surface-subtle text-text-heading font-medium'
+                  : 'border-border-subtle bg-surface-panel text-text-body'
+              "
+              @click="toggleStatus(facet.value)"
+            >
+              {{ statusLabel(facet.value) }}
+              <span class="text-text-secondary tabular-nums">{{ facet.count }}</span>
+            </button>
+          </div>
+          <div
+            v-if="facets.os.length"
+            class="flex flex-wrap items-center gap-1.5"
+            role="group"
+            :aria-label="t('infra.hosts.osFacet')"
+          >
+            <button
+              v-for="facet in facets.os"
+              :key="facet.value"
+              type="button"
+              :data-test="`hosts-facet-os-${facet.value}`"
+              :aria-pressed="osFilter.includes(facet.value)"
+              class="rounded-default min-h-11 border px-3 text-xs"
+              :class="
+                osFilter.includes(facet.value)
+                  ? 'border-border-default bg-surface-subtle text-text-heading font-medium'
+                  : 'border-border-subtle bg-surface-panel text-text-body'
+              "
+              @click="toggleOs(facet.value)"
+            >
+              {{ raw(facet.value) }}
+              <span class="text-text-secondary tabular-nums">{{ facet.count }}</span>
+            </button>
+          </div>
+          <div
+            class="text-text-secondary flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-xs"
+            data-test="hosts-usage-legend"
+          >
+            <span class="inline-flex items-center gap-1.5">
+              <span
+                class="bg-row-rail-warning inline-block size-2 shrink-0 rounded-full"
+                aria-hidden="true"
+              ></span>
+              {{ t("infra.hosts.usageBarWarn", { threshold: 70 }) }}
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span
+                class="bg-row-rail-negative inline-block size-2 shrink-0 rounded-full"
+                aria-hidden="true"
+              ></span>
+              {{ t("infra.hosts.usageBarCritical", { threshold: 90 }) }}
+            </span>
+          </div>
+        </div>
+        <ul class="m-0 flex list-none flex-col gap-2 p-0" data-test="hosts-mobile-list">
+          <li v-for="row in pagedRows" :key="row.host_name">
+            <button
+              type="button"
+              aria-haspopup="dialog"
+              :data-test="`hosts-row-${row.host_name}`"
+              class="border-border-subtle bg-surface-panel rounded-surface focus-visible:ring-focus-ring-accent flex w-full flex-col gap-2 border p-3 text-start outline-none focus-visible:ring-2"
+              @click="openDrawer(row.host_name)"
+            >
+              <div class="flex min-w-0 items-center gap-2">
+                <span
+                  class="text-text-heading min-w-0 flex-1 truncate font-mono text-sm"
+                  :title="row.display_name"
+                  >{{ raw(row.display_name) }}</span
+                >
+                <OTag
+                  :variant="
+                    row.status === 'ACTIVE'
+                      ? 'success-soft'
+                      : row.status === 'INACTIVE'
+                        ? 'default-soft'
+                        : 'amber-soft'
+                  "
+                  size="xs"
+                  class="shrink-0"
+                  >{{ statusLabel(row.status) }}</OTag
+                >
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <div
+                  class="flex min-w-0 flex-col gap-1"
+                  :data-test="`hosts-cell-cpu-${row.host_name}`"
+                  :data-tint="utilizationTint(row.cpu)"
+                >
+                  <span class="text-text-secondary text-xs">{{ t("infra.hosts.metricCpu") }}</span>
+                  <OProgressBar
+                    v-if="row.cpu != null"
+                    size="xs"
+                    :value="barValue(row.cpu)"
+                    :variant="tintVariant(row.cpu)"
+                    :color="usageBarFill(tintVariant(row.cpu))"
+                    :data-test="`hosts-bar-cpu-${row.host_name}`"
+                  />
+                  <span class="text-xs tabular-nums" :class="tintClass(row.cpu)">{{
+                    pct(row.cpu)
+                  }}</span>
+                </div>
+                <div
+                  class="flex min-w-0 flex-col gap-1"
+                  :data-test="`hosts-cell-memory-${row.host_name}`"
+                  :data-tint="utilizationTint(row.memoryPct)"
+                >
+                  <span class="text-text-secondary text-xs">{{
+                    t("infra.hosts.metricMemory")
+                  }}</span>
+                  <OProgressBar
+                    v-if="row.memoryPct != null"
+                    size="xs"
+                    :value="barValue(row.memoryPct)"
+                    :variant="tintVariant(row.memoryPct)"
+                    :color="usageBarFill(tintVariant(row.memoryPct))"
+                    :data-test="`hosts-bar-memory-${row.host_name}`"
+                  />
+                  <span class="text-xs tabular-nums" :class="tintClass(row.memoryPct)">{{
+                    pct(row.memoryPct)
+                  }}</span>
+                </div>
+                <div
+                  class="flex min-w-0 flex-col gap-1"
+                  :data-test="`hosts-cell-disk-${row.host_name}`"
+                  :data-tint="utilizationTint(row.disk)"
+                >
+                  <span class="text-text-secondary text-xs">{{ t("infra.hosts.metricDisk") }}</span>
+                  <OProgressBar
+                    v-if="row.disk != null"
+                    size="xs"
+                    :value="barValue(row.disk)"
+                    :variant="tintVariant(row.disk)"
+                    :color="usageBarFill(tintVariant(row.disk))"
+                    :data-test="`hosts-bar-disk-${row.host_name}`"
+                  />
+                  <span class="text-xs tabular-nums" :class="tintClass(row.disk)">{{
+                    pct(row.disk)
+                  }}</span>
+                </div>
+              </div>
+              <div
+                class="text-text-secondary flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs"
+              >
+                <span :data-test="`hosts-cell-load-${row.host_name}`">
+                  {{ t("infra.hosts.metricLoad") }}
+                  <span class="text-text-body tabular-nums">{{ num(row.load) }}</span>
+                  <template v-if="loadPerCore(row)">{{ loadPerCore(row) }}</template>
+                </span>
+                <span :data-test="`hosts-cell-cores-${row.host_name}`">
+                  {{ t("infra.hosts.columnCores") }}
+                  <span class="text-text-body tabular-nums">{{
+                    row.cores != null ? row.cores : raw("—")
+                  }}</span>
+                </span>
+                <span :data-test="`hosts-cell-lastseen-${row.host_name}`">
+                  {{ t("infra.hosts.columnLastSeen") }}
+                  <span class="text-text-body">{{ raw(row.lastSeen ?? "—") }}</span>
+                </span>
+                <span v-if="row.os_type" :data-test="`hosts-cell-os-${row.host_name}`">{{
+                  raw(row.os_type)
+                }}</span>
+              </div>
+            </button>
+          </li>
+        </ul>
+        <div v-if="totalPages > 1" class="flex items-center justify-between gap-2 py-1">
+          <OButton
+            variant="outline"
+            size="sm"
+            data-test="hosts-mobile-prev"
+            :disabled="page <= 1"
+            @click="prevPage"
+          >
+            {{ t("common.previous") }}
+          </OButton>
+          <span class="text-text-secondary text-xs tabular-nums" data-test="hosts-mobile-page">{{
+            t("common.pageNumber", { page })
+          }}</span>
+          <OButton
+            variant="outline"
+            size="sm"
+            data-test="hosts-mobile-next"
+            :disabled="page >= totalPages"
+            @click="nextPage"
+          >
+            {{ t("common.next") }}
+          </OButton>
+        </div>
+      </div>
+
+      <div v-else class="flex min-h-0 flex-1">
         <!-- Facet rail — fixed order; UNKNOWN appends last only when present.
              Panel surface + right border match FolderList.vue so the rail reads
              like the app's other left rails. -->
@@ -582,7 +807,9 @@ const osToggleLabel = (slug: string) =>
           </div>
         </div>
 
-        <div class="min-h-0 flex-1">
+        <!-- min-w-0 lets the frame shrink so OTable's own in-frame scroll takes
+             over when the column set cannot fit beside the rail. -->
+        <div class="min-h-0 min-w-0 flex-1">
           <OTable
             :data="pagedRows"
             :columns="columns"
@@ -592,7 +819,7 @@ const osToggleLabel = (slug: string) =>
             :sort-by="sortColumnId"
             :sort-order="sortDesc ? 'desc' : 'asc'"
             pagination="server"
-            :page-size="50"
+            :page-size="PAGE_SIZE"
             :current-page="page"
             :total-count="filteredRows.length"
             :show-global-filter="false"
