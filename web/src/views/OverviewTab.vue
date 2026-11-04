@@ -16,13 +16,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <div class="px-page-edge text-text-body flex h-full flex-col gap-0 overflow-y-auto pt-2.5 pb-2.5">
     <!-- Header: refresh + time picker -->
     <div v-if="pageState !== 'forbidden'" class="mb-4 flex flex-wrap items-center gap-2">
-      <p
-        v-if="windowSummary"
-        class="text-text-secondary min-w-0 flex-1 text-xs tabular-nums"
+      <!-- Two facts, two tiers: the run count the sections below are drawn from leads, the roster sits a step under it. -->
+      <div
+        v-if="showRunsLedger || anomalyConfigCount !== null"
+        class="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1"
         data-test="overview-window-summary"
       >
-        {{ windowSummary }}
-      </p>
+        <template v-if="showRunsLedger">
+          <span class="text-text-heading text-lg leading-none font-semibold tabular-nums">{{
+            alertRuns.length
+          }}</span>
+          <span class="text-text-secondary text-xs">{{ t("overview.windowRunsLead") }}</span>
+        </template>
+        <span v-if="showRunsLedger && anomalyConfigCount !== null" class="text-text-secondary"
+          >·</span
+        >
+        <template v-if="anomalyConfigCount !== null">
+          <span class="text-text-body text-compact font-medium tabular-nums">{{
+            anomalyConfigCount
+          }}</span>
+          <span class="text-text-secondary text-xs">{{ t("overview.windowMonitors") }}</span>
+        </template>
+      </div>
       <div class="ms-auto flex items-center gap-2">
         <ORefreshButton
           :last-run-at="lastFetched ? lastFetched.getTime() : null"
@@ -355,72 +370,90 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       />
     </template>
 
-    <!-- ACTIVE ANOMALIES -->
-    <section v-if="anomalies.length > 0" class="mb-5" data-test="overview-anomalies-section">
-      <div class="mb-2 flex items-center justify-between ps-1">
-        <OText variant="card-title" class="tracking-[0.01em]">
-          {{ t("overview.activeAnomalies") }}
-          <OTag type="countChip" value="warning">{{ anomalies.length }}</OTag>
-        </OText>
-        <button
-          class="text-text-link cursor-pointer border-none bg-none p-0 text-xs font-medium whitespace-nowrap opacity-80 transition-opacity duration-150 hover:underline hover:opacity-100"
-          @click="goToAnomalies"
-        >
-          {{ t("overview.viewAll") }} {{ "→" }}
-        </button>
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <div
-          v-for="item in anomalies"
-          :key="item.id"
-          class="group rounded-default border-border-default bg-surface-base hover:bg-table-row-hover-bg flex flex-col gap-2 border border-[0.0625em] px-3.5 py-2.5 transition-[background] duration-150"
-          :class="severityRowClass(item.severity)"
-        >
-          <div class="flex w-full items-center gap-3">
-            <span class="flex shrink-0 items-center" :class="severityIconClass(item.severity)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </span>
-            <div class="min-w-0 flex-1">
-              <div
-                class="text-text-heading flex flex-wrap items-center gap-1 [row-gap:0.25rem] text-sm font-medium"
-              >
-                {{ item.title }}
-                <span class="text-text-secondary mx-[0.1rem] text-xs font-normal max-md:hidden"
-                  >·</span
-                >
-                <span class="text-text-secondary text-xs font-normal">{{ item.description }}</span>
-              </div>
-            </div>
-            <span class="text-text-secondary shrink-0 text-xs whitespace-nowrap">{{
-              relativeTime_(item.ts * 1000)
-            }}</span>
-            <span class="invisible shrink-0 whitespace-nowrap group-hover:visible max-md:visible">
-              <OButton variant="ghost-primary" size="sm" @click="goToAlert(item)">
-                {{ t("overview.investigate") }}
-              </OButton>
-            </span>
+    <!-- ACTIVE ANOMALIES — the null monitors sit beside it as its denominator, not below it as a rival section. -->
+    <div v-if="showAnomalyRow" class="mb-5 grid items-start gap-5 xl:grid-cols-3">
+      <div class="min-w-0 xl:col-span-2">
+        <section v-if="anomalies.length > 0" data-test="overview-anomalies-section">
+          <div class="mb-2 flex items-center justify-between ps-1">
+            <OText variant="card-title" class="tracking-[0.01em]">
+              {{ t("overview.activeAnomalies") }}
+              <OTag type="countChip" value="warning">{{ anomalies.length }}</OTag>
+            </OText>
+            <button
+              class="text-text-link cursor-pointer border-none bg-none p-0 text-xs font-medium whitespace-nowrap opacity-80 transition-opacity duration-150 hover:underline hover:opacity-100"
+              @click="goToAnomalies"
+            >
+              {{ t("overview.viewAll") }} {{ "→" }}
+            </button>
           </div>
-          <OverviewAnomalySeries v-if="item.series.length > 0" :points="item.series" class="ps-7" />
-        </div>
+          <div class="flex flex-col gap-1.5">
+            <div
+              v-for="item in anomalies"
+              :key="item.id"
+              class="group rounded-default border-border-default bg-surface-base hover:bg-table-row-hover-bg flex flex-col gap-2 border border-[0.0625em] px-3.5 py-2.5 transition-[background] duration-150"
+              :class="severityRowClass(item.severity)"
+            >
+              <div class="flex w-full items-center gap-3">
+                <span class="flex shrink-0 items-center" :class="severityIconClass(item.severity)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+                <div class="min-w-0 flex-1">
+                  <div
+                    class="text-text-heading flex flex-wrap items-center gap-1 [row-gap:0.25rem] text-sm font-medium"
+                  >
+                    <!-- The amber start rail carries severity; this names it in words. -->
+                    <OTag type="alertLevel" :value="item.severity" class="shrink-0" />
+                    {{ item.title }}
+                    <!-- The mark leads the fragment it separates, so a wrap takes it down. -->
+                    <span class="text-text-secondary text-xs font-normal"
+                      ><span class="max-md:hidden" aria-hidden="true">·&nbsp;</span
+                      >{{ item.description }}</span
+                    >
+                  </div>
+                </div>
+                <span class="text-text-secondary shrink-0 text-xs whitespace-nowrap">{{
+                  relativeTime_(item.ts * 1000)
+                }}</span>
+                <span
+                  class="invisible shrink-0 whitespace-nowrap group-hover:visible max-md:visible"
+                >
+                  <OButton variant="ghost-primary" size="sm" @click="goToAlert(item)">
+                    {{ t("overview.investigate") }}
+                  </OButton>
+                </span>
+              </div>
+              <OverviewAnomalySeries
+                v-if="item.series.length > 0"
+                :points="item.series"
+                class="ps-7"
+              />
+            </div>
+          </div>
+        </section>
+        <OverviewSkeleton v-else-if="isSectionPending('anomalies')" section="anomalies" />
+        <OverviewSectionError
+          v-else-if="showSectionError('anomalies')"
+          section="anomalies"
+          :title="t('overview.activeAnomalies')"
+          @retry="() => loadAll(true)"
+        />
       </div>
-    </section>
-    <OverviewSkeleton v-else-if="isSectionPending('anomalies')" section="anomalies" />
-    <OverviewSectionError
-      v-else-if="showSectionError('anomalies')"
-      section="anomalies"
-      :title="t('overview.activeAnomalies')"
-      @retry="() => loadAll(true)"
-    />
 
-    <OverviewQuietMonitors v-if="hasAnyData && quietMonitors.length > 0" :rows="quietMonitors" />
+      <OverviewQuietMonitors
+        v-if="hasAnyData && quietMonitors.length > 0"
+        :rows="quietMonitors"
+        :watched="anomalyConfigCount"
+        class="min-w-0"
+      />
+    </div>
 
     <!-- RECENT EVENTS (alert run feed: what fired, then what ran clean) -->
     <section
@@ -431,14 +464,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <div class="mb-2 flex items-center justify-between ps-1">
         <OText variant="card-title" class="tracking-[0.01em]">
           {{ t("overview.recentEvents") }}
-          <OTag type="countChip" value="neutral">{{ eventRows.length }}</OTag>
-          <span
-            v-if="alertRuns.length > eventRows.length"
-            class="text-text-secondary ms-2 align-middle text-xs font-normal"
-            data-test="overview-recent-events-of"
-            >{{
-              t("overview.showingOf", { shown: eventRows.length, total: alertRuns.length })
-            }}</span
+          <!-- The chip counts rows. The runs behind them are counted once, in the tally. -->
+          <OTag
+            type="countChip"
+            value="neutral"
+            :aria-label="t('overview.recentEventsRowsAria', { count: eventRows.length })"
+            >{{ eventRows.length }}</OTag
           >
         </OText>
         <button
@@ -835,15 +866,10 @@ const sectionFailure = reactive<Record<SectionKey, unknown>>({
 const alertCount = ref<number | null>(null);
 const summaryFailed = ref(false);
 const anomalyConfigCount = ref<number | null>(null);
-// Two numbers the page already held and never painted: how many monitors the org
-// watches, and how many alert runs the selected range actually returned.
-const windowSummary = computed(() => {
-  if (anomalyConfigCount.value === null) return "";
-  return t("overview.windowSummary", {
-    monitors: anomalyConfigCount.value,
-    runs: alertRuns.value.length,
-  });
-});
+// The header ledger stays hidden until the run request has answered, so a zero is never a loading state.
+const showRunsLedger = computed(
+  () => alertRuns.value.length > 0 || sectionState.recentEvents.loaded,
+);
 // null keeps all clear: only answered lists prove an org empty, and only the flag-off page asks
 const noUserStreams = ref<boolean | null>(null);
 // a probe that failed for any reason but 403 leaves "no streams" unproven, so all clear may not show
@@ -884,6 +910,15 @@ const pageState = computed<PageState>(() => {
 });
 const showSectionError = (key: SectionKey) =>
   isFailed(key) && pageState.value !== "error" && pageState.value !== "forbidden";
+
+// The exception column and its null-state neighbour share one row only when one of them has content.
+const showAnomalyRow = computed(
+  () =>
+    anomalies.value.length > 0 ||
+    isSectionPending("anomalies") ||
+    showSectionError("anomalies") ||
+    (hasAnyData.value && quietMonitors.value.length > 0),
+);
 
 /* Wraps a loader with its section's state. The loaders swallow their own errors,
    and `finally` also covers the early `return` in the enterprise-gated ones, so

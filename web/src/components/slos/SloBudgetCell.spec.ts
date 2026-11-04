@@ -81,9 +81,20 @@ describe("SloBudgetCell", () => {
 
   it("keeps a paused SLO's last numbers out of the severity ink", () => {
     const wrapper = cell({ status: status({ error_budget_remaining: -37.6 }), enabled: false });
-    expect(wrapper.find('[data-test="slo-budget-segment"]').classes()).toContain(
-      "bg-progress-bar-neutral",
-    );
     expect(wrapper.text()).toContain("-37.6%");
+    expect(wrapper.html()).not.toContain("text-negative");
+  });
+
+  it("draws no live meter for a paused objective, only its last figure", () => {
+    const wrapper = cell({ status: status({ error_budget_remaining: -37.6 }), enabled: false });
+    expect(wrapper.find('[data-test="slo-budget-bar"]').exists()).toBe(false);
+    expect(wrapper.text()).toContain("×1.2");
+  });
+
+  it("bounds the track so an unfilled groove is visible", () => {
+    const bar = cell({ status: status({ error_budget_remaining: 40 }) }).find(
+      '[data-test="slo-budget-bar"]',
+    );
+    expect(bar.classes()).toContain("border-border-control");
   });
 });

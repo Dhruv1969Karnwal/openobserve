@@ -22,8 +22,8 @@ export interface LogsStreamPick {
   lastUs?: number | null;
 }
 
-/** Enough picks to answer "which stream?" without becoming a second index. */
-export const STREAM_PICK_LIMIT = 8;
+/** The canvas lists the org's streams in full: it is the answer, not a teaser. */
+export const STREAM_PICK_LIMIT = Number.MAX_SAFE_INTEGER;
 
 const toPick = (entry: any): LogsStreamPick => ({
   name: String(entry?.name ?? entry?.value ?? ""),

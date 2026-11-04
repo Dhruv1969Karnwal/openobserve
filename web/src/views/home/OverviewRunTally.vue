@@ -18,49 +18,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   OverviewRunTally — every alert run the selected range returned, counted.
   OverviewTab fetches up to 500 history rows and lists six, so this footer is
   the window's own remainder: what the rows left out, and the span they cover.
-  Colour sits on the dot, ink on the number.
+  Each mark is the rows' own state icon, scaled down, so the legend explains the
+  mark a reader has already seen.
 -->
 <template>
   <div
-    class="border-t-border-default text-2xs flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-t-[0.0625em] px-3.5 py-2"
+    class="border-t-border-default text-text-secondary flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-t-[0.0625em] px-3.5 py-2 text-xs"
     data-test="overview-run-tally"
   >
+    <span v-if="runs.length > 0" class="font-medium tabular-nums">
+      {{ t("overview.runTallyOf", { count: runs.length }) }}
+    </span>
     <span v-if="firing > 0" class="flex items-center gap-1.5">
-      <span class="bg-badge-error-solid-bg inline-block h-2 w-2 shrink-0" aria-hidden="true" />
+      <OIcon name="error-outline" size="xs" class="text-badge-error-soft-text shrink-0" />
       <span class="text-text-body font-medium tabular-nums"
         >{{ firing }} {{ t("alerts.historyTimeline.firing") }}</span
       >
     </span>
     <span v-if="errored > 0" class="flex items-center gap-1.5">
-      <span class="bg-badge-warning-solid-bg inline-block h-2 w-2 shrink-0" aria-hidden="true" />
+      <OIcon name="error-outline" size="xs" class="text-badge-warning-soft-text shrink-0" />
       <span class="text-text-body font-medium tabular-nums"
         >{{ errored }} {{ t("alerts.historyTimeline.error") }}</span
       >
     </span>
     <span v-if="pending > 0" class="flex items-center gap-1.5">
-      <span class="bg-badge-blue-solid-bg inline-block h-2 w-2 shrink-0" aria-hidden="true" />
+      <OIcon name="schedule" size="xs" class="text-badge-blue-soft-text shrink-0" />
       <span class="text-text-body font-medium tabular-nums"
         >{{ pending }} {{ t("alerts.historyTimeline.pending") }}</span
       >
     </span>
     <span v-if="healthy > 0" class="flex items-center gap-1.5">
-      <span class="bg-badge-success-solid-bg inline-block h-2 w-2 shrink-0" aria-hidden="true" />
-      <span class="text-text-secondary tabular-nums"
-        >{{ healthy }} {{ t("alerts.historyTimeline.ok") }}</span
-      >
+      <OIcon name="check-circle-outline" size="xs" class="text-badge-success-soft-text shrink-0" />
+      <span class="tabular-nums">{{ healthy }} {{ t("alerts.historyTimeline.ok") }}</span>
     </span>
     <span v-if="skipped > 0" class="flex items-center gap-1.5">
-      <span class="bg-border-default inline-block h-2 w-2 shrink-0" aria-hidden="true" />
-      <span class="text-text-secondary tabular-nums"
-        >{{ skipped }} {{ t("alerts.historyTimeline.skipped") }}</span
-      >
+      <OIcon name="block" size="xs" class="text-text-secondary shrink-0" />
+      <span class="tabular-nums">{{ skipped }} {{ t("alerts.historyTimeline.skipped") }}</span>
     </span>
-    <span v-if="spanLabel" class="text-text-secondary ms-auto tabular-nums">{{ spanLabel }}</span>
+    <span v-if="spanLabel" class="ms-auto tabular-nums">{{ spanLabel }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
+import OIcon from "@/lib/core/Icon/OIcon.vue";
 import { useI18nTyped } from "@/types/i18n";
 import {
   isErrorOutcome,

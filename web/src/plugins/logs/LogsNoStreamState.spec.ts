@@ -108,4 +108,66 @@ describe("LogsNoStreamState", () => {
     expect(rows[0].text()).toContain("1,550,240");
     expect(rows[0].classes().join(" ")).not.toContain("min-h-11");
   });
+
+  it("subordinates the instruction to the streams it describes", () => {
+    mountState(false);
+    const heading = wrapper!.find('[data-test="logs-no-stream-heading"]');
+    const list = wrapper!.find('[data-test="logs-no-stream-quick-list"]');
+    expect(heading.exists()).toBe(true);
+    expect(heading.text()).toContain("Pick a stream to start exploring");
+    // the caption is body type, the data is the object of the screen
+    expect(heading.find("h2").classes()).toContain("text-sm");
+    const order = heading.element.compareDocumentPosition(list.element);
+    expect(Boolean(order & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+  });
+
+  it("names how many streams the list holds instead of leaving the count implied", () => {
+    mountState(false);
+    expect(wrapper!.find('[data-test="logs-no-stream-heading"]').text()).toContain(
+      "3 streams in this organization",
+    );
+  });
+
+  it("labels the header row in body ink, so it is not the weakest type on the page", () => {
+    mountState(false);
+    const header = wrapper!.find('[data-test="logs-no-stream-quick-list"]').find("div.sticky");
+    expect(header.exists()).toBe(true);
+    expect(header.classes().join(" ")).toContain("text-text-body");
+    expect(header.classes().join(" ")).toContain("text-xs");
+    expect(header.text()).toContain("Last Ingested");
+  });
+
+  it("marks the guide link as a link and the selector as a control, without colour alone", () => {
+    mountState(false);
+    const link = wrapper!.find('[data-test="logs-no-stream-query-guide-link"]');
+    const control = wrapper!.find('[data-test="logs-no-stream-select-stream-card"]');
+    expect(link.element.tagName).toBe("A");
+    expect(link.classes().join(" ")).toContain("underline");
+    expect(link.find("svg, .material-icons-outlined").exists()).toBe(true);
+    expect(control.classes().join(" ")).toContain("border-button-outline-border");
+    expect(control.text()).toContain("Select a stream");
+  });
+
+  it("keeps the footer a sibling of the scroll container, never an overlay on a row", () => {
+    mountState(false);
+    const section = wrapper!.find('[data-test="logs-no-stream-state"]');
+    const list = wrapper!.find('[data-test="logs-no-stream-quick-list"]');
+    const footer = wrapper!.find("footer");
+    expect(list.element.parentElement).toBe(section.element);
+    expect(footer.element.parentElement).toBe(section.element);
+    const sectionCls = section.classes().join(" ");
+    expect(sectionCls).toContain("flex");
+    expect(sectionCls).toContain("flex-col");
+    expect(sectionCls).toContain("min-h-0");
+    const listCls = list.classes().join(" ");
+    expect(listCls).toContain("flex-1");
+    expect(listCls).toContain("min-h-0");
+    expect(listCls).toContain("overflow-y-auto");
+    const flexible = [...section.element.children].filter((c) => c.classList.contains("flex-1"));
+    expect(flexible).toHaveLength(1);
+    expect(flexible[0]).toBe(list.element);
+    expect(footer.classes().join(" ")).not.toMatch(/(^|\s)(absolute|fixed|sticky)/);
+    const order = list.element.compareDocumentPosition(footer.element);
+    expect(Boolean(order & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+  });
 });

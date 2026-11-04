@@ -26,9 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <template>
   <div class="flex flex-wrap items-end gap-x-6 gap-y-2">
-    <div v-if="plotable" class="flex w-[13.5rem] shrink-0 flex-col gap-1">
+    <div v-if="plotable" class="flex min-w-[13.5rem] flex-1 flex-col gap-1">
       <div
-        class="flex h-11 items-stretch gap-px"
+        class="flex h-16 items-stretch gap-px"
         data-test="overview-anomaly-series-plot"
         role="img"
         :aria-label="ariaLabel"
@@ -62,10 +62,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           :style="{ background: INK }"
           aria-hidden="true"
         />
-        <span class="text-2xs text-text-secondary font-semibold tracking-[0.04em]">{{
-          t("alerts.anomaly.seriesValue")
-        }}</span>
-        <span class="text-text-body text-sm font-medium tabular-nums">{{
+        <span class="text-text-secondary text-xs">{{ t("alerts.anomaly.seriesValue") }}</span>
+        <span class="text-text-heading text-xl leading-none font-semibold tabular-nums">{{
           format(head.value)
         }}</span>
       </div>
@@ -76,7 +74,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           :style="{ background: BAND }"
           aria-hidden="true"
         />
-        <span class="text-2xs text-text-secondary font-semibold tracking-[0.04em]">{{
+        <span class="text-text-secondary text-xs">{{
           t("alerts.anomaly.seriesExpectedRange")
         }}</span>
         <span class="text-text-body text-sm font-medium tabular-nums"
@@ -89,9 +87,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           :style="{ background: OUT }"
           aria-hidden="true"
         />
-        <span class="text-2xs text-text-secondary font-semibold tracking-[0.04em]">{{
-          t("alerts.anomaly.seriesAnomaly")
-        }}</span>
+        <span class="text-text-secondary text-xs">{{ t("alerts.anomaly.seriesAnomaly") }}</span>
       </div>
     </div>
   </div>

@@ -175,7 +175,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             data-test="logs-search-bar-histogram-btn"
             size="xs"
             variant="outline"
-            class="gap-1.5"
+            :class="['gap-1.5', searchObj.meta.showHistogram ? 'list-selected-edge' : '']"
             @click="searchObj.meta.showHistogram = !searchObj.meta.showHistogram"
           >
             <OSwitch

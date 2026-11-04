@@ -138,6 +138,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :forbidden="forbidden"
             :frame="false"
             :default-columns="false"
+            :column-visibility="defaultColumnVisibility"
             fill-height="auto"
             :row-section="spansFolders ? rowSection : undefined"
             :global-filter="filterQuery"
@@ -159,39 +160,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             @row-click="onRowClick"
             data-test="dashboard-table"
           >
-            <!-- Toolbar inside the table frame: scoped search (fills the bar) + refresh -->
+            <!-- Toolbar inside the table frame: the list's own search, and the
+                 reach toggle down the right with the other query utilities.
+                 The rail on the left is the only control that says WHICH folder
+                 this page is; this one only says how far the search reaches, so
+                 it no longer leads the row in the rail's place. -->
             <template #toolbar>
               <!-- min-w-0: otherwise the wrapper can't shrink below the search's min-content and pushes controls off-edge. -->
               <div class="flex w-full min-w-0 items-center gap-2 max-md:contents">
-                <!-- The scope is a property of the list, not of the text field,
-                     so it leads the toolbar instead of hiding in the search's
-                     trailing slot; the rail says WHICH folder, this says how far
-                     the list reaches. -->
-                <OToggleGroup
-                  :model-value="searchAcrossFolders ? 'all' : 'this'"
-                  type="single"
-                  mobile-dropdown
-                  class="shrink-0"
-                  @update:model-value="(v) => (searchAcrossFolders = v === 'all')"
-                >
-                  <OToggleGroupItem
-                    value="this"
-                    size="sm"
-                    icon-left="folder-outline"
-                    data-test="dashboard-search-scope-current"
-                    :title="t('dashboard.searchThisFolderTitle')"
-                    >{{ t("dashboard.searchThisFolder") }}</OToggleGroupItem
-                  >
-                  <OToggleGroupItem
-                    value="all"
-                    size="sm"
-                    icon-left="search"
-                    data-test="dashboard-search-across-folders-toggle"
-                    :title="t('dashboard.searchAllFoldersTitle')"
-                    >{{ t("dashboard.searchAllFolders") }}</OToggleGroupItem
-                  >
-                </OToggleGroup>
-                <div class="min-w-0 flex-1 max-md:min-w-40">
+                <div class="min-w-0 flex-1 max-md:min-w-40 lg:max-w-md">
                   <OInput
                     v-model="dynamicQueryModel"
                     :placeholder="
@@ -210,6 +187,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </div>
             </template>
             <template #toolbar-trailing>
+              <OToggleGroup
+                :model-value="searchAcrossFolders ? 'all' : 'this'"
+                type="single"
+                mobile-dropdown
+                class="shrink-0"
+                data-test="dashboard-search-scope"
+                @update:model-value="(v) => (searchAcrossFolders = v === 'all')"
+              >
+                <OToggleGroupItem
+                  value="this"
+                  size="sm"
+                  icon-left="folder-outline"
+                  data-test="dashboard-search-scope-current"
+                  :title="t('dashboard.searchThisFolderTitle')"
+                  >{{ t("dashboard.searchThisFolder") }}</OToggleGroupItem
+                >
+                <OToggleGroupItem
+                  value="all"
+                  size="sm"
+                  icon-left="search"
+                  data-test="dashboard-search-across-folders-toggle"
+                  :title="t('dashboard.searchAllFoldersTitle')"
+                  >{{ t("dashboard.searchAllFolders") }}</OToggleGroupItem
+                >
+              </OToggleGroup>
               <ORefreshButton
                 layout="inline"
                 variant="outline"
@@ -221,29 +223,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               />
             </template>
             <template #subheader>
-              <!-- What this list IS, stated once above the rows: the scope the
-                   rail and the toolbar chose, how much is in it, and when any of
-                   it last moved. -->
+              <!-- What this list IS, stated once above the rows: the scope the rail
+                   and the toolbar chose, how much is in it, and when any of it last
+                   moved. One sentence, not three tiles — every figure it holds is
+                   already printed in a row below it, and a tile cannot say which
+                   row it came from. -->
               <div
                 class="border-table-row-divider px-page-edge border-b py-1.5"
                 data-test="dashboards-scope-summary"
               >
-                <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
+                <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-xs">
                   <span class="text-text-heading font-medium">{{ scopeLabel }}</span>
                   <span
-                    v-if="scopeCountLabel"
+                    v-show="!loading"
                     class="text-text-secondary tabular-nums"
+                    data-test="dashboards-scope-facts"
+                    >· {{ scopeFacts }}</span
+                  >
+                  <span
+                    v-if="scopeCountLabel"
+                    class="text-text-secondary"
                     data-test="dashboards-scope-count"
                     >· {{ scopeCountLabel }}</span
                   >
                   <span
                     v-if="scopeDescription"
-                    class="text-text-secondary max-w-72 min-w-0 truncate"
+                    class="text-text-secondary max-w-96 min-w-0 truncate"
                     data-test="dashboards-scope-description"
                     >· {{ scopeDescription }}</span
                   >
                 </div>
-                <OStatStrip class="mt-1.5" :items="scopeStats" :loading="loading" />
               </div>
             </template>
             <template #cell-name="{ row, value }">
@@ -493,57 +502,63 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                unmounted: the list repaints this on every folder switch. -->
           <section
             v-show="showContextPanel"
-            class="border-border-subtle px-page-edge flex min-w-0 shrink-0 flex-col gap-1.5 border-t py-2.5"
+            class="border-border-subtle px-page-edge flex min-w-0 shrink-0 flex-col gap-2 border-t py-2.5"
             :aria-label="t('dashboard.context.ariaLabel')"
             data-test="dashboard-folder-actions"
           >
             <OText variant="card-title" as="h2">{{
               t("dashboard.context.addTitle", { folder: scopeLabel })
             }}</OText>
-            <ul class="grid gap-x-8 gap-y-1 md:grid-cols-3">
-              <li class="flex min-w-0 flex-col">
-                <OButton
-                  variant="ghost-primary"
-                  size="xs"
-                  class="w-fit !px-0"
-                  data-test="dashboard-folder-action-new"
-                  @click="onContextAction('new')"
+            <!-- Side by side only once the panel fits both halves without cutting either. -->
+            <div class="grid min-w-0 gap-x-8 gap-y-2 2xl:grid-cols-[minmax(0,42%)_minmax(0,1fr)]">
+              <ul class="flex min-w-0 flex-col gap-1.5">
+                <li
+                  v-for="action in contextActions"
+                  :key="action.id"
+                  class="flex min-w-0 items-center gap-3"
                 >
-                  {{ t("dashboard.context.newTitle") }}
-                </OButton>
-                <span class="text-text-secondary min-w-0 truncate text-xs">{{
-                  t("dashboard.context.newDesc")
-                }}</span>
-              </li>
-              <li class="flex min-w-0 flex-col">
-                <OButton
-                  variant="ghost-primary"
-                  size="xs"
-                  class="w-fit !px-0"
-                  data-test="dashboard-folder-action-import"
-                  @click="onContextAction('import')"
-                >
-                  {{ t("dashboard.context.importTitle") }}
-                </OButton>
-                <span class="text-text-secondary min-w-0 truncate text-xs">{{
-                  t("dashboard.context.importDesc")
-                }}</span>
-              </li>
-              <li class="flex min-w-0 flex-col">
-                <OButton
-                  variant="ghost-primary"
-                  size="xs"
-                  class="w-fit !px-0"
-                  data-test="dashboard-folder-action-templates"
-                  @click="onContextAction('templates')"
-                >
-                  {{ t("dashboard.context.templatesTitle") }}
-                </OButton>
-                <span class="text-text-secondary min-w-0 truncate text-xs">{{
-                  t("dashboard.context.templatesDesc")
-                }}</span>
-              </li>
-            </ul>
+                  <OButton
+                    variant="outline"
+                    size="sm"
+                    :icon-left="action.icon"
+                    class="shrink-0"
+                    :data-test="`dashboard-folder-action-${action.id}`"
+                    @click="onContextAction(action.id)"
+                  >
+                    {{ action.title }}
+                  </OButton>
+                  <span class="text-text-secondary min-w-0 truncate text-xs">{{
+                    action.desc
+                  }}</span>
+                </li>
+              </ul>
+              <TemplateSuggestionCards
+                v-if="($route.query.folder ?? 'default') === 'default'"
+                class="w-full min-w-0"
+                :active-folder-id="activeFolderId ?? 'default'"
+                :filter-query="filterQuery"
+                @open-drawer="showAddDashboardFromGitHub = true"
+                @imported="refreshDashboards"
+              />
+            </div>
+            <div class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+              <span class="text-text-secondary text-xs">{{
+                t("dashboard.context.migrateLead")
+              }}</span>
+              <OButton
+                v-for="migration in migrationOptions"
+                :key="migration.key"
+                variant="outline"
+                size="xs"
+                icon-left="open-in-new"
+                class="shrink-0"
+                :data-test="`dashboard-folder-migrate-${migration.key}`"
+                :title="t(`dashboard.${migration.descKey}`)"
+                @click="openMigration(migration.url)"
+              >
+                {{ t(`dashboard.${migration.labelKey}`) }}
+              </OButton>
+            </div>
           </section>
         </div>
       </div>
@@ -659,6 +674,7 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { isCancelledError } from "@tanstack/vue-query";
+import { formatDistanceToNowStrict } from "date-fns";
 import { useI18nTyped, raw, type I18nText } from "@/types/i18n";
 import { formatDate } from "@/utils/date";
 
@@ -704,7 +720,7 @@ import analytics from "@/services/product_analytics";
 import { useFavoriteDashboards, FAVORITES_FOLDER_ID } from "@/composables/useFavoriteDashboards";
 import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
 import OTag from "@/lib/core/Badge/OTag.vue";
-import OStatStrip from "@/lib/data/StatStrip/OStatStrip.vue";
+import type { IconName } from "@/lib/core/Icon/OIcon.icons";
 import OText from "@/lib/core/Typography/OText.vue";
 import useBreakpoint from "@/composables/useBreakpoint";
 
@@ -758,7 +774,6 @@ export default defineComponent({
     FirstDataPanel,
     OTruncatedText,
     OTag,
-    OStatStrip,
     OText,
     OUserCell,
     OTimeCell,
@@ -1077,33 +1092,51 @@ export default defineComponent({
     const scopeFavoriteCount = computed(
       () => dashboards.value.filter((row: DashboardRow) => isFavorite(row.id)).length,
     );
-    // What a reader of a library page wants first: how much is here, how much is
-    // starred, and when any of it last moved. None of the three is a denominator
-    // for another, so no tile carries a proportion track.
-    const scopeStats = computed(() => {
-      const row = lastTouched.value;
+    // Same relative form the Updated column prints, so the line above the rows and
+    // the column beside it are one fact told once. Past the column's 30-day cutoff
+    // the date takes over — "3 years ago" answers nothing.
+    const relativeAge = (iso: string) => {
+      const then = Date.parse(iso);
+      if (Number.isNaN(then)) return "";
+      return Math.abs(Date.now() - then) <= 30 * 86_400_000
+        ? formatDistanceToNowStrict(new Date(then), { addSuffix: true })
+        : formatDate(new Date(then), "MMM d, yyyy");
+    };
+    // How much is here, how much is starred, when any of it last moved — as one
+    // sentence, because the rows below already carry each of these figures.
+    const scopeFacts = computed(() => {
+      const count = dashboards.value.length;
+      const when = lastTouched.value?.modified_raw || lastTouched.value?.created_raw;
       return [
-        {
-          key: "dashboards",
-          label: t("dashboard.context.factDashboards"),
-          value: String(dashboards.value.length),
-          dataTest: "dashboard-stat-dashboards",
-        },
-        {
-          key: "favorites",
-          label: t("dashboard.context.factFavorites"),
-          value: String(scopeFavoriteCount.value),
-          dataTest: "dashboard-stat-favorites",
-        },
-        {
-          key: "updated",
-          label: t("dashboard.context.factChanged"),
-          value: row ? shortDay(row.modified_raw || row.created_raw) : "—",
-          sub: row?.owner ? raw(row.owner) : undefined,
-          dataTest: "dashboard-stat-updated",
-        },
-      ];
+        t("dashboard.scope.dashboards", { count }, count),
+        t("dashboard.scope.favorites", { count: scopeFavoriteCount.value }),
+        when ? t("dashboard.scope.updated", { when: relativeAge(when) }) : "",
+      ]
+        .filter(Boolean)
+        .join(" · ");
     });
+    const contextActions = computed<
+      { id: "new" | "import" | "templates"; icon: IconName; title: I18nText; desc: I18nText }[]
+    >(() => [
+      {
+        id: "new",
+        icon: "add",
+        title: t("dashboard.context.newTitle"),
+        desc: t("dashboard.context.newDesc"),
+      },
+      {
+        id: "import",
+        icon: "upload-file",
+        title: t("dashboard.context.importTitle"),
+        desc: t("dashboard.context.importDesc"),
+      },
+      {
+        id: "templates",
+        icon: "dashboard",
+        title: t("dashboard.context.templatesTitle"),
+        desc: t("dashboard.context.templatesDesc"),
+      },
+    ]);
     const showContextPanel = computed(
       () =>
         !loading.value &&
@@ -1128,9 +1161,9 @@ export default defineComponent({
           sortable: true,
           resizable: true,
           hideable: true,
-          size: wide ? 220 : 200,
+          size: wide ? 300 : 200,
           // The identity column is never the one cut off while another has room.
-          minSize: wide ? 220 : 200,
+          minSize: wide ? 240 : 200,
           meta: { align: "left", flex: true },
         },
         ...(showsColumn("description")
@@ -1142,12 +1175,15 @@ export default defineComponent({
                 sortable: true,
                 resizable: true,
                 hideable: true,
-                // Wide band: 44 select + 220 name + 264 description + 170 owner +
-                // 122 created + 122 updated + 108 actions = 1050, inside the 1112
-                // the rail leaves, so the identity column stays the widest cell.
-                size: 264,
-                minSize: 160,
-                meta: { align: "left" },
+                // Wide band: 44 select + 300 name + 300 description + 160 owner +
+                // 112 updated + 124 actions = 1040, inside the 1100 the rail leaves.
+                // Name and description are BOTH fillers, so the two text columns
+                // share the leftover instead of one of them holding still while
+                // the identity column ate all of it — which is how a sentence was
+                // cut at 270px in a 1100px frame.
+                size: 300,
+                minSize: 180,
+                meta: { align: "left", flex: true },
               },
             ]
           : []),
@@ -1160,7 +1196,7 @@ export default defineComponent({
                 sortable: true,
                 resizable: true,
                 hideable: true,
-                size: wide ? 170 : 150,
+                size: wide ? 160 : 150,
                 minSize: 130,
                 meta: { align: "left" },
               },
@@ -1190,8 +1226,8 @@ export default defineComponent({
                 sortable: true,
                 resizable: true,
                 hideable: true,
-                size: 122,
-                minSize: 112,
+                size: 112,
+                minSize: 104,
                 meta: { align: "left" },
               },
             ]
@@ -1212,6 +1248,10 @@ export default defineComponent({
 
       return baseColumns;
     });
+    // Created is the sort the list already applies, and its value sits a few days
+    // from Updated in every row; it stays one click away in the column toggle
+    // rather than holding 122px of the description column's sentence.
+    const defaultColumnVisibility = { created: false };
     const selectedDashboardIds = computed(() => selectedIds.value);
 
     onMounted(async () => {
@@ -2176,7 +2216,9 @@ export default defineComponent({
       scopeLabel,
       scopeCountLabel,
       scopeDescription,
-      scopeStats,
+      scopeFacts,
+      contextActions,
+      defaultColumnVisibility,
       showContextPanel,
       onContextAction,
       tableShellWidth,

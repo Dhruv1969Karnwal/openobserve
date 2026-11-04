@@ -1249,6 +1249,7 @@ describe("OverviewTab", () => {
   describe("what the already-fetched payloads answer", () => {
     const MONITORS = '[data-test="overview-anomaly-monitors-section"]';
     const PLOT = '[data-test="overview-anomaly-series-plot"]';
+    const WINDOW = '[data-test="overview-window-summary"]';
 
     /** µs, `secondsAgo` before mount — inside the default 15-minute window. */
     const ago = (secondsAgo: number) => (Date.now() - secondsAgo * 1000) * 1000;
@@ -1336,6 +1337,83 @@ describe("OverviewTab", () => {
       expect(monitors.text()).toContain("Stream: app_checkout");
       expect(monitors.text()).toContain("0 anomalous point");
       expect(monitors.text()).not.toContain("ingest-drift");
+    });
+
+    it("should lead the window ledger with the runs and set the roster a tier below", async () => {
+      givenRecentEvents();
+      givenAnomalyConfigs([{ id: "anm-1", name: "ingest-drift", stream_name: "ingest_gateway" }]);
+      givenAnomalyHistory([{ cfg: { id: "anm-1" }, hits: [bucket(60, 2)] }]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      const ledger = wrapper.find(WINDOW);
+      expect(ledger.find(".text-lg").text()).toBe("2");
+      expect(ledger.find(".text-compact").text()).toBe("1");
+      expect(ledger.text()).toContain("alert runs in this range");
+      expect(ledger.text()).toContain("anomaly monitors watched");
+    });
+
+    it("should count the runs once, so the feed states no second total", async () => {
+      givenRecentEvents();
+      givenAnomalyConfigs([
+        { id: "anm-1", name: "ingest-drift", stream_name: "ingest_gateway" },
+        { id: "anm-2", name: "checkout-drift", stream_name: "app_checkout" },
+      ]);
+      givenAnomalyHistory([{ cfg: { id: "anm-1" }, hits: [bucket(60, 2)] }]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      expect(wrapper.find(RECENT_EVENTS).text()).not.toContain("Showing");
+      expect(wrapper.find(MONITORS).text()).toContain("1 of 2 anomaly monitors");
+    });
+
+    it("should name an anomaly's severity in words beside its start rail", async () => {
+      givenAnomalyConfigs([
+        { id: "anm-1", name: "ingest-drift", stream_name: "ingest_gateway" },
+        { id: "anm-2", name: "checkout-drift", stream_name: "app_checkout" },
+      ]);
+      givenAnomalyHistory([{ cfg: { id: "anm-1" }, hits: [bucket(60, 2)] }]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      expect(wrapper.find(ANOMALIES).text()).toContain("Warning");
+      expect(wrapper.find(MONITORS).text()).toContain("Ok");
+    });
+
+    it("should keep the anomaly separator inside the fragment it leads", async () => {
+      givenAnomalyConfigs([
+        { id: "anm-1", name: "ingest-drift", stream_name: "ingest_gateway" },
+        { id: "anm-2", name: "checkout-drift", stream_name: "app_checkout" },
+      ]);
+      givenAnomalyHistory([{ cfg: { id: "anm-1" }, hits: [bucket(60, 2)] }]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      const marks = wrapper
+        .find(ANOMALIES)
+        .findAll("span")
+        .filter((s) => s.text() === "·");
+      expect(marks).toHaveLength(1);
+      expect(marks[0].element.parentElement?.textContent).toContain("Stream: ingest_gateway");
+    });
+
+    it("should stack a quiet monitor's stream and its point count as separate units", async () => {
+      givenAnomalyConfigs([
+        { id: "anm-1", name: "ingest-drift", stream_name: "ingest_gateway" },
+        { id: "anm-2", name: "checkout-drift", stream_name: "app_checkout" },
+      ]);
+      givenAnomalyHistory([{ cfg: { id: "anm-1" }, hits: [bucket(60, 2)] }]);
+
+      wrapper = mountOverviewTab();
+      await flushPromises();
+
+      const spans = wrapper.find(MONITORS).findAll("span");
+      expect(spans.filter((s) => s.text() === "Stream: app_checkout")).toHaveLength(1);
+      expect(spans.filter((s) => s.text() === "0 anomalous point(s)")).toHaveLength(1);
     });
 
     it("should not let quiet monitors stand in for content on an empty page", async () => {

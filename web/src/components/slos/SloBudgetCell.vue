@@ -53,9 +53,6 @@ const burn = computed(() => {
 });
 
 const toneClass = computed(() => {
-  // A paused SLO's numbers are the last ones it measured, not a live state, so
-  // the bar keeps the neutral ink and the severity stays on the live rows.
-  if (props.enabled === false) return "bg-progress-bar-neutral";
   const v = remaining.value ?? 0;
   if (v <= 0) return "bg-progress-bar-danger";
   if (v < 25) return "bg-progress-bar-warning";
@@ -79,18 +76,26 @@ const segmentStyle = computed(() => ({
 
 const zeroStyle = computed(() => ({ insetInlineStart: `${OVERRUN_ZONE * 100}%` }));
 
+const paused = computed(() => props.enabled === false);
+
 const numberClass = computed(() => {
-  const v = remaining.value ?? 0;
-  if (v <= 0) return props.enabled === false ? "text-text-body" : "text-negative";
-  return "text-text-heading";
+  // A paused SLO's numbers are the last ones it measured, not a live state, so
+  // they recede; the row's rail, wash and pill say why.
+  if (paused.value) return "text-text-secondary";
+  return (remaining.value ?? 0) <= 0 ? "text-negative" : "text-text-heading";
 });
 </script>
 
 <template>
   <span v-if="!hasBudget" class="text-text-secondary">{{ ABSENT }}</span>
   <span v-else class="flex min-w-0 items-center gap-1.5" data-test="slo-budget-cell">
+    <!-- A meter paints a live state, and a paused objective has none: its last
+         figure stays as a number, not as a bar that promises to be moving.
+         The groove carries a `border-control` edge because an unfilled track at
+         1.26:1 is invisible, which made an overspent budget read as an empty one. -->
     <span
-      class="bg-progress-bar-track relative inline-block h-2 w-16 shrink-0 rounded-full"
+      v-if="!paused"
+      class="border-border-control bg-progress-bar-track relative inline-block h-2 w-16 shrink-0 rounded-full border"
       role="progressbar"
       :aria-valuenow="Math.round(remaining ?? 0)"
       aria-valuemin="-100"
@@ -104,7 +109,7 @@ const numberClass = computed(() => {
         data-test="slo-budget-segment"
       ></span>
       <span
-        class="bg-border-default absolute inset-y-0 w-px"
+        class="bg-text-secondary absolute inset-y-0 w-px"
         :style="zeroStyle"
         data-test="slo-budget-zero"
       ></span>
@@ -112,7 +117,9 @@ const numberClass = computed(() => {
     <span class="text-compact font-semibold tabular-nums" :class="numberClass">{{
       formatBudget(remaining)
     }}</span>
-    <span class="text-text-secondary text-compact tabular-nums" data-test="slo-budget-burn">{{
+    <!-- A load-bearing number, so it is set as body text: at 11-12px grey the
+         burn rate was the smallest figure on the screen that a decision turns on. -->
+    <span class="text-text-body text-sm tabular-nums" data-test="slo-budget-burn">{{
       formatBurn(burn)
     }}</span>
   </span>

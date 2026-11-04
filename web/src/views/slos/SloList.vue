@@ -134,12 +134,32 @@
             class="px-page-edge border-table-row-divider border-b py-1.5"
             data-test="slos-slolist-stats"
           >
+            <!-- The scope sentence carries what the tiles cannot: how old the
+                 measurement behind them is, and when the next budget runs out.
+                 Both are fields the list already returns. -->
+            <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-xs">
+              <span class="text-text-heading font-medium">{{ scopeLabel }}</span>
+              <span
+                v-show="scopeFacts"
+                class="text-text-secondary tabular-nums"
+                data-test="slos-slolist-scope-facts"
+                >· {{ scopeFacts }}</span
+              >
+            </div>
+            <!-- `compact` narrows the strip's wrap basis, which is what puts all six
+                 states on one row on a frame wide enough to hold six: the Alerts
+                 strip — the same six-facet control — already lays itself out that way.
+                 Left off below the wide band, where the narrower tiles would land
+                 four-plus-two with empty cells beside the pair; there the standard
+                 basis lands three-up instead. -->
             <OStatStrip
+              class="mt-1.5"
               :items="stats"
               :loading="loading"
-              :compact="isMobile"
+              :compact="columnBand === 'wide'"
               selectable
               :selected-key="healthFilter"
+              default-key="total"
               @select="onStatSelect"
             />
           </div>
@@ -147,18 +167,20 @@
 
         <template #cell-name="{ row }">
           <div class="flex min-w-0 flex-col">
-            <div class="flex min-w-0 items-center gap-2">
-              <OTruncatedText class="font-medium">{{ row.name }}</OTruncatedText>
+            <!-- A chip is never squeezed, so a chip beside the name is what cuts the name. -->
+            <OTruncatedText class="font-medium" :data-test="`slos-slolist-name-${row.id}`">{{
+              row.name
+            }}</OTruncatedText>
+            <!-- A column the band cannot fit comes back under the name, never beside it. -->
+            <div
+              v-if="
+                !compactActions &&
+                (showsStatusInCell || isGrouped(row) || activeCorrections(row).length)
+              "
+              class="flex min-w-0 items-center gap-1.5"
+            >
               <OTag
-                v-if="isGrouped(row) && !compactActions"
-                variant="purple-soft"
-                icon="layers"
-                size="xs"
-                class="shrink-0"
-                :label="raw(String(row.group_by?.length ?? 0))"
-              />
-              <OTag
-                v-if="showsStatusInCell && !compactActions"
+                v-if="showsStatusInCell"
                 :variant="healthVariant(row)"
                 :icon="stateIcon(row)"
                 size="xs"
@@ -166,7 +188,17 @@
                 :label="healthLabel(row)"
                 :data-test="`slos-slolist-health-${row.id}`"
               />
-              <span v-if="activeCorrections(row).length" class="inline-flex">
+              <OTag
+                v-if="isGrouped(row)"
+                variant="default-soft"
+                icon="layers"
+                size="xs"
+                class="shrink-0"
+                :label="groupByKeysLabel(row)"
+                :aria-label="groupByLabel(row)"
+                :data-test="`slos-slolist-group-${row.id}`"
+              />
+              <span v-if="activeCorrections(row).length" class="inline-flex shrink-0">
                 <OTag
                   type="downtimeStatus"
                   value="active"
@@ -184,9 +216,6 @@
                 />
               </span>
             </div>
-            <!-- A column the band cannot fit comes back under the name, never off
-                 the screen. On the narrow band the row leads with the objective's
-                 name alone, so the identity is never the thing that gets cut. -->
             <div v-if="compactActions" class="flex min-w-0 items-center gap-1.5">
               <OTag
                 :variant="healthVariant(row)"
@@ -198,11 +227,13 @@
               />
               <OTag
                 v-if="isGrouped(row)"
-                variant="purple-soft"
+                variant="default-soft"
                 icon="layers"
                 size="xs"
                 class="shrink-0"
-                :label="raw(String(row.group_by?.length ?? 0))"
+                :label="groupByKeysLabel(row)"
+                :aria-label="groupByLabel(row)"
+                :data-test="`slos-slolist-group-${row.id}`"
               />
               <OTruncatedText
                 class="text-text-secondary text-xs"
@@ -210,11 +241,16 @@
                 >{{ budgetSubline(row) }}</OTruncatedText
               >
             </div>
+            <!-- One subline per row, never two. It carries the SLI type and the
+                 tags (filterable since forever, printable until now) and, on rows
+                 whose figures are missing or running out, WHY in the row itself;
+                 on a band that drops columns, the measurement pair it dropped rides
+                 on the same line. Every word comes off the list response:
+                 `sli_type`, `tags`, `status.coverage`, `status.time_to_exhaust_secs`. -->
             <OTruncatedText
-              v-if="!showsColumn('sli') || !showsColumn('window') || !showsColumn('coverage')"
               class="text-text-secondary text-xs"
-              :data-test="`slos-slolist-measurement-${row.id}`"
-              >{{ measurementSubline(row) }}</OTruncatedText
+              :data-test="`slos-slolist-facts-${row.id}`"
+              >{{ rowSubline(row) }}</OTruncatedText
             >
           </div>
         </template>
@@ -531,10 +567,12 @@ import { slosQuery } from "@/services/slos.queries";
 // stays off the query layer and calls the endpoint directly.
 import sloService from "@/services/slos";
 import { computed, onBeforeUnmount, onMounted, ref, nextTick, watch } from "vue";
+import { formatDistanceToNowStrict } from "date-fns";
 import { useDowntimesEnabled } from "@/composables/downtimes/useDowntimesEnabled";
 import { raw, useI18nTyped, type I18nText } from "@/types/i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { formatDate } from "@/utils/date";
 
 import ExportResourceDialog from "@/components/common/ExportResourceDialog.vue";
 import FolderList from "@/components/common/sidebar/FolderList.vue";
@@ -560,7 +598,7 @@ import type { IconName } from "@/lib/core/Icon/OIcon.icons";
 import OToggleGroup from "@/lib/core/ToggleGroup/OToggleGroup.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OToggleGroupItem from "@/lib/core/ToggleGroup/OToggleGroupItem.vue";
-import type { OTableColumnDef } from "@/lib/core/Table/OTable.types";
+import type { OTableColumnDef, RowRailTone } from "@/lib/core/Table/OTable.types";
 import type { StatItem } from "@/lib/data/StatStrip/OStatStrip.types";
 import type { SloListItem } from "@/ts/interfaces/slo";
 import { toast } from "@/lib/feedback/Toast/useToast";
@@ -576,8 +614,11 @@ import {
   formatBurn,
   formatCoverage,
   formatSli,
+  formatTimeToExhaust,
   formatWindow,
   healthIcon,
+  healthTone,
+  sliTypeLabel,
   sloHealth,
   type SloHealth,
 } from "@/composables/useSloFormat";
@@ -816,9 +857,9 @@ const columns = computed<OTableColumnDef<SloListItem>[]>(() => {
       sortable: true,
       resizable: true,
       hideable: true,
-      // The identity column keeps the room the chips leave it, and is never the
-      // one cut off while a metric still has space. The declared widths are the
-      // band's arithmetic, so the frame is never left scrolling by a few px.
+      // The identity column keeps its width; the cell's chips ride the subline, so
+      // the declared widths are the band's arithmetic and the frame never scrolls
+      // by a few px.
       size: wide ? 260 : 208,
       minSize: 200,
       meta: { align: "left", flex: true },
@@ -951,8 +992,13 @@ function stateIcon(row: SloListItem) {
   return row.enabled === false ? "pause" : healthIcon(rowHealth(row));
 }
 
-function rowRailTone(row: SloListItem) {
-  return row.enabled === false ? ("neutral" as const) : null;
+/** Every row carries a rail, painted in its own state's tone — the channel the
+ *  Alerts list already runs down its rows. A rail on the paused row alone is a
+ *  mark with no scale to read it against, which is what made row 04's bar read
+ *  as a decoration that "appears on no other row and is unexplained". */
+function rowRailTone(row: SloListItem): RowRailTone {
+  if (row.enabled === false) return "neutral";
+  return healthTone(rowHealth(row)) as RowRailTone;
 }
 
 function rowTone(row: SloListItem) {
@@ -962,6 +1008,103 @@ function rowTone(row: SloListItem) {
 function isGrouped(row: SloListItem): boolean {
   return !!row.group_by && row.group_by.length > 0;
 }
+
+/** What the diamond-and-a-number was standing for, in words: the SLO splits into
+ *  one series per value of these labels. The first label is named, the rest are
+ *  counted — a chip is never squeezed, so the list cannot all fit in it. */
+function groupByLabel(row: SloListItem): I18nText {
+  const keys = row.group_by ?? [];
+  const rest = keys.length - 1;
+  return t("slos.groupedBy", { labels: rest > 0 ? `${keys[0]} +${rest}` : keys[0] });
+}
+
+/** The chip prints the keys and the icon says what they are, so the phrase naming
+ *  them rides on the accessible name instead of on five identical rows. */
+function groupByKeysLabel(row: SloListItem): I18nText {
+  const keys = row.group_by ?? [];
+  const rest = keys.length - 1;
+  return raw(rest > 0 ? `${keys[0]} +${rest}` : `${keys[0]}`);
+}
+
+/** Why a row has no figures, said in the row instead of left to a grey pill: the
+ *  reasons the backend distinguishes are four different follow-ups. */
+function noDataReason(row: SloListItem): I18nText {
+  if (!row.status) return t("slos.neverMeasured");
+  if (row.status.stale_watermark) return t("slos.sourceStopped");
+  if (row.status.measuring_since) {
+    return t("slos.measuringSince", {
+      when: formatDate(row.status.measuring_since * 1000, "MMM d, yyyy"),
+    });
+  }
+  return t("slos.noDataAtCoverage", { coverage: formatCoverage(row.status.coverage) });
+}
+
+/** The measurement facts a column has no room for, plus the one sentence a row
+ *  cannot be left without: what kind of objective this is, what it is tagged, and
+ *  either when its budget runs out or why its figures are missing. */
+function statusSubline(row: SloListItem): string {
+  const parts: string[] = [sliTypeLabel(row.sli_type, t)];
+  const tags = row.tags ?? [];
+  if (tags.length) {
+    parts.push(tags.slice(0, 2).join(", ") + (tags.length > 2 ? " …" : ""));
+  }
+  if (row.enabled !== false) {
+    if (rowState(row) === "no_data") parts.push(noDataReason(row));
+    else if (
+      (row.status?.error_budget_remaining ?? 100) < 25 &&
+      (row.status?.time_to_exhaust_secs ?? 0) > 0
+    ) {
+      parts.push(
+        t("slos.budgetGoneIn", {
+          when: formatTimeToExhaust(row.status?.time_to_exhaust_secs ?? 0),
+        }),
+      );
+    }
+  }
+  return parts.join("  ·  ");
+}
+
+/** The row's one subline: what the band cannot show as a column, then what the row
+ *  cannot be left without saying. */
+function rowSubline(row: SloListItem): string {
+  const lines: string[] = [];
+  if (!showsColumn("sli") || !showsColumn("window") || !showsColumn("coverage")) {
+    lines.push(measurementSubline(row));
+  }
+  lines.push(statusSubline(row));
+  return lines.join("  ·  ");
+}
+
+/** A measurement age, in the same relative form the timestamps beside it use. */
+function ageFromSeconds(epochSeconds: number | null | undefined): string {
+  if (!epochSeconds) return "";
+  return formatDistanceToNowStrict(new Date(epochSeconds * 1000), { addSuffix: true });
+}
+
+const scopeLabel = computed(() => folderName(activeFolderId.value));
+
+/** The two facts the tiles cannot state because they are not counts: how old the
+ *  measurement under them is, and when the next budget in view runs out. */
+const scopeFacts = computed(() => {
+  const live = visibleRows.value.filter(
+    (r) => r.enabled !== false && r.status && !r.status.no_data,
+  );
+  const ages = live
+    .map((r) => r.status?.computed_at ?? 0)
+    .filter((v) => v > 0)
+    .sort((a, b) => a - b);
+  const nextOut = live
+    .filter((r) => (r.status?.error_budget_remaining ?? 100) > 0)
+    .map((r) => r.status?.time_to_exhaust_secs ?? 0)
+    .filter((v) => v > 0)
+    .sort((a, b) => a - b)[0];
+  return [
+    ages.length ? t("slos.measuredAgo", { when: ageFromSeconds(ages[0]) }) : "",
+    nextOut ? t("slos.nextBudgetOut", { when: formatTimeToExhaust(nextOut) }) : "",
+  ]
+    .filter(Boolean)
+    .join("  ·  ");
+});
 
 function isLowCoverage(row: SloListItem): boolean {
   return !!row.status && row.status.no_data;
@@ -1025,7 +1168,10 @@ const stats = computed<StatItem[]>(() => {
       label: t("slos.health.meeting"),
       value: counts.meeting,
       icon: "check-circle",
-      tone: "success",
+      // Ink, not green: a count of objectives that are fine is not a signal about
+      // anything the reader can act on, and 24px green barely clears large-text
+      // contrast. The exception states keep their colour — that is what it is for.
+      tone: "neutral",
     },
     {
       key: "no_data",

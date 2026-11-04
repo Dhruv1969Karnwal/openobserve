@@ -213,8 +213,14 @@ const createMockI18n = () => {
             importDesc: "Upload a JSON file or paste a dashboard URL",
             templatesTitle: "Browse templates",
             templatesDesc: "Import a ready-made dashboard from the gallery",
+            migrateLead: "Already have dashboards elsewhere?",
             factFavorites: "In favorites",
             factChanged: "Last updated",
+          },
+          scope: {
+            dashboards: "{count} dashboard | {count} dashboards",
+            favorites: "{count} in favorites",
+            updated: "updated {when}",
           },
           identifier: "Identifier",
           description: "Description",
@@ -1554,6 +1560,107 @@ describe("Dashboards.vue", () => {
       await nextTick();
       // A null key would drop the row from a sectioned table entirely.
       expect(wrapper.vm.rowSection({ folder: "", folder_id: "f-x" } as any)).toBe("f-x");
+    });
+  });
+
+  // What a five-persona council measured at 1440x900: 543px of empty canvas, a
+  // three-tile strip whose figures repeated the pager's "Showing 1-2 of 2", a
+  // 368px scope control beside a folder rail that already said "default", and an
+  // "Add dashboards" block of three unthemed text columns.
+  describe("Composition: scope, reach and the create path", () => {
+    // WHY: the saved view carries a cross-folder search the band tests above left
+    // behind, and that branch reads `filteredResults` instead of the folder.
+    beforeEach(() => resetListViewState("dashboards"));
+    afterEach(() => resetListViewState("dashboards"));
+
+    const mountList = async () => {
+      wrapper = shallowMount(Dashboards, { global: buildGlobalConfig(store, router, i18n) });
+      await flushPromises();
+      await nextTick();
+      return wrapper;
+    };
+    // WHY: this file stubs insertBefore/appendChild/getAttribute, so neither the
+    // DOM nor attributes() is readable; the component tree and vnode attrs are.
+    const buttons = () =>
+      wrapper
+        .findAllComponents({ name: "OButton" })
+        .map((b: any) => b.vm.$attrs?.["data-test"])
+        .filter(Boolean);
+
+    it("states the scope as one sentence instead of three tiles", async () => {
+      await mountList();
+      expect(wrapper.vm.scopeFacts).toBe("1 dashboard · 0 in favorites · updated Jan 1, 2023");
+      expect("scopeStats" in wrapper.vm).toBe(false);
+    });
+
+    it("gives the folder a real number and a real date, not a 24px display date", async () => {
+      await mountList();
+      // WHY: the tile read "Oct 28, 2026" at KPI size beside two counts, with the
+      // owner's email pasted inline where the Updated column uses a relative time.
+      expect(wrapper.vm.scopeFacts).toMatch(/^1 dashboard/);
+      expect(wrapper.vm.scopeFacts).toMatch(/updated (Jan 1, 2023|\S+ ago)$/);
+      expect(wrapper.vm.scopeFacts).not.toContain("@");
+    });
+
+    it("gives the two text columns the leftover width", async () => {
+      await mountList();
+      const flexed = wrapper.vm.columns.filter((c: any) => c.meta?.flex).map((c: any) => c.id);
+      expect(flexed).toEqual(["name", "description"]);
+    });
+
+    it("takes Created out of the default set and keeps it in the column toggle", async () => {
+      await mountList();
+      expect(wrapper.vm.defaultColumnVisibility).toEqual({ created: false });
+      expect(wrapper.vm.columns.map((c: any) => c.id)).toContain("created");
+    });
+
+    it("offers the folder's three ways in as buttons, not as text columns", async () => {
+      await mountList();
+      expect(wrapper.vm.contextActions.map((a: any) => a.id)).toEqual([
+        "new",
+        "import",
+        "templates",
+      ]);
+      for (const action of wrapper.vm.contextActions) {
+        expect(action.title).toBeTruthy();
+        expect(action.desc).toBeTruthy();
+      }
+      expect(buttons()).toEqual(
+        expect.arrayContaining([
+          "dashboard-folder-action-new",
+          "dashboard-folder-action-import",
+          "dashboard-folder-action-templates",
+        ]),
+      );
+    });
+
+    it("brings the four migration destinations out of the import menu", async () => {
+      await mountList();
+      expect(wrapper.vm.migrationOptions.map((m: any) => m.key)).toEqual([
+        "datadog",
+        "grafana",
+        "kibana",
+        "cloudwatch",
+      ]);
+      expect(buttons()).toEqual(
+        expect.arrayContaining([
+          "dashboard-folder-migrate-datadog",
+          "dashboard-folder-migrate-grafana",
+          "dashboard-folder-migrate-kibana",
+          "dashboard-folder-migrate-cloudwatch",
+        ]),
+      );
+    });
+
+    it("draws each migration destination as a bordered control, not as bare text", async () => {
+      await mountList();
+      for (const key of ["datadog", "grafana", "kibana", "cloudwatch"]) {
+        const control = wrapper
+          .findAllComponents({ name: "OButton" })
+          .find((b: any) => b.vm.$attrs?.["data-test"] === `dashboard-folder-migrate-${key}`);
+        expect(control?.props("variant")).toBe("outline");
+        expect(control?.props("iconLeft")).toBe("open-in-new");
+      }
     });
   });
 });

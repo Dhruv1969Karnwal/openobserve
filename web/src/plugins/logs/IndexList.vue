@@ -67,22 +67,53 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
          streams in the org it yields nothing and stays quiet. -->
     <div
       v-if="!searchObj.data.stream.selectedStream.length"
-      class="index-table mt-1 min-h-0 overflow-y-auto"
+      class="mt-1 flex min-h-0 flex-1 flex-col"
       data-test="logs-search-stream-quick-pick"
     >
-      <div class="flex w-full flex-col gap-1">
-        <OButton
-          v-for="stream in quickPickStreams"
-          :key="stream.value"
-          :data-test="`logs-search-stream-quick-pick-${stream.value}`"
-          variant="outline"
-          size="sm"
-          icon-left="database"
-          class="w-full justify-start max-md:h-auto! max-md:min-h-11"
-          @click="quickSelectStream(stream.value)"
+      <div class="px-page-edge shrink-0 pb-1.5">
+        <OInput
+          v-model="streamFilter"
+          data-test="logs-search-stream-filter"
+          :aria-label="t('logs.noStream.filterLabel')"
+          :placeholder="t('logs.noStream.filterPlaceholder')"
+          clearable
         >
-          <OTruncatedText class="flex-1 text-left">{{ stream.label }}</OTruncatedText>
-        </OButton>
+          <template #icon-left>
+            <OIcon name="search" size="sm" />
+          </template>
+        </OInput>
+      </div>
+      <div
+        class="border-border-subtle bg-surface-base rounded-default min-h-0 flex-1 overflow-y-auto border border-[0.0625em]"
+      >
+        <ul role="list">
+          <li
+            v-for="stream in filteredQuickPickStreams"
+            :key="stream.value"
+            class="border-b-border-subtle border-b border-b-[0.0625em] last:border-b-0"
+          >
+            <button
+              type="button"
+              :data-test="`logs-search-stream-quick-pick-${stream.value}`"
+              class="hover:bg-table-row-hover-bg flex w-full min-w-0 items-center gap-2 px-2.5 py-1.5 text-left max-md:min-h-11"
+              @click="quickSelectStream(stream.value)"
+            >
+              <OTruncatedText class="text-text-heading text-compact min-w-0 flex-1 font-mono">{{
+                stream.label
+              }}</OTruncatedText>
+              <span class="text-text-secondary shrink-0 text-xs tabular-nums">{{
+                stream.events == null ? "—" : formatLargeNumber(stream.events)
+              }}</span>
+            </button>
+          </li>
+        </ul>
+        <p
+          v-if="filteredQuickPickStreams.length === 0"
+          class="text-text-secondary text-compact px-2.5 py-2"
+          data-test="logs-search-stream-filter-empty"
+        >
+          {{ t("logs.noStream.filterEmpty") }}
+        </p>
       </div>
     </div>
     <div v-else class="index-table mt-1">
@@ -273,6 +304,7 @@ import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
 import OSelect from "@/lib/forms/Select/OSelect.vue";
+import OInput from "@/lib/forms/Input/OInput.vue";
 import type { SelectModelValue } from "@/lib/forms/Select/OSelect.types";
 import OSkeleton from "@/lib/feedback/Skeleton/OSkeleton.vue";
 import { captureFromValuesApi } from "@/composables/fieldValueStore";
@@ -306,6 +338,7 @@ export default defineComponent({
     ),
     OButton,
     OSelect,
+    OInput,
     OIcon,
     OTooltip,
     OTruncatedText,
@@ -462,14 +495,27 @@ export default defineComponent({
     // first, one click each. Uncapped so the list fills its frame instead of
     // showing eight of twenty and pointing at the dropdown. Falls back to the
     // plain stream-list order when ingestion stats aren't available.
-    const quickPickStreams = computed(() => {
+    const quickPickStreams = computed<
+      Array<{ label: string; value: string; events?: number | null }>
+    >(() => {
       const detailed = searchObj.data.streamResults?.list;
       if (Array.isArray(detailed) && detailed.length) {
-        return [...detailed]
-          .sort(compareStreamsByLatest)
-          .map((item: any) => ({ label: item.name, value: item.name }));
+        return [...detailed].sort(compareStreamsByLatest).map((item: any) => ({
+          label: item.name,
+          value: item.name,
+          events: item.stats?.doc_num ?? null,
+        }));
       }
       return streamList.value || [];
+    });
+
+    const streamFilter = ref("");
+
+    // The rail is the only way to reach stream #21 on a 240px panel, so it filters.
+    const filteredQuickPickStreams = computed(() => {
+      const needle = streamFilter.value.trim().toLowerCase();
+      const rows = quickPickStreams.value;
+      return needle ? rows.filter((row) => String(row.label).toLowerCase().includes(needle)) : rows;
     });
 
     const checkSelectedFields = computed(() => {
@@ -1914,6 +1960,8 @@ export default defineComponent({
       getValuesPartition,
       streamList,
       quickPickStreams,
+      streamFilter,
+      filteredQuickPickStreams,
       hasUserDefinedSchemas,
       setPage,
       resetPagination,
