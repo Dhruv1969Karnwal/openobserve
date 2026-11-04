@@ -25,6 +25,16 @@ import type { ProgressBarVariant } from "@/lib/data/ProgressBar/OProgressBar.typ
  * separable amber (3:1 on both grounds in both themes, same family as the
  * percentage ink beside the bar), so a bar crossing the utilization threshold
  * stays amber without re-inking a shared palette step.
+ *
+ * A bar UNDER both thresholds rides `progress-bar-default`, which is the accent
+ * ramp — near-black (#1c1f23, 16.54:1) in the flagship theme, i.e. the loudest
+ * mark on the row while the exception it must not compete with sits at 5.02:1.
+ * Salience has to run quiet → amber → red, so the calm fill takes
+ * `row-rail-muted` (grey-500, 4.64:1 on the page ground) and the accent stays
+ * where it belongs: on actions.
  */
-export const usageBarFill = (variant: ProgressBarVariant): string | undefined =>
-  variant === "warning" ? "var(--color-row-rail-warning)" : undefined;
+export const usageBarFill = (variant: ProgressBarVariant): string | undefined => {
+  if (variant === "warning") return "var(--color-row-rail-warning)";
+  if (variant === "danger") return undefined;
+  return "var(--color-row-rail-muted)";
+};

@@ -83,6 +83,7 @@ import { toast } from "@/lib/feedback/Toast/useToast";
 import TemplateService from "@/services/alert_templates";
 import DestinationService from "@/services/alert_destination";
 import { resetListViewState, useListViewState } from "@/composables/useListViewState";
+import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 
 const node = document.createElement("div");
 node.setAttribute("id", "app");
@@ -2421,5 +2422,82 @@ describe("AlertList - triggered in the last 15 minutes", () => {
     expect(never.length).toBeGreaterThan(0);
     expect(never.every((c: any) => !c.find(".rounded-full").exists())).toBe(true);
     expect(fired.filter((c: any) => c.find(".bg-warning-500").exists())).toHaveLength(4);
+  });
+}, 15000);
+
+describe("AlertList - the two audit timestamp columns", () => {
+  const ABSOLUTE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+  const cellTexts = (wrapper: any, id: string) =>
+    wrapper
+      .findAll(`[data-test="o2-table-cell-${id}"]`)
+      .map((cell: any) => cell.text().trim())
+      .filter((text: string) => text !== "");
+
+  const load = async () => {
+    // One instant for both columns: the row that made two relative ages identical.
+    const firedUs = Date.now() * 1000 - 60_000_000;
+    alertsDB = [
+      makeAlert(1, {
+        name: "fired-and-met",
+        is_real_time: false,
+        last_triggered_at: firedUs,
+        last_satisfied_at: firedUs,
+      }),
+      makeAlert(2, { name: "never-fired", is_real_time: false }),
+    ];
+    const wrapper: any = await mountAlertList();
+    await flushPromises();
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    await flushPromises();
+    await wrapper.vm.handleActionQuery(undefined);
+    await flushPromises();
+    return wrapper;
+  };
+
+  it("prints one format in both columns, and no relative age in either", async () => {
+    const wrapper = await load();
+    expect(wrapper.vm.TIME_COLUMN_MODE).toBe("absolute");
+    for (const id of ["last_triggered_at", "last_satisfied_at"]) {
+      const texts = cellTexts(wrapper, id);
+      expect(texts.length).toBeGreaterThan(0);
+      expect(texts.every((text: string) => ABSOLUTE.test(text) || text === "Never")).toBe(true);
+    }
+  });
+
+  it("names which event each cell's age belongs to", async () => {
+    const wrapper = await load();
+    const fired = wrapper.vm.filteredResults.find((r: any) => r.name === "fired-and-met");
+    const triggered = String(wrapper.vm.triggeredAge(fired));
+    const satisfied = String(wrapper.vm.satisfiedAge(fired));
+    expect(triggered).toMatch(/^Fired .+ ago$/);
+    expect(satisfied).toMatch(/^Condition met .+ ago$/);
+    // The regression this pins: one instant in two columns must never read as one message.
+    expect(triggered).not.toBe(satisfied);
+    const never = wrapper.vm.filteredResults.find((r: any) => r.name === "never-fired");
+    expect(wrapper.vm.triggeredAge(never)).toBeUndefined();
+    // The age is reachable where the reader is looking: in that column's own tooltip.
+    for (const [id, lead] of [
+      ["last_triggered_at", "Fired"],
+      ["last_satisfied_at", "Condition met"],
+    ] as const) {
+      const tip = wrapper
+        .findAll(`[data-test="o2-table-cell-${id}"]`)[0]
+        .findAllComponents(OTooltip)[0];
+      expect(String(tip.props("content"))).toMatch(new RegExp(`^${lead} .+ ago$`));
+    }
+  });
+
+  it("labels and sizes both headers from the same policy, not from a format gap", async () => {
+    const wrapper = await load();
+    const column = (id: string) => wrapper.vm.columns.find((c: any) => c.id === id);
+    const triggered = column("last_triggered_at");
+    const satisfied = column("last_satisfied_at");
+    expect(triggered.header).not.toBe(satisfied.header);
+    expect(triggered.meta.headerSubLabel).toBe(i18n.global.t("alerts.lastTriggeredSub"));
+    expect(satisfied.meta.headerSubLabel).toBe(i18n.global.t("alerts.lastSatisfiedSub"));
+    expect(triggered.meta.headerSubLabel).not.toBe(satisfied.meta.headerSubLabel);
+    expect(triggered.meta.headerTooltip).toBe(i18n.global.t("alerts.lastTriggeredHelp"));
+    expect(satisfied.meta.headerTooltip).toBe(i18n.global.t("alerts.lastSatisfiedHelp"));
+    expect(triggered.size).toBe(satisfied.size);
   });
 }, 15000);

@@ -823,14 +823,12 @@ describe("General", () => {
       expect(wrapper.vm.currentPickerMode).toBe("dark");
     });
 
-    it("marks the applied mode's chip pressed and the other one unpressed", () => {
+    it("names the applied mode's chip as the current one and leaves the other unmarked", () => {
       const wrapper = createWrapper();
-      expect(wrapper.find('[data-test="theme-light-chip"]').attributes("aria-pressed")).toBe(
-        String(wrapper.vm.isModeActive("light")),
-      );
-      expect(wrapper.find('[data-test="theme-dark-chip"]').attributes("aria-pressed")).toBe(
-        String(wrapper.vm.isModeActive("dark")),
-      );
+      for (const mode of ["light", "dark"]) {
+        const chip = wrapper.find(`[data-test="theme-${mode}-chip"]`).attributes("aria-label");
+        expect(chip?.includes("current mode")).toBe(wrapper.vm.isModeActive(mode));
+      }
     });
 
     it("labels the chip group with the section heading it belongs to", () => {
@@ -942,21 +940,27 @@ describe("General", () => {
       }
     });
 
-    it("exposes the mode name and the selected state of both chips to assistive tech", () => {
+    it("names each chip as the accent picker it is and says which mode is current", () => {
       const wrapper = createWrapper();
       for (const [hook, mode] of Object.entries(MODE_OF)) {
         const button = wrapper.find(`[data-test="${hook}"]`);
-        expect(button.attributes("aria-pressed")).toBe(String(wrapper.vm.isModeActive(mode)));
-        // The accessible name leads with the visible mode name and still names the accent.
-        const name = button.text().replace(/\s+/g, " ").trim();
-        expect(name.startsWith(button.find(".chip-label").text())).toBe(true);
-        expect(name).toMatch(/#[0-9a-fA-F]{6}/);
+        // A chip opens a picker, so it is named as an action rather than as a toggle.
+        expect(button.attributes("aria-pressed")).toBeUndefined();
+        expect((button.attributes("aria-label") || "").toLowerCase()).toContain(
+          button.find(".chip-label").text().toLowerCase(),
+        );
+        expect(button.attributes("aria-label")).toContain("accent color");
+        expect(wrapper.vm.isModeActive(mode)).toBe(
+          (button.attributes("aria-label") || "").includes("current mode"),
+        );
       }
-      // Exactly one chip is pressed, so "which one is applied" is never a guess.
-      const pressed = Object.keys(MODE_OF).filter(
-        (hook) => wrapper.find(`[data-test="${hook}"]`).attributes("aria-pressed") === "true",
+      // Exactly one chip claims "current mode", so "which one is applied" is never a guess.
+      const current = Object.keys(MODE_OF).filter((hook) =>
+        (wrapper.find(`[data-test="${hook}"]`).attributes("aria-label") || "").includes(
+          "current mode",
+        ),
       );
-      expect(pressed).toHaveLength(1);
+      expect(current).toHaveLength(1);
     });
 
     it("marks the selected chip with a glyph and leaves the other unmarked", () => {
@@ -1185,7 +1189,7 @@ describe("General", () => {
   });
 
   describe("mobile action-bar space reservation", () => {
-    it("reserves the Save action bar in flow instead of floating over the controls", () => {
+    it("keeps the Save bar in flow below lg, where a pinned bar covered the controls", () => {
       const w = createWrapper();
       const footer = w.find('[data-test="general-settings-form-footer"]');
       const classes = (footer.attributes("class") || "").split(/\s+/);
@@ -1193,12 +1197,92 @@ describe("General", () => {
       for (const floating of ["sticky", "bottom-0", "z-10", "fixed"]) {
         expect(classes).not.toContain(floating);
       }
+      // From lg the reading column is tall enough that the bar needs pinning to be found.
+      expect(classes).toContain("lg:sticky");
+      expect(classes).toContain("lg:bottom-0");
     });
 
     it("wraps the theme-chip row so a narrow measure never clips a pill", () => {
       const w = createWrapper();
       const group = w.find('[data-test="general-settings-theme-chips"]');
       expect(group.attributes("class") || "").toContain("flex-wrap");
+    });
+  });
+
+  describe("an empty field with a default says so", () => {
+    it("never paints the system default as a placeholder value", () => {
+      const w = createWrapper();
+      const field = w.find('[data-test="general-settings-max-series-per-query"]');
+      expect(field.find("input").attributes("placeholder")).toBeUndefined();
+      expect(field.text()).toContain("Empty");
+      expect(field.text()).toContain("the system default of 40,000 applies");
+    });
+
+    it("renames the same field once a value is set", async () => {
+      mockStore.state.organizationData.organizationSettings = {
+        scrape_interval: 30,
+        max_series_per_query: 25000,
+      };
+      const w = createWrapper();
+      await nextTick();
+      const field = w.find('[data-test="general-settings-max-series-per-query"]');
+      expect(field.find("input").element.value).toBe("25000");
+      expect(field.text()).toContain("Set to 25,000 series per query.");
+      expect(field.text()).not.toContain("system default");
+      mockStore.state.organizationData.organizationSettings = { scrape_interval: 30 };
+    });
+
+    it("states the scrape interval as the age it allows", () => {
+      const w = createWrapper();
+      expect(w.text()).toContain("The newest metric point can be up to 30 seconds old.");
+    });
+
+    it("names which mode's accent is custom and which is still the default", () => {
+      mockStore.state.organizationData.organizationSettings = {
+        scrape_interval: 30,
+        dark_mode_theme_color: "#3F7994",
+      };
+      const w = createWrapper();
+      expect(w.find('[data-test="general-settings-accent-state-light"]').text()).toContain(
+        "uses the default color",
+      );
+      expect(w.find('[data-test="general-settings-accent-state-dark"]').text()).toContain(
+        "uses a custom color",
+      );
+      mockStore.state.organizationData.organizationSettings = { scrape_interval: 30 };
+    });
+  });
+
+  describe("save affordance", () => {
+    const save = (w: any) => w.find('[data-test="dashboard-add-submit"]');
+
+    it("refuses Save with a reason while nothing differs from what is saved", () => {
+      const w = createWrapper();
+      expect(w.vm.isDirty).toBe(false);
+      expect(save(w).attributes("disabled")).toBeDefined();
+      expect(save(w).attributes("disabled-reason")).toBe("Nothing to save yet.");
+      expect(w.find('[data-test="general-settings-dirty-note"]').text()).toContain(
+        "Everything on this page is saved.",
+      );
+    });
+
+    it("opens Save the moment a field differs from what is saved", async () => {
+      const w = createWrapper();
+      const form = w.findComponent({ name: "OForm" });
+      form.vm.form.setFieldValue("scrape_interval", 45);
+      await nextTick();
+      expect(w.vm.isDirty).toBe(true);
+      expect(save(w).attributes("disabled")).toBeUndefined();
+      expect(w.find('[data-test="general-settings-dirty-note"]').text()).toContain(
+        "Unsaved changes on this page.",
+      );
+    });
+
+    it("counts a previewed accent color as an unsaved change", async () => {
+      const w = createWrapper();
+      w.vm.customDarkColor = "#3F7994";
+      await nextTick();
+      expect(w.vm.isDirty).toBe(true);
     });
   });
 });

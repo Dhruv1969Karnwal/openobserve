@@ -20,12 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <!-- The page header (h1 + subtitle) and the page gutter belong to the Settings
          shell; this component owns the form and the sections inside it. -->
     <div v-if="!trialExpired" data-test="general-settings-platform">
-      <OForm
-        :schema="generalSettingsSchema"
-        :default-values="generalSettingsDefaults"
-        @submit="saveGeneralSettings"
-        v-slot="{ isSubmitting }"
-      >
+      <OForm :form="generalForm" v-slot="{ isSubmitting }">
         <SettingsSection
           data-test="settings-section-collection"
           :title="t('settings.generalSectionCollection')"
@@ -37,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             type="number"
             min="0"
             width="sm"
+            :help-text="scrapeIntervalNote"
             data-test="general-settings-scrape-interval"
           />
         </SettingsSection>
@@ -53,7 +49,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :min="1000"
             :max="1000000"
             width="sm"
-            :placeholder="raw('40,000')"
+            :help-text="maxSeriesNote"
             data-test="general-settings-max-series-per-query"
           >
             <template v-slot:icon-right>
@@ -107,22 +103,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <OTooltip :content="t('settings.resetToDefaultColors')" side="top" />
             </button>
           </div>
+          <p
+            data-test="general-settings-accent-state"
+            class="text-text-secondary flex flex-wrap items-center gap-x-4 gap-y-1 text-xs leading-5"
+          >
+            <span
+              v-for="mode in accentModes"
+              :key="mode.mode"
+              class="inline-flex items-baseline gap-1.5"
+              :data-test="`general-settings-accent-state-${mode.mode}`"
+            >
+              <span class="text-text-heading font-medium">{{ mode.label }}</span>
+              <span>{{ mode.state }}</span>
+            </span>
+          </p>
         </SettingsSection>
 
-        <!-- The form's single commit, on the sheet's own rule and closing the panel
-             column, so it reads as the page's action rather than Appearance's.
-             In flow, not a `sticky bottom-0` overlay: the scroll viewport is the
-             page shell, so a pinned bar floats over whatever lands in the bottom
-             band — on a phone that was the Appearance controls. A reserved action
-             bar the content scrolls above is what keeps the last control usable. -->
+        <!-- Pinned from `lg` up: the last field sits far above the end of the form, and a
+             Save only reachable by finding the bottom of the page is not an affordance. -->
         <div
           data-test="general-settings-form-footer"
-          class="border-border-subtle pb-safe mt-8 border-t pt-5 max-lg:flex max-lg:justify-end lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-8"
+          class="border-border-subtle bg-surface-base pb-safe mt-8 border-t pt-5 max-lg:flex max-lg:justify-end lg:sticky lg:bottom-0 lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-8"
         >
+          <p
+            data-test="general-settings-dirty-note"
+            class="text-text-secondary self-center text-xs leading-5"
+          >
+            {{ dirtyNote }}
+          </p>
           <OButton
             data-test="dashboard-add-submit"
             class="lg:col-start-2 lg:justify-self-end"
             :loading="isSubmitting"
+            :disabled="!isDirty"
+            :disabled-reason="isSubmitting ? undefined : t('settings.nothingToSave')"
             variant="primary"
             size="sm-action"
             type="submit"
@@ -559,7 +573,7 @@ import SettingsSection from "./SettingsSection.vue";
 import ThemeModeChip from "./ThemeModeChip.vue";
 import { applyThemeColors, switchThemeMode } from "@/utils/theme";
 import { isTrialExpired, useLocalOrganization } from "@/utils/zincutils";
-import { formatSizeFromMB } from "@/utils/formatters";
+import { formatSizeFromMB, addCommasToNumber } from "@/utils/formatters";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OInput from "@/lib/forms/Input/OInput.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
@@ -569,6 +583,7 @@ import ODialog from "@/lib/overlay/Dialog/ODialog.vue";
 import OSpinner from "@/lib/feedback/Spinner/OSpinner.vue";
 import OFile from "@/lib/forms/File/OFile.vue";
 import OForm from "@/lib/forms/Form/OForm.vue";
+import { useOForm } from "@/lib/forms/Form/useOForm";
 import OFormInput from "@/lib/forms/Input/OFormInput.vue";
 import OColor from "@/lib/forms/Color/OColor.vue";
 import { toast } from "@/lib/feedback/Toast/useToast";
@@ -633,6 +648,9 @@ export default defineComponent({
       max_series_per_query:
         store.state?.organizationData?.organizationSettings?.max_series_per_query ?? null,
     }));
+
+    /** What the backend applies when `max_series_per_query` is left empty. */
+    const SYSTEM_MAX_SERIES_DEFAULT = 40000;
 
     const loadingState = ref(false);
 
@@ -972,6 +990,87 @@ export default defineComponent({
         });
       }
     };
+
+    // The page owns the form so it can name each field's state and its unsaved changes.
+    const generalForm = useOForm<GeneralSettingsForm>({
+      defaultValues: generalSettingsDefaults.value,
+      schema: generalSettingsSchema,
+      onSubmit: saveGeneralSettings,
+    });
+    const formValues = generalForm.useStore((s: any) => s.values);
+
+    const numericOrNull = (value: unknown) =>
+      value === null || value === undefined || value === "" ? null : Number(value);
+
+    const scrapeIntervalNote = computed<I18nText | undefined>(() => {
+      const seconds = numericOrNull(formValues.value?.scrape_interval);
+      if (seconds === null || Number.isNaN(seconds)) return undefined;
+      return t("settings.scrapeIntervalConsequence", { seconds });
+    });
+
+    // A placeholder is not a value: the sentence under the field names which state it is in.
+    const maxSeriesNote = computed(() => {
+      const value = numericOrNull(formValues.value?.max_series_per_query);
+      return value === null || Number.isNaN(value)
+        ? t("settings.maxSeriesOnDefault", {
+            value: addCommasToNumber(SYSTEM_MAX_SERIES_DEFAULT),
+          })
+        : t("settings.maxSeriesSetTo", { value: addCommasToNumber(value) });
+    });
+
+    const savedSettings = computed(() => {
+      const saved = store.state?.organizationData?.organizationSettings;
+      return {
+        scrape_interval: saved?.scrape_interval ?? 15,
+        max_series_per_query: saved?.max_series_per_query ?? null,
+        light_mode_theme_color: saved?.light_mode_theme_color || DEFAULT_LIGHT_COLOR,
+        dark_mode_theme_color: saved?.dark_mode_theme_color || DEFAULT_DARK_COLOR,
+      };
+    });
+
+    const isDirty = computed(() => {
+      const saved = savedSettings.value;
+      const values = formValues.value ?? {};
+      return (
+        numericOrNull(values.scrape_interval) !== numericOrNull(saved.scrape_interval) ||
+        numericOrNull(values.max_series_per_query) !== numericOrNull(saved.max_series_per_query) ||
+        customLightColor.value !== saved.light_mode_theme_color ||
+        customDarkColor.value !== saved.dark_mode_theme_color
+      );
+    });
+
+    // Org settings can land after mount. Push them into a form the user has not
+    // touched, so the unsaved comparison never reports a difference that is only
+    // a late-arriving value.
+    watch(
+      () => store.state.organizationData?.organizationSettings,
+      () => {
+        if (generalForm.state.isDirty) return;
+        generalForm.setFieldValue("scrape_interval", savedSettings.value.scrape_interval);
+        generalForm.setFieldValue("max_series_per_query", savedSettings.value.max_series_per_query);
+      },
+      { deep: true, immediate: true },
+    );
+
+    const dirtyNote = computed(() =>
+      isDirty.value ? t("settings.unsavedChangesNote") : t("settings.allChangesSavedNote"),
+    );
+
+    const accentState = (color: string, fallback: string) =>
+      color === fallback ? t("settings.accentUsesDefault") : t("settings.accentUsesCustom");
+
+    const accentModes = computed(() => [
+      {
+        mode: "light",
+        label: t("settings.light"),
+        state: accentState(customLightColor.value, DEFAULT_LIGHT_COLOR),
+      },
+      {
+        mode: "dark",
+        label: t("settings.dark"),
+        state: accentState(customDarkColor.value, DEFAULT_DARK_COLOR),
+      },
+    ]);
 
     const uploadImage = (fileList: any = null, mode: string = "light") => {
       const selectedFiles = fileList || files.value;
@@ -1352,10 +1451,14 @@ export default defineComponent({
       store,
       config,
       router,
-      // Form wiring (Options-API: schema + defaults MUST be returned so :schema
-      // resolves and validation runs).
       generalSettingsSchema,
       generalSettingsDefaults,
+      generalForm,
+      scrapeIntervalNote,
+      maxSeriesNote,
+      isDirty,
+      dirtyNote,
+      accentModes,
       saveGeneralSettings,
       files,
       filesLight,

@@ -830,3 +830,53 @@ helm --namespace openobserve-collector upgrade o2c openobserve/openobserve-colle
     expect(codes().some((c) => c.includes("upgrade o2c"))).toBe(false);
   });
 });
+
+describe("SetupCardRenderer — step markers and variant captions", () => {
+  let wrapper: VueWrapper<any>;
+  const LINUX_SUBS = { ...SUBS, token: "dGVzdEB0b2tlbg==" };
+
+  afterEach(() => {
+    if (wrapper) wrapper.unmount();
+  });
+
+  it("never tints a chip as 'required' when its word says something else", () => {
+    wrapper = mountCard();
+    const chip = wrapper.find('[data-test="ai-step-install"]');
+    expect(chip.text()).toContain("Terminal");
+    expect(chip.html()).not.toMatch(/primary-soft/);
+  });
+
+  it("says out loud that the variant toggle rewrites the command below", () => {
+    wrapper = mount(SetupCardRenderer, {
+      props: { content: linuxCard(LINUX_SUBS, gt), subs: LINUX_SUBS },
+      global: { plugins: [store, router], stubs: { FirstEventStatus: FirstEventStatusStub } },
+      attachTo: document.body,
+    });
+    const tabs = wrapper.find('[data-test="ai-variant-tabs"]');
+    expect(tabs.text()).toContain("The command below uses");
+    expect(tabs.find('[role="radiogroup"], [data-variant]').exists()).toBe(true);
+  });
+
+  const mountK8s = () =>
+    mount(SetupCardRenderer, {
+      props: { content: kubernetesCard(LINUX_SUBS, gt), subs: LINUX_SUBS },
+      global: { plugins: [store, router], stubs: { FirstEventStatus: FirstEventStatusStub } },
+      attachTo: document.body,
+    });
+
+  it("names the value in the install command that is still the shipped example", async () => {
+    wrapper = mountK8s();
+    const note = () => wrapper.find('[data-test="ai-step-input-note-cluster"]');
+    expect(wrapper.find('[data-test="ai-input-cluster"]').exists()).toBe(true);
+    expect(note().text()).toBe(
+      "cluster1 in the command is still the example from the Cluster name field above — change it there before you run this.",
+    );
+    await wrapper.find('[data-test="ai-input-cluster"] input').setValue("prod-eu");
+    expect(note().text()).toBe("prod-eu in the command is the Cluster name you set above.");
+  });
+
+  it("never claims a value the step does not fill in", () => {
+    wrapper = mountCard();
+    expect(wrapper.findAll('[data-test^="ai-step-input-note-"]').length).toBe(0);
+  });
+});

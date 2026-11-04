@@ -21,6 +21,7 @@ import { createStore } from "vuex";
 import { createRouter, createMemoryHistory } from "vue-router";
 import { defineComponent, h, ref } from "vue";
 import HostsPage from "./HostsPage.vue";
+import { headerLabelMinWidth } from "@/lib/core/Table/utils/headerMinWidth";
 import i18n from "@/locales";
 
 // Mock factories only dereference these at mount time, so module-scope reactive state is safe.
@@ -280,10 +281,10 @@ describe("HostsPage", () => {
       wrapper = await mountPage();
       const columns = wrapper.findComponent({ name: "OTable" }).props("columns") as any[];
       const header = (id: string) => columns.find((c) => c.id === id)?.header;
-      expect(header("cpu")).toBe("CPU % (current)");
-      expect(header("memory")).toBe("Memory (current)");
-      expect(header("disk")).toBe("Disk % (current)");
-      expect(header("load")).toBe("Load 15m (current)");
+      expect(header("cpu")).toBe("CPU %");
+      expect(header("memory")).toBe("Memory");
+      expect(header("disk")).toBe("Disk %");
+      expect(header("load")).toBe("Load 15m");
     });
 
     it("says plainly that utilization is a latest sample while the range drives membership", async () => {
@@ -291,6 +292,70 @@ describe("HostsPage", () => {
       const note = wrapper.find('[data-test="hosts-range-note"]');
       expect(note.exists()).toBe(true);
       expect(note.text()).toMatch(/latest sample/i);
+    });
+  });
+
+  describe("identity legibility and frame fit", () => {
+    const AWS_HOSTS = [
+      "ip-10-0-20.eu-west-1.compute.internal",
+      "ip-10-0-32.eu-west-1.compute.internal",
+      "ip-10-0-11.eu-west-1.compute.internal",
+    ];
+
+    const seedAwsFleet = () => {
+      const rows = AWS_HOSTS.map((name, i) => makeRow({ host_name: name, cpu: 40 + i }));
+      hostsListState.rows.value = rows;
+      hostsListState.filteredRows.value = rows;
+      hostsListState.pagedRows.value = rows;
+      hostsListState.fleetCount.value = { total: 3, active: 3 };
+    };
+
+    it("prints the part of a hostname that differs from its neighbours", async () => {
+      seedAwsFleet();
+      wrapper = await mountPage();
+      const cell = wrapper.find('[data-test="hosts-row-ip-10-0-20.eu-west-1.compute.internal"]');
+      expect(cell.text()).toBe("ip-10-0-20");
+      expect(cell.attributes("title")).toBe("ip-10-0-20.eu-west-1.compute.internal");
+    });
+
+    it("writes the withheld suffix once instead of cutting it off every row", async () => {
+      seedAwsFleet();
+      wrapper = await mountPage();
+      const note = wrapper.find('[data-test="hosts-name-suffix-note"]');
+      expect(note.exists()).toBe(true);
+      expect(note.text()).toContain(".eu-west-1.compute.internal");
+    });
+
+    it("prints host names whole when the fleet shares no suffix to withhold", async () => {
+      wrapper = await mountPage();
+      expect(wrapper.find('[data-test="hosts-name-suffix-note"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test="hosts-row-web-01"]').text()).toBe("web-01");
+    });
+
+    it("renders last seen as a recency value that fits its column", async () => {
+      seedAwsFleet();
+      wrapper = await mountPage();
+      const cell = wrapper.find(
+        '[data-test="hosts-lastseen-cell-ip-10-0-20.eu-west-1.compute.internal"]',
+      );
+      expect(cell.exists()).toBe(true);
+      expect(cell.text()).toBe("Nov 14, 2023");
+    });
+
+    it("fits every column header inside the 1440 table frame", async () => {
+      wrapper = await mountPage();
+      const columns = wrapper.findComponent({ name: "OTable" }).props("columns") as any[];
+      const floorSum = columns.reduce(
+        (sum, col) =>
+          sum +
+          Math.max(
+            col.minSize ?? col.size ?? 0,
+            headerLabelMinWidth(col.header, { sortable: !!col.sortable }),
+          ),
+        0,
+      );
+      // 1440 viewport - 96 icon rail - 232 facet rail - borders and padding.
+      expect(floorSum).toBeLessThanOrEqual(1124);
     });
   });
 
@@ -477,11 +542,25 @@ describe("HostsPage", () => {
       const fill = warnBar.find("div");
       expect(fill.attributes("style")).toContain("--color-row-rail-warning");
       expect(fill.classes().join(" ")).not.toContain("bg-progress-bar-warning");
+    });
 
+    it("keeps a calm bar quieter than the exception beside it", async () => {
+      wrapper = await mountPage();
       const defaultBar = wrapper
         .find('[data-test="hosts-cell-cpu-web-02"]')
         .find('[role="progressbar"]');
-      expect(defaultBar.find("div").classes()).toContain("bg-progress-bar-default");
+      // `progress-bar-default` rides the accent ramp, which the flagship theme
+      // paints near-black (16.54:1) — louder than the 5.02:1 amber exception.
+      expect(defaultBar.find("div").attributes("style")).toContain("--color-row-rail-muted");
+      expect(defaultBar.find("div").classes().join(" ")).not.toContain("bg-progress-bar-default");
+    });
+
+    it("swatches the threshold legend with the red the bars and the pills both use", async () => {
+      wrapper = await mountPage();
+      const legend = wrapper.find('[data-test="hosts-usage-legend"]');
+      expect(legend.html()).toContain("bg-row-rail-warning");
+      expect(legend.html()).toContain("bg-progress-bar-danger");
+      expect(legend.html()).not.toContain("bg-row-rail-negative");
     });
 
     it("draws no bar for a null reading but still prints the em-dash", async () => {

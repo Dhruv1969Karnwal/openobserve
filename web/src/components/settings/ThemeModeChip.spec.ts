@@ -41,9 +41,14 @@ describe("ThemeModeChip", () => {
     expect(button.attributes("tabindex")).toBeUndefined();
   });
 
-  it("carries the mode's selected state as aria-pressed", () => {
-    expect(chip(mountChip({ active: true })).attributes("aria-pressed")).toBe("true");
-    expect(chip(mountChip({ active: false })).attributes("aria-pressed")).toBe("false");
+  it("names the control as the accent picker it is, not as a mode toggle", () => {
+    const active = chip(mountChip({ active: true }));
+    const inactive = chip(mountChip({ active: false }));
+    expect(active.attributes("aria-pressed")).toBeUndefined();
+    expect(active.attributes("aria-label")).toBe(
+      "Change the Light theme accent color, current mode",
+    );
+    expect(inactive.attributes("aria-label")).toBe("Change the Light theme accent color");
   });
 
   it("paints the mode's page ground, not its accent, as the swatch field", () => {

@@ -58,6 +58,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           sorting="client"
           selection="multiple"
           :is-row-selectable="(row: any) => row.enableDelete"
+          :row-selection-reason="rowSelectionReason"
           filter-mode="client"
           :default-columns="false"
           :column-visibility="defaultColumnVisibility"
@@ -86,6 +87,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :selected-key="roleFilter"
                 @select="onStatSelect"
               />
+              <!-- Rank is a ring and kind is a corner, so both are named in words as well. -->
+              <p
+                class="text-text-body text-2xs mt-1 leading-snug"
+                data-test="user-list-role-legend"
+              >
+                {{ t("user.roleChipLegend") }}
+              </p>
             </div>
           </template>
 
@@ -148,7 +156,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               >
                 {{ row.email }}
               </div>
-              <div class="text-text-secondary truncate text-xs" :title="userSubline(row)">
+              <div class="text-text-secondary text-compact truncate" :title="userSubline(row)">
                 {{ userSubline(row) }}
               </div>
             </div>
@@ -160,19 +168,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <span v-else class="text-text-body">—</span>
           </template>
 
-          <!-- Roles badges — built-in roles carry the privilege colour from the
-               userRole group; a custom role is a category, not a privilege level, so
-               it gets one stable neutral chip rather than an untyped tag whose
-               colour would be derived from the role's spelling. The invited chip
-               rides along here too: pending users are otherwise indistinguishable
-               on this path. -->
+          <!-- Roles badges — a ring marks the roles that can administer this organization and a square corner the names OpenObserve does not ship; the invited chip rides along here too, since pending users are otherwise invisible on this path. -->
           <template #cell-roles="{ row }">
             <div class="flex flex-wrap items-center gap-1">
               <OTag
                 v-for="(roleName, idx) in row.roles || []"
                 :key="`${roleName}-${idx}`"
                 :type="isBuiltinRole(roleName) ? 'userRole' : undefined"
-                :variant="isBuiltinRole(roleName) ? undefined : 'default-soft'"
+                :variant="rolePillVariant(roleName)"
+                :shape="rolePillShape(roleName)"
+                size="md"
                 :value="roleName"
               />
               <OTag v-if="row.status === 'pending'" type="userStatus" value="invited" />
@@ -185,6 +190,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <span class="inline-flex items-center gap-1">
               <OTag
                 type="userRole"
+                :variant="rolePillVariant(String(row.role || ''))"
+                :shape="rolePillShape(String(row.role || ''))"
+                size="md"
                 :value="String(row.role || '').replace(/\s*\(Invited\)\s*$/i, '')"
               />
               <OTag v-if="row.status === 'pending'" type="userStatus" value="invited" />
@@ -194,7 +202,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <template #cell-actions="{ row, index }">
             <OButton
               v-if="row.enableDelete && row.status != 'pending'"
-              :title="t('user.delete')"
+              :aria-label="t('user.delete')"
               variant="ghost"
               size="icon-sm"
               class="max-md:hidden"
@@ -206,7 +214,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </OButton>
             <OButton
               v-if="row.status == 'pending' && row.token"
-              :title="t('user.revoke_invite')"
+              :aria-label="t('user.revoke_invite')"
               variant="ghost"
               size="icon-sm"
               class="max-md:hidden"
@@ -218,7 +226,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </OButton>
             <OButton
               v-if="row.enableEdit && row.status != 'pending'"
-              :title="t('user.update')"
+              :aria-label="t('user.update')"
               variant="ghost"
               size="icon-sm"
               class="max-md:hidden"
@@ -607,6 +615,18 @@ export default defineComponent({
     ]);
     const isBuiltinRole = (r: string) => BUILTIN_ROLES.has(String(r ?? "").toLowerCase());
 
+    // A checkbox that refuses needs a reason; four different rows refuse for four
+    // different reasons, and only one of them is fixable from this screen.
+    const rowSelectionReason = (row: any): I18nText | undefined => {
+      if (row?.enableDelete) return undefined;
+      if (String(row?.role ?? "").toLowerCase() === "root") return t("user.rootRowLocked");
+      if (row?.isExternal || row?.is_external) return t("user.externalRowLocked");
+      if (row?.isLoggedinUser) return t("user.selfRowLocked");
+      if (currentUserRole.value !== "root" && currentUserRole.value !== "admin")
+        return t("user.manageUsersAdminOnly");
+      return undefined;
+    };
+
     // ── Role tiles — the page's primary signal ──────────────────────────────
     // A user can hold SEVERAL roles (built-in + custom), so the strip counts role
     // MEMBERSHIP, not buckets: one Admin+custom user is counted under both tiles.
@@ -623,6 +643,23 @@ export default defineComponent({
       viewer: 2,
       serviceaccount: 1,
     };
+
+    // ── Role chips: rank in the ring, kind in the corner, never in a hue ──────
+    // `PRIVILEGE_RANK >= ADMIN_RANK_FLOOR` is the line this page's delete/edit gates and the server already draw.
+    const ADMIN_RANK_FLOOR = 4;
+    // `member` is absent on purpose: the users-table migration only aliases the pre-RBAC name.
+    const SHIPPED_ROLES = new Set(["root", "admin", "editor", "viewer", "user", "serviceaccount"]);
+    const roleKey = (r: unknown) => String(r ?? "").toLowerCase();
+    const rolePillVariant = (r: unknown) =>
+      (PRIVILEGE_RANK[roleKey(r)] ?? 0) >= ADMIN_RANK_FLOOR
+        ? ("default-outline" as const)
+        : ("default-soft" as const);
+    /** A name the organization carries (custom, or pre-RBAC) rather than one OpenObserve ships. */
+    const orgCarriedRole = (r: unknown) => !SHIPPED_ROLES.has(roleKey(r));
+    // A zero radius beats a pill at a glance; a small one would read as a rounding artefact.
+    const rolePillShape = (r: unknown) =>
+      orgCarriedRole(r) ? ("square" as const) : ("pill" as const);
+
     // Roles are unbounded (an org can define dozens), and a strip is a fixed row of
     // tiles — past this many the strip stops being scannable, so the tail collapses
     // into one "Other roles" tile that still filters. Five leaves room for that
@@ -685,15 +722,10 @@ export default defineComponent({
       ).length;
     });
 
-    // Built-in roles keep the privilege ramp; every custom role reads teal so it is
-    // visibly "not a built-in" without each one inventing its own colour.
-    const roleTone = (key: string): StatItem["tone"] => {
-      if (key === "root" || key === "admin") return "orange";
-      if (key === "editor" || key === "member") return "blue";
-      if (key === "user" || key === "viewer") return "neutral";
-      if (key === "serviceaccount") return "purple";
-      return "teal";
-    };
+    // A facet tile is not a status: every count prints in ink and the selected
+    // tile's border is the only mark the strip draws. (A hue per role implied a
+    // severity ladder the roles do not have.)
+    const roleTone = (_key: string): StatItem["tone"] => "neutral";
     // The Role column's pill title-cases a built-in ("Admin"); the tile says the
     // same thing the same way. A custom role keeps the name its author gave it.
     const roleTileLabel = (role: { key: string; label: string }): I18nText =>
@@ -750,7 +782,7 @@ export default defineComponent({
           key: OVERFLOW_KEY,
           label: t("iam.summaryOtherRoles", { count: overflowRoles.value.length }),
           value: v(overflowUserCount.value),
-          tone: "teal",
+          tone: "neutral",
           dataTest: "user-summary-other-roles",
         });
       }
@@ -761,7 +793,7 @@ export default defineComponent({
           key: INVITED_KEY,
           label: t("iam.summaryInvited"),
           value: v(invitedCount.value),
-          tone: "purple",
+          tone: "neutral",
           dataTest: "user-summary-invited",
         });
       }
@@ -771,7 +803,7 @@ export default defineComponent({
         // The facet's reset. "Users" under a page titled Users restated nothing.
         label: t("iam.all"),
         value: v(total),
-        tone: "primary",
+        tone: "neutral",
         dataTest: "user-summary-total",
       });
       return tiles;
@@ -1576,6 +1608,10 @@ export default defineComponent({
       store,
       config,
       isBuiltinRole,
+      rolePillVariant,
+      orgCarriedRole,
+      rolePillShape,
+      rowSelectionReason,
       toCamelCase,
       defaultColumnVisibility,
       userSubline,

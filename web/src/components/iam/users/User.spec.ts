@@ -756,6 +756,84 @@ describe("User Component", () => {
     });
   });
 
+  describe("a row that refuses selection says why", () => {
+    it("stays silent for a row that can be selected", () => {
+      expect(wrapper.vm.rowSelectionReason({ enableDelete: true, role: "member" })).toBeUndefined();
+    });
+
+    it("names the protection on the root row", () => {
+      wrapper.vm.currentUserRole = "admin";
+      expect(wrapper.vm.rowSelectionReason({ enableDelete: false, role: "root" })).toBe(
+        "The root account is protected: it cannot be selected or deleted.",
+      );
+    });
+
+    it("names the identity source on an external row", () => {
+      wrapper.vm.currentUserRole = "admin";
+      expect(
+        wrapper.vm.rowSelectionReason({ enableDelete: false, role: "viewer", isExternal: true }),
+      ).toBe("This user signs in through an external identity source and is managed there.");
+    });
+
+    it("names the signed-in account on its own row", () => {
+      wrapper.vm.currentUserRole = "admin";
+      expect(
+        wrapper.vm.rowSelectionReason({ enableDelete: false, role: "admin", isLoggedinUser: true }),
+      ).toBe("You cannot delete the account you are signed in with.");
+    });
+
+    it("names the missing permission when the viewer cannot manage users", () => {
+      wrapper.vm.currentUserRole = "member";
+      expect(wrapper.vm.rowSelectionReason({ enableDelete: false, role: "viewer" })).toBe(
+        "Only root or an org admin can remove users.",
+      );
+    });
+  });
+
+  describe("role chips rank privilege without a hue", () => {
+    const NEUTRAL = ["default-soft", "default-outline"];
+    const ALL = ["root", "admin", "editor", "member", "viewer", "user", "serviceaccount"];
+
+    it("rings only the pair that can administer the organization", () => {
+      for (const role of ["root", "admin"]) {
+        expect(wrapper.vm.rolePillVariant(role)).toBe("default-outline");
+      }
+      for (const role of ["editor", "member", "viewer", "user", "serviceaccount"]) {
+        expect(wrapper.vm.rolePillVariant(role)).not.toBe(wrapper.vm.rolePillVariant("root"));
+      }
+    });
+
+    it("separates Editor from Member without asking the reader to read", () => {
+      expect(wrapper.vm.rolePillVariant("editor")).toBe(wrapper.vm.rolePillVariant("member"));
+      expect(wrapper.vm.rolePillShape("editor")).toBe("pill");
+      expect(wrapper.vm.rolePillShape("member")).toBe("square");
+    });
+
+    it("marks a custom role by its corner, so the ring keeps meaning one thing", () => {
+      expect(wrapper.vm.rolePillShape("Billing reader")).toBe("square");
+      expect(wrapper.vm.rolePillVariant("Billing reader")).toBe("default-soft");
+    });
+
+    it("never reaches for a decorative hue", () => {
+      for (const role of [...ALL, "Billing reader"]) {
+        expect(NEUTRAL).toContain(wrapper.vm.rolePillVariant(role));
+      }
+    });
+
+    it("states the rank in words beside the tiles", () => {
+      const legend = wrapper.find('[data-test="user-list-role-legend"]');
+      expect(legend.exists()).toBe(true);
+      expect(legend.text()).toContain("administer");
+      expect(legend.text()).toContain("squared-off");
+    });
+
+    it("prints every facet tile in ink", () => {
+      wrapper.vm.currentUserRole = "admin";
+      const tones = new Set(wrapper.vm.summaryStats.map((tile: any) => tile.tone));
+      expect(tones).toEqual(new Set(["neutral"]));
+    });
+  });
+
   describe.skip("changeMaxRecordToReturn", () => {
     it("should update maxRecordToReturn value", () => {
       wrapper.vm.changeMaxRecordToReturn(1000);

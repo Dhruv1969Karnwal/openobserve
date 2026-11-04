@@ -245,11 +245,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   class="flex min-w-0 items-center gap-2 overflow-hidden"
                   :data-test="`alert-list-${row.name}-name-cell`"
                 >
-                  <!-- Type chip: glyph + colour by alert type -->
+                  <!-- Type chip: the family named, because the glyph is 12px. -->
                   <span
                     class="rounded-default bg-surface-subtle grid h-6 w-6 shrink-0 place-items-center"
                   >
-                    <OIcon :name="typeIconName(row)" size="sm" :class="typeIconClass(row)" />
+                    <OIcon
+                      :name="typeIconName(row)"
+                      size="sm"
+                      :label="typeIconLabel(row)"
+                      :class="typeIconClass()"
+                    >
+                      <OTooltip :content="typeIconLabel(row)" side="top" />
+                    </OIcon>
                   </span>
                   <OTruncatedText>{{ row.name || "--" }}</OTruncatedText>
                   <!-- A paused row has no outcome pill (a frozen outcome is not a current one), so the state needs a word here. -->
@@ -364,13 +371,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </template>
 
               <template #cell-last_triggered_at="{ row }">
-                <OTimeCell
-                  :value="row.last_triggered_at_raw"
-                  unit="us"
-                  mode="relative"
-                  :timezone="store.state.timezone"
-                  :empty-label="t('alerts.anomaly.retrainNever')"
-                />
+                <span class="inline-flex min-w-0 items-center">
+                  <OTimeCell
+                    :value="row.last_triggered_at_raw"
+                    unit="us"
+                    :mode="TIME_COLUMN_MODE"
+                    :timezone="store.state.timezone"
+                    :empty-label="t('alerts.anomaly.retrainNever')"
+                  />
+                  <OTooltip v-if="triggeredAge(row)" :content="triggeredAge(row)" side="top" />
+                </span>
               </template>
 
               <template #cell-last_satisfied_at="{ row }">
@@ -387,10 +397,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <OTimeCell
                     :value="row.last_satisfied_at"
                     unit="iso"
-                    mode="absolute"
+                    :mode="TIME_COLUMN_MODE"
                     :timezone="store.state.timezone"
                     :empty-label="t('alerts.anomaly.retrainNever')"
                   />
+                  <OTooltip v-if="satisfiedAge(row)" :content="satisfiedAge(row)" side="top" />
                 </span>
               </template>
 
@@ -1011,8 +1022,12 @@ import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import useStreams from "@/composables/useStreams";
 
-import { convertUnixToDateFormat as convertUnixToFormat } from "@/utils/date";
-import { raw, useI18nTyped, type I18nText } from "@/types/i18n";
+import {
+  convertUnixToDateFormat as convertUnixToFormat,
+  formatRelativeAge,
+  type TimeColumnMode,
+} from "@/utils/date";
+import { raw, useI18nTyped, type I18nKey, type I18nText } from "@/types/i18n";
 import {
   isFiringOutcome,
   outcomeBucket,
@@ -1090,6 +1105,9 @@ import { focusSearchInput, isInputFocused } from "@/utils/keyboardShortcuts";
 import { COL } from "@/lib/core/Table/OTable.types";
 
 // import alertList from "./alerts";
+
+/** Audit columns: the reader asks *when*; the age is secondary, so it rides in the cell tooltip. */
+const TIME_COLUMN_MODE: TimeColumnMode = "absolute";
 
 export default defineComponent({
   name: "AlertList",
@@ -1385,6 +1403,19 @@ export default defineComponent({
       return "cold";
     };
 
+    /** The cell prints the instant, so the tooltip carries the age AND names the event. */
+    const ageHint = (rawMicros: unknown, key: I18nKey): I18nText | undefined => {
+      const age = triggerAgeMs(rawMicros);
+      if (age === null) return undefined;
+      return t(key, {
+        age: formatRelativeAge(Date.now() - age, { timezone: store.state.timezone }),
+      });
+    };
+    const triggeredAge = (row: any): I18nText | undefined =>
+      ageHint(row?.last_triggered_at_raw, "alerts.lastTriggeredAge");
+    const satisfiedAge = (row: any): I18nText | undefined =>
+      ageHint(row?.last_satisfied_at_raw, "alerts.lastSatisfiedAge");
+
     // ── SLO alerts in this list (Feature 5, Phase 2) ────────────────────────
     // An SLO alert watches no stream and runs no query, so without this branch
     // its row says nothing at all about what it is for. It names its SLO
@@ -1524,19 +1555,21 @@ export default defineComponent({
             : row?.is_real_time
               ? "bolt"
               : "schedule";
-    const typeIconClass = (row: any): string =>
-      // Deliberately the neutral tone, not a status colour: green here reads as
-      // "healthy" on a row whose actual state lives two columns to the right.
-      // The glyph and the badge carry the family; colour carries state.
+    // All grey: Realtime and Composite used to share one amber, and a family hue
+    // is decoration — colour on this row belongs to the state two columns right.
+    const typeIconClass = (): string => "text-text-secondary";
+
+    /** The 12px glyph alone cannot carry the family, so it says it in words. */
+    const typeIconLabel = (row: any): I18nText =>
       isSloRow(row)
-        ? "text-text-secondary"
+        ? t("alerts.sloBadge")
         : row?.alert_type === "Composite"
-          ? "text-status-warning-text"
+          ? t("alerts.compositeAlert")
           : row?.is_real_time === "anomaly"
-            ? "text-status-info-text"
+            ? t("alerts.anomalyDetection")
             : row?.is_real_time
-              ? "text-status-warning-text"
-              : "text-text-secondary";
+              ? t("alerts.realTime")
+              : t("alerts.scheduled");
 
     // At-a-glance operational counts for the summary strip. Counts over the rows
     // currently shown (folder + tab + search) so it tracks what the user sees.
@@ -1578,6 +1611,7 @@ export default defineComponent({
           label: t("alerts.summaryFailed"),
           value: v(c.failed),
           tone: "error",
+          sub: c.failed === 0 && hasData ? t("alerts.summaryNothingFailed") : undefined,
           dataTest: "alert-summary-failed",
         },
         {
@@ -1585,6 +1619,7 @@ export default defineComponent({
           label: t("alerts.summaryFiring"),
           value: v(c.firing),
           tone: "error",
+          sub: c.firing === 0 && hasData ? t("alerts.summaryNothingFiring") : undefined,
           dataTest: "alert-summary-firing",
         },
         {
@@ -1598,7 +1633,9 @@ export default defineComponent({
           key: "active",
           label: t("alerts.summaryActive"),
           value: v(c.active),
-          tone: "success",
+          // Enabled rules are an inventory, not a state to act on: green put a
+          // 3.30:1 hue on the strip's biggest number and read as "healthy".
+          tone: "neutral",
           dataTest: "alert-summary-active",
         },
         {
@@ -1612,7 +1649,7 @@ export default defineComponent({
           key: "total",
           label: t("alerts.summaryTotal"),
           value: v(c.total),
-          tone: "primary",
+          tone: "neutral",
           // Total is clickable (clears the filter) but never shows the ring — the
           // selected key is only ever a real state, never "total". No bar (its
           // share of itself is always 100%).
@@ -1823,8 +1860,13 @@ export default defineComponent({
           sortable: true,
           resizable: true,
           hideable: true,
-          size: 150,
-          meta: { align: "left" },
+          // Same shape of value in both timestamp columns, so the same width.
+          size: COL.dateAbsolute,
+          meta: {
+            align: "left",
+            headerSubLabel: t("alerts.lastTriggeredSub"),
+            headerTooltip: t("alerts.lastTriggeredHelp"),
+          },
         },
         {
           id: "last_satisfied_at",
@@ -1835,7 +1877,11 @@ export default defineComponent({
           resizable: true,
           hideable: true,
           size: COL.dateAbsolute,
-          meta: { align: "left" },
+          meta: {
+            align: "left",
+            headerSubLabel: t("alerts.lastSatisfiedSub"),
+            headerTooltip: t("alerts.lastSatisfiedHelp"),
+          },
         },
         // Anomaly Detection columns — shown on anomalyDetection and all tabs
         ...(activeTab.value === "anomalyDetection" || activeTab.value === "all"
@@ -3977,10 +4023,14 @@ export default defineComponent({
       tableFrameRef,
       datasetLoaded,
       recencyLevel,
+      triggeredAge,
+      satisfiedAge,
+      TIME_COLUMN_MODE,
       alertRowClass,
       alertRowStyle,
       typeIconName,
       typeIconClass,
+      typeIconLabel,
       isSloRow,
       sloLabel,
       goToSlo,

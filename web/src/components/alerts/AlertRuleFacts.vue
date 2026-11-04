@@ -56,7 +56,7 @@ const facts = computed(() => fitFacts(ruleFacts(props.row, t), lineWidth.value -
       <OTruncatedText
         :as="fact.mono ? 'code' : 'span'"
         class="min-w-0"
-        :class="fact.mono ? 'font-mono' : ''"
+        :class="fact.mono ? 'font-mono' : fact.prose ? 'font-medium' : ''"
         >{{ fact.text }}</OTruncatedText
       >
     </template>

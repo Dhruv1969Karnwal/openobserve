@@ -14,7 +14,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { describe, expect, it } from "vitest";
-import { cadenceFact, conditionFact, fitFacts, ruleFacts, streamFact } from "./alertRuleFacts";
+import {
+  cadenceFact,
+  conditionFact,
+  familyFact,
+  fitFacts,
+  ruleFacts,
+  streamFact,
+} from "./alertRuleFacts";
 
 // Mirrors the two en-US messages the line is built from, including its plurals.
 const t = (key: string, named?: Record<string, any>): string => {
@@ -96,6 +103,25 @@ describe("streamFact / cadenceFact", () => {
     });
     expect(cadenceFact({ frequency: "", frequency_type: "minutes" }, t)).toBeNull();
   });
+
+  it("marks the interval cadence as prose, so it does not read as part of the expression", () => {
+    expect(cadenceFact({ frequency: 5, frequency_type: "minutes" }, t)).toEqual({
+      text: "every 5 minutes",
+      prose: true,
+    });
+    expect(
+      cadenceFact({ frequency: "0 3 * * *", frequency_type: "cron" }, t)?.prose,
+    ).toBeUndefined();
+  });
+
+  it("names the family only where the cadence cannot", () => {
+    expect(familyFact({ is_real_time: true, frequency: "" }, t)).toEqual({
+      text: "alerts.realTime",
+      prose: true,
+    });
+    expect(familyFact({ is_real_time: false, frequency: "" }, t)).toBeNull();
+    expect(familyFact({ is_real_time: true, frequency: 5 }, t)).toBeNull();
+  });
 });
 
 describe("ruleFacts", () => {
@@ -112,6 +138,29 @@ describe("ruleFacts", () => {
         t,
       ).map((fact) => fact.text),
     ).toEqual(["app_checkout", "duration_ms > 800", "every 5 minutes"]);
+  });
+
+  it("says Realtime on a rule that has no cadence to read", () => {
+    expect(
+      ruleFacts(
+        {
+          alert_type: "RealTime",
+          is_real_time: true,
+          stream_name: "app_auth",
+          rawCondition: {
+            type: "threshold",
+            column: "http.status_code",
+            operator: "=",
+            value: 401,
+          },
+        },
+        t,
+      ).map((fact) => [fact.text, !!fact.prose]),
+    ).toEqual([
+      ["app_auth", false],
+      ["http.status_code = 401", false],
+      ["alerts.realTime", true],
+    ]);
   });
 
   it("uses the backend's resolved expression for a composite and nothing for an SLO row", () => {

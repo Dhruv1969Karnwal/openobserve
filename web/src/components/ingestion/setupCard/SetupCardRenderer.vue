@@ -295,6 +295,17 @@ const displayCode = (step: RichCardStep) =>
 const currentVariantNote = (step: RichCardStep) =>
   step.variants?.length ? activeVariant(step)?.note : undefined;
 
+// A value the card filled in for the user is indistinguishable from one the command always had, so the block cannot say which part is theirs to change.
+const filledInputs = (step: RichCardStep): RichCardInput[] => {
+  const template = displayCode(step)?.raw ?? "";
+  if (!template) return [];
+  return [...(step.inputs ?? []), ...(activeVariant(step)?.inputs ?? [])].filter(
+    (inp) => !inp.flag && !inp.helmSet && template.includes(`{${inp.id}}`),
+  );
+};
+/** An untouched default is the shipped example, not a choice this user made. */
+const isSampleValue = (inp: RichCardInput): boolean => inputValue(inp.id) === inp.default.trim();
+
 // Content modules are plain data with no i18n context, so their `*Key` fields
 // are translated here, on render, and win over the resolved-text counterpart.
 const stepTitle = (step: RichCardStep): I18nText =>
@@ -592,10 +603,13 @@ function fireConfetti() {
           :done="isStepDone(step)"
           :data-test="`ai-step-${step.id}`"
         >
-          <template v-if="step.chip" #title-suffix>
+          <template #title-suffix>
+            <!-- A required step needs no mark; only the exception is chipped, and
+                 the chip's colour follows the word it carries, not a second fact. -->
             <OTag
+              v-if="step.chip"
               type="stepChip"
-              :value="step.required ? 'required' : 'optional'"
+              :value="step.required ? 'meta' : 'optional'"
               :icon="step.chip.kind === 'terminal' ? undefined : chipIcon(step.chip.kind)"
             >
               <template v-if="step.chip.kind === 'terminal'" #icon>
@@ -637,6 +651,7 @@ function fireConfetti() {
             >
               <OToggleGroup
                 :model-value="currentVariantId(step)"
+                :label="t('ingestion.stepVariantCaption')"
                 @update:model-value="(v) => selectVariant(variantKey(step), v)"
               >
                 <OToggleGroupItem
@@ -667,6 +682,7 @@ function fireConfetti() {
             >
               <OToggleGroup
                 :model-value="currentSubVariantId(step)"
+                :label="t('ingestion.stepVariantCaption')"
                 @update:model-value="(v) => selectVariant(subVariantKey(step), v)"
               >
                 <OToggleGroupItem
@@ -725,6 +741,28 @@ function fireConfetti() {
             >
               <slot :name="`step-${step.id}-controls`" :step="step" />
             </div>
+
+            <p
+              v-for="inp in filledInputs(step)"
+              :key="inp.id"
+              class="step-note"
+              :data-test="`ai-step-input-note-${inp.id}`"
+            >
+              <OIcon name="edit" size="sm" />
+              <span>
+                {{
+                  isSampleValue(inp)
+                    ? t("ingestion.setupCard.commandValueIsSample", {
+                        value: inputValue(inp.id) || inp.default,
+                        label: inputLabel(inp),
+                      })
+                    : t("ingestion.setupCard.commandValueFromField", {
+                        value: inputValue(inp.id) || inp.default,
+                        label: inputLabel(inp),
+                      })
+                }}
+              </span>
+            </p>
 
             <OCodeBlock
               v-if="displayCode(step) && !missingRequired(activeVariant(step))"

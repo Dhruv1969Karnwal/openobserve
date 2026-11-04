@@ -36,11 +36,13 @@ import OSearchInput from "@/lib/forms/SearchInput/OSearchInput.vue";
 import OSpinner from "@/lib/feedback/Spinner/OSpinner.vue";
 import OProgressBar from "@/lib/data/ProgressBar/OProgressBar.vue";
 import type { ProgressBarVariant } from "@/lib/data/ProgressBar/OProgressBar.types";
+import OTimeCell from "@/lib/core/Table/cells/OTimeCell.vue";
 import DateTime from "@/components/DateTime.vue";
 import DataSourceSetupCard from "@/components/ingestion/setupCard/DataSourceSetupCard.vue";
 import HostDetailDrawer from "./HostDetailDrawer.vue";
 import { useHostsList, utilizationTint, type HostRow } from "./useHostsList";
 import { usageBarFill } from "./usageBarFill";
+import { shortenHostNames } from "./hostNameDisplay";
 import { HOSTS_DEFAULT_RELATIVE_PERIOD, HOSTS_DEFAULT_WINDOW_US } from "./hostsQueries";
 import { useWorkloadDetection } from "@/composables/useWorkloadDetection";
 import useBreakpoint from "@/composables/useBreakpoint";
@@ -259,6 +261,17 @@ const statusLabel = (status: string) =>
       ? t("infra.hosts.statusInactive")
       : t("infra.hosts.statusUnknown");
 
+// ── Host identity ─────────────────────────────────────────────────────────────
+// A fleet of `ip-10-0-20.eu-west-1.compute.internal` truncates to twelve identical
+// "ip-10-0-20.eu-west-1.compute.i…" labels, so the suffix every row repeats is
+// withheld from the cells and written once beside the column instead.
+const hostNames = computed(() =>
+  shortenHostNames(filteredRows.value.map((row) => row.display_name)),
+);
+const hostLabel = (name: string) => hostNames.value.labels.get(name) ?? name;
+// A label printed in full needs no hover echo; one that gave up a suffix says so.
+const hostTitle = (name: string) => (hostLabel(name) === name ? undefined : name);
+
 // ── Table ─────────────────────────────────────────────────────────────────────
 const columns = computed<OTableColumnDef<HostRow>[]>(() => [
   {
@@ -270,7 +283,7 @@ const columns = computed<OTableColumnDef<HostRow>[]>(() => [
     // across rows is an operational error, and three 150px utilisation columns
     // holding "100%" was where the width was going instead.
     size: 260,
-    minSize: 200,
+    minSize: 156,
     meta: { mono: true, flex: true },
   },
   { id: "os", header: t("infra.hosts.columnOs"), accessorKey: "os_type", size: 96, sortable: true },
@@ -286,7 +299,7 @@ const columns = computed<OTableColumnDef<HostRow>[]>(() => [
     id: "cpu",
     header: t("infra.hosts.columnCpu"),
     accessorKey: "cpu",
-    size: 132,
+    size: 118,
     minSize: 104,
     sortable: true,
     meta: { align: "right" },
@@ -295,8 +308,8 @@ const columns = computed<OTableColumnDef<HostRow>[]>(() => [
     id: "memory",
     header: t("infra.hosts.columnMemory"),
     accessorKey: "memoryPct",
-    size: 132,
-    minSize: 104,
+    size: 124,
+    minSize: 112,
     sortable: true,
     meta: { align: "right" },
   },
@@ -304,7 +317,7 @@ const columns = computed<OTableColumnDef<HostRow>[]>(() => [
     id: "disk",
     header: t("infra.hosts.columnDisk"),
     accessorKey: "disk",
-    size: 132,
+    size: 118,
     minSize: 104,
     sortable: true,
     meta: { align: "right" },
@@ -313,7 +326,8 @@ const columns = computed<OTableColumnDef<HostRow>[]>(() => [
     id: "load",
     header: t("infra.hosts.columnLoad"),
     accessorKey: "load",
-    size: 130,
+    size: 124,
+    minSize: 112,
     sortable: true,
     meta: { align: "right" },
   },
@@ -329,7 +343,10 @@ const columns = computed<OTableColumnDef<HostRow>[]>(() => [
     id: "lastSeen",
     header: t("infra.hosts.columnLastSeen"),
     accessorKey: "lastSeen",
-    size: 170,
+    // Sized to a relative age ("3 minutes ago"), which is what a last-seen
+    // column is really asking; the absolute datetime rides the cell's tooltip.
+    size: 140,
+    minSize: 128,
     sortable: true,
   },
 ]);
@@ -522,6 +539,13 @@ const osToggleLabel = (slug: string) =>
           :placeholder="t('infra.hosts.filterPlaceholder')"
           data-test="hosts-name-filter"
         />
+        <div
+          v-if="hostNames.sharedSuffix"
+          class="text-text-secondary text-xs"
+          data-test="hosts-name-suffix-note"
+        >
+          {{ t("infra.hosts.sharedSuffixNote", { suffix: hostNames.sharedSuffix }) }}
+        </div>
         <div class="flex flex-col gap-1.5" data-test="hosts-mobile-facets">
           <div
             class="flex flex-wrap items-center gap-1.5"
@@ -583,7 +607,7 @@ const osToggleLabel = (slug: string) =>
             </span>
             <span class="inline-flex items-center gap-1.5">
               <span
-                class="bg-row-rail-negative inline-block size-2 shrink-0 rounded-full"
+                class="bg-progress-bar-danger inline-block size-2 shrink-0 rounded-full"
                 aria-hidden="true"
               ></span>
               {{ t("infra.hosts.usageBarCritical", { threshold: 90 }) }}
@@ -603,7 +627,7 @@ const osToggleLabel = (slug: string) =>
                 <span
                   class="text-text-heading min-w-0 flex-1 truncate font-mono text-sm"
                   :title="row.display_name"
-                  >{{ raw(row.display_name) }}</span
+                  >{{ raw(hostLabel(row.display_name)) }}</span
                 >
                 <OTag
                   :variant="
@@ -788,11 +812,8 @@ const osToggleLabel = (slug: string) =>
               }}</OTag>
             </div>
           </section>
-          <OText variant="meta" class="px-1 pb-2" data-test="hosts-range-note">{{
-            t("infra.hosts.rangeNote")
-          }}</OText>
           <div
-            class="text-2xs text-text-secondary flex flex-wrap items-center gap-x-3 gap-y-1 px-1 pb-2"
+            class="text-text-secondary flex flex-wrap items-center gap-x-3 gap-y-1 px-1 pb-2 text-xs"
             data-test="hosts-usage-legend"
           >
             <span class="inline-flex items-center gap-1.5">
@@ -804,7 +825,7 @@ const osToggleLabel = (slug: string) =>
             </span>
             <span class="inline-flex items-center gap-1.5">
               <span
-                class="bg-row-rail-negative inline-block size-2 shrink-0 rounded-full"
+                class="bg-progress-bar-danger inline-block size-2 shrink-0 rounded-full"
                 aria-hidden="true"
               ></span>
               {{ t("infra.hosts.usageBarCritical", { threshold: 90 }) }}
@@ -814,145 +835,167 @@ const osToggleLabel = (slug: string) =>
 
         <!-- min-w-0 lets the frame shrink so OTable's own in-frame scroll takes
              over when the column set cannot fit beside the rail. -->
-        <div class="min-h-0 min-w-0 flex-1">
-          <OTable
-            :data="pagedRows"
-            :columns="columns"
-            :loading="loading"
-            row-key="host_name"
-            sorting="server"
-            :sort-by="sortColumnId"
-            :sort-order="sortDesc ? 'desc' : 'asc'"
-            pagination="server"
-            :page-size="PAGE_SIZE"
-            :current-page="page"
-            :total-count="filteredRows.length"
-            :show-global-filter="false"
-            @sort-change="onSortChange"
-            @pagination-change="(p) => (page = p.page)"
+        <div class="flex min-h-0 min-w-0 flex-1 flex-col gap-1">
+          <!-- The four metric headers stopped saying "(current)" to buy the identity
+               column its width back, so the sentence that defines "current" sits here
+               at reading size instead of as rail fine print. -->
+          <div
+            class="text-text-secondary flex flex-wrap items-baseline gap-x-4 gap-y-1 px-1 text-xs"
+            data-test="hosts-column-notes"
           >
-            <template #cell-host="{ row }">
-              <!-- The label is the only thing that tells 12 near-identical hosts
-                   apart, so it ellipsises instead of being cut mid-name. -->
-              <OButton
-                variant="ghost-primary"
-                size="xs"
-                class="max-w-full min-w-0"
-                :data-test="`hosts-row-${row.host_name}`"
-                @click="openDrawer(row.host_name)"
-              >
-                <OTruncatedText>{{ raw(row.display_name) }}</OTruncatedText>
-              </OButton>
-            </template>
-            <template #cell-os="{ row }">
-              <span>{{ raw(row.os_type ?? "—") }}</span>
-            </template>
-            <template #cell-status="{ row }">
-              <OTag
-                :variant="
-                  row.status === 'ACTIVE'
-                    ? 'success-soft'
-                    : row.status === 'INACTIVE'
-                      ? 'default-soft'
-                      : 'amber-soft'
-                "
-                size="xs"
-                >{{ statusLabel(row.status) }}</OTag
-              >
-            </template>
-            <template #cell-cpu="{ row }">
-              <div
-                class="flex w-full min-w-0 items-center justify-end gap-2"
-                :data-test="`hosts-cell-cpu-${row.host_name}`"
-                :data-tint="utilizationTint(row.cpu)"
-              >
-                <OProgressBar
-                  v-if="row.cpu != null"
+            <span data-test="hosts-range-note">{{ t("infra.hosts.rangeNote") }}</span>
+            <span v-if="hostNames.sharedSuffix" data-test="hosts-name-suffix-note">
+              {{ t("infra.hosts.sharedSuffixNote", { suffix: hostNames.sharedSuffix }) }}
+            </span>
+          </div>
+          <div class="min-h-0 min-w-0 flex-1">
+            <OTable
+              :data="pagedRows"
+              :columns="columns"
+              :loading="loading"
+              row-key="host_name"
+              sorting="server"
+              :sort-by="sortColumnId"
+              :sort-order="sortDesc ? 'desc' : 'asc'"
+              pagination="server"
+              :page-size="PAGE_SIZE"
+              :current-page="page"
+              :total-count="filteredRows.length"
+              :show-global-filter="false"
+              @sort-change="onSortChange"
+              @pagination-change="(p) => (page = p.page)"
+            >
+              <template #cell-host="{ row }">
+                <!-- The label is the only thing that tells 12 near-identical hosts
+                   apart: the shared suffix moves out of the row (hostNameDisplay) and
+                   the whole name stays reachable through the title and the accessible
+                   name, so it ellipsises only if it is STILL cut. -->
+                <OButton
+                  variant="ghost-primary"
                   size="xs"
-                  class="min-w-0 flex-1"
-                  :value="barValue(row.cpu)"
-                  :variant="tintVariant(row.cpu)"
-                  :color="usageBarFill(tintVariant(row.cpu))"
-                  :data-test="`hosts-bar-cpu-${row.host_name}`"
-                />
-                <span class="shrink-0 tabular-nums" :class="tintClass(row.cpu)">{{
-                  pct(row.cpu)
-                }}</span>
-              </div>
-            </template>
-            <template #cell-memory="{ row }">
-              <div
-                class="flex w-full min-w-0 flex-col items-end"
-                :data-test="`hosts-cell-memory-${row.host_name}`"
-                :data-tint="utilizationTint(row.memoryPct)"
-              >
-                <div class="flex w-full min-w-0 items-center justify-end gap-2">
+                  class="max-w-full min-w-0"
+                  :title="hostTitle(row.display_name)"
+                  :aria-label="t('infra.hosts.openHostAria', { name: row.display_name })"
+                  :data-test="`hosts-row-${row.host_name}`"
+                  @click="openDrawer(row.host_name)"
+                >
+                  <OTruncatedText :tooltip="raw(row.display_name)">{{
+                    raw(hostLabel(row.display_name))
+                  }}</OTruncatedText>
+                </OButton>
+              </template>
+              <template #cell-os="{ row }">
+                <span>{{ raw(row.os_type ?? "—") }}</span>
+              </template>
+              <template #cell-status="{ row }">
+                <OTag
+                  :variant="
+                    row.status === 'ACTIVE'
+                      ? 'success-soft'
+                      : row.status === 'INACTIVE'
+                        ? 'default-soft'
+                        : 'amber-soft'
+                  "
+                  size="xs"
+                  >{{ statusLabel(row.status) }}</OTag
+                >
+              </template>
+              <template #cell-cpu="{ row }">
+                <div
+                  class="flex w-full min-w-0 items-center justify-end gap-2"
+                  :data-test="`hosts-cell-cpu-${row.host_name}`"
+                  :data-tint="utilizationTint(row.cpu)"
+                >
                   <OProgressBar
-                    v-if="row.memoryPct != null"
+                    v-if="row.cpu != null"
                     size="xs"
                     class="min-w-0 flex-1"
-                    :value="barValue(row.memoryPct)"
-                    :variant="tintVariant(row.memoryPct)"
-                    :color="usageBarFill(tintVariant(row.memoryPct))"
-                    :data-test="`hosts-bar-memory-${row.host_name}`"
+                    :value="barValue(row.cpu)"
+                    :variant="tintVariant(row.cpu)"
+                    :color="usageBarFill(tintVariant(row.cpu))"
+                    :data-test="`hosts-bar-cpu-${row.host_name}`"
                   />
-                  <span class="shrink-0 tabular-nums" :class="tintClass(row.memoryPct)">{{
-                    pct(row.memoryPct)
+                  <span class="shrink-0 tabular-nums" :class="tintClass(row.cpu)">{{
+                    pct(row.cpu)
                   }}</span>
                 </div>
-                <OText
-                  v-if="memoryAbsolute(row)"
-                  variant="meta"
-                  class="text-2xs tabular-nums"
-                  :data-test="`hosts-memory-absolute-${row.host_name}`"
-                  >{{ memoryAbsolute(row) }}</OText
+              </template>
+              <template #cell-memory="{ row }">
+                <div
+                  class="flex w-full min-w-0 flex-col items-end"
+                  :data-test="`hosts-cell-memory-${row.host_name}`"
+                  :data-tint="utilizationTint(row.memoryPct)"
                 >
-              </div>
-            </template>
-            <template #cell-disk="{ row }">
-              <div
-                class="flex w-full min-w-0 items-center justify-end gap-2"
-                :data-test="`hosts-cell-disk-${row.host_name}`"
-                :data-tint="utilizationTint(row.disk)"
-              >
-                <OProgressBar
-                  v-if="row.disk != null"
-                  size="xs"
-                  class="min-w-0 flex-1"
-                  :value="barValue(row.disk)"
-                  :variant="tintVariant(row.disk)"
-                  :color="usageBarFill(tintVariant(row.disk))"
-                  :data-test="`hosts-bar-disk-${row.host_name}`"
-                />
-                <span class="shrink-0 tabular-nums" :class="tintClass(row.disk)">{{
-                  pct(row.disk)
+                  <div class="flex w-full min-w-0 items-center justify-end gap-2">
+                    <OProgressBar
+                      v-if="row.memoryPct != null"
+                      size="xs"
+                      class="min-w-0 flex-1"
+                      :value="barValue(row.memoryPct)"
+                      :variant="tintVariant(row.memoryPct)"
+                      :color="usageBarFill(tintVariant(row.memoryPct))"
+                      :data-test="`hosts-bar-memory-${row.host_name}`"
+                    />
+                    <span class="shrink-0 tabular-nums" :class="tintClass(row.memoryPct)">{{
+                      pct(row.memoryPct)
+                    }}</span>
+                  </div>
+                  <OText
+                    v-if="memoryAbsolute(row)"
+                    variant="meta"
+                    class="text-xs tabular-nums"
+                    :data-test="`hosts-memory-absolute-${row.host_name}`"
+                    >{{ memoryAbsolute(row) }}</OText
+                  >
+                </div>
+              </template>
+              <template #cell-disk="{ row }">
+                <div
+                  class="flex w-full min-w-0 items-center justify-end gap-2"
+                  :data-test="`hosts-cell-disk-${row.host_name}`"
+                  :data-tint="utilizationTint(row.disk)"
+                >
+                  <OProgressBar
+                    v-if="row.disk != null"
+                    size="xs"
+                    class="min-w-0 flex-1"
+                    :value="barValue(row.disk)"
+                    :variant="tintVariant(row.disk)"
+                    :color="usageBarFill(tintVariant(row.disk))"
+                    :data-test="`hosts-bar-disk-${row.host_name}`"
+                  />
+                  <span class="shrink-0 tabular-nums" :class="tintClass(row.disk)">{{
+                    pct(row.disk)
+                  }}</span>
+                </div>
+              </template>
+              <template #cell-load="{ row }">
+                <div
+                  class="flex w-full items-baseline justify-end gap-1"
+                  :data-test="`hosts-cell-load-${row.host_name}`"
+                >
+                  <span class="tabular-nums">{{ num(row.load) }}</span>
+                  <OText
+                    v-if="loadPerCore(row)"
+                    variant="meta"
+                    class="text-xs tabular-nums"
+                    :data-test="`hosts-load-per-core-${row.host_name}`"
+                    >{{ loadPerCore(row) }}</OText
+                  >
+                </div>
+              </template>
+              <template #cell-cores="{ row }">
+                <span class="tabular-nums" :data-test="`hosts-cell-cores-${row.host_name}`">{{
+                  raw(row.cores != null ? String(row.cores) : "—")
                 }}</span>
-              </div>
-            </template>
-            <template #cell-load="{ row }">
-              <div
-                class="flex w-full items-baseline justify-end gap-1"
-                :data-test="`hosts-cell-load-${row.host_name}`"
-              >
-                <span class="tabular-nums">{{ num(row.load) }}</span>
-                <OText
-                  v-if="loadPerCore(row)"
-                  variant="meta"
-                  class="text-2xs tabular-nums"
-                  :data-test="`hosts-load-per-core-${row.host_name}`"
-                  >{{ loadPerCore(row) }}</OText
-                >
-              </div>
-            </template>
-            <template #cell-cores="{ row }">
-              <span class="tabular-nums" :data-test="`hosts-cell-cores-${row.host_name}`">{{
-                raw(row.cores != null ? String(row.cores) : "—")
-              }}</span>
-            </template>
-            <template #cell-lastSeen="{ row }">
-              <span>{{ raw(row.lastSeen ?? "—") }}</span>
-            </template>
-          </OTable>
+              </template>
+              <template #cell-lastSeen="{ row }">
+                <span :data-test="`hosts-lastseen-cell-${row.host_name}`">
+                  <OTimeCell :value="row.lastSeenUs" unit="us" mode="relative" />
+                </span>
+              </template>
+            </OTable>
+          </div>
         </div>
       </div>
     </div>

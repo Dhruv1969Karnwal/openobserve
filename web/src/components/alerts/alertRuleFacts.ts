@@ -25,6 +25,8 @@ export interface RuleFact {
   text: string;
   /** Identifiers and expressions compare character by character. */
   mono?: boolean;
+  /** Prose ABOUT the rule, so it never reads as part of the expression it follows. */
+  prose?: boolean;
 }
 
 type Translate = (key: string, named?: Record<string, unknown>) => string;
@@ -72,7 +74,14 @@ export function cadenceFact(row: any, t: Translate): RuleFact | null {
   if (!Number.isFinite(count) || count <= 0) return null;
   return {
     text: t("alerts.ruleEvery", { duration: t("alerts.summary.minuteCount", { n: count }) }),
+    prose: true,
   };
+}
+
+/** A rule with no cadence checks continuously; without this the family is a 12px glyph. */
+export function familyFact(row: any, t: Translate): RuleFact | null {
+  if (!row?.is_real_time || !isBlank(row?.frequency)) return null;
+  return { text: t("alerts.realTime"), prose: true };
 }
 
 /** Composite rows print the backend's resolved expression; every other kind builds from its fields. */
@@ -81,9 +90,12 @@ export function ruleFacts(row: any, t: Translate): RuleFact[] {
   if (row.alert_type === "Composite") {
     return isBlank(row.conditions) ? [] : [{ text: String(row.conditions), mono: false }];
   }
-  const facts = [streamFact(row), conditionFact(row.rawCondition), cadenceFact(row, t)].filter(
-    (fact): fact is RuleFact => fact !== null,
-  );
+  const cadence = cadenceFact(row, t);
+  const facts = [
+    streamFact(row),
+    conditionFact(row.rawCondition),
+    cadence ?? familyFact(row, t),
+  ].filter((fact): fact is RuleFact => fact !== null);
   return facts;
 }
 

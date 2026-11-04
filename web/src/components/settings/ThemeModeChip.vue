@@ -14,12 +14,12 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<!-- One theme-mode control: switches the app to that mode and opens its accent picker. -->
+<!-- One accent color control: shows the mode's accent and opens its picker. -->
 <template>
   <button
     type="button"
     :data-test="dataTest"
-    :aria-pressed="active"
+    :aria-label="ariaLabel"
     class="focus-visible:ring-focus-ring-accent inline-flex min-h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full border px-3 whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:outline-none max-md:min-h-11"
     :class="
       active
@@ -40,13 +40,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <span class="chip-label text-text-heading text-2xs font-semibold">{{ label }}</span>
     <span class="chip-accent-value sr-only">{{ accent }}</span>
     <OIcon v-if="active" name="check" size="sm" class="chip-mark text-text-heading shrink-0" />
+    <OTooltip :content="ariaLabel" side="top" />
   </button>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
-import type { I18nText } from "@/types/i18n";
+import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
+import { useI18nTyped, type I18nText } from "@/types/i18n";
+
+const { t } = useI18nTyped();
 
 const props = defineProps<{
   mode: "light" | "dark";
@@ -67,4 +71,11 @@ const GROUND: Record<"light" | "dark", string> = {
 };
 
 const ground = computed(() => GROUND[props.mode]);
+
+// The chip opens a picker; `active` is which mode is on screen, not a toggle state.
+const ariaLabel = computed(() =>
+  t(props.active ? "settings.accentPickerAriaCurrent" : "settings.accentPickerAria", {
+    mode: props.label,
+  }),
+);
 </script>

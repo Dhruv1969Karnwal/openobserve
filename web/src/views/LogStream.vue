@@ -136,6 +136,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               @click="refreshStreams"
             />
           </template>
+          <!-- The row rail carries state, so it is named once here rather than left
+               to be inferred from three hues, one of them the absence of a mark. -->
+          <template #subheader>
+            <div
+              class="border-table-row-divider text-2xs text-text-secondary px-page-edge flex flex-wrap items-center gap-x-3 gap-y-1 border-b py-1"
+              data-test="log-stream-rail-legend"
+            >
+              <span>{{ t("logStream.railLegend") }}</span>
+              <span class="inline-flex items-center gap-1.5">
+                <span
+                  class="inline-block h-3 w-1 shrink-0"
+                  :style="{ backgroundColor: 'var(--color-row-rail-positive)' }"
+                  aria-hidden="true"
+                ></span>
+                {{ t("logStream.railLegendActive") }}
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <span
+                  class="inline-block h-3 w-1 shrink-0"
+                  :style="{ backgroundColor: 'var(--color-row-rail-warning)' }"
+                  aria-hidden="true"
+                ></span>
+                {{ t("logStream.railLegendQuiet") }}
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <span
+                  class="inline-block h-3 w-1 shrink-0"
+                  :style="{ backgroundColor: 'var(--color-row-rail-muted)' }"
+                  aria-hidden="true"
+                ></span>
+                {{ t("logStream.railLegendNever") }}
+              </span>
+            </div>
+          </template>
           <!--
             Render the stream-name cell with a deterministic per-name data-test.
             Tests can target a specific stream row via
@@ -958,7 +992,9 @@ export default defineComponent({
       return [
         {
           key: "streams",
-          label: t("home.streams"),
+          // The org-wide count beside a table paginated per type: the label names
+          // the set, or "52" beside "Showing 1–20 of 20" reads as a data bug.
+          label: t("logStream.streamsAllTypes"),
           value: count(s?.num_streams),
           icon: "window",
           tone: "primary",
