@@ -46,7 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <template v-if="isMobile">
             <OTruncatedText
               class="text-text-heading max-w-full min-w-0 font-mono text-sm"
-              :tooltip="stream.name"
+              :tooltip="raw(stream.name)"
             >
               {{ stream.name }}
             </OTruncatedText>
@@ -68,7 +68,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <template v-else>
             <OTruncatedText
               class="text-text-heading min-w-0 flex-1 text-left font-mono"
-              :tooltip="stream.name"
+              :tooltip="raw(stream.name)"
             >
               {{ stream.name }}
             </OTruncatedText>
@@ -118,7 +118,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script setup lang="ts">
 import { computed } from "vue";
 import { useStore } from "vuex";
-import { useI18nTyped } from "@/types/i18n";
+import { useI18nTyped, raw } from "@/types/i18n";
 import useBreakpoint from "@/composables/useBreakpoint";
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import OButton from "@/lib/core/Button/OButton.vue";

@@ -52,6 +52,11 @@ export interface ColumnVisibilityPlan {
   visibility: Record<string, boolean>;
   /** Only the auto-hidden ids, with the rule that hid each. */
   hidden: Record<string, HideReason>;
+  /**
+   * Pixels left for the identity column once every fixed-width column that
+   * survived the pass is placed. Zero until the frame has been measured.
+   */
+  identityWidth: number;
 }
 
 /** `"--"` and `"—"` are the placeholder a cell prints for a missing value, not values. */

@@ -302,7 +302,7 @@ export const getSeriesColor = (
       (mapping: any) => mapping.value === seriesName && mapping.color,
     );
     if (customMapping) {
-      return resolveChartInk(customMapping.color);
+      return resolveChartInk(customMapping.color) ?? null;
     }
   }
 

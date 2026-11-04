@@ -1099,7 +1099,7 @@ export default defineComponent({
           key: "updated",
           label: t("dashboard.context.factChanged"),
           value: row ? shortDay(row.modified_raw || row.created_raw) : "—",
-          sub: row?.owner ?? "",
+          sub: row?.owner ? raw(row.owner) : undefined,
           dataTest: "dashboard-stat-updated",
         },
       ];

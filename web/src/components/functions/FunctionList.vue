@@ -113,11 +113,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 >
                   <span class="text-text-heading font-medium" data-test="function-list-scope">
                     {{
-                      t("function.scopeCount", visibleRows.length, { count: visibleRows.length })
+                      t("function.scopeCount", { count: visibleRows.length }, visibleRows.length)
                     }}
                   </span>
                   <span class="text-text-secondary tabular-nums" data-test="function-list-scope">
-                    · {{ t("function.scopeApplied", appliedCount, { count: appliedCount }) }}
+                    · {{ t("function.scopeApplied", { count: appliedCount }, appliedCount) }}
                   </span>
                 </div>
               </template>

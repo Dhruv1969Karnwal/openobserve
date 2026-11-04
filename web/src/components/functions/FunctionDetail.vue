@@ -139,7 +139,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             class="text-text-secondary text-xs tabular-nums"
             data-test="function-detail-count"
             >{{
-              t("function.definitionCount", view.functionCount, { count: view.functionCount })
+              t("function.definitionCount", { count: view.functionCount }, view.functionCount)
             }}</span
           >
         </div>
@@ -209,7 +209,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             class="text-text-secondary text-xs tabular-nums"
             data-test="function-detail-stream-count"
             >{{
-              t("function.streamsCount", view.streams.length, { count: view.streams.length })
+              t("function.streamsCount", { count: view.streams.length }, view.streams.length)
             }}</span
           >
         </div>

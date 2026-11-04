@@ -43,11 +43,13 @@ import OIcon from "@/lib/core/Icon/OIcon.vue";
 import ODropdown from "@/lib/overlay/Dropdown/ODropdown.vue";
 import ODropdownItem from "@/lib/overlay/Dropdown/ODropdownItem.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
+import type { IconName } from "@/lib/core/Icon/OIcon.icons";
+import type { I18nText } from "@/types/i18n";
 
 export interface ToolbarAction {
   id: string;
   label: string;
-  icon: string;
+  icon: IconName;
   disabled?: boolean;
   destructive?: boolean;
 }
@@ -56,7 +58,7 @@ withDefaults(
   defineProps<{
     actions: ToolbarAction[];
     /** Accessible name and tooltip of the overflow trigger. */
-    triggerLabel: string;
+    triggerLabel: I18nText;
     /** Phone mode: paint the rows for a host tray instead of opening a menu. */
     flat?: boolean;
   }>(),
