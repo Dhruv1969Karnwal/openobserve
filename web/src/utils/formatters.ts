@@ -148,7 +148,19 @@ export const formatEventCount = (num: number): string => {
   return scaled.toFixed(1).replace(/\.0$/, "") + units[tier];
 };
 
-export const formatSizeFromMB = (sizeInMB: string | number) => {
+/**
+ * `fixed` is the documented default — the design guide's "fixed decimals" rule, and the
+ * requirement of every metering and billing surface, where a column that shifts its precision
+ * row to row cannot be totalled by eye. `minimal` drops a fraction that is exactly zero, which
+ * is what a dense exploratory table wants (`412 MB`, not `412.00 MB`).
+ */
+export type SizeDecimals = "fixed" | "minimal";
+
+export const formatSizeFromMB = (
+  sizeInMB: string | number,
+  options?: { decimals?: SizeDecimals },
+) => {
+  const decimals = options?.decimals ?? "fixed";
   let size = parseFloat(String(sizeInMB));
 
   if (isNaN(size)) {
@@ -166,9 +178,7 @@ export const formatSizeFromMB = (sizeInMB: string | number) => {
   let new_size = size.toFixed(2);
   if (new_size == "0.00" && size > 0) {
     new_size = "0.01";
-  } else if (new_size.endsWith(".00")) {
-    // A whole number of the unit it is printed in carries no fraction: "412.00 MB"
-    // put two decimals on 60 byte counts on one screen. A real fraction keeps both.
+  } else if (decimals === "minimal" && new_size.endsWith(".00")) {
     new_size = new_size.slice(0, -3);
   }
 

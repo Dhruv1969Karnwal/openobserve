@@ -583,7 +583,10 @@ export default defineComponent({
     // yet" renders as a muted em dash rather than a misleading "0 MB".
     const hasStat = (v: unknown): boolean => v !== null && v !== undefined && v !== "";
     const formatCount = (v: unknown): string => (hasStat(v) ? addCommasToNumber(Number(v)) : "—");
-    const formatBytes = (v: unknown): string => (hasStat(v) ? formatSizeFromMB(Number(v)) : "—");
+    // `minimal` here, fixed decimals everywhere else: this table is scanned for relative
+    // size, and 60 rows of `412.00 MB` put noise where the reader wants magnitude.
+    const formatBytes = (v: unknown): string =>
+      hasStat(v) ? formatSizeFromMB(Number(v), { decimals: "minimal" }) : "—";
 
     // How many times smaller the data is on disk than as ingested, e.g. "80.5x".
     // Plain "x", not the "×" multiplication sign — that glyph sits on the maths

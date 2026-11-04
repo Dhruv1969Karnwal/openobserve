@@ -321,18 +321,32 @@ describe("formatSizeFromMB", () => {
   });
 
   it("formats a value in MB", () => {
-    expect(formatSizeFromMB("500")).toBe("500 MB");
+    expect(formatSizeFromMB("500")).toBe("500.00 MB");
   });
 
   it("converts 1024 MB to GB", () => {
-    expect(formatSizeFromMB("1024")).toBe("1 GB");
+    expect(formatSizeFromMB("1024")).toBe("1.00 GB");
   });
 
-  it("keeps two decimals where the size really is a fraction", () => {
-    // The Streams strip prints 8.96 GB and 1.91 GB: those need the decimals the
-    // whole-MB rows (412 MB, 360 MB) must not carry.
+  it("keeps fixed decimals by default, because that is what meters and bills require", () => {
+    // A whole number is the common case in billing output, and it is exactly the case an
+    // "auto" formatter would silently reformat. `meteringModel`, `UsageOverview`,
+    // `QueryInspector`, `FleetCollectorMetrics` and the logs scan estimate all rely on this.
+    expect(formatSizeFromMB("1016")).toBe("1016.00 MB");
+    expect(formatSizeFromMB("2048")).toBe("2.00 GB");
+    expect(formatSizeFromMB("340")).toBe("340.00 MB");
     expect(formatSizeFromMB("8.96")).toBe("8.96 MB");
-    expect(formatSizeFromMB("412")).toBe("412 MB");
+  });
+
+  it("drops a zero fraction only when the caller asks for minimal decimals", () => {
+    // The dense exploratory tables (streams size columns) read `412 MB`, not `412.00 MB`.
+    expect(formatSizeFromMB("412", { decimals: "minimal" })).toBe("412 MB");
+    expect(formatSizeFromMB("500", { decimals: "minimal" })).toBe("500 MB");
+    // A real fraction is never invented away, and the minimal mode changes nothing else.
+    expect(formatSizeFromMB("8.96", { decimals: "minimal" })).toBe("8.96 MB");
+    expect(formatSizeFromMB("1.91", { decimals: "minimal" })).toBe("1.91 MB");
+    expect(formatSizeFromMB("1024", { decimals: "minimal" })).toBe("1 GB");
+    expect(formatSizeFromMB("not-a-number", { decimals: "minimal" })).toBe("0 MB");
   });
 
   it("rounds very small positive values to 0.01 MB", () => {
