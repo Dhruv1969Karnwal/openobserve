@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { describe, it, expect } from "vitest";
-import { functionRowView, parseParams, parseStreams } from "./functionRows";
+import { functionRowView, parseParams, parseStreams, streamUsage } from "./functionRows";
 
 describe("functionRows", () => {
   it("reads the typed params array the list endpoint serves", () => {
@@ -57,5 +57,38 @@ describe("functionRows", () => {
     const view = functionRowView({ name: "x" });
     expect(view.body).toBe("");
     expect(view.name).toBe("x");
+    expect(view.sourceLines).toBe(0);
+  });
+
+  // A one-character body is a complete program, and the count says so.
+  it("counts the source as written", () => {
+    expect(functionRowView({ function: "." }).sourceLines).toBe(1);
+    expect(functionRowView({ function: ".a = 1\n.b = 2\n" }).sourceLines).toBe(2);
+    expect(functionRowView({ function: "" }).sourceLines).toBe(0);
+  });
+
+  it("carries a declared type or required flag, and nothing else", () => {
+    expect(parseParams([{ name: "key", value: null, type: "string", required: true }])).toEqual([
+      { name: "key", value: null, type: "string", required: true },
+    ]);
+    expect(parseParams([{ name: "fields", value: "*", required: false }])).toEqual([
+      { name: "fields", value: "*", required: false },
+    ]);
+    expect(parseParams([{ name: "fields", value: "*", required: "yes" }])).toEqual([
+      { name: "fields", value: "*" },
+    ]);
+  });
+
+  it("sums the rows into the stream index the list closes with", () => {
+    const rows = [
+      { name: "redact_pii", view: { streams: ["container_stdout"] } },
+      { name: "add_geo", view: { streams: ["k8s", "container_stdout"] } },
+      { name: "unused", view: { streams: [] } },
+    ];
+    expect(streamUsage(rows)).toEqual([
+      { stream: "container_stdout", functions: ["redact_pii", "add_geo"] },
+      { stream: "k8s", functions: ["add_geo"] },
+    ]);
+    expect(streamUsage([])).toEqual([]);
   });
 });

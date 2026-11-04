@@ -76,7 +76,7 @@ describe("FunctionList master–detail", () => {
           language: "vrl",
           num_of_func: 1,
           params: [{ name: "table", value: "enrich_ip_geo" }],
-          associated_with_streams: ["k8s", "edge_router_access"],
+          associated_with_streams: ["k8s", "edge_router_access", "container_stdout"],
           transType: 0,
         },
       ],
@@ -210,5 +210,48 @@ describe("FunctionList master–detail", () => {
     expect(panel.exists()).toBe(true);
     expect(panel.attributes("aria-busy")).toBe("true");
     expect(wrapper.find('[data-test="function-detail-empty"]').exists()).toBe(false);
+  });
+
+  it("counts the streams a function runs on instead of cutting one in half", async () => {
+    const wrapper = mountList();
+    await settle();
+
+    const cell = wrapper.findAll("tbody tr")[1].find('[data-test="function-list-applied-in"]');
+    expect(cell.find('[data-test="function-list-stream-count"]').text()).toBe("3");
+    expect(cell.text()).toContain("k8s");
+    expect(cell.text()).toContain("edge_router_access");
+    expect(cell.find('[data-test="function-list-stream-more"]').text()).toBe("+1");
+  });
+
+  it("closes the list region with the streams its own rows carry", async () => {
+    const wrapper = mountList();
+    await settle();
+
+    const index = wrapper.find('[data-test="functions-stream-index"]');
+    expect(index.exists()).toBe(true);
+    expect(index.text()).toContain("Where these functions run");
+    expect(index.find('[data-test="functions-stream-index-total"]').text()).toBe("3 streams");
+    const shared = index
+      .findAll('[data-test="functions-stream-index-row"]')
+      .find((row) => row.text().includes("container_stdout"));
+    expect(shared?.find('[data-test="functions-stream-index-count"]').text()).toBe("2");
+  });
+
+  it("draws no pager for a list that already fits one page", async () => {
+    const wrapper = mountList();
+    await settle();
+
+    expect(wrapper.find('[data-test="o2-table-page-size-select"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test="o2-table-next-page-btn"]').exists()).toBe(false);
+  });
+
+  it("ends the detail region with its content rather than the frame", async () => {
+    const wrapper = mountList();
+    await settle();
+
+    const classes = wrapper.find('[data-test="function-detail-panel"]').classes();
+    expect(classes).toContain("xl:self-start");
+    expect(classes).not.toContain("xl:self-stretch");
+    expect(wrapper.find('[data-test="function-detail-section-runs"]').exists()).toBe(true);
   });
 });

@@ -52,13 +52,114 @@ describe("FunctionDetail", () => {
     expect(wrapper.find('[data-test="function-detail-body-redact_pii"]').text()).toContain(
       '.foo = "bar"',
     );
-    expect(wrapper.find('[data-test="function-detail-count"]').text()).toBe("2 statements");
+    expect(wrapper.find('[data-test="function-detail-source-facts"]').text()).toContain(
+      "2 statements",
+    );
     expect(wrapper.find('[data-test="function-detail-param-fields"]').text()).toContain("fields");
     expect(wrapper.find('[data-test="function-detail-param-fields"]').text()).toContain("*");
     expect(wrapper.find('[data-test="function-detail-stream-container_stdout"]').exists()).toBe(
       true,
     );
     expect(wrapper.find('[data-test="function-detail-stream-k8s"]').exists()).toBe(true);
+  });
+
+  // A one-line body is a whole program, and the pane has to say so rather than stub it.
+  it("states the source as lines and numbers its rows", () => {
+    const wrapper = mountDetail();
+
+    expect(wrapper.find('[data-test="function-detail-source-facts"]').text()).toContain("1 line");
+    expect(
+      wrapper.find('[data-test="function-detail-body-redact_pii-line-numbers"]').exists(),
+    ).toBe(true);
+    expect(wrapper.find('[data-test="function-detail-body-redact_pii"]').text()).toContain(
+      '.foo = "bar"',
+    );
+  });
+
+  it("names the function in the text face, not the code face", () => {
+    const wrapper = mountDetail();
+    const title = wrapper.find('[data-test="function-detail-name"]');
+    expect(title.classes()).not.toContain("font-mono");
+  });
+
+  it("labels an argument's value in words so a bare `*` cannot read as a marker", () => {
+    const wrapper = mountDetail();
+    const section = wrapper.find('[data-test="function-detail-section-params"]');
+
+    expect(section.text()).toContain("Value");
+    expect(section.text()).toContain("Argument");
+    expect(section.find('[data-test="function-detail-param-fields"]').text()).toContain("*");
+    expect(section.find('[data-test="function-detail-param-no-value"]').exists()).toBe(false);
+  });
+
+  it('says "No value" in words when an argument carries none', () => {
+    const wrapper = mount(FunctionDetail, {
+      props: {
+        view: functionRowView({
+          name: "one_arg",
+          function: ".a = 1",
+          language: "vrl",
+          params: [{ name: "row" }],
+          transType: 0,
+        }),
+      },
+      global: { plugins: [i18n] },
+    });
+
+    expect(
+      wrapper
+        .find('[data-test="function-detail-param-row"]')
+        .find('[data-test="function-detail-param-no-value"]')
+        .text(),
+    ).toBe("No value");
+  });
+
+  // Only a payload that declares the state gets a word about it; nothing here is inferred.
+  it("reports a declared required flag in words, and stays silent when the payload has none", () => {
+    const declared = mountDetail({
+      view: functionRowView({
+        name: "typed",
+        function: ".a = 1",
+        language: "vrl",
+        params: [{ name: "key", value: null, type: "string", required: true }],
+        transType: 0,
+      }),
+    });
+    expect(declared.find('[data-test="function-detail-param-key"]').text()).toContain("Required");
+    expect(declared.find('[data-test="function-detail-param-key"]').text()).toContain("string");
+
+    const silent = mountDetail();
+    expect(silent.text()).not.toContain("Required");
+    expect(silent.text()).not.toContain("Optional");
+  });
+
+  // Pipelines and streams answer one question, so the pane shows them as one list.
+  it("gives pipelines and streams one region", () => {
+    const wrapper = mountDetail({
+      usedByPipelines: [{ pipeline_id: "pip-1", name: "redact-stdout", enabled: true }],
+    });
+    const runs = wrapper.find('[data-test="function-detail-section-runs"]');
+
+    expect(runs.exists()).toBe(true);
+    expect(runs.text()).toContain("Where this runs");
+    expect(runs.find('[data-test="function-detail-pipeline-pip-1"]').text()).toContain(
+      "redact-stdout",
+    );
+    expect(runs.find('[data-test="function-detail-pipeline-pip-1"]').text()).toContain("Running");
+    expect(runs.find('[data-test="function-detail-stream-k8s"]').exists()).toBe(true);
+    expect(runs.find('[data-test="function-detail-runs-count"]').text()).toBe(
+      "1 pipeline · 2 streams",
+    );
+  });
+
+  it("says plainly when nothing calls the function", () => {
+    const wrapper = mountDetail({
+      view: functionRowView({ name: "idle", function: ".", language: "vrl", transType: 0 }),
+    });
+    expect(wrapper.find('[data-test="function-detail-runs-empty"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test="function-detail-runs-empty"]').text()).toContain(
+      "No pipeline or stream calls this function",
+    );
   });
 
   it("keeps the list's actions available on the focused function", async () => {
@@ -113,6 +214,8 @@ describe("FunctionDetail", () => {
       view: functionRowView({ name: "js_fn", function: "row", transType: 1 }),
     });
     expect(wrapper.find('[data-test="function-detail-panel"]').text()).toContain("JavaScript");
-    expect(wrapper.find('[data-test="function-detail-count"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test="function-detail-source-facts"]').text()).not.toContain(
+      "statement",
+    );
   });
 });

@@ -50,7 +50,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </template>
       <div class="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
         <div
-          class="relative flex min-h-0 w-full flex-1 flex-col gap-4 overflow-y-auto xl:flex-row xl:gap-6 xl:overflow-hidden"
+          class="relative flex min-h-0 w-full flex-1 flex-col gap-4 overflow-y-auto xl:flex-row xl:gap-6"
         >
           <div
             class="flex min-w-0 shrink-0 flex-col xl:min-h-0 xl:flex-1 xl:shrink"
@@ -191,12 +191,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </template>
 
               <template #cell-appliedIn="{ row }">
-                <span
+                <!-- A cut identifier is an operational error: whole names go first, and what
+                     does not fit is counted, never clipped mid-word. -->
+                <div
                   v-if="row?.view?.streams.length"
+                  class="flex min-w-0 flex-nowrap items-baseline gap-x-1.5 overflow-hidden"
                   data-test="function-list-applied-in"
-                  data-o2-cell-clip
-                  >{{ row.view.streams.join(streamSeparator) }}</span
                 >
+                  <span
+                    class="text-text-secondary shrink-0 text-xs tabular-nums"
+                    data-test="function-list-stream-count"
+                    >{{ row.view.streams.length }}</span
+                  >
+                  <span
+                    v-for="(stream, position) in visibleStreams(row)"
+                    :key="stream"
+                    :class="
+                      position === 0
+                        ? 'text-text-heading shrink-0 font-mono'
+                        : 'text-text-heading min-w-0 truncate font-mono'
+                    "
+                    >{{ stream }}</span
+                  >
+                  <span
+                    v-if="row.view.streams.length > STREAM_NAME_LIMIT"
+                    class="text-text-secondary relative shrink-0"
+                    :aria-label="
+                      t(
+                        'function.streamsMore',
+                        { count: row.view.streams.length - STREAM_NAME_LIMIT },
+                        row.view.streams.length - STREAM_NAME_LIMIT,
+                      )
+                    "
+                    data-test="function-list-stream-more"
+                    >{{ raw("+") }}{{ row.view.streams.length - STREAM_NAME_LIMIT }}</span
+                  >
+                  <OTooltip :content="raw(row.view.streams.join(', '))" />
+                </div>
                 <span
                   v-else
                   class="text-text-secondary"
@@ -304,6 +335,62 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </OButton>
               </template>
             </OTable>
+            <!-- The list's own close: the inverse of the Streams column, summed from the
+                 rows already on screen, so the region ends with content instead of canvas. -->
+            <OCard
+              variant="glass"
+              class="mt-3 w-full shrink-0"
+              data-test="functions-stream-index"
+              :aria-label="t('function.whereTheseRun')"
+            >
+              <OCardSection role="header" dense>
+                <OText variant="card-title">{{ t("function.whereTheseRun") }}</OText>
+                <span
+                  class="text-text-secondary text-xs tabular-nums"
+                  data-test="functions-stream-index-total"
+                  >{{
+                    t("function.streamsCount", { count: streamIndex.length }, streamIndex.length)
+                  }}</span
+                >
+              </OCardSection>
+              <OCardSection role="body" dense class="pt-0">
+                <ul v-if="streamIndex.length" class="m-0 flex list-none flex-col p-0">
+                  <li
+                    v-for="usage in visibleStreamIndex"
+                    :key="usage.stream"
+                    class="border-border-subtle flex items-baseline gap-2 border-t py-1.5 first:border-t-0"
+                    data-test="functions-stream-index-row"
+                  >
+                    <span class="text-text-heading min-w-0 truncate font-mono">{{
+                      usage.stream
+                    }}</span>
+                    <OTooltip :content="raw(usage.functions.join(', '))" />
+                    <span
+                      class="text-text-secondary ms-auto shrink-0 text-xs tabular-nums"
+                      :aria-label="
+                        t(
+                          'function.streamFunctionCount',
+                          { count: usage.functions.length },
+                          usage.functions.length,
+                        )
+                      "
+                      data-test="functions-stream-index-count"
+                      >{{ usage.functions.length }}</span
+                    >
+                  </li>
+                </ul>
+                <OText v-else variant="meta">{{ t("function.noStreamsApplied") }}</OText>
+                <OText
+                  v-if="hiddenStreamCount"
+                  variant="meta"
+                  class="tabular-nums"
+                  data-test="functions-stream-index-rest"
+                  >{{
+                    t("function.streamsMore", { count: hiddenStreamCount }, hiddenStreamCount)
+                  }}</OText
+                >
+              </OCardSection>
+            </OCard>
           </div>
           <FunctionDetail
             v-if="paneVisible"
@@ -312,7 +399,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :filtered="!!filterQuery"
             :pushed="isMobile"
             :used-by-pipelines="usedByPipelines"
-            class="w-full shrink-0 xl:w-2/5 xl:self-stretch"
+            class="w-full shrink-0 xl:max-h-full xl:w-2/5 xl:self-start"
             @back="closePhoneDetail"
             @edit="showAddUpdateFn({ row: focusedRow })"
             @pipelines="getAssociatedPipelines({ row: focusedRow })"
@@ -405,7 +492,10 @@ import OTimeCell from "@/lib/core/Table/cells/OTimeCell.vue";
 import OPageLayout from "@/lib/core/PageLayout/OPageLayout.vue";
 import PipelineSectionTabs from "@/components/pipeline/PipelineSectionTabs.vue";
 import FunctionDetail from "./FunctionDetail.vue";
-import { functionRowView } from "./functionRows";
+import { functionRowView, streamUsage } from "./functionRows";
+import OCard from "@/lib/core/Card/OCard.vue";
+import OCardSection from "@/lib/core/Card/OCardSection.vue";
+import OText from "@/lib/core/Typography/OText.vue";
 import ORefreshButton from "@/lib/core/RefreshButton/ORefreshButton.vue";
 import { toast } from "@/lib/feedback/Toast/useToast";
 import { useShortcuts } from "@/lib/vue-shortcut-manager";
@@ -443,6 +533,9 @@ export default defineComponent({
     OSearchInput,
     ORefreshButton,
     OTimeCell,
+    OCard,
+    OCardSection,
+    OText,
   },
   emits: [
     "updated:fields",
@@ -854,6 +947,17 @@ export default defineComponent({
           .length,
     );
 
+    // The list's close names the streams the rows carry and how many functions each one
+    // runs, summed from the rows on screen — no second request, no invented coverage.
+    const STREAM_INDEX_ROWS = 5;
+    const STREAM_NAME_LIMIT = 2;
+    const visibleStreams = (row: any) => (row?.view?.streams ?? []).slice(0, STREAM_NAME_LIMIT);
+    const streamIndex = computed(() => streamUsage(visibleRows.value as any[]));
+    const visibleStreamIndex = computed(() => streamIndex.value.slice(0, STREAM_INDEX_ROWS));
+    const hiddenStreamCount = computed(() =>
+      Math.max(streamIndex.value.length - STREAM_INDEX_ROWS, 0),
+    );
+
     // Deep links and reloads restore the selection the URL names.
     const urlFunctionName = () => String(route.query[FOCUSED_QUERY] ?? "");
     const syncFocusedName = (name: string) => {
@@ -1226,6 +1330,11 @@ export default defineComponent({
       isMobile,
       streamSeparator,
       appliedCount,
+      streamIndex,
+      visibleStreamIndex,
+      visibleStreams,
+      STREAM_NAME_LIMIT,
+      hiddenStreamCount,
       usedByPipelines,
       openBulkDeleteDialog,
       exportLoading,

@@ -21,6 +21,10 @@
 export interface FunctionParamRow {
   name: string;
   value: string | null;
+  /** Only a producer that declares a type gets one; absent means the UI makes no type claim. */
+  type?: string;
+  /** Only a producer that declares it gets one; absent means the UI makes no required claim. */
+  required?: boolean;
 }
 
 export interface FunctionRowView {
@@ -29,12 +33,20 @@ export interface FunctionRowView {
   codeLang: string;
   isJs: boolean;
   body: string;
+  /** Line count of `body` as written — a one-line source is a complete source. */
+  sourceLines: number;
   params: FunctionParamRow[];
   streams: string[];
   /** The server's own function count, or null when the payload carries none. */
   functionCount: number | null;
   /** `z_meta._timestamp` in microseconds — the payload's only write time. */
   updatedUs: number | null;
+}
+
+/** One stream and the functions applied to it — the list's inverse index, summed from its rows. */
+export interface StreamUsage {
+  stream: string;
+  functions: string[];
 }
 
 const asText = (value: unknown): string | null => {
@@ -58,7 +70,11 @@ const paramFromEntry = (entry: unknown): FunctionParamRow | null => {
   const name = asText(record.name ?? record.key ?? record.arg)?.trim() ?? "";
   if (!name) return null;
   const value = asText(record.value ?? record.default);
-  return { name, value: value?.trim() ? value.trim() : null };
+  const type = asText(record.type)?.trim();
+  const param: FunctionParamRow = { name, value: value?.trim() ? value.trim() : null };
+  if (type) param.type = type;
+  if (typeof record.required === "boolean") param.required = record.required;
+  return param;
 };
 
 /**
@@ -98,17 +114,39 @@ export const parseStreams = (data: any): string[] => {
     .filter((name: string) => name.length > 0);
 };
 
+/** Sums the rows already on screen into the stream → functions index the list closes with. */
+export const streamUsage = (rows: any[]): StreamUsage[] => {
+  const byStream = new Map<string, string[]>();
+  (rows ?? []).forEach((row: any) => {
+    const name = asText(row?.name) ?? "";
+    const streams: string[] = row?.view?.streams ?? [];
+    streams.forEach((stream) => {
+      const applied = byStream.get(stream) ?? [];
+      applied.push(name);
+      byStream.set(stream, applied);
+    });
+  });
+  return [...byStream.entries()]
+    .map(([stream, functions]) => ({ stream, functions }))
+    .sort((a, b) => b.functions.length - a.functions.length || a.stream.localeCompare(b.stream));
+};
+
+const countSourceLines = (body: string | null): number =>
+  body ? body.replace(/\n$/, "").split("\n").length : 0;
+
 export function functionRowView(data: any): FunctionRowView {
   const transType = String(data?.transType ?? data?.trans_type ?? "0");
   const isJs = transType === "1";
   const declared = asText(data?.language)?.trim().toLowerCase() ?? "";
   const count = Number(data?.num_of_func ?? data?.numOfFunc);
   const stamped = Number(data?.z_meta?._timestamp ?? data?.zMeta?._timestamp);
+  const body = asText(data?.function) ?? "";
   return {
     name: asText(data?.name) ?? "",
     codeLang: declared || (isJs ? "javascript" : "vrl"),
     isJs,
-    body: asText(data?.function) ?? "",
+    body,
+    sourceLines: countSourceLines(body),
     params: parseParams(data?.params),
     streams: parseStreams(data),
     functionCount: Number.isFinite(count) ? count : null,

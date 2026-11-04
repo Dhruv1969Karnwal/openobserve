@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <h2
             :title="view.name"
             data-test="function-detail-name"
-            class="text-text-heading truncate font-mono text-base leading-tight font-medium"
+            class="text-text-heading truncate text-base leading-tight font-medium"
           >
             {{ view.name }}
           </h2>
@@ -131,100 +131,134 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </div>
 
     <div v-else class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-3">
-      <section class="flex min-w-0 flex-col gap-1.5">
-        <div class="flex items-center gap-2">
-          <OText variant="card-title">{{ t("function.function_definition") }}</OText>
+      <section class="flex min-w-0 flex-col gap-1.5" data-test="function-detail-section-source">
+        <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <OText variant="card-title">{{ t("function.definitionTitle") }}</OText>
           <span
-            v-if="view.functionCount !== null"
             class="text-text-secondary text-xs tabular-nums"
-            data-test="function-detail-count"
-            >{{
-              t("function.definitionCount", { count: view.functionCount }, view.functionCount)
-            }}</span
+            data-test="function-detail-source-facts"
+            >{{ sourceFacts }}</span
           >
         </div>
+        <!-- The source is the function. A gutter numbers it and the block ends with its
+             last line, so a one-line body reads as complete rather than as a stub. -->
         <OCodeBlock
           v-if="view.body"
           :code="view.body"
           :lang="view.codeLang"
-          wrap
-          :max-lines="14"
+          line-numbers
           padded
           :data-test="`function-detail-body-${view.name}`"
         />
-        <OText v-else variant="meta">{{ raw("—") }}</OText>
+        <OText v-else variant="meta" data-test="function-detail-body-empty">{{
+          t("function.sourceEmpty")
+        }}</OText>
       </section>
 
-      <section class="border-border-subtle flex min-w-0 flex-col gap-1.5 border-t pt-3">
-        <OText variant="card-title">{{ t("function.import.paramsLabel") }}</OText>
-        <ODescriptionList v-if="view.params.length" dense>
-          <ODescriptionItem
-            v-for="param in view.params"
-            :key="param.name"
-            :data-test="`function-detail-param-${param.name}`"
-          >
-            <template #label>
-              <span class="min-w-0 truncate font-mono">{{ param.name }}</span>
-            </template>
-            <OCode v-if="param.value">{{ param.value }}</OCode>
-            <span v-else class="text-text-secondary">{{ raw("—") }}</span>
-          </ODescriptionItem>
-        </ODescriptionList>
-        <OText v-else variant="meta">{{ t("common.noParameters") }}</OText>
-      </section>
-
-      <section class="border-border-subtle flex min-w-0 flex-col gap-1.5 border-t pt-3">
-        <div class="flex items-center gap-2">
-          <OText variant="card-title">{{ t("function.usedByPipelines") }}</OText>
-        </div>
-        <div v-if="usedByPipelines.length" class="flex flex-wrap gap-1">
+      <section
+        class="border-border-subtle flex min-w-0 flex-col gap-1 border-t pt-3"
+        data-test="function-detail-section-params"
+      >
+        <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <OText variant="card-title">{{ t("function.argumentsTitle") }}</OText>
           <span
-            v-for="pipe in usedByPipelines"
-            :key="pipe.pipeline_id"
-            class="border-border-control bg-surface-base rounded-default inline-flex min-w-0 items-center gap-1.5 border px-1.5 py-0.5"
-            :data-test="`function-detail-pipeline-`"
-          >
-            <OIcon
-              :name="pipe.enabled ? 'play-arrow' : 'pause'"
-              size="xs"
-              :class="pipe.enabled ? 'text-text-body' : 'text-text-secondary'"
-              :aria-label="
-                pipe.enabled ? t('function.pipelineEnabled') : t('function.pipelinePaused')
-              "
-            />
-            <OTooltip
-              :content="pipe.enabled ? t('function.pipelineEnabled') : t('function.pipelinePaused')"
-            />
-            <span class="min-w-0 truncate font-mono text-xs">{{ pipe.name }}</span>
-          </span>
-        </div>
-        <OText v-else variant="meta">{{ raw("—") }}</OText>
-      </section>
-
-      <section class="border-border-subtle flex min-w-0 flex-col gap-1.5 border-t pt-3">
-        <div class="flex items-center gap-2">
-          <OText variant="card-title">{{ t("logStream.header") }}</OText>
-          <span
-            v-if="view.streams.length"
+            v-if="view.params.length"
             class="text-text-secondary text-xs tabular-nums"
-            data-test="function-detail-stream-count"
+            data-test="function-detail-params-count"
             >{{
-              t("function.streamsCount", { count: view.streams.length }, view.streams.length)
+              t("function.argumentsCount", { count: view.params.length }, view.params.length)
             }}</span
           >
         </div>
-        <div v-if="view.streams.length" class="flex flex-wrap gap-1">
-          <OTag
-            v-for="stream in view.streams"
-            :key="stream"
-            :label="raw(stream)"
-            variant="default-soft"
-            size="xs"
-            class="font-mono"
-            :data-test="`function-detail-stream-${stream}`"
-          />
+        <table v-if="view.params.length" class="w-full border-collapse text-xs">
+          <thead>
+            <tr class="text-text-label text-left">
+              <th scope="col" class="py-1 pe-2 text-start font-normal">
+                {{ t("function.order") }}
+              </th>
+              <th scope="col" class="py-1 pe-2 text-start font-normal">
+                {{ t("function.argumentColumn") }}
+              </th>
+              <th scope="col" class="py-1 text-start font-normal">
+                {{ t("function.valueColumn") }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(param, index) in view.params"
+              :key="param.name"
+              class="border-border-subtle border-t align-top"
+              :data-test="`function-detail-param-${param.name}`"
+            >
+              <td class="text-text-secondary py-1.5 pe-2 tabular-nums">{{ index + 1 }}</td>
+              <td class="py-1.5 pe-2">
+                <span class="text-text-heading font-mono">{{ param.name }}</span>
+                <span
+                  v-if="param.type"
+                  class="text-text-secondary block"
+                  data-test="function-detail-param-type"
+                  >{{ param.type }}</span
+                >
+                <!-- Required is a word whenever the payload has a state to report; a bare
+                     `*` was read as a required marker, and the payload carries no such flag. -->
+                <span
+                  v-if="param.required !== undefined"
+                  class="text-text-body block"
+                  data-test="function-detail-param-required"
+                  >{{
+                    param.required ? t("function.requiredWord") : t("function.optionalWord")
+                  }}</span
+                >
+              </td>
+              <td class="py-1.5">
+                <OCode v-if="param.value">{{ param.value }}</OCode>
+                <span
+                  v-else
+                  class="text-text-secondary"
+                  data-test="function-detail-param-no-value"
+                  >{{ t("function.noValueWord") }}</span
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <OText v-else variant="meta">{{ t("common.noParameters") }}</OText>
+      </section>
+
+      <section
+        class="border-border-subtle flex min-w-0 flex-col gap-1 border-t pt-3"
+        data-test="function-detail-section-runs"
+      >
+        <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <OText variant="card-title">{{ t("function.whereItRuns") }}</OText>
+          <span
+            v-if="destinations.length"
+            class="text-text-secondary text-xs tabular-nums"
+            data-test="function-detail-runs-count"
+            >{{ runsFacts }}</span
+          >
         </div>
-        <OText v-else variant="meta">{{ raw("—") }}</OText>
+        <ul v-if="destinations.length" class="m-0 flex list-none flex-col p-0">
+          <li
+            v-for="destination in destinations"
+            :key="destination.key"
+            class="border-border-subtle flex items-baseline gap-2 border-t py-1.5 first:border-t-0"
+            :data-test="destination.testId"
+          >
+            <span class="text-text-secondary w-14 shrink-0 text-xs">{{ destination.kind }}</span>
+            <span class="text-text-heading min-w-0 truncate font-mono">{{ destination.name }}</span>
+            <span
+              v-if="destination.state"
+              class="text-text-body ms-auto shrink-0 text-xs"
+              data-test="function-detail-run-state"
+              >{{ destination.state }}</span
+            >
+          </li>
+        </ul>
+        <OText v-else variant="meta" data-test="function-detail-runs-empty">{{
+          t("function.runsNowhere")
+        }}</OText>
       </section>
     </div>
   </aside>
@@ -240,11 +274,8 @@ import ODropdown from "@/lib/overlay/Dropdown/ODropdown.vue";
 import ODropdownItem from "@/lib/overlay/Dropdown/ODropdownItem.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
-import OTag from "@/lib/core/Badge/OTag.vue";
 import OText from "@/lib/core/Typography/OText.vue";
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
-import ODescriptionList from "@/lib/lists/DescriptionList/ODescriptionList.vue";
-import ODescriptionItem from "@/lib/lists/DescriptionList/ODescriptionItem.vue";
 import OSkeleton from "@/lib/feedback/Skeleton/OSkeleton.vue";
 import OTimeCell from "@/lib/core/Table/cells/OTimeCell.vue";
 import { useStore } from "vuex";
@@ -277,6 +308,48 @@ const store = useStore();
 const panelEl = ref<HTMLElement | null>(null);
 
 const languageLabel = computed(() => (props.view?.isJs ? raw("JavaScript") : t("function.vrl")));
+
+// Facts about the source itself, so a one-character body is legibly the whole function.
+const sourceFacts = computed(() => {
+  const view = props.view;
+  if (!view) return "";
+  const lines = t("function.sourceLines", { count: view.sourceLines }, view.sourceLines);
+  if (view.functionCount === null) return lines;
+  return `${lines} · ${t(
+    "function.definitionCount",
+    { count: view.functionCount },
+    view.functionCount,
+  )}`;
+});
+
+// Pipelines and streams are one question — where does this run — so they are one list.
+const destinations = computed(() => {
+  const pipelines = (props.usedByPipelines ?? []).map((pipe) => ({
+    key: `pipeline-${pipe.pipeline_id}`,
+    kind: t("function.pipelineKind"),
+    name: pipe.name,
+    state: pipe.enabled ? t("function.runningWord") : t("function.pausedWord"),
+    testId: `function-detail-pipeline-${pipe.pipeline_id}`,
+  }));
+  const streams = (props.view?.streams ?? []).map((stream) => ({
+    key: `stream-${stream}`,
+    kind: t("function.streamKind"),
+    name: stream,
+    state: "",
+    testId: `function-detail-stream-${stream}`,
+  }));
+  return [...pipelines, ...streams];
+});
+
+// A back-link that never arrived is unknown, not zero, so only a non-empty kind is stated.
+const runsFacts = computed(() => {
+  const parts: string[] = [];
+  const pipelines = props.usedByPipelines?.length ?? 0;
+  if (pipelines) parts.push(t("function.pipelinesCount", { count: pipelines }, pipelines));
+  const streams = props.view?.streams.length ?? 0;
+  if (streams) parts.push(t("function.streamsCount", { count: streams }, streams));
+  return parts.join(" · ");
+});
 
 onMounted(() => {
   if (props.pushed) panelEl.value?.focus({ preventScroll: true });
