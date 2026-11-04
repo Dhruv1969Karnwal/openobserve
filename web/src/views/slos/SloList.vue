@@ -812,7 +812,7 @@ const columns = computed<OTableColumnDef<SloListItem>[]>(() => {
     {
       id: "name",
       header: t("slos.column.name"),
-      accessor: (r: any) => r.name,
+      accessorFn: (r: any) => r.name,
       sortable: true,
       resizable: true,
       hideable: true,
@@ -826,14 +826,14 @@ const columns = computed<OTableColumnDef<SloListItem>[]>(() => {
     ...optional("health", {
       id: "health",
       header: t("slos.column.status"),
-      accessor: (r: any) => rowHealth(r),
+      accessorFn: (r: any) => rowHealth(r),
       // A chip is never squeezed: the widest state label keeps its own room.
       size: wide ? 148 : 144,
     }),
     ...optional("sli", {
       id: "sli",
       header: t("slos.column.statusVsTarget"),
-      accessor: (r: any) => r.status?.sli ?? -1,
+      accessorFn: (r: any) => r.status?.sli ?? -1,
       sortable: true,
       resizable: true,
       hideable: true,
@@ -842,7 +842,7 @@ const columns = computed<OTableColumnDef<SloListItem>[]>(() => {
     ...optional("budget", {
       id: "budget",
       header: t("slos.column.errorBudget"),
-      accessor: (r: any) => r.status?.error_budget_remaining ?? null,
+      accessorFn: (r: any) => r.status?.error_budget_remaining ?? null,
       sortable: true,
       resizable: true,
       hideable: true,
@@ -853,7 +853,7 @@ const columns = computed<OTableColumnDef<SloListItem>[]>(() => {
     ...optional("coverage", {
       id: "coverage",
       header: t("slos.column.coverage"),
-      accessor: (r: any) => r.status?.coverage ?? 0,
+      accessorFn: (r: any) => r.status?.coverage ?? 0,
       sortable: true,
       resizable: true,
       hideable: true,
@@ -862,7 +862,7 @@ const columns = computed<OTableColumnDef<SloListItem>[]>(() => {
     ...optional("window", {
       id: "window",
       header: t("slos.column.window"),
-      accessor: (r: any) => r.window_secs,
+      accessorFn: (r: any) => r.window_secs,
       resizable: true,
       hideable: true,
       size: 104,
@@ -870,7 +870,7 @@ const columns = computed<OTableColumnDef<SloListItem>[]>(() => {
     {
       id: "burn",
       header: t("slos.column.burnRate"),
-      accessor: (r: any) => r.status?.burn_rate ?? -1,
+      accessorFn: (r: any) => r.status?.burn_rate ?? -1,
       sortable: true,
       resizable: true,
       hideable: true,
@@ -879,14 +879,14 @@ const columns = computed<OTableColumnDef<SloListItem>[]>(() => {
     {
       id: "tags",
       header: t("slos.column.tags"),
-      accessor: (r: any) => (r.tags || []).join(","),
+      accessorFn: (r: any) => (r.tags || []).join(","),
       hideable: true,
       size: 180,
     },
     {
       id: "folder",
       header: t("slos.column.folder"),
-      accessor: (r: any) => r.folder_id,
+      accessorFn: (r: any) => r.folder_id,
       sortable: true,
       hideable: true,
       size: 140,
@@ -897,7 +897,7 @@ const columns = computed<OTableColumnDef<SloListItem>[]>(() => {
     {
       id: "actions",
       header: t("slos.column.actions"),
-      accessor: () => "",
+      accessorFn: () => "",
       sortable: false,
       isAction: true,
       meta: { align: "center", actionCount: compactActions.value ? 1 : 3 },
@@ -924,7 +924,7 @@ function rowHealth(row: SloListItem): SloHealth {
   return sloHealth(row.status);
 }
 
-function healthLabel(row: SloListItem): string {
+function healthLabel(row: SloListItem): I18nText {
   const state = rowState(row);
   return state === "paused" ? t("slos.paused") : t(`slos.health.${state}`);
 }
