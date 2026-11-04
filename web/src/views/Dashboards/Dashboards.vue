@@ -333,11 +333,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OUserCell :value="value" />
                 <OTag
                   v-if="row.role && row.role !== 'owner'"
-                  :label="t(`dashboard.roleShort.`)"
+                  :label="roleChipLabel(row.role)"
                   variant="default-soft"
                   size="xs"
                   class="shrink-0"
-                  :data-test="`dashboard-role-`"
+                  :data-test="`dashboard-role-${row.role}`"
                 />
               </span>
             </template>
@@ -497,18 +497,69 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </OButton>
             </template>
           </OTable>
+          <!-- The landing scope is Favorites, and the rows it is missing are already
+               on screen elsewhere: the favorites read fetches every folder a favorite
+               lives in, so the dashboards those folders hold that are NOT starred are
+               held here too. Star one and it joins the list above. -->
+          <section
+            v-show="showFavoriteCandidates"
+            class="border-border-subtle px-page-edge flex min-w-0 shrink-0 flex-col gap-1.5 border-t py-2.5"
+            :aria-label="t('dashboard.context.candidatesAriaLabel')"
+            data-test="dashboard-favorite-candidates"
+          >
+            <div class="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+              <OText variant="card-title" as="h2">{{
+                t("dashboard.context.candidatesTitle")
+              }}</OText>
+              <span class="text-text-secondary min-w-0 truncate text-xs">{{
+                t("dashboard.context.candidatesHint", { folders: candidateFoldersLabel })
+              }}</span>
+            </div>
+            <ul class="flex min-w-0 flex-col gap-0.5">
+              <li
+                v-for="(row, slot) in favoriteCandidateSlots"
+                :key="slot"
+                v-show="row.present"
+                class="hover:bg-table-row-hover-bg group/row rounded-default flex min-w-0 items-center gap-2 px-1 py-1"
+                :data-test="`dashboard-favorite-candidate-${row.id}`"
+              >
+                <OButton
+                  variant="ghost"
+                  size="icon-xs-sq"
+                  icon-left="star-outline"
+                  class="shrink-0"
+                  :title="t('dashboard.addToFavorites')"
+                  :aria-label="t('dashboard.addToFavorites')"
+                  :data-test="`dashboard-favorite-candidate-star-${row.id}`"
+                  @click="toggleFavorite(row)"
+                />
+                <OButton
+                  variant="ghost"
+                  size="sm"
+                  class="min-w-0 px-0 text-left"
+                  :data-test="`dashboard-favorite-candidate-open-${row.id}`"
+                  @click="routeToViewD(row)"
+                >
+                  <OTruncatedText class="text-text-heading font-medium">{{
+                    row.name
+                  }}</OTruncatedText>
+                </OButton>
+                <span class="text-text-secondary ms-auto hidden min-w-0 truncate text-xs md:inline"
+                  >{{ row.owner }} · {{ t("dashboard.scope.updated", { when: row.age }) }}</span
+                >
+              </li>
+            </ul>
+          </section>
           <!-- A folder with room under the pager spends it on the task that
                actually fills one, instead of leaving the frame empty. Hidden, not
                unmounted: the list repaints this on every folder switch. -->
           <section
             v-show="showContextPanel"
             class="border-border-subtle px-page-edge flex min-w-0 shrink-0 flex-col gap-2 border-t py-2.5"
-            :aria-label="t('dashboard.context.ariaLabel')"
+            :aria-label="contextPanelAriaLabel"
             data-test="dashboard-folder-actions"
           >
-            <OText variant="card-title" as="h2">{{
-              t("dashboard.context.addTitle", { folder: scopeLabel })
-            }}</OText>
+            <OText variant="card-title" as="h2">{{ contextPanelTitle }}</OText>
             <!-- Side by side only once the panel fits both halves without cutting either. -->
             <div class="grid min-w-0 gap-x-8 gap-y-2 2xl:grid-cols-[minmax(0,42%)_minmax(0,1fr)]">
               <ul class="flex min-w-0 flex-col gap-1.5">
@@ -752,6 +803,31 @@ interface DashboardRow {
   actions: string;
 }
 
+/** A "not in your favorites" slot: always rendered, hidden when unfilled. */
+interface FavoriteCandidate extends DashboardRow {
+  age: string;
+  present: boolean;
+}
+
+const CANDIDATE_SLOTS = 3;
+
+const BLANK_CANDIDATE: FavoriteCandidate = {
+  id: "",
+  folder: "",
+  folder_id: "",
+  name: "",
+  identifier: "",
+  description: raw(""),
+  owner: "",
+  created_raw: "",
+  created: "",
+  modified_raw: "",
+  modified: "",
+  actions: "false",
+  age: "",
+  present: false,
+};
+
 interface DashboardSearchResult {
   dashboard: Record<string, any>;
   hash: string;
@@ -801,7 +877,12 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const { t } = useI18nTyped();
+    const { t, te } = useI18nTyped();
+    // A role outside the booked ladder prints itself rather than a raw key path.
+    const roleChipLabel = (role: string) => {
+      const key = `dashboard.roleShort.${role}`;
+      return te(key) ? t(key) : raw(role);
+    };
     const { isMobile } = useBreakpoint();
     const dashboard = ref({});
     const showAddDashboardDialog = ref(false);
@@ -1039,9 +1120,8 @@ export default defineComponent({
     // Rows carry a folder only where the view spans folders (Favorites, search
     // across folders); there it is what a reader groups by, so it becomes a
     // section header instead of a column.
-    const spansFolders = computed(
-      () => (searchAcrossFolders.value && searchQuery.value !== "") || showFavoritesOnly.value,
-    );
+    const spansSearch = computed(() => searchAcrossFolders.value && searchQuery.value !== "");
+    const spansFolders = computed(() => spansSearch.value || showFavoritesOnly.value);
     // Never a null key once sectioning is on: a row without a section is dropped
     // from a sectioned body, and every row the view returned must stay readable.
     const rowSection = (row: DashboardRow) =>
@@ -1122,7 +1202,9 @@ export default defineComponent({
         id: "new",
         icon: "add",
         title: t("dashboard.context.newTitle"),
-        desc: t("dashboard.context.newDesc"),
+        desc: showFavoritesOnly.value
+          ? t("dashboard.context.newDescFavorites")
+          : t("dashboard.context.newDesc"),
       },
       {
         id: "import",
@@ -1137,13 +1219,27 @@ export default defineComponent({
         desc: t("dashboard.context.templatesDesc"),
       },
     ]);
+    // Cross-folder search results are an answer to a question, not a scope you add
+    // to, so they never get the panel. Favorites is a scope you do add to — by
+    // starring — and it is the route the app lands on, so it gets it with copy
+    // that names what creating a dashboard actually does there.
     const showContextPanel = computed(
       () =>
         !loading.value &&
+        !spansSearch.value &&
         dashboards.value.length > 0 &&
         dashboards.value.length <= 5 &&
-        filterQuery.value.trim() === "" &&
-        !spansFolders.value,
+        filterQuery.value.trim() === "",
+    );
+    const contextPanelTitle = computed(() =>
+      showFavoritesOnly.value
+        ? t("dashboard.context.addTitleFavorites")
+        : t("dashboard.context.addTitle", { folder: scopeLabel.value }),
+    );
+    const contextPanelAriaLabel = computed(() =>
+      showFavoritesOnly.value
+        ? t("dashboard.context.ariaLabelFavorites")
+        : t("dashboard.context.ariaLabel"),
     );
     const onContextAction = (id: "new" | "import" | "templates") => {
       if (id === "new") addDashboard();
@@ -1749,6 +1845,56 @@ export default defineComponent({
       }
     });
 
+    // Favorites reads every folder that holds a favorite and those lists stay in
+    // the cache, so the dashboards this scope is missing are already held. A
+    // candidate is one of those rows that is not starred: nothing is fetched for
+    // this region, and nothing outside the folders the scope already opened.
+    // The list is a fixed set of slots rather than a growing v-for, and a slot with
+    // no candidate is hidden rather than absent.
+    const favoriteCandidates = computed<FavoriteCandidate[]>(() => {
+      if (!showFavoritesOnly.value || spansSearch.value) return [];
+      const lists = (store.state.organizationData?.allDashboardList ?? {}) as Record<
+        string,
+        Record<string, any>[]
+      >;
+      const starred = new Set(favorites.value.map((f: any) => `${f.folderId}/${f.dashboardId}`));
+      const rows: FavoriteCandidate[] = [];
+      for (const [folderId, list] of Object.entries(lists)) {
+        if (!Array.isArray(list)) continue;
+        for (const board of list) {
+          if (!board?.dashboardId || starred.has(`${folderId}/${board.dashboardId}`)) continue;
+          const row = mapDashboard(board, 0) as FavoriteCandidate;
+          row.folder = folderNamesById.value.get(folderId) ?? folderId;
+          row.folder_id = folderId;
+          row.age = relativeAge(row.modified_raw || row.created_raw);
+          row.present = true;
+          rows.push(row);
+        }
+      }
+      return rows
+        .sort((a, b) =>
+          String(b.modified_raw || b.created_raw).localeCompare(
+            String(a.modified_raw || a.created_raw),
+          ),
+        )
+        .slice(0, CANDIDATE_SLOTS);
+    });
+    const favoriteCandidateSlots = computed<FavoriteCandidate[]>(() =>
+      Array.from(
+        { length: CANDIDATE_SLOTS },
+        (_, index) => favoriteCandidates.value[index] ?? BLANK_CANDIDATE,
+      ),
+    );
+    // Same gate as the panel below it: a list that is answering a filter is not a
+    // scope being described, and the hero empty state owns that frame.
+    const showFavoriteCandidates = computed(
+      () =>
+        !loading.value && filterQuery.value.trim() === "" && favoriteCandidates.value.length > 0,
+    );
+    const candidateFoldersLabel = computed(() =>
+      [...new Set(favoriteCandidates.value.map((row) => row.folder))].join(", "),
+    );
+
     function measureListFrame() {
       const shell = tableShellRef.value;
       if (!shell) return;
@@ -2203,6 +2349,7 @@ export default defineComponent({
     ]);
     return {
       t,
+      roleChipLabel,
       oTableRef,
       store,
       orgData,
@@ -2218,6 +2365,11 @@ export default defineComponent({
       scopeDescription,
       scopeFacts,
       contextActions,
+      favoriteCandidateSlots,
+      showFavoriteCandidates,
+      candidateFoldersLabel,
+      contextPanelTitle,
+      contextPanelAriaLabel,
       defaultColumnVisibility,
       showContextPanel,
       onContextAction,
