@@ -18,7 +18,7 @@ import { useTableColumnPersistence } from "./composables/useTableColumnPersisten
 import OTableColumnToggle from "./sub-components/OTableColumnToggle.vue";
 import { FlexRender, type Row } from "@tanstack/vue-table";
 import { shouldFillHeight } from "./fillPolicy";
-import { shouldShowFoldCue } from "./tableFold";
+import { shouldShowFoldCue, dockReservePx, dockedBottomBandPx } from "./tableFold";
 import {
   TOOLTIP_OFF_ATTR,
   TOOLTIP_TRIGGER_ATTR,
@@ -987,17 +987,20 @@ const bodyOverflows = ref(false);
 const scrollOverflowPx = ref(0);
 const scrollAtBottom = ref(false);
 const scrollbarTakesSpace = ref(false);
+const dockedBandReserve = ref(0);
 function measureBodyOverflow() {
   const sc = scrollContainerRef.value;
   if (!sc || isDelegatedScroll.value) {
     bodyOverflows.value = false;
     scrollOverflowPx.value = 0;
+    dockedBandReserve.value = 0;
     return;
   }
   scrollOverflowPx.value = Math.max(0, sc.scrollHeight - sc.clientHeight);
   bodyOverflows.value = scrollOverflowPx.value > 1;
   scrollbarTakesSpace.value = sc.offsetWidth - sc.clientWidth > 0;
   scrollAtBottom.value = sc.scrollHeight - sc.scrollTop - sc.clientHeight < 4;
+  dockedBandReserve.value = dockReservePx(dockedBottomBandPx(sc), bodyOverflows.value);
 }
 const hasDockedPager = computed(() => !!slots["pagination-bar"] || pagination.isEnabled.value);
 const foldClearance = computed(
@@ -1532,6 +1535,7 @@ defineExpose({
               ? `${props.maxHeight}px`
               : props.maxHeight
             : undefined,
+          paddingBottom: dockedBandReserve ? `${dockedBandReserve}px` : undefined,
         }"
         data-test="o2-table-scroll-container"
         @scroll="handleScroll"
@@ -1671,6 +1675,7 @@ defineExpose({
             :selection-multiple="selection.isMultiple.value"
             :is-row-selected-fn="(row: TData) => selection.isRowSelected(row)"
             :is-row-selectable="props.isRowSelectable"
+            :row-selection-reason="props.rowSelectionReason"
             :expansion-enabled="expansion.isEnabled.value"
             :is-expanded-fn="(row: TData) => expansion.isExpanded(row)"
             :get-row-expansion-enabled="props.getRowExpansionEnabled"

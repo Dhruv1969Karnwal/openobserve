@@ -124,3 +124,23 @@
 @utility pb-safe {
   padding-bottom: calc(var(--spacing-5) + env(safe-area-inset-bottom));
 }
+
+/* ── Selection affordance ───────────────────────────────────────────────────
+   The shared non-colour cue for a selected/active row, option or toggle: an inset
+   start edge (follows the element's own radius, costs no layout) plus the weight
+   step. A selected fill alone measured 1.30–1.36:1, under the SC 1.4.11 graphic
+   floor, so no surface may signal selection with tint only. Pair with
+   `aria-selected` / `aria-pressed` / `aria-current` on the same element. */
+@utility list-selected-edge {
+  box-shadow: inset 0.1875rem 0 0 var(--color-border-strong);
+  font-weight: var(--font-semibold);
+}
+
+/* The shared field lists (logs, traces) mark a selected field with tint only,
+   measured 1.30–1.36:1. The row is rendered by src/components/common/FieldRow.vue,
+   which is not a lib/core surface, so the affordance is bound here. Declarations
+   mirror `list-selected-edge` above — change one, change both. */
+.field_list.selected {
+  box-shadow: inset 0.1875rem 0 0 var(--color-border-strong);
+  font-weight: var(--font-semibold);
+}

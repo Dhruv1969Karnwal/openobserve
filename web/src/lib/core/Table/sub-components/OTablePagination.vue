@@ -90,6 +90,16 @@ const rangeSentence = computed(() =>
     ? `${t("search.showing")} ${EMPTY_RANGE} ${t("search.of")} ${totalCountText.value}`
     : t("components.table.range", { from: rangeLabel.value, total: totalCountText.value }),
 );
+
+// Pager arrows are not drawn when there is one page; the page-size select is a
+// pager too. A set that already fits the smallest option offers no real choice,
+// so the control would only promise pagination that cannot happen. A lower-bound
+// total may hide more rows than it names, so it never suppresses the select.
+const showsPageSizeSelect = computed(() => {
+  if (props.pageSizeOptions.length === 0) return false;
+  const smallest = Math.min(...props.pageSizeOptions);
+  return !props.totalCountExact || props.totalCount > smallest;
+});
 </script>
 
 <template>
@@ -144,14 +154,8 @@ const rangeSentence = computed(() =>
       >
         {{ rangeSentence }}
       </span>
-      <div
-        class="bg-border-default h-4 w-px shrink-0 max-md:hidden"
-        v-if="pageSizeOptions.length > 0"
-      />
-      <div
-        v-if="pageSizeOptions.length > 0"
-        class="text-text-secondary flex items-center gap-1.5 text-xs"
-      >
+      <div class="bg-border-default h-4 w-px shrink-0 max-md:hidden" v-if="showsPageSizeSelect" />
+      <div v-if="showsPageSizeSelect" class="text-text-secondary flex items-center gap-1.5 text-xs">
         <span class="whitespace-nowrap max-md:hidden">{{ t("search.recordsPerPage") }}</span>
         <OSelect
           v-model="pageSizeModel"

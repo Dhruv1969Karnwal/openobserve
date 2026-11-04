@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import OButton from "./OButton.vue";
+import { raw } from "@/types/i18n";
 import type { ButtonVariant } from "./OButton.types";
 
 const ALL_VARIANTS = [
@@ -644,6 +645,36 @@ describe("OButton", () => {
       mountIconOnly().unmount();
       vi.advanceTimersByTime(1000);
       expect(warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("disabledReason", () => {
+    it("keeps a disabled button focusable and names its reason to AT", () => {
+      const wrapper = mount(OButton, {
+        props: { disabled: true, disabledReason: raw("Upgrade to share") },
+        slots: { default: "Share Link" },
+      });
+      expect(wrapper.attributes("disabled")).toBeUndefined();
+      expect(wrapper.attributes("aria-disabled")).toBe("true");
+      const reason = wrapper.get(".sr-only");
+      expect(wrapper.attributes("aria-describedby")).toBe(reason.attributes("id"));
+      expect(reason.text()).toBe("Upgrade to share");
+    });
+
+    it("steps the label weight down so disabled is not opacity alone", () => {
+      const off = mount(OButton, { props: { disabled: true } });
+      const on = mount(OButton);
+      expect(off.classes()).toContain("font-normal");
+      expect(on.classes()).toContain("font-medium");
+    });
+
+    it("stays inert: a reasoned disabled button never emits click", async () => {
+      const wrapper = mount(OButton, {
+        props: { disabled: true, disabledReason: raw("Upgrade to share") },
+        slots: { default: "Share Link" },
+      });
+      await wrapper.trigger("click");
+      expect(wrapper.emitted("click")).toBeUndefined();
     });
   });
 });

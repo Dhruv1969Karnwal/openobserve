@@ -349,6 +349,10 @@ export interface OTableProps<TData = any> {
    *  (renders with `cursor: not-allowed` and ignores toggles). E.g. block bulk
    *  selection of the root user in IAM. */
   isRowSelectable?: (row: TData) => boolean;
+  /** Why `isRowSelectable` returned false for this row. Shown as a tooltip and
+   *  wired as the checkbox's `aria-describedby`, because a checkbox that
+   *  silently refuses one row reads as a broken control. */
+  rowSelectionReason?: (row: TData) => I18nText | undefined;
   /** Field used as unique row identifier, or a resolver for rows that have no
    *  naturally unique field. Pass a resolver when the obvious candidate can
    *  repeat across rows (e.g. log hits sharing a `_timestamp`), otherwise every

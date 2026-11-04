@@ -116,6 +116,24 @@ export function isFoldDefect(verdict: RowVerdict): boolean {
 }
 
 /**
+ * Scroll padding (px) that lets the last row clear a band docked to the bottom edge of the
+ * viewport. A sticky <tfoot> paints over the rows it passes, so without the reserve the last
+ * row stays `unreachable` even at maximum scrollTop — it is sliced by a band no scroll can
+ * escape. Zero when the body does not scroll, because then nothing is ever hidden.
+ */
+export function dockReservePx(bandPx: number, scrolls: boolean): number {
+  if (!scrolls || !Number.isFinite(bandPx) || bandPx <= 0) return 0;
+  return Math.ceil(bandPx);
+}
+
+/** The band that docks to the scroll viewport's bottom edge: a sticky <tfoot>, if there is one. */
+export function dockedBottomBandPx(scroller: Element): number {
+  const band = scroller.querySelector("tfoot");
+  if (!band) return 0;
+  return getComputedStyle(band).position === "sticky" ? band.getBoundingClientRect().height : 0;
+}
+
+/**
  * Whether a bounded body needs a drawn scroll cue: enough content remains below, and the
  * platform's own scrollbar paints nothing (an overlay scrollbar takes no layout space), so
  * the half row at the fold would otherwise be the only cue that the list continues.

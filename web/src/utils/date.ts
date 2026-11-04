@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { format as dfFormat, sub } from "date-fns";
+import { format as dfFormat, formatDistanceStrict, sub } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { DateTime as _DateTime } from "luxon";
 
@@ -330,6 +330,53 @@ export const formatToTimeCompact = (us: number): string => formatTimestamp(us, "
  */
 export function subtractRelativeTime(endDate: Date | number, period: Record<string, number>): Date {
   return sub(endDate, period);
+}
+
+// ---------------------------------------------------------------------------
+// Time-column policy — the single rule every timestamped list follows
+// ---------------------------------------------------------------------------
+//
+// One column picks ONE mode and every row in it renders through it, so two
+// neighbouring columns of the same row never mix a relative and an absolute
+// value. `relative` is the scannable mode and always carries its baseline in the
+// words ("2 minutes ago"), with the exact datetime behind a tooltip.
+
+/** How a column of timestamps renders. One column, one mode, all of its rows. */
+export type TimeColumnMode = "relative" | "absolute" | "date";
+
+/** Age past which "x ago" stops being useful and the real date is printed. */
+export const RELATIVE_TIME_CUTOFF_DAYS = 30;
+
+const DAY_MS = 86_400_000;
+
+/**
+ * "2 minutes ago" while the value is inside `cutoffDays`, otherwise the real
+ * date ("Jun 24, 2024") — a bare "2 years ago" names no moment.
+ */
+export function formatRelativeAge(
+  epochMs: number,
+  options: { nowMs?: number; cutoffDays?: number; timezone?: string } = {},
+): string {
+  const { nowMs = Date.now(), cutoffDays = RELATIVE_TIME_CUTOFF_DAYS, timezone } = options;
+  const ageMs = Math.abs(nowMs - epochMs);
+  if (ageMs <= cutoffDays * DAY_MS) {
+    return formatDistanceStrict(new Date(epochMs), new Date(nowMs), { addSuffix: true });
+  }
+  if (!timezone) return formatDate(epochMs, "MMM D, YYYY");
+  try {
+    return formatInTimeZone(new Date(epochMs), timezone, "MMM d, yyyy");
+  } catch {
+    return new Date(epochMs).toISOString().slice(0, 10);
+  }
+}
+
+/** The exact datetime a relative cell reveals on hover; also the `absolute` mode. */
+export function formatAbsoluteInZone(epochMs: number, timezone: string): string {
+  try {
+    return formatInTimeZone(new Date(epochMs), timezone, "yyyy-MM-dd HH:mm:ss");
+  } catch {
+    return new Date(epochMs).toISOString();
+  }
 }
 
 // ---------------------------------------------------------------------------

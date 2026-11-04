@@ -127,6 +127,7 @@ const boxSizeClasses: Record<NonNullable<CheckboxProps["size"]>, string> = {
       type="button"
       role="checkbox"
       :aria-label="ariaLabel"
+      :aria-describedby="descriptionId"
       :aria-checked="checked === 'indeterminate' ? 'mixed' : checked"
       :data-state="dataState"
       :disabled="isDisabled"

@@ -225,11 +225,18 @@ const trendClass = computed(() =>
         >
           <OTooltip :content="subTooltip || sub" />
         </OIcon>
-        <OTruncatedText v-else-if="sub" class="text-text-label text-2xs max-lg:hidden">{{
-          sub
-        }}</OTruncatedText>
       </div>
     </div>
+    <!-- The qualifier gets its own line. On the same baseline as the label it left
+         the headline label ~180px in a 256px tile at 1440 and cut "Compressed Size"
+         to "Compress…", while below `lg` it was hidden outright — so the narrow
+         layout looked complete only because it deleted the note. -->
+    <OTruncatedText
+      v-if="sub && !subIcon"
+      class="text-text-label text-2xs"
+      data-test="o-stat-card-sub"
+      >{{ sub }}</OTruncatedText
+    >
     <div v-if="showTrack" class="bg-surface-subtle h-1 overflow-hidden rounded-full">
       <div
         class="h-full rounded-full transition-all duration-300"

@@ -24,6 +24,9 @@ import {
   isInvalidDate,
   convertUnixToDateFormat,
   convertDateToTimestamp,
+  formatRelativeAge,
+  formatAbsoluteInZone,
+  RELATIVE_TIME_CUTOFF_DAYS,
 } from "./date";
 
 describe("Date Utilities", () => {
@@ -504,5 +507,46 @@ describe("Date Utilities", () => {
         expect(result2.timestamp).toBeGreaterThan(result1.timestamp);
       }
     });
+  });
+});
+
+describe("time-column policy helpers", () => {
+  const NOW = Date.parse("2026-11-04T12:00:00Z");
+  const MIN = 60_000;
+  const DAY = 86_400_000;
+
+  it("names the baseline of a recent timestamp instead of printing a bare duration", () => {
+    expect(formatRelativeAge(NOW - 5 * MIN, { nowMs: NOW })).toBe("5 minutes ago");
+  });
+
+  it("switches to the real date once the value is older than the cutoff", () => {
+    const age = (RELATIVE_TIME_CUTOFF_DAYS + 5) * DAY;
+    expect(
+      formatRelativeAge(NOW - age, { nowMs: NOW, cutoffDays: RELATIVE_TIME_CUTOFF_DAYS }),
+    ).toBe("Sep 30, 2026");
+  });
+
+  it("renders the cutoff date in the caller's timezone, not the browser's", () => {
+    // 23:30Z is already the next morning in Kolkata, so the two zones disagree.
+    const late = Date.parse("2026-11-04T23:30:00Z");
+    const age = (RELATIVE_TIME_CUTOFF_DAYS + 5) * DAY;
+    expect(
+      formatRelativeAge(late - age, {
+        nowMs: late,
+        cutoffDays: RELATIVE_TIME_CUTOFF_DAYS,
+        timezone: "Asia/Kolkata",
+      }),
+    ).toBe("Oct 1, 2026");
+    expect(
+      formatRelativeAge(late - age, { nowMs: late, cutoffDays: RELATIVE_TIME_CUTOFF_DAYS }),
+    ).toBe("Sep 30, 2026");
+  });
+
+  it("gives the relative cell the absolute string its tooltip reveals", () => {
+    expect(formatAbsoluteInZone(NOW, "UTC")).toBe("2026-11-04 12:00:00");
+  });
+
+  it("falls back to the ISO instant for a timezone the platform cannot resolve", () => {
+    expect(formatAbsoluteInZone(NOW, "Not/AZone")).toBe("2026-11-04T12:00:00.000Z");
   });
 });

@@ -153,6 +153,8 @@ const iconSize: Record<NonNullable<ToggleGroupItemProps["size"]>, "xs" | "sm" | 
         // so suppress the per-item background and just keep the active text colour.
         !isAnimated && 'data-[state=on]:bg-toggle-item-active-bg',
         'data-[state=on]:text-toggle-item-active-text',
+        // Tint alone is 1.30:1 against the track, so the pressed state also carries an edge and a weight.
+        'data-[state=on]:ring-border-strong data-[state=on]:font-semibold data-[state=on]:ring-1 data-[state=on]:ring-inset',
         // Sit above the sliding indicator so the icon/label stay readable.
         isAnimated && 'relative z-10',
         // Focus ring

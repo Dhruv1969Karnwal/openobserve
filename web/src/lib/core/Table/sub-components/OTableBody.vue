@@ -3,6 +3,7 @@
 <script setup lang="ts">
 import type { Row, Table } from "@tanstack/vue-table";
 import { computed, ref, watch, useSlots } from "vue";
+import type { I18nText } from "@/types/i18n";
 import OTableBodyRow from "./OTableBodyRow.vue";
 import { VueDraggableNext } from "vue-draggable-next";
 
@@ -19,6 +20,7 @@ const props = defineProps<{
   /** When provided, rows for which this returns false render a disabled
    *  (not-allowed cursor) selection checkbox. Forwarded to OTableBodyRow. */
   isRowSelectable?: (row: any) => boolean;
+  rowSelectionReason?: (row: any) => I18nText | undefined;
   expansionEnabled?: boolean;
   isExpandedFn?: (row: any) => boolean;
   getRowExpansionEnabled?: (row: any) => boolean;
@@ -243,6 +245,7 @@ const headingColspan = computed(
       :selection-multiple="selectionMultiple"
       :is-row-selected="isRowSelectedFn?.(item)"
       :is-row-selectable="isRowSelectable"
+      :row-selection-reason="rowSelectionReason"
       :expansion-enabled="expansionEnabled"
       :can-expand="getRowExpansionEnabled ? getRowExpansionEnabled(item) : true"
       :is-expanded="isExpandedFn?.(item)"
@@ -308,6 +311,7 @@ const headingColspan = computed(
         :selection-multiple="selectionMultiple"
         :is-row-selected="isRowSelectedFn?.(item.row.original)"
         :is-row-selectable="isRowSelectable"
+        :row-selection-reason="rowSelectionReason"
         :expansion-enabled="expansionEnabled"
         :can-expand="getRowExpansionEnabled ? getRowExpansionEnabled(item.row.original) : true"
         :is-expanded="isExpandedFn?.(item.row.original)"
@@ -373,6 +377,7 @@ const headingColspan = computed(
       :selection-multiple="selectionMultiple"
       :is-row-selected="isRowSelectedFn?.(getRowForIndex(virtualRow.index)?.original)"
       :is-row-selectable="isRowSelectable"
+      :row-selection-reason="rowSelectionReason"
       :expansion-enabled="expansionEnabled"
       :can-expand="
         getRowExpansionEnabled

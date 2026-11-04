@@ -6,6 +6,7 @@ import {
   clearBottomOf,
   foldReport,
   isFoldDefect,
+  dockReservePx,
   shouldShowFoldCue,
   overlapHeight,
   type FoldBox,
@@ -154,5 +155,45 @@ describe("tableFold", () => {
     });
     expect(withClearance.clearancePx).toBe(CLEARANCE);
     expect(withClearance.defects).toEqual([]);
+  });
+});
+
+describe("dockReservePx", () => {
+  it("reserves the docked footer's height so the last row can scroll clear of it", () => {
+    expect(dockReservePx(43.2, true)).toBe(44);
+  });
+
+  it("reserves nothing while the body fits, because nothing is hidden", () => {
+    expect(dockReservePx(44, false)).toBe(0);
+  });
+
+  it("reserves nothing when no band is docked", () => {
+    expect(dockReservePx(0, true)).toBe(0);
+  });
+
+  it("is inert before layout, when a measurement engine reports no boxes", () => {
+    expect(dockReservePx(Number.NaN, true)).toBe(0);
+  });
+
+  // The reported defect: 14 rows on one page, the 14th never visible because the
+  // sticky footer paints over it and no amount of scrolling reveals it.
+  it("turns an unreachable last row into a clear one once the reserve is applied", () => {
+    const footer = box(672, 716);
+    const trapped = foldReport({
+      viewport: VIEWPORT,
+      window: WINDOW,
+      bands: [{ label: "sticky-tfoot", box: footer }],
+      rows: rowsAt(319, 20, 275).slice(-1),
+      atEnd: true,
+    });
+    expect(trapped.defects.map((d) => d.state)).toContain("unreachable");
+
+    const cleared = classifyRow(row(footer.top - 20, footer.top - 1), {
+      viewport: VIEWPORT,
+      window: WINDOW,
+      bands: [],
+      atEnd: true,
+    });
+    expect(cleared.state).toBe("clear");
   });
 });

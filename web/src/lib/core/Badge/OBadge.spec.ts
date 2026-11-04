@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
 import { h } from "vue";
 import OBadge from "./OBadge.vue";
+import { raw } from "@/types/i18n";
 
 describe("OBadge", () => {
   // ── Slot content ────────────────────────────────────────────────────────
@@ -305,5 +306,29 @@ describe("OBadge", () => {
     const iconSpan = wrapper.find(".material-icons-outlined");
     expect(iconSpan.exists()).toBe(true);
     expect(iconSpan.attributes("aria-hidden")).toBe("true");
+  });
+});
+
+describe("OBadge count naming", () => {
+  it("speaks the counted noun before a bare count so the chip is not just a number", () => {
+    const wrapper = mount(OBadge, {
+      props: { count: 6, countNoun: raw("Streams") },
+    });
+    const noun = wrapper.find('[data-test="o2-badge-count"] .sr-only');
+    expect(noun.exists()).toBe(true);
+    expect(noun.text()).toBe("Streams");
+    expect(wrapper.find('[data-test="o2-badge-count"]').text()).toBe("Streams6");
+  });
+
+  it("adds no hidden noun when the caller does not name one", () => {
+    const wrapper = mount(OBadge, { props: { count: 6 } });
+    expect(wrapper.find('[data-test="o2-badge-count"] .sr-only').exists()).toBe(false);
+  });
+
+  it("suppresses the noun with the count itself at zero", () => {
+    const wrapper = mount(OBadge, {
+      props: { count: 0, hideZeroCount: true, countNoun: raw("Streams") },
+    });
+    expect(wrapper.find('[data-test="o2-badge-count"]').exists()).toBe(false);
   });
 });

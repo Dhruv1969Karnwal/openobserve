@@ -164,3 +164,12 @@ describe("OTag removable", () => {
     expect(w.find("[data-test='o2-badge-remove']").attributes("aria-label")).toBe("Remove prod");
   });
 });
+
+describe("OTag countNoun passthrough", () => {
+  it("names a countChip's number", () => {
+    const wrapper = mount(OTag, {
+      props: { type: "countChip", value: "neutral", count: 2, countNoun: raw("Streams") },
+    });
+    expect(wrapper.find('[data-test="o2-badge-count"] .sr-only').text()).toBe("Streams");
+  });
+});

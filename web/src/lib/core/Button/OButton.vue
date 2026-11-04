@@ -4,6 +4,7 @@ import { Primitive } from "reka-ui";
 import { computed, ref, onMounted, onBeforeUnmount, useAttrs, useId } from "vue";
 import { UNNAMED_ICON_ONLY_DELAY_MS, warnIfUnnamedIconOnly } from "./iconOnlyName";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
+import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 
 defineOptions({ inheritAttrs: false });
 
@@ -22,7 +23,9 @@ const props = withDefaults(defineProps<ButtonProps>(), {
 const emit = defineEmits<ButtonEmits>();
 const attrs = useAttrs();
 const id = useId();
-const unavailable = computed(() => props.disabled && props.focusableUnavailable);
+const unavailable = computed(
+  () => props.disabled && (props.focusableUnavailable || props.disabledReason !== undefined),
+);
 const reasonId = computed(() => props.descriptionId ?? `${id}-reason`);
 const rootRef = ref<{ $el?: Element } | null>(null);
 // Labels that arrive with data are not unnamed, so the dev check waits for them.
@@ -380,7 +383,9 @@ const classes = computed<string[]>(() => [
   // `as="a"` renders a real anchor, which base-elements.css underlines on hover.
   "no-underline hover:no-underline",
   // Medium (500) keeps button labels calm/simple — heavier weights read as shouty.
-  "font-medium transition-[color,background-color,border-color,text-decoration-color,fill,stroke,box-shadow] duration-150",
+  // A disabled label also steps down a weight: opacity alone read as the enabled button.
+  props.disabled ? "font-normal" : "font-medium",
+  "transition-[color,background-color,border-color,text-decoration-color,fill,stroke,box-shadow] duration-150",
   "outline-none",
   /* Unified focus ring — identical to OInput/OSelect: a 2px OPAQUE primary ring
      hugging the control (no ring-offset gap). The trailing `!` beats any width/color
@@ -430,7 +435,7 @@ function handleClick(event: MouseEvent): void {
     :class="classes"
     :type="as === 'button' ? type : undefined"
     :disabled="
-      as === 'button' ? (disabled && !focusableUnavailable) || (loading && !unavailable) : undefined
+      as === 'button' ? (disabled && !unavailable) || (loading && !unavailable) : undefined
     "
     :aria-disabled="disabled || loading || undefined"
     :aria-busy="loading || undefined"
@@ -457,8 +462,10 @@ function handleClick(event: MouseEvent): void {
       </slot>
       <slot />
       <span v-if="unavailable && !descriptionId" :id="reasonId" class="sr-only" aria-hidden="true"
-        ><slot name="unavailable-reason"
+        >{{ disabledReason ?? "" }}<slot name="unavailable-reason"
       /></span>
+      <!-- No default slot: OTooltip binds to its host, so the reason paints on the button itself. -->
+      <OTooltip v-if="unavailable && disabledReason" :content="disabledReason" />
       <slot name="icon-right">
         <OIcon v-if="iconRight" :name="iconRight" size="sm" />
       </slot>

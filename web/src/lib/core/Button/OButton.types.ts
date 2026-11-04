@@ -5,6 +5,7 @@
 
 import type { PrimitiveProps } from "reka-ui";
 import type { IconName } from "@/lib/core/Icon/OIcon.icons";
+import type { I18nText } from "@/types/i18n";
 
 /** Visual style variant — design is baked in, no style override props */
 export type ButtonVariant =
@@ -102,6 +103,11 @@ export interface ButtonProps extends PrimitiveProps {
   focusableUnavailable?: boolean;
   /** Associates the unavailable button with its reason. */
   descriptionId?: string;
+  /**
+   * Why the button is disabled. It stays focusable and shows this as a tooltip,
+   * because a control that silently refuses needs a reason to be usable.
+   */
+  disabledReason?: I18nText;
   /** Shows loading state and disables interaction */
   loading?: boolean;
   /** Applies active/selected state styling (overrides variant to primary appearance) */

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { BadgeProps, BadgeEmits, BadgeSlots } from "./OBadge.types";
-import { computed, useSlots } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, useSlots } from "vue";
 import { useI18nTyped } from "@/types/i18n";
 import OIcon from "../Icon/OIcon.vue";
 import { iconRegistry } from "../Icon/OIcon.icons";
+import { UNNAMED_COUNT_DELAY_MS, warnIfUnnamedCount } from "./countChipName";
 
 defineOptions({ inheritAttrs: false });
 
@@ -249,6 +250,14 @@ function handleKeydown(e: KeyboardEvent): void {
   }
 }
 
+const rootRef = ref<{ $el?: Element } | null>(null);
+let nameCheckTimer: ReturnType<typeof setTimeout> | undefined;
+onMounted(() => {
+  if (!import.meta.env.DEV || import.meta.env.MODE === "test") return;
+  nameCheckTimer = setTimeout(() => warnIfUnnamedCount(rootRef.value?.$el), UNNAMED_COUNT_DELAY_MS);
+});
+onBeforeUnmount(() => clearTimeout(nameCheckTimer));
+
 // The ✕ lives inside a `clickable` badge, so its click must not also read as a
 // click on the badge itself.
 function handleRemove(e: MouseEvent): void {
@@ -261,6 +270,7 @@ function handleRemove(e: MouseEvent): void {
 <template>
   <component
     :is="tag"
+    ref="rootRef"
     :type="clickable ? 'button' : undefined"
     :disabled="clickable && disabled ? true : undefined"
     :aria-disabled="disabled || undefined"
@@ -308,7 +318,9 @@ function handleRemove(e: MouseEvent): void {
     <span
       v-if="hasTrailing"
       :class="['shrink-0 border-s border-current/25 leading-none opacity-75', trailingSizeClasses]"
+      data-test="o2-badge-count"
     >
+      <span v-if="countNoun" class="sr-only">{{ countNoun }}</span>
       <slot name="trailing">{{ count }}</slot>
     </span>
 
