@@ -113,7 +113,7 @@ export const THEME_STORAGE_KEYS = {
  *
  * At this head — these figures are re-synced to the gate's own live output (concurrent file
  * additions move the pair/group counts, so they are read from the census each round, not remembered):
- * 5222 runtime pairs in 2482 booking groups — 2275 groups measured-pass, 207 groups
+ * 5228 runtime pairs in 2482 booking groups — 2275 groups measured-pass, 207 groups
  * (285 individual sites) booked with all twelve numbers each, 0 groups unbooked, and 0 groups
  * delegated to tokens/contrast-manifest.ts (none stand — the grey-tier light debt was paid by
  * re-tiering), of the bookings 34 are icon-only sites riding SC 1.4.11's 3:1 bar with a per-entry
