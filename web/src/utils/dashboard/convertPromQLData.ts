@@ -34,10 +34,15 @@ import { addCommasToNumber } from "@/utils/formatters";
 import {
   chartColor,
   chartNumber,
+  chartTextColor,
   dataZoomBrushStyle,
   CHART_SELECTION_FILL,
 } from "@/utils/chartTheme";
-import { calculateBottomLegendHeight, calculateRightLegendWidth } from "./legendConfiguration";
+import {
+  calculateBottomLegendHeight,
+  calculateRightLegendWidth,
+  reserveLegendPagerSpace,
+} from "./legendConfiguration";
 import { convertPromQLChartData } from "./promql/convertPromQLChartData";
 import { calculateMetricFontSize, buildMetricSparkline } from "./sql/charts/convertSQLMetricChart";
 import { resolveMetricValueStyle } from "./tableConfigUtils";
@@ -694,6 +699,9 @@ export const convertPromQLData = async (
       axisLabel: {
         // hide axis label if overlaps
         hideOverlap: true,
+        // One tick grey across both converters: ECharts' own grey measured 2.40:1
+        // on the dashboards while these labels sat at 5.02:1.
+        color: chartTextColor(),
         // For time-based x-axis (type: "time"), rotation and truncation are not applicable
         rotate: 0,
         overflow: "none",
@@ -709,6 +717,7 @@ export const convertPromQLData = async (
         // hide colliding tick labels instead of drawing them on top of each
         // other (short panels fit fewer labels than ECharts offers)
         hideOverlap: true,
+        color: chartTextColor(),
         formatter: function (name: any) {
           return formatUnitValue(
             getUnitValue(
@@ -1480,6 +1489,17 @@ export const convertPromQLData = async (
     const legendLeftPx = Math.max(containerWidth - legendWidth, 0);
     options.legend.left = legendLeftPx;
     options.legend.right = 0;
+  }
+
+  // A bottom legend must stop short of its own pager, or the arrows land on top
+  // of the third series name.
+  if (
+    legendConfig.orient != "vertical" &&
+    panelSchema.config?.show_legends &&
+    panelSchema.type != "gauge" &&
+    panelSchema.type != "metric"
+  ) {
+    reserveLegendPagerSpace(options, chartPanelRef?.value?.offsetWidth || 0);
   }
 
   //check if is there any data else filter out axis or series data

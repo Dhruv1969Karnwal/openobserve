@@ -70,12 +70,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <!-- The right-hand cluster: the query function · unit, Drill down, then
            the freshness clock. None of it truncates; the metric name is what
            gives way when the row runs short. -->
-      <div class="flex shrink-0 flex-nowrap items-center">
-        <!-- The name outranks the function·unit note: on a narrow card the right
-             cluster would otherwise squeeze the identifier out of the row. -->
+      <div class="flex min-w-0 flex-nowrap items-center">
+        <!-- The note gives way before the identifier does: it truncates rather than
+             squeezing the metric name out of the row, and `title` keeps it whole. -->
         <span
           v-if="restInfo"
-          class="text-2xs text-text-secondary hidden whitespace-nowrap @min-[24rem]/panelbar:inline"
+          class="text-2xs text-text-secondary hidden min-w-0 truncate @min-[24rem]/panelbar:inline"
           :title="restInfo"
           :data-test="`metrics-explorer-card-rest-info-${card.name}`"
           >{{ restInfo }}</span

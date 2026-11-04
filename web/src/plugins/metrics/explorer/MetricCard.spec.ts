@@ -165,12 +165,14 @@ describe("MetricCard (ported to @/lib)", () => {
       const { info, fresh } = status(wrapper);
       expect(info.text()).toBe("sum(rate) · s");
       expect(fresh.text()).toContain("33");
-      // The unit note is the one element allowed to yield, and only to a container
-      // query: at 390 the right cluster was squeezing the metric NAME to zero
-      // width. It stays visible on every card at or above 24rem, and is never
-      // hover-gated.
-      expect(hidingClasses(info.element, wrapper.element)).toEqual(["hidden"]);
+      // The note is the one element allowed to yield, and it yields by truncating,
+      // not by switching off: it is the only on-screen statement of what the panel
+      // plots, since the y-axis title it was assumed to duplicate does not reliably
+      // paint. It yields below 24rem, which is under a two-up card at 1440.
+      // `truncate` clips the note; only `hidden` is a container query below 24rem.
+      expect(hidingClasses(info.element, wrapper.element)).toEqual(["hidden", "truncate"]);
       expect(info.classes()).toContain("@min-[24rem]/panelbar:inline");
+      expect(info.classes()).toContain("truncate");
       expect(hidingClasses(fresh.element, wrapper.element)).toEqual([]);
     });
 
@@ -187,8 +189,9 @@ describe("MetricCard (ported to @/lib)", () => {
             .element,
         ),
       ).toBe(true);
-      expect(cluster.className).toContain("shrink-0");
-      expect(info.classes()).toContain("whitespace-nowrap");
+      expect(cluster.className).toContain("min-w-0");
+      expect(cluster.className).not.toContain("shrink-0");
+      expect(info.classes()).toContain("truncate");
       expect(info.classes()).toContain("@min-[24rem]/panelbar:inline");
       // The name is the row's one shrinkable element.
       const title = wrapper.find(
@@ -351,7 +354,9 @@ describe("MetricCard (ported to @/lib)", () => {
       const btn = wrapper.find(
         '[data-test="metrics-explorer-card-refresh-node_cpu_seconds_total"]',
       );
-      expect(btn.element.parentElement?.className).not.toContain("w-0");
+      // token match: `min-w-0` on a sibling is not a collapsed wrapper
+      const parentClasses = (btn.element.parentElement?.className ?? "").split(/\s+/);
+      expect(parentClasses).not.toContain("w-0");
     });
 
     it("has no refresh action on an unsupported card (there is nothing to run)", () => {

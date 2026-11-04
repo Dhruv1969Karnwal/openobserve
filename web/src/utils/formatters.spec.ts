@@ -321,11 +321,18 @@ describe("formatSizeFromMB", () => {
   });
 
   it("formats a value in MB", () => {
-    expect(formatSizeFromMB("500")).toBe("500.00 MB");
+    expect(formatSizeFromMB("500")).toBe("500 MB");
   });
 
   it("converts 1024 MB to GB", () => {
-    expect(formatSizeFromMB("1024")).toBe("1.00 GB");
+    expect(formatSizeFromMB("1024")).toBe("1 GB");
+  });
+
+  it("keeps two decimals where the size really is a fraction", () => {
+    // The Streams strip prints 8.96 GB and 1.91 GB: those need the decimals the
+    // whole-MB rows (412 MB, 360 MB) must not carry.
+    expect(formatSizeFromMB("8.96")).toBe("8.96 MB");
+    expect(formatSizeFromMB("412")).toBe("412 MB");
   });
 
   it("rounds very small positive values to 0.01 MB", () => {

@@ -118,8 +118,11 @@ describe("SQL value axis prints one unit per axis", () => {
     ]);
     const labels = tickLabels(ctx, 0, 1500000);
 
-    expect(new Set(labels.map(suffixOf))).toEqual(new Set(["MB/s"]));
-    expect(labels).toContain("1.43MB/s");
+    // One tier for the whole axis, and it is named once on the axis instead of
+    // being repeated as a suffix on every tick.
+    expect(new Set(labels.map(suffixOf))).toEqual(new Set([""]));
+    expect(ctx.options.yAxis.name).toContain("MB/s");
+    expect(labels).toContain("1.43");
   });
 
   it("pins the crosshair label to the axis unit too", () => {
@@ -148,7 +151,7 @@ describe("SQL value axis prints one unit per axis", () => {
     expect(new Set(labels.map(suffixOf))).toEqual(new Set(["KB"]));
     // 1200 used to escalate to "1.17MB" mid-axis, a label the column width had
     // never been measured for
-    expect(fmt(1200)).toBe("1200.00KB");
+    expect(fmt(1200)).toBe("1200KB");
   });
 });
 

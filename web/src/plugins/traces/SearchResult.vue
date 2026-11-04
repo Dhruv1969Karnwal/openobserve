@@ -74,14 +74,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             searchObj.data.queryResults.errorCount > 0
           "
           data-test="traces-error-count-badge"
-          variant="error"
+          type="logsResultChip"
+          value="error"
           :clickable="true"
+          :aria-pressed="showErrorOnly"
           class="rounded-default! px-2.5! py-[0.4rem]! text-xs text-xs!"
-          :class="
-            showErrorOnly
-              ? 'bg-badge-error-solid-bg! text-badge-error-solid-text!'
-              : 'bg-error-tag-bg! text-error-tag-text!'
-          "
+          :class="showErrorOnly ? 'border-border-control border' : ''"
           @click="toggleErrorOnly"
         >
           {{
@@ -92,7 +90,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             side="bottom"
           />
           <template #trailing>
-            <OIcon name="filter-alt" size="xs" class="shrink-0" />
+            <!-- The × is the remove affordance: the tint alone only implied that
+                 clicking again takes the filter away. -->
+            <OIcon
+              :name="showErrorOnly ? 'close' : 'filter-alt'"
+              size="xs"
+              class="shrink-0"
+              aria-hidden="true"
+            />
           </template>
         </OTag>
 

@@ -18,6 +18,7 @@
 // mocks those away, which bypasses the whole tick-prediction path).
 import { describe, expect, it, vi } from "vitest";
 import { buildSQLContext } from "@/utils/dashboard/sql/shared/contextBuilder";
+import { calculateWidthText } from "@/utils/dashboard/chartDimensionUtils";
 
 vi.mock("@/utils/dashboard/sqlProcessData", () => ({
   processData: vi.fn((data) => data[0] || []),
@@ -87,14 +88,15 @@ describe("buildSQLContext y-axis ticks", () => {
     expect(fmt(0.004)).not.toBe(fmt(0.006));
   });
 
-  it("keeps the configured decimals when they already distinguish the ticks", () => {
+  it("prints a whole step as whole numbers even where decimals are pinned", () => {
     const rows = [
       { t: "10:00", v: 100 },
       { t: "10:01", v: 900 },
     ];
     const ctx: any = buildCtx(basePanel(), rows);
     const fmt = ctx.options.yAxis.axisLabel.formatter;
-    expect(fmt(200)).toContain("200.00");
+    expect(fmt(200)).toContain("200");
+    expect(fmt(200)).not.toContain(".");
   });
 
   it("labels the zero tick in the panel's own unit", () => {
@@ -104,8 +106,8 @@ describe("buildSQLContext y-axis ticks", () => {
       { t: "10:01", v: 900 },
     ];
     const cases: [string, number, string, string][] = [
-      ["kilobytes", 2, "0.00KB", "200.00KB"],
-      ["megabytes", 2, "0.00MB", "200.00MB"],
+      ["kilobytes", 2, "0KB", "200KB"],
+      ["megabytes", 2, "0MB", "200MB"],
       // the License page's ingestion chart: megabytes at 0 decimals
       ["megabytes", 0, "0MB", "200MB"],
     ];
@@ -153,5 +155,92 @@ describe("buildSQLContext y-axis ticks", () => {
       rows.map(({ t, v }) => ({ t, v })),
     );
     expect(ctx.options.yAxis.nameGap).toBeGreaterThan(lineCtx.options.yAxis.nameGap);
+  });
+});
+
+describe("axis formatting discipline", () => {
+  const rows = [
+    { t: "10:00", v: 20 },
+    { t: "10:01", v: 180 },
+  ];
+
+  it("prints whole counts without two decimals when nothing pinned the precision", () => {
+    const ctx: any = buildCtx(basePanel({ config: {} }), rows);
+    const fmt = ctx.options.yAxis.axisLabel.formatter;
+    expect(fmt(180)).toBe("180");
+    expect(fmt(60)).toBe("60");
+  });
+
+  it("does not let a pinned precision inflate a whole step", () => {
+    const ctx: any = buildCtx(basePanel({ config: { decimals: 2 } }), rows);
+    expect(ctx.options.yAxis.axisLabel.formatter(180)).toBe("180");
+  });
+
+  it("keeps a pinned precision when the step is fractional", () => {
+    const ctx: any = buildCtx(basePanel({ config: { decimals: 2 } }), [
+      { t: "10:00", v: 0.1 },
+      { t: "10:01", v: 0.9 },
+    ]);
+    expect(ctx.options.yAxis.axisLabel.formatter(0.2)).toBe("0.20");
+  });
+
+  it("titles the axis with a compound unit instead of repeating it on every tick", () => {
+    const ctx: any = buildCtx(
+      basePanel({ config: { decimals: 2, unit: "custom", unit_custom: "span/s" } }),
+      [
+        { t: "10:00", v: 1 },
+        { t: "10:01", v: 6 },
+      ],
+    );
+    expect(ctx.options.yAxis.name).toContain("span/s");
+    const label = ctx.options.yAxis.axisLabel.formatter(5);
+    expect(label).toBe("5");
+    expect(label).not.toContain("span/s");
+  });
+
+  it("sizes the unit title on the ticks it actually paints, not on the unit it removed", () => {
+    const ctx: any = buildCtx(
+      basePanel({ config: { decimals: 2, unit: "custom", unit_custom: "span/s" } }),
+      [
+        { t: "10:00", v: 1 },
+        { t: "10:01", v: 6 },
+      ],
+    );
+    const fmt = ctx.options.yAxis.axisLabel.formatter;
+    // The name inset must be sized on the label the axis actually paints. Sized on
+    // a unit-bearing label instead, the rotated title lands outside the panel —
+    // which is where "spans/s" went.
+    expect(ctx.options.yAxis.nameGap).toBeLessThan(calculateWidthText("9span/s") + 10);
+    expect(fmt(9)).toBe("9");
+  });
+
+  it("keeps a short unit on the tick, where it reads as part of the number", () => {
+    const ctx: any = buildCtx(basePanel({ config: { decimals: 0, unit: "percent" } }), [
+      { t: "10:00", v: 10 },
+      { t: "10:01", v: 90 },
+    ]);
+    expect(ctx.options.yAxis.axisLabel.formatter(50)).toBe("50%");
+  });
+
+  it("thins the tick count on a short panel so tick labels cannot stack", () => {
+    const short = { value: { offsetWidth: 800, offsetHeight: 120 } };
+    const ctx: any = buildSQLContext(
+      basePanel({ config: {} }),
+      [rows],
+      store,
+      short,
+      null,
+      [{}],
+      { queries: [{}] },
+      {},
+      [],
+    );
+    expect(ctx.options.yAxis.splitNumber).toBeLessThanOrEqual(3);
+  });
+
+  it("paints tick labels with the chart text token, not ECharts' own grey", () => {
+    const ctx: any = buildCtx(basePanel({ config: {} }), rows);
+    expect(ctx.options.yAxis.axisLabel.color).toBeTruthy();
+    expect(ctx.options.xAxis[0].axisLabel.color).toBe(ctx.options.yAxis.axisLabel.color);
   });
 });

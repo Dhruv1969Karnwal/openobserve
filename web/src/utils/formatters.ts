@@ -166,6 +166,10 @@ export const formatSizeFromMB = (sizeInMB: string | number) => {
   let new_size = size.toFixed(2);
   if (new_size == "0.00" && size > 0) {
     new_size = "0.01";
+  } else if (new_size.endsWith(".00")) {
+    // A whole number of the unit it is printed in carries no fraction: "412.00 MB"
+    // put two decimals on 60 byte counts on one screen. A real fraction keeps both.
+    new_size = new_size.slice(0, -3);
   }
 
   return `${new_size} ${units[index]}`;

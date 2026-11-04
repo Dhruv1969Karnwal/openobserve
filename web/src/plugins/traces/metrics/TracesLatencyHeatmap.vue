@@ -44,6 +44,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </OToggleGroupItem>
       </OToggleGroup>
     </PanelBar>
+    <!-- A legend must not cost half its chart: this row is one fixed 16px line and
+         truncates, with the full sentence on `title`. Two wrapped lines here took
+         44px from a 90px plot. -->
+    <div
+      v-if="status === 'ready'"
+      class="border-border-subtle text-2xs text-text-secondary flex h-4 shrink-0 items-center gap-1.5 overflow-hidden border-b px-2"
+      data-test="traces-latency-heatmap-legend"
+    >
+      <span class="inline-flex shrink-0 items-stretch overflow-hidden" aria-hidden="true">
+        <span
+          v-for="token in rampTokens"
+          :key="token"
+          class="h-1.5 w-2.5"
+          :style="{ backgroundColor: `var(${token})` }"
+        ></span>
+      </span>
+      <span class="truncate" :title="rampLegend">{{ rampLegendCompact }}</span>
+    </div>
     <div class="relative min-h-0 flex-1">
       <div
         v-if="status === 'loading'"
@@ -136,6 +154,34 @@ const DAY_US = 24 * 3600 * 1_000_000;
 const status = ref<"idle" | "loading" | "ready" | "empty" | "unavailable" | "error">("idle");
 const grid = shallowRef<LatencyHeatmapGrid | null>(null);
 const colorBy = ref<"spans" | "errors">("spans");
+
+/**
+ * The density scale, named once so the cells and the legend are the same marks:
+ * a swatch drawn separately from what it explains is how a legend starts lying.
+ * The low step is the neutral, the top steps climb the product's sequential ramp.
+ */
+const DENSITY_RAMP_TOKENS = [
+  "--color-grey-500",
+  "--color-map-seq-2",
+  "--color-map-seq-3",
+  "--color-map-seq-4",
+  "--color-map-seq-5",
+] as const;
+const ERROR_RAMP_TOKENS = ["--color-grey-500", "--color-status-error-text"] as const;
+
+const rampTokens = computed(() =>
+  colorBy.value === "errors" ? ERROR_RAMP_TOKENS : DENSITY_RAMP_TOKENS,
+);
+const rampLegend = computed(() =>
+  colorBy.value === "errors"
+    ? t("traces.latencyHeatmap.rampErrors")
+    : t("traces.latencyHeatmap.rampSpans"),
+);
+const rampLegendCompact = computed(() =>
+  colorBy.value === "errors"
+    ? t("traces.latencyHeatmap.rampErrorsCompact")
+    : t("traces.latencyHeatmap.rampSpansCompact"),
+);
 
 let controller: AbortController | null = null;
 
@@ -282,7 +328,7 @@ const options = computed(() => {
             min: 0,
             max: 1,
             inRange: {
-              color: [chartColor("--color-grey-500"), chartColor("--color-status-error-text")],
+              color: ERROR_RAMP_TOKENS.map((token) => chartColor(token)),
             },
           },
           // ECharts refuses a heatmap series without a visual map, so the neutral series gets a constant one.
@@ -301,13 +347,7 @@ const options = computed(() => {
           min: 0,
           max: 1,
           inRange: {
-            color: [
-              chartColor("--color-grey-500"),
-              chartColor("--color-map-seq-2"),
-              chartColor("--color-map-seq-3"),
-              chartColor("--color-map-seq-4"),
-              chartColor("--color-map-seq-5"),
-            ],
+            color: DENSITY_RAMP_TOKENS.map((token) => chartColor(token)),
           },
         },
     toolbox: {

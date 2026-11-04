@@ -479,8 +479,8 @@ if .severity == "error" {
 
     describe("formatSizeFromMB", () => {
       it("should format size from MB to appropriate unit", () => {
-        expect(formatSizeFromMB("1024")).toBe("1.00 GB");
-        expect(formatSizeFromMB("1")).toBe("1.00 MB");
+        expect(formatSizeFromMB("1024")).toBe("1 GB");
+        expect(formatSizeFromMB("1")).toBe("1 MB");
         expect(formatSizeFromMB("0.5")).toBe("0.50 MB");
       });
 

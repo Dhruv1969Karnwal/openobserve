@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { calculateWidthText } from "./chartDimensionUtils";
+import { chartColor } from "@/utils/chartTheme";
 import { escapeHtml } from "@/utils/html";
 
 // Constants for better maintainability
@@ -1181,6 +1182,65 @@ export const applyPieDonutCenterAdjustment = (
  * @param {any} hoveredSeriesState - State for handling hovered series
  * @param {any} options - The chart options object to modify
  */
+/** ECharts draws a scroll pager (two arrow glyphs and the "1/4" text) inside the legend box. */
+const LEGEND_PAGER_RESERVE_PX = 64;
+
+/** Icon + itemGap an entry costs on top of its text, plus a pixel of slack. */
+const LEGEND_ITEM_CHROME_PX = 40;
+
+/** A page that names fewer than this many plotted series is a pager hiding the chart. */
+const LEGEND_MIN_VISIBLE_SERIES = 3;
+
+/** The 7.5rem cap this codebase truncated legend text at before the pager existed. */
+const LEGEND_MAX_TEXT_WIDTH_PX = 120;
+
+/**
+ * Bound a horizontal scroll legend to the width left AFTER its pager, and cap entry
+ * text so a page still names a usable number of series.
+ *
+ * Unbounded, the third entry ran under the arrows and painted as "canar": a control
+ * physically cutting a series name. Reserving the pager without re-budgeting the text
+ * then cost a whole entry per page (3 → 2, "1/4" → "1/6"), which hides more of the
+ * chart than the overlap it removed.
+ */
+export const reserveLegendPagerSpace = (options: any, containerWidthPx: number) => {
+  const legend = options?.legend;
+  if (!legend || legend.show === false || legend.type !== "scroll") return;
+  if (legend.orient === "vertical" || !containerWidthPx || containerWidthPx <= 0) return;
+
+  const viewport = Math.max(
+    containerWidthPx - LEGEND_PAGER_RESERVE_PX,
+    LEGEND_CONSTANTS.MIN_SCROLL_WIDTH,
+  );
+  legend.width = viewport;
+
+  const names: string[] = (Array.isArray(legend.data) ? legend.data : (options.series ?? []))
+    .map((item: any) => (typeof item === "string" ? item : item?.name))
+    .filter((name: any): name is string => typeof name === "string" && name.length > 0);
+  const widest = names.reduce(
+    (max: number, name: string) => Math.max(max, calculateWidthText(name)),
+    0,
+  );
+
+  const wanted = Math.min(widest || LEGEND_MAX_TEXT_WIDTH_PX, LEGEND_MAX_TEXT_WIDTH_PX);
+  const budget =
+    Math.floor(viewport / LEGEND_MIN_VISIBLE_SERIES) - LEGEND_ITEM_CHROME_PX ||
+    LEGEND_CONSTANTS.MIN_TEXT_WIDTH;
+  legend.textStyle = {
+    ...(legend.textStyle ?? {}),
+    width: Math.max(LEGEND_CONSTANTS.MIN_TEXT_WIDTH, Math.min(wanted, budget)),
+    overflow: "truncate",
+  };
+
+  legend.pageIconSize = 14;
+  legend.pageIconColor = chartColor("--color-border-control");
+  legend.pageIconInactiveColor = chartColor("--color-border-default");
+  legend.pageTextStyle = {
+    color: chartColor("--color-text-secondary"),
+    fontSize: LEGEND_CONSTANTS.FONT_SIZE,
+  };
+};
+
 export const applyLegendConfiguration = (
   panelSchema: any,
   chartPanelRef: any,
@@ -1208,6 +1268,9 @@ export const applyLegendConfiguration = (
     applyRightLegendPositioning(panelSchema, options, chartPanelRef);
   } else {
     applyBottomLegendPositioning(panelSchema, options, chartPanelRef);
+    if (!["pie", "donut"].includes(panelSchema.type)) {
+      reserveLegendPagerSpace(options, chartPanelRef?.value?.offsetWidth || 0);
+    }
   }
 
   // Apply special positioning for pie and donut charts
