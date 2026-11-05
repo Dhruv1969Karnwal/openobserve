@@ -1041,17 +1041,7 @@ export default defineComponent({
     // the list alone until a row is chosen, and a marked row with nothing to read
     // is a promise the screen has not kept.
     const selectionShown = computed(() => !isMobile.value || phoneDetailOpen.value);
-    // Which row the table must mark as current. OTable owns the treatment - the
-    // fill, the inset ring that survives greyscale and colour-blind reading, the
-    // `data-active-row` hook and the row's own `aria-current` - and it is driven
-    // by the row's position, so this list passes the position rather than
-    // painting its own idea of a selection. A colour-only class here was the
-    // whole affordance the raters could not see: 1.4:1 against white, and the
-    // same grey family as hover.
-    //
-    // `Row.index` is the row's position in the data handed to the table, which is
-    // `visibleRows` - not its position on the page - so the index is taken from
-    // the same list, in the same order.
+    // OTable keys the active row off `Row.index`, its position in `visibleRows` — not its page position.
     const focusedRowIndex = computed(() => {
       if (!selectionShown.value) return null;
       const name = focusedRow.value?.name;

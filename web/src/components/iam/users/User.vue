@@ -602,20 +602,7 @@ export default defineComponent({
       return name ? `${name} · ${auth}` : String(auth);
     };
 
-    // Built-in role names get the muted (yellow) outline badge; anything else
-    // is treated as a custom role and gets the destructive (red) outline badge.
-    //
-    // This is the ONE answer to "did OpenObserve define this role name, or did
-    // the organization invent it?" - the corner of the chip is drawn from it too
-    // (see `orgCarriedRole` below). It used to be drawn from a second, slightly
-    // different set, and the two disagreed on `member`, so the same role was
-    // built-in to one rule and organization-created to another.
-    //
-    // `member` belongs here although no `UserRole::Member` exists any more: the
-    // users-table migration read it as an alias for `admin`, so the product
-    // defined the name. It is a legacy spelling of a shipped role, never a role
-    // an organization created, and drawing it as one told users their own
-    // instance had invented a privilege name that came from OpenObserve.
+    // `member` is a legacy alias for `admin` from the users-table migration, so it is product-defined, not org-created.
     const BUILTIN_ROLES = new Set([
       "admin",
       "viewer",

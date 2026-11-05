@@ -186,11 +186,7 @@ onMounted(() => {
         @click="onHostMetricsClick"
         @keydown.enter.prevent="onHostMetricsClick"
       >
-        <!-- Badge icons render at 12px (OIcon size="xs"). `monitor-heart-outline` is a
-             monitor containing a small heart, and that interior detail collapses at
-             12px into an unreadable mark — two reviewers independently read it as
-             "a rectangle with a stray dash" and "a broken placeholder". A chart glyph
-             keeps its shape at that size and says the same thing. -->
+        <!-- Badge icons render at 12px; nested interior detail collapses at that size. -->
         <OTag variant="success-soft" icon="query-stats" size="sm" />
         <OTruncatedText class="text-text-heading flex-1 text-sm font-medium">
           {{ raw("Host Metrics") }}

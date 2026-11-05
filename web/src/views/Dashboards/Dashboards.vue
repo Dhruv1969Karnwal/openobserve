@@ -357,27 +357,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </template>
             <template #cell-actions="{ row }">
               <span class="row-actions flex items-center justify-end gap-0.5">
-                <OButton
-                  v-if="row.actions == 'true' && inlineRowActions"
-                  icon-left="drive-file-move"
-                  :title="t('dashboard.move_to_another_folder')"
-                  variant="ghost"
-                  size="icon-xs-sq"
-                  class="max-md:hidden"
-                  data-test="dashboard-move-to-another-folder"
-                  @click.stop="showMoveDashboardPanel(row)"
-                />
-                <OButton
-                  v-if="row.actions == 'true' && inlineRowActions"
-                  icon-left="content-copy"
-                  :title="t('dashboard.duplicate')"
-                  variant="ghost"
-                  size="icon-xs-sq"
-                  class="max-md:hidden"
-                  data-test="dashboard-duplicate"
-                  data-row-action="duplicate"
-                  @click.stop="duplicateDashboard(row.id, row.folder_id)"
-                />
                 <ODropdown v-if="row.actions == 'true'" side="bottom" align="end">
                   <template #trigger>
                     <OButton
@@ -390,7 +369,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     />
                   </template>
                   <ODropdownItem
-                    v-if="compactRowActions"
                     icon-left="drive-file-move"
                     data-test="dashboard-move-to-another-folder-menu"
                     @select="showMoveDashboardPanel(row)"
@@ -398,7 +376,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <span>{{ t("dashboard.move_to_another_folder") }}</span>
                   </ODropdownItem>
                   <ODropdownItem
-                    v-if="compactRowActions"
                     icon-left="content-copy"
                     data-test="dashboard-duplicate-menu"
                     @select="duplicateDashboard(row.id, row.folder_id)"
@@ -1095,11 +1072,8 @@ export default defineComponent({
     });
     const bandColumns = computed(() => BAND_COLUMNS[columnBand.value] ?? BAND_COLUMNS.wide);
     const showsColumn = (id: string) => bandColumns.value.includes(id);
-    // Only the wide band can pay for three always-on row buttons beside the
-    // identity column; the compact bands carry the one kebab they already have.
-    const inlineRowActions = computed(() => columnBand.value === "wide");
-    const compactRowActions = computed(() => isMobile.value || !inlineRowActions.value);
-    const actionsColumnSize = computed(() => (isMobile.value ? 56 : 124));
+    // One kebab at every band; three same-weight unlabelled glyphs read as noise.
+    const actionsColumnSize = computed(() => 56);
     // A subline carries a date, not a timestamp: the ISO string with seconds is
     // noise at 12px under a name.
     const shortDay = (value?: string) => (value ? formatDate(value, "MMM d, yyyy") : "");
@@ -1337,7 +1311,7 @@ export default defineComponent({
           meta: {
             align: "center",
             cellClass: "actions-column",
-            actionCount: compactRowActions.value ? 1 : 3,
+            actionCount: 1,
           },
         },
       ];
@@ -2375,8 +2349,6 @@ export default defineComponent({
       onContextAction,
       tableShellWidth,
       measureListFrame,
-      inlineRowActions,
-      compactRowActions,
       spansFolders,
       rowSection,
       rowSublines,
