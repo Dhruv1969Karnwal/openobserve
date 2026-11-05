@@ -132,20 +132,25 @@ export default defineComponent({
   emits: ["update:rowsPerPage", "firstPage", "prevPage", "nextPage", "lastPage"],
   setup(props) {
     const { t } = useI18nTyped();
+    // Same sentence, same dash and the same grouping as the OTable footer, so a
+    // panel table and the list beside it cannot print the same range two ways.
     const countDisplay = computed(() => {
       const { showPagination, pagination, totalRows } = props;
       if (totalRows === 0) return t("dashboard.dashboards.paginationEmpty");
-      if (!showPagination || pagination.rowsPerPage === 0) {
+      const total = totalRows.toLocaleString();
+      if (!showPagination || pagination.rowsPerPage === 0)
         return t("dashboard.dashboards.paginationRange", {
-          start: 1,
-          end: totalRows,
-          total: totalRows,
+          start: (1).toLocaleString(),
+          end: total,
+          total,
         });
-      }
-
       const start = (pagination.page - 1) * pagination.rowsPerPage + 1;
       const end = Math.min(pagination.page * pagination.rowsPerPage, totalRows);
-      return t("dashboard.dashboards.paginationRange", { start, end, total: totalRows });
+      return t("dashboard.dashboards.paginationRange", {
+        start: start.toLocaleString(),
+        end: end.toLocaleString(),
+        total,
+      });
     });
 
     const formattedPaginationOptions = computed(() => {

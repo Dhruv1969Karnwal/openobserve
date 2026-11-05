@@ -295,7 +295,7 @@ const addToSlackSrcset = `${addToSlackImage2x} 2x`;
         <template #extra>
           <ul class="text-text-body m-0 flex list-none flex-col gap-1 p-0 text-sm">
             <li class="flex items-center gap-2">
-              <OIcon name="check" size="sm" class="text-status-positive" />
+              <OIcon name="check" size="sm" class="text-status-success-text" />
               {{ t("slackApp.connect.featureQuestions") }}
             </li>
           </ul>

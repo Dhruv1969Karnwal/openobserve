@@ -209,7 +209,7 @@ describe("UpdatePasswordDialog", () => {
       .find('[data-test="password-requirement-uppercase"]')
       .classes()
       .join(" ");
-    expect(metAfter).toContain("text-status-positive");
+    expect(metAfter).toContain("text-status-success-text");
   });
 
   it("reveals the new password when its toggle is clicked", async () => {

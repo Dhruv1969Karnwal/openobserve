@@ -4,6 +4,7 @@ import { Primitive } from "reka-ui";
 import { computed, ref, onMounted, onBeforeUnmount, useAttrs, useId } from "vue";
 import { UNNAMED_ICON_ONLY_DELAY_MS, warnIfUnnamedIconOnly } from "./iconOnlyName";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
+import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 
 defineOptions({ inheritAttrs: false });
 
@@ -22,7 +23,9 @@ const props = withDefaults(defineProps<ButtonProps>(), {
 const emit = defineEmits<ButtonEmits>();
 const attrs = useAttrs();
 const id = useId();
-const unavailable = computed(() => props.disabled && props.focusableUnavailable);
+const unavailable = computed(
+  () => props.disabled && (props.focusableUnavailable || props.disabledReason !== undefined),
+);
 const reasonId = computed(() => props.descriptionId ?? `${id}-reason`);
 const rootRef = ref<{ $el?: Element } | null>(null);
 // Labels that arrive with data are not unnamed, so the dev check waits for them.
@@ -44,91 +47,78 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-button-primary text-button-primary-foreground",
     "enabled:hover:bg-button-primary-hover",
     "enabled:active:bg-button-primary-active",
-    "focus-visible:ring-3 focus-visible:ring-button-primary-hover",
     "disabled:bg-button-primary-disabled disabled:text-button-primary-foreground",
   ].join(" "),
   secondary: [
     "bg-button-secondary text-button-secondary-foreground",
     "enabled:hover:bg-button-secondary-hover",
     "enabled:active:bg-button-secondary-active",
-    "focus-visible:ring-3 focus-visible:ring-button-secondary-focus-ring",
     "disabled:bg-button-secondary-disabled disabled:text-text-disabled",
   ].join(" "),
   outline: [
     "bg-transparent text-button-outline-text border border-button-outline-border",
     "enabled:hover:bg-button-outline-hover-bg enabled:hover:border-button-outline-hover-border",
     "enabled:active:bg-button-outline-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-outline-hover-border",
     "disabled:opacity-50",
   ].join(" "),
   ghost: [
     "bg-transparent text-button-ghost-text border-0",
     "enabled:hover:bg-button-ghost-hover-bg",
     "enabled:active:bg-button-ghost-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-focus-ring",
     "disabled:text-text-disabled",
   ].join(" "),
   "ghost-primary": [
     "bg-transparent text-button-ghost-primary-text border-0",
     "enabled:hover:bg-button-ghost-primary-hover-bg",
     "enabled:active:bg-button-ghost-primary-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-primary-focus-ring",
     "disabled:text-text-disabled",
   ].join(" "),
   "ghost-muted": [
     "bg-transparent text-button-ghost-muted-text border-0",
     "enabled:hover:text-button-ghost-muted-hover-text enabled:hover:bg-button-ghost-muted-hover-bg",
     "enabled:active:bg-button-ghost-muted-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-muted-focus-ring",
     "disabled:text-text-disabled",
   ].join(" "),
   "ghost-subtle": [
     "bg-transparent text-button-ghost-subtle-text border-0 opacity-60",
     "enabled:hover:opacity-100 enabled:hover:bg-button-ghost-subtle-hover-bg",
     "enabled:active:bg-button-ghost-subtle-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-subtle-focus-ring",
     "disabled:text-text-disabled disabled:opacity-30",
   ].join(" "),
   "ghost-destructive": [
     "bg-transparent text-button-ghost-destructive-text border-0",
     "enabled:hover:bg-button-ghost-destructive-hover-bg",
     "enabled:active:bg-button-ghost-destructive-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-destructive-focus-ring",
     "disabled:opacity-60",
   ].join(" "),
   "ghost-success": [
     "bg-transparent text-button-ghost-success-text border-0",
     "enabled:hover:bg-button-ghost-success-hover-bg",
     "enabled:active:bg-button-ghost-success-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-success-focus-ring",
     "disabled:opacity-60",
   ].join(" "),
   destructive: [
     "bg-button-destructive text-button-destructive-foreground",
     "enabled:hover:bg-button-destructive-hover",
     "enabled:active:bg-button-destructive-hover",
-    "focus-visible:ring-3 focus-visible:ring-button-destructive-hover",
     "disabled:opacity-60",
   ].join(" "),
   "filter-exclude": [
     "bg-error-500 text-button-destructive-foreground border-0",
     "enabled:hover:bg-error-600",
     "enabled:active:bg-error-600",
-    "focus-visible:ring-3 focus-visible:ring-error-600",
     "disabled:opacity-60",
   ].join(" "),
   "ghost-warning": [
     "bg-transparent text-button-ghost-warning-text border-0",
     "enabled:hover:bg-button-ghost-warning-hover-bg",
     "enabled:active:bg-button-ghost-warning-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-warning-focus-ring",
     "disabled:opacity-60",
   ].join(" "),
   warning: [
     "bg-button-warning text-button-warning-foreground border border-button-warning-border",
     "enabled:hover:bg-button-warning-hover",
     "enabled:active:bg-button-warning-active",
-    "focus-visible:ring-3 focus-visible:ring-button-warning-focus-ring",
     "disabled:opacity-60",
   ].join(" "),
   // A stale result awaiting a re-run is not an alert, so it stays off the solid warning fill.
@@ -136,7 +126,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-button-pending-bg text-button-pending-text border border-button-pending-bg",
     "enabled:hover:bg-button-pending-hover-bg enabled:hover:border-button-pending-hover-bg",
     "enabled:active:bg-button-pending-active-bg enabled:active:border-button-pending-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-pending-focus-ring",
     "disabled:opacity-60",
   ].join(" "),
   // Neutral ghost: inherits parent text color — used for compact inline action buttons
@@ -145,7 +134,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-transparent text-inherit border-0",
     "enabled:hover:bg-button-ghost-hover-bg",
     "enabled:active:bg-button-ghost-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-focus-ring",
     "disabled:opacity-50",
   ].join(" "),
   // Outline destructive: transparent bg + red border + red text — use for destructive actions
@@ -154,7 +142,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-transparent text-button-ghost-destructive-text border border-button-ghost-destructive-text",
     "enabled:hover:bg-button-ghost-destructive-hover-bg",
     "enabled:active:bg-button-ghost-destructive-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-destructive-focus-ring",
     "disabled:opacity-50",
   ].join(" "),
   // Stop a running operation (query/task in flight) — distinct from
@@ -164,7 +151,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-cancel-query-bg text-button-primary-foreground",
     "enabled:hover:opacity-90",
     "enabled:active:opacity-80",
-    "focus-visible:ring-3 focus-visible:ring-cancel-query-bg",
     "disabled:opacity-60",
   ].join(" "),
   // Panel collapse: ghost muted — for sidebar panel header collapse/expand.
@@ -173,7 +159,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-transparent text-button-ghost-muted-text border-0",
     "enabled:hover:text-button-ghost-muted-hover-text enabled:hover:bg-button-ghost-muted-hover-bg",
     "enabled:active:bg-button-ghost-muted-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-muted-focus-ring",
     "disabled:opacity-50",
   ].join(" "),
   // Primary-colored tall-narrow vertical rectangle — for splitter collapse/expand buttons
@@ -181,7 +166,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-button-primary text-button-primary-foreground",
     "enabled:hover:bg-button-primary-hover",
     "enabled:active:bg-button-primary-active",
-    "focus-visible:ring-3 focus-visible:ring-button-primary-hover",
     "disabled:bg-button-primary-disabled disabled:text-button-primary-foreground",
   ].join(" "),
   // Sidebar toggle: bg-surface border shadow — for persistent panel collapse/expand buttons
@@ -189,7 +173,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-surface-panel text-button-ghost-text border border-border-default",
     "enabled:hover:bg-button-ghost-hover-bg enabled:hover:border-button-border-hover",
     "enabled:active:bg-button-ghost-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-focus-ring",
     "disabled:opacity-50",
   ].join(" "),
   // AI-themed gradient — purple→pink gradient background, white text
@@ -197,7 +180,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-gradient-ai text-white border-0",
     "enabled:hover:shadow-md enabled:hover:shadow-ai-accent/40",
     "enabled:active:opacity-90",
-    "focus-visible:ring-3 focus-visible:ring-ai-accent",
     "disabled:opacity-40",
   ].join(" "),
   // On-dark primary — white background with primary color text, for use on dark gradient panels
@@ -205,7 +187,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-white text-button-on-dark-primary-text font-bold border-0 shadow-md",
     "enabled:hover:shadow-lg",
     "enabled:active:opacity-90",
-    "focus-visible:ring-3 focus-visible:ring-white/50",
     "disabled:opacity-50",
   ].join(" "),
   // On-dark ghost — transparent with white border/text, for use on dark gradient panels
@@ -213,7 +194,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-transparent text-white border-2 border-white/30",
     "enabled:hover:bg-white/10 enabled:hover:border-white/50",
     "enabled:active:opacity-90",
-    "focus-visible:ring-3 focus-visible:ring-white/50",
     "disabled:opacity-50",
   ].join(" "),
   // Destination preview buttons — brand-colored CTAs inside alert destination preview cards.
@@ -272,7 +252,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-button-ghost-primary-active-bg text-button-ghost-primary-text border border-button-outline-hover-border",
     "enabled:hover:bg-button-ghost-primary-active-bg enabled:hover:border-button-outline-hover-border",
     "enabled:active:bg-button-ghost-primary-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-primary-focus-ring",
     "disabled:opacity-50",
   ].join(" "),
   // dashed: "add tile" — transparent bg, dashed muted border + muted icon/text.
@@ -281,7 +260,6 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "bg-transparent text-button-ghost-muted-text border border-dashed border-button-outline-border",
     "enabled:hover:bg-button-ghost-hover-bg enabled:hover:border-button-border-hover enabled:hover:text-button-ghost-text",
     "enabled:active:bg-button-ghost-active-bg",
-    "focus-visible:ring-3 focus-visible:ring-button-ghost-focus-ring",
     "disabled:opacity-50",
   ].join(" "),
   // pricing-chip: Pill-shaped toggle chip for model pricing quick-setup template selection
@@ -405,14 +383,20 @@ const classes = computed<string[]>(() => [
   // `as="a"` renders a real anchor, which base-elements.css underlines on hover.
   "no-underline hover:no-underline",
   // Medium (500) keeps button labels calm/simple — heavier weights read as shouty.
-  "font-medium transition-[color,background-color,border-color,text-decoration-color,fill,stroke,box-shadow] duration-150",
+  // A disabled label also steps down a weight: opacity alone read as the enabled button.
+  props.disabled ? "font-normal" : "font-medium",
+  "transition-[color,background-color,border-color,text-decoration-color,fill,stroke,box-shadow] duration-150",
   "outline-none",
   /* Unified focus ring — identical to OInput/OSelect: a 2px OPAQUE primary ring
-     hugging the control (no ring-offset gap). The trailing `!` overrides
-     each variant's own ring width/color below, so every button focuses identically.
+     hugging the control (no ring-offset gap). The trailing `!` beats any width/color
+     declared further down the class list, so every button focuses identically.
      Reads --color-focus-ring-accent, NOT accent/25: at 25% alpha the ring measured
      1.38:1 in light and 1.50:1 in dark, against the 3:1 SC 1.4.11 floor. Solid, it is
-     4.80:1 / 6.82:1. This override is why the per-variant ring classes never paint. */
+     4.80:1 / 6.82:1. Because of that override the variant map below declares NO ring of
+     its own — the 25 `focus-visible:ring-3 focus-visible:ring-*` entries it carried could
+     never paint, and left the per-variant contrast work pinned to a class that renders
+     nowhere. The --color-button-*-focus-ring roles stay in component.css: a variant that
+     genuinely needs a different ring has to stop this override for it, not just add one. */
   "focus-visible:ring-[0.125rem]! focus-visible:ring-focus-ring-accent!",
   unavailable.value ? "cursor-not-allowed!" : "disabled:cursor-not-allowed enabled:cursor-pointer",
   // Variant + size (active overrides variant to primary appearance)
@@ -451,7 +435,7 @@ function handleClick(event: MouseEvent): void {
     :class="classes"
     :type="as === 'button' ? type : undefined"
     :disabled="
-      as === 'button' ? (disabled && !focusableUnavailable) || (loading && !unavailable) : undefined
+      as === 'button' ? (disabled && !unavailable) || (loading && !unavailable) : undefined
     "
     :aria-disabled="disabled || loading || undefined"
     :aria-busy="loading || undefined"
@@ -478,8 +462,10 @@ function handleClick(event: MouseEvent): void {
       </slot>
       <slot />
       <span v-if="unavailable && !descriptionId" :id="reasonId" class="sr-only" aria-hidden="true"
-        ><slot name="unavailable-reason"
+        >{{ disabledReason ?? "" }}<slot name="unavailable-reason"
       /></span>
+      <!-- No default slot: OTooltip binds to its host, so the reason paints on the button itself. -->
+      <OTooltip v-if="unavailable && disabledReason" :content="disabledReason" />
       <slot name="icon-right">
         <OIcon v-if="iconRight" :name="iconRight" size="sm" />
       </slot>

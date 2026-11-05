@@ -126,7 +126,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
                 <OButton
                   v-else
-                  :variant="row.enabled ? 'ghost-destructive' : 'ghost'"
+                  variant="ghost"
                   size="icon-sm"
                   class="max-md:hidden"
                   :icon-left="row.enabled ? 'pause' : 'play-arrow'"
@@ -185,7 +185,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <ODropdownItem
                     v-if="!toggleLoadingMap[row.id]"
                     :icon-left="row.enabled ? 'pause' : 'play-arrow'"
-                    :variant="row.enabled ? 'destructive' : 'default'"
+                    :variant="row.enabled ? 'default' : 'default'"
                     class="md:hidden"
                     :data-test="`synthetics-locations-${row.id}-${row.enabled ? 'disable' : 'enable'}-btn-menu`"
                     @select="toggleLocationEnabled(row)"

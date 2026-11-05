@@ -89,7 +89,7 @@ function indicatorClasses(step: StepRegistration): string {
   ].join(" ");
 
   if (step.error) {
-    return `${base} bg-stepper-indicator-error text-stepper-indicator-fg`;
+    return `${base} bg-stepper-indicator-error text-stepper-indicator-error-fg`;
   }
   if (step.done) {
     return `${base} bg-stepper-indicator-done text-stepper-indicator-fg`;

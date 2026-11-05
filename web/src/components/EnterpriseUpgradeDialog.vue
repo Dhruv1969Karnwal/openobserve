@@ -56,9 +56,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         :class="{ 'cloud-layout': dialogConfig.isCloudLayout }"
       >
         <!-- Left Panel - Hero Section (hidden for Cloud) -->
+        <!-- White labels ride the darkened stops (>=4.74 all 12 scopes); the exemptions live in ACCENT_FILL_WHITE_BY_DESIGN in lib/styles/tokens/themeRuntimeContrast.spec.ts. -->
         <div
           v-if="!dialogConfig.isCloudLayout"
-          class="hero-panel relative flex min-h-0 [flex:0_0_35%] flex-col overflow-y-auto bg-[linear-gradient(135deg,var(--color-theme-accent)_0%,color-mix(in_srgb,var(--color-theme-accent)_85%,black_15%)_100%)] p-10 text-white max-[56.25rem]:min-h-100 max-[56.25rem]:flex-none"
+          class="hero-panel relative flex min-h-0 [flex:0_0_35%] flex-col overflow-y-auto bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-theme-accent)_50%,black)_0%,color-mix(in_srgb,var(--color-theme-accent)_35%,black)_100%)] p-10 text-white max-[56.25rem]:min-h-100 max-[56.25rem]:flex-none"
         >
           <div class="m-auto flex w-full max-w-100 flex-1 flex-col items-center justify-center">
             <!-- eslint-disable local/no-hardcoded-px -- optical effect, not layout — scaling it with text makes elevation bloom -->
@@ -99,9 +100,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <!-- eslint-disable local/no-hardcoded-px -- optical effect, not layout — scaling shadow and blur with text makes elevation bloom -->
                 <div
                   data-test="enterprise-upgrade-offer-badge"
-                  class="rounded-default shadow-success-500/40 inline-flex items-center bg-[linear-gradient(135deg,#22c55e_0%,#4ade80_100%)] px-5 py-2.5 text-sm font-bold text-white shadow-lg backdrop-blur-[10px]"
+                  class="rounded-default shadow-success-500/40 bg-success-500 text-on-status-fill-text inline-flex items-center px-5 py-2.5 text-sm font-bold shadow-lg backdrop-blur-[10px]"
                   :class="{
-                    'bg-[rgba(255,255,255,0.2)]! shadow-md!': dialogConfig.isLicensed,
+                    'bg-[rgba(255,255,255,0.2)]! text-white! shadow-md!': dialogConfig.isLicensed,
                   }"
                 >
                   <!-- eslint-enable local/no-hardcoded-px -->
@@ -159,7 +160,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 size="lg"
                 @click="handlePrimaryButtonClick"
                 data-test="enterprise-upgrade-download-btn"
-                class="rounded-default! text-theme-accent! bg-white! px-8 py-2.5 text-sm font-bold! [letter-spacing:0.01875rem] shadow-md transition-all duration-300 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] hover:[transform:translateY(-0.1875rem)_scale(1.02)] hover:shadow-lg active:[transform:translateY(-1px)_scale(0.98)]"
+                class="rounded-default! bg-white! px-8 py-2.5 text-sm font-bold! [letter-spacing:0.01875rem] shadow-md transition-all duration-300 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] hover:[transform:translateY(-0.1875rem)_scale(1.02)] hover:shadow-lg active:[transform:translateY(-1px)_scale(0.98)]"
               >
                 <!-- eslint-enable local/no-hardcoded-px -->
                 {{ dialogConfig.primaryButtonText }}

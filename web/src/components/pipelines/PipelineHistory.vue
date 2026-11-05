@@ -155,7 +155,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <OTooltip :content="row.is_realtime ? t('common.realTime') : t('alerts.scheduled')">
               <OIcon
                 :name="row.is_realtime ? 'check-circle' : 'schedule'"
-                :class="row.is_realtime ? 'text-status-positive' : 'text-text-muted'"
+                :class="row.is_realtime ? 'text-status-success-text' : 'text-text-muted'"
                 size="md"
               />
             </OTooltip>
@@ -169,7 +169,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             >
               <OIcon
                 :name="row.is_silenced ? 'volume-off' : 'volume-up'"
-                :class="row.is_silenced ? 'text-text-muted' : 'text-status-positive'"
+                :class="row.is_silenced ? 'text-text-muted' : 'text-status-success-text'"
                 size="md"
               />
             </OTooltip>
@@ -183,7 +183,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <OIcon
               v-if="row.is_partial !== null && row.is_partial !== undefined"
               :name="row.is_partial ? 'warning' : 'check-circle'"
-              :class="row.is_partial ? 'text-warning' : 'text-status-positive'"
+              :class="row.is_partial ? 'text-status-warning-text' : 'text-status-success-text'"
               size="xs"
             >
               <OTooltip
@@ -349,7 +349,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       :name="selectedRow.is_partial ? 'warning' : 'check-circle'"
                       :class="[
                         'me-1',
-                        selectedRow.is_partial ? 'text-warning' : 'text-status-positive',
+                        selectedRow.is_partial
+                          ? 'text-status-warning-text'
+                          : 'text-status-success-text',
                       ]"
                       size="xs"
                     />

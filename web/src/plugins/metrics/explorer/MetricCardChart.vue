@@ -26,20 +26,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   axis) is expressed as panel config the shared converter already understands.
 -->
 <template>
-  <div ref="chartPanelRef" class="h-full w-full" :style="{ height }">
-    <PanelSchemaRenderer
-      :panel-schema="panelSchema"
-      :selected-time-obj="selectedTimeObj"
-      :variables-data="variablesData"
-      :injected-promql-data="injectedPromqlData"
-      :injected-exemplars="injectedExemplars"
-      :allow-alert-creation="allowAlertCreation"
-      alert-source="explorer"
-      :allow-annotations-add="false"
-      :allow-annotations-a-p-i="false"
-      @error="onPanelError"
-      @updated:data-zoom="$emit('zoom', $event)"
-    />
+  <div
+    ref="chartPanelRef"
+    class="metrics-chart-mount flex h-full w-full flex-col"
+    :style="{ height }"
+  >
+    <div class="relative min-h-0 flex-1">
+      <PanelSchemaRenderer
+        :panel-schema="panelSchema"
+        :selected-time-obj="selectedTimeObj"
+        :variables-data="variablesData"
+        :injected-promql-data="injectedPromqlData"
+        :injected-exemplars="injectedExemplars"
+        :allow-alert-creation="allowAlertCreation"
+        alert-source="explorer"
+        :allow-annotations-add="false"
+        :allow-annotations-a-p-i="false"
+        @error="onPanelError"
+        @updated:data-zoom="$emit('zoom', $event)"
+      />
+    </div>
+    <!-- A2. The Data-table toggle gets a row of its own. Painted over the plot
+         it covered the first x-axis tick and the legend marker; the band below
+         is where it lives, focused or not. -->
+    <div class="h-6 shrink-0" data-test="metrics-chart-a11y-band"></div>
   </div>
 </template>
 
@@ -85,6 +95,8 @@ export default defineComponent({
     /** Overrides the precision read off `results`, so heatmaps drawn together label buckets alike. */
     decimals: { type: Number, default: null },
     color: { type: String, required: true },
+    /** What the card is titled. The chart's accessible name is built from it. */
+    title: { type: String, default: "" },
     height: { type: String, default: "100%" },
     /**
      * The window these results were queried for, in MICROSECONDS — the same unit
@@ -132,17 +144,27 @@ export default defineComponent({
 
     /**
      * A single series keeps the card's accent colour — that colour is the card's
-     * identity, and a lone line needs no distinguishing. The moment there is more
-     * than one, `fixed` paints them all the SAME colour (colorPalette resolves
-     * `fixed` to `fixedColor[0]` for every series name), which on a legend-less
-     * tile makes a Percentiles or Min/Max variant unreadable: three lines you
-     * cannot tell apart, or — when they coincide — indistinguishable from one.
-     * Hashing the series NAME into the palette also keeps p50 the same colour on
-     * every re-render and between the tile and the card it applies to.
+     * identity, and a lone line needs no distinguishing. More than one takes the
+     * classic ramp BY POSITION, the same seat assignment the SQL builder uses:
+     * hashing the name into 12 seats collides as soon as a card draws four
+     * series, which is how two `le` buckets of one histogram ended up painted the
+     * same colour under a legend that could not separate them.
      */
     const colorConfig = () => {
       if (seriesCount() <= 1) return { mode: "fixed", fixedColor: [props.color] };
-      return { mode: props.legend ? "palette-classic" : "palette-classic-by-series" };
+      return { mode: "palette-classic" };
+    };
+
+    /**
+     * A template that only repeats the metric names nothing: every series of that
+     * query would print the same legend entry, which is how a card came to carry
+     * four lines labelled with one name. Dropping it lets the series-name builder
+     * fall back to the labels that actually differ, the same rule the drill-in
+     * applies (metricsHandoff's legendFor).
+     */
+    const legendTemplateOf = (query: any) => {
+      const template = query?.legendTemplate ?? "";
+      return !template || template === query?.stream ? "" : template;
     };
 
     /**
@@ -152,7 +174,7 @@ export default defineComponent({
      */
     const panelSchema = computed(() => ({
       id: "metrics-explorer-card",
-      title: "",
+      title: props.title,
       type: props.chartType,
       queryType: "promql",
       queries: (props.queries ?? []).map((q: any) => ({
@@ -160,13 +182,13 @@ export default defineComponent({
         query: withBareMetricNames(q.expr),
         customQuery: true,
         fields: { ...(q.stream ? { stream: q.stream } : {}), stream_type: "metrics" },
-        config: { promql_legend: q.legendTemplate ?? "" },
+        config: { promql_legend: legendTemplateOf(q) },
       })),
       config: {
         unit: props.unit,
         unit_custom: props.unitCustom,
         decimals: props.decimals ?? adaptiveDecimals(props.results),
-        show_legends: props.legend,
+        show_legends: props.legend || seriesCount() > 1,
         // Gridlines make a small chart readable — without them a sparkline is
         // just a shape. The heatmap is solid colour, so they'd only add noise.
         show_gridlines: props.chartType !== "heatmap",
@@ -272,3 +294,35 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+/* keep(lib-override:chart-renderer) — the toggle is ChartRenderer's DOM, which
+   metrics may not re-template; this re-points only where the card mounts it.
+   The data-table escape hatch lives inside the chart renderer: sr-only it is
+   invisible to a sighted keyboard user, and focus-anchored at the canvas corner
+   it lands on the first x-axis tick and the legend marker. In the metrics
+   mounts it gets the reserved band under the plot instead, visible at rest,
+   full label intact. */
+.metrics-chart-mount :deep([data-test="chart-data-table-toggle"]) {
+  position: absolute !important;
+  top: 100% !important;
+  bottom: auto !important;
+  inset-inline-start: 0 !important;
+  inset-inline-end: auto !important;
+  z-index: 10 !important;
+  width: auto !important;
+  height: 1.5rem !important;
+  margin: 0 !important;
+  padding: 0 0.5rem !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  white-space: nowrap !important;
+  font-size: var(--text-2xs);
+  line-height: 1.4;
+  border: 0.0625rem solid var(--color-border-control);
+  border-radius: var(--radius-default);
+  background-color: var(--color-surface-base);
+  color: var(--color-text-heading);
+}
+</style>

@@ -36,9 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         value="primarysm"
         class="max-w-62.5"
       >
-        <span class="truncate font-mono text-xs"
-          >{{ filter.label }} {{ filter.operator || "=" }} {{ filter.value }}</span
-        >
+        <span class="truncate font-mono text-xs">{{ describeMatcher(filter) }}</span>
         <template #trailing>
           <span class="ms-1 inline-flex items-center"><OIcon name="close" size="xs" /></span>
         </template>
@@ -69,16 +67,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         class="max-w-62.5 min-w-0"
         :data-test="`metrics-explorer-label-chip-${filter.label}`"
       >
-        <OTruncatedText class="font-mono text-xs"
-          >{{ filter.label }} {{ filter.operator || "=" }} {{ filter.value }}</OTruncatedText
-        >
+        <OTruncatedText class="font-mono text-xs">{{ describeMatcher(filter) }}</OTruncatedText>
         <template #trailing>
           <button
             type="button"
-            class="ms-1 inline-flex cursor-pointer items-center"
+            class="-my-1 -me-1 inline-flex shrink-0 cursor-pointer items-center justify-center p-1"
             :aria-label="
               t('metrics.explorer.labels.removeFilterAria', {
-                filter: labelFilterKey(filter),
+                filter: describeMatcher(filter),
               })
             "
             :data-test="`metrics-explorer-label-chip-remove-${filter.label}`"
@@ -309,6 +305,11 @@ import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
 import { useFilterHint } from "@/composables/metrics/useFilterHint";
 import { labelFilterKey, type LabelFilter } from "@/composables/metrics/useMetricsExplorerGrid";
+
+/** A chip's matcher as prose. `labelFilterKey` joins with NULs, which a screen
+ *  reader reads aloud as nothing, so the accessible name needs its own form. */
+const describeMatcher = (filter: LabelFilter) =>
+  `${filter.label} ${filter.operator || "="} "${filter.value}"`;
 
 /** The PromQL selector builder throws on anything else, so an invalid name is
  *  rejected here rather than being turned into a broken query. */

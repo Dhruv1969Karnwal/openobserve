@@ -151,7 +151,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   style="background: rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.35)"
                 >
                   <svg
-                    class="text-status-positive h-6 w-6"
+                    class="text-status-success-text h-6 w-6"
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -371,7 +371,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           size="icon-sm"
           :class="[
             'border',
-            copiedSql ? 'text-status-positive border-status-positive' : 'border-border-default',
+            copiedSql ? 'text-status-success-text border-status-positive' : 'border-border-default',
           ]"
           @click="copySql"
           data-test="inspector-copy-sql-btn"
@@ -706,12 +706,12 @@ export default defineComponent({
       if (ms < 50) {
         return {
           text: t("logs.searchJobInspector.ultraFastResponse"),
-          colorClass: "text-status-positive",
+          colorClass: "text-status-success-text",
         };
       } else if (ms < 200) {
         return {
           text: t("logs.searchJobInspector.fastResponse"),
-          colorClass: "text-status-positive",
+          colorClass: "text-status-success-text",
         };
       } else if (ms < 500) {
         return {

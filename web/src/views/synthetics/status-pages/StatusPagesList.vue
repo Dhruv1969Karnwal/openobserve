@@ -165,6 +165,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </ODropdownItem>
 
             <ODropdownItem
+              v-if="advancedEnabled || showsLockedAffordances"
               :disabled="!advancedEnabled"
               :data-test="`status-pages-post-update-item-${(row as any).id}`"
               @select="emit('post-update', row)"
@@ -189,6 +190,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </ODropdownItem>
 
             <ODropdownItem
+              v-if="advancedEnabled || showsLockedAffordances"
               :disabled="!advancedEnabled"
               :data-test="`status-pages-view-updates-item-${(row as any).id}`"
               @select="emit('view-updates', row)"
@@ -220,6 +222,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </ODropdownItem>
 
             <ODropdownItem
+              v-if="advancedEnabled || showsLockedAffordances"
               :disabled="!advancedEnabled"
               :data-test="`status-pages-domains-item-${(row as any).id}`"
               @select="emit('manage-domains', row)"
@@ -278,6 +281,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import config from "@/aws-exports";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 import { raw, useI18nTyped } from "@/types/i18n";
 import OTable from "@/lib/core/Table/OTable.vue";
 import type { OTableColumnDef } from "@/lib/core/Table/OTable.types";
@@ -318,14 +322,7 @@ const emit = defineEmits<{
 const { t } = useI18nTyped();
 const search = ref("");
 
-/**
- * Notices ("Post update" / "View updates") and Custom domains are locked in
- * an OSS build, but available on both self-hosted enterprise and cloud — the
- * backend's own gate on these routes is a compile-time
- * `#[cfg(feature = "enterprise")]`, which cloud's Cargo feature graph already
- * enables. Same `isCloud || isEnterprise` check that gates the Billing route
- * itself (`router/index.ts`), rather than the runtime `build_type` signal.
- */
+// Notices and domains need a licensed build (isCloud || isEnterprise, as on the Billing route), so OSS is locked or nothing.
 const advancedEnabled = computed(() => config.isCloud === "true" || config.isEnterprise === "true");
 
 const filteredPages = computed(() => {

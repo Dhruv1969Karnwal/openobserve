@@ -72,6 +72,34 @@ const selectionLabel = computed(() => {
   const total = `${props.totalCount.toLocaleString()}${props.totalCountExact ? "" : "+"}`;
   return t("components.table.selectedOfTotal", { selected, total });
 });
+
+// A filter can leave the page painting nothing, and "1 - 2 of 2" over an empty
+// body reads as a broken count rather than a narrow search.
+const EMPTY_RANGE = "0";
+const rangeLabel = computed(() =>
+  props.showingFrom === 0 || props.showingTo === 0
+    ? EMPTY_RANGE
+    : `${props.showingFrom.toLocaleString()}–${props.showingTo.toLocaleString()}`,
+);
+const totalCountText = computed(
+  () => `${props.totalCount.toLocaleString()}${props.totalCountExact ? "" : "+"}`,
+);
+// One sentence and one dash for every list footer in the product.
+const rangeSentence = computed(() =>
+  rangeLabel.value === EMPTY_RANGE
+    ? `${t("search.showing")} ${EMPTY_RANGE} ${t("search.of")} ${totalCountText.value}`
+    : t("components.table.range", { from: rangeLabel.value, total: totalCountText.value }),
+);
+
+// Pager arrows are not drawn when there is one page; the page-size select is a
+// pager too. A set that already fits the smallest option offers no real choice,
+// so the control would only promise pagination that cannot happen. A lower-bound
+// total may hide more rows than it names, so it never suppresses the select.
+const showsPageSizeSelect = computed(() => {
+  if (props.pageSizeOptions.length === 0) return false;
+  const smallest = Math.min(...props.pageSizeOptions);
+  return !props.totalCountExact || props.totalCount > smallest;
+});
 </script>
 
 <template>
@@ -121,17 +149,13 @@ const selectionLabel = computed(() => {
       />
       <span
         v-else
-        class="text-primary text-xs whitespace-nowrap"
+        class="text-text-secondary text-xs whitespace-nowrap"
         data-test="o2-table-pagination-info"
       >
-        {{ t("search.showing") }} {{ showingFrom }} - {{ showingTo }} {{ t("search.of") }}
-        {{ totalCount.toLocaleString() }}{{ totalCountExact ? "" : "+" }}
+        {{ rangeSentence }}
       </span>
-      <div
-        class="bg-border-default h-4 w-px shrink-0 max-md:hidden"
-        v-if="pageSizeOptions.length > 0"
-      />
-      <div v-if="pageSizeOptions.length > 0" class="text-primary flex items-center gap-1.5 text-xs">
+      <div class="bg-border-default h-4 w-px shrink-0 max-md:hidden" v-if="showsPageSizeSelect" />
+      <div v-if="showsPageSizeSelect" class="text-text-secondary flex items-center gap-1.5 text-xs">
         <span class="whitespace-nowrap max-md:hidden">{{ t("search.recordsPerPage") }}</span>
         <OSelect
           v-model="pageSizeModel"
@@ -143,7 +167,13 @@ const selectionLabel = computed(() => {
         />
       </div>
 
-      <nav class="flex items-center gap-1" :aria-label="t('components.pagination.pagination')">
+      <!-- One page has nothing to page through: four disabled arrows read as a
+           control that is broken, so the range and the page size carry the row. -->
+      <nav
+        v-if="totalPages > 1"
+        class="flex items-center gap-1"
+        :aria-label="t('components.pagination.pagination')"
+      >
         <OButton
           variant="outline"
           size="icon"

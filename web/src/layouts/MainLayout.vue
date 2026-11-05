@@ -103,16 +103,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <div
             class="border-border-default flex shrink-0 items-center justify-between border-b px-4 py-3"
           >
-            <img
-              class="h-6 w-auto"
-              :src="
-                getImageURL(
-                  isDark
-                    ? 'images/common/openobserve_latest_dark_2.svg'
-                    : 'images/common/openobserve_latest_light_2.svg',
-                )
-              "
-              :alt="raw('OpenObserve')"
+            <BrandWordmark
+              test-id="main-layout-mobile-nav-retrace-logo"
+              :name="t('login.openObserveLogoAlt')"
             />
             <OButton
               :aria-label="t('common.close')"
@@ -240,6 +233,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { configFullQuery } from "@/services/config.queries";
 import { orgSettingsQuery } from "@/services/organizations.queries";
 import ONavbar from "@/lib/core/Navbar/ONavbar.vue";
+import BrandWordmark from "@/components/BrandWordmark.vue";
 import type { NavItem } from "@/lib/core/Navbar/ONavbar.types";
 import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
 import AppHeader from "../components/Header.vue";
@@ -333,6 +327,7 @@ export default defineComponent({
   mixins: [mainLayoutMixin],
   components: {
     AppHeader,
+    BrandWordmark,
     WebinarBanner,
     AnnouncementBanner,
     PasswordExpiryBanner,
@@ -509,9 +504,10 @@ export default defineComponent({
     // The AI Observability menu entry itself ships on true OSS builds too —
     // Monitor (LLM Insights + Sessions) needs no backend flag, unlike the rest
     // of the module. AIObservabilityShell (Index.vue) renders Evaluate/
-    // Experiment/Annotate/Agent Graph/Agent Behavior too, but locked (lock
-    // icon + tooltip) rather than hidden, so this entry point itself doesn't
-    // need to wait on `isOnlineEvalsEnabled` for those.
+    // Experiment/Annotate/Agent Graph/Agent Behavior behind PAID_FEATURE_POLICY
+    // — dropped from the rail under the shipped "hide", locked only in a "lock"
+    // build — so this entry point itself doesn't need to wait on
+    // `isOnlineEvalsEnabled` for those.
     const isOssBuild = !(config.isEnterprise == "true" || config.isCloud == "true");
     const isAiObservabilityMenuVisible = computed(() => isOnlineEvalsEnabled.value || isOssBuild);
 
@@ -818,12 +814,18 @@ export default defineComponent({
       }
     });
 
-    // Shows the entry — locked, if this edition doesn't unlock `featureKey` —
-    // whenever `enabledByRuntimeFlag` is true OR the edition flat-out doesn't
-    // unlock it (so the locked entry stays discoverable rather than only
-    // appearing once an admin has also flipped the runtime flag on). Hides it
-    // only when the edition allows the feature but the runtime flag is off —
-    // that's a deployment choice, not something to upsell.
+    // The edition is the entry's gate: `access.visible` carries the policy half
+    // (false under `PAID_FEATURE_POLICY = "hide"` for an edition that does not
+    // unlock `featureKey`, so no locked tile is inserted at all) and an entitled
+    // edition keeps the entry whenever the runtime flag is on OR the build is
+    // entitled. That is deliberately NOT the same rule as the route's:
+    // `workflowsRouteGuard` refuses on `workflows_enabled === false` while this
+    // entry only ever requires the edition, so an entitled build with the flag off
+    // lists Workflows and sends the click to `/` — the split its own comment
+    // declares ("the two are not meant to match", useEnterpriseRoutes.ts). Chosen
+    // because the entry must not flash in before `/config` lands, while a guard may
+    // not bounce a bookmark whose config is still loading. `incidents` reads no
+    // flag on either side, so it has no such gap.
     const syncGatedMenuEntry = (
       name: string,
       featureKey: "incidents" | "workflows",
@@ -833,7 +835,7 @@ export default defineComponent({
     ) => {
       const existingIndex = linksList.value.findIndex((link) => link.name === name);
       const access = checkFeatureAccess(featureKey, buildFeatureGateContext(store.state.zoConfig));
-      const shouldShow = enabledByRuntimeFlag || !access.allowed;
+      const shouldShow = access.visible && (enabledByRuntimeFlag || access.allowed);
 
       if (!shouldShow) {
         if (existingIndex !== -1) linksList.value.splice(existingIndex, 1);

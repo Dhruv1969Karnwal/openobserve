@@ -81,6 +81,23 @@
   box-shadow: var(--shadow-lg) !important;
 }
 
+/* Scroll-reveal states for the public landing page. The classes are attached at
+   runtime by components/landing/useReveal.ts (IntersectionObserver), so no
+   template names them — the strings there keep Tailwind's scanner from purging
+   these. Content is visible by default: JS adds _wait then _in as each element
+   enters, and prefers-reduced-motion users never get _wait. */
+@utility landing-reveal-wait {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition:
+    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@utility landing-reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Announcement message markup comes from v-html, so links and code inherit the operator-chosen banner colour. */
 @utility announcement-message {
   overflow-wrap: anywhere;
@@ -99,4 +116,31 @@
     border-radius: var(--radius-default);
     background-color: color-mix(in srgb, currentColor 14%, transparent);
   }
+}
+
+/* Bottom padding for a full-width action bar that closes a scroll region: the
+   device safe-area inset is not a Tailwind token, so the reservation combines
+   the standard action-bar step with it in one declaration. */
+@utility pb-safe {
+  padding-bottom: calc(var(--spacing-5) + env(safe-area-inset-bottom));
+}
+
+/* ── Selection affordance ───────────────────────────────────────────────────
+   The shared non-colour cue for a selected/active row, option or toggle: an inset
+   start edge (follows the element's own radius, costs no layout) plus the weight
+   step. A selected fill alone measured 1.30–1.36:1, under the SC 1.4.11 graphic
+   floor, so no surface may signal selection with tint only. Pair with
+   `aria-selected` / `aria-pressed` / `aria-current` on the same element. */
+@utility list-selected-edge {
+  box-shadow: inset 0.1875rem 0 0 var(--color-border-strong);
+  font-weight: var(--font-semibold);
+}
+
+/* The shared field lists (logs, traces) mark a selected field with tint only,
+   measured 1.30–1.36:1. The row is rendered by src/components/common/FieldRow.vue,
+   which is not a lib/core surface, so the affordance is bound here. Declarations
+   mirror `list-selected-edge` above — change one, change both. */
+.field_list.selected {
+  box-shadow: inset 0.1875rem 0 0 var(--color-border-strong);
+  font-weight: var(--font-semibold);
 }

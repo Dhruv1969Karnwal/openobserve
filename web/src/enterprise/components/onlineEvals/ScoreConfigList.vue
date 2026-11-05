@@ -381,7 +381,6 @@ const summaryStats = computed<StatItem[]>(() => {
   const c = typeCounts.value;
   const has = c.total > 0;
   const v = (n: number): string | number => (has ? n : "—");
-  const share = has ? c.total : undefined;
   return [
     {
       key: "numeric",
@@ -389,7 +388,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.numeric),
       icon: "tag",
       tone: "blue",
-      max: share,
       dataTest: "score-config-summary-numeric",
     },
     {
@@ -398,7 +396,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.categorical),
       icon: "category",
       tone: "purple",
-      max: share,
       dataTest: "score-config-summary-categorical",
     },
     {
@@ -407,7 +404,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.boolean),
       icon: "toggle-off",
       tone: "teal",
-      max: share,
       dataTest: "score-config-summary-boolean",
     },
     {

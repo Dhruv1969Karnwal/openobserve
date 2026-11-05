@@ -136,6 +136,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               @click="refreshStreams"
             />
           </template>
+          <!-- The row rail carries state, so it is named once here rather than left
+               to be inferred from three hues, one of them the absence of a mark. -->
+          <template #subheader>
+            <div
+              class="border-table-row-divider text-2xs text-text-secondary px-page-edge flex flex-wrap items-center gap-x-3 gap-y-1 border-b py-1"
+              data-test="log-stream-rail-legend"
+            >
+              <span>{{ t("logStream.railLegend") }}</span>
+              <span class="inline-flex items-center gap-1.5">
+                <span
+                  class="inline-block h-3 w-1 shrink-0"
+                  :style="{ backgroundColor: 'var(--color-row-rail-positive)' }"
+                  aria-hidden="true"
+                ></span>
+                {{ t("logStream.railLegendActive") }}
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <span
+                  class="inline-block h-3 w-1 shrink-0"
+                  :style="{ backgroundColor: 'var(--color-row-rail-warning)' }"
+                  aria-hidden="true"
+                ></span>
+                {{ t("logStream.railLegendQuiet") }}
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <span
+                  class="inline-block h-3 w-1 shrink-0"
+                  :style="{ backgroundColor: 'var(--color-row-rail-muted)' }"
+                  aria-hidden="true"
+                ></span>
+                {{ t("logStream.railLegendNever") }}
+              </span>
+            </div>
+          </template>
           <!--
             Render the stream-name cell with a deterministic per-name data-test.
             Tests can target a specific stream row via
@@ -447,10 +481,10 @@ import { COL, type OTableColumnDef } from "@/lib/core/Table/OTable.types";
 import type { EmptyStateAction } from "@/lib/core/EmptyState/presets";
 import OTimeCell from "@/lib/core/Table/cells/OTimeCell.vue";
 import OStatStrip from "@/lib/data/StatStrip/OStatStrip.vue";
-import type { StatItem, StatTrend } from "@/lib/data/StatStrip/OStatStrip.types";
+import type { StatItem } from "@/lib/data/StatStrip/OStatStrip.types";
 import OPageLayout from "@/lib/core/PageLayout/OPageLayout.vue";
 import streamService from "../services/stream";
-import { addCommasToNumber, formatEventCount } from "@/utils/formatters";
+import { addCommasToNumber } from "@/utils/formatters";
 import SchemaIndex from "../components/logstream/schema.vue";
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import EmptyStateIngestionChip from "@/lib/core/EmptyState/EmptyStateIngestionChip.vue";
@@ -549,7 +583,10 @@ export default defineComponent({
     // yet" renders as a muted em dash rather than a misleading "0 MB".
     const hasStat = (v: unknown): boolean => v !== null && v !== undefined && v !== "";
     const formatCount = (v: unknown): string => (hasStat(v) ? addCommasToNumber(Number(v)) : "—");
-    const formatBytes = (v: unknown): string => (hasStat(v) ? formatSizeFromMB(Number(v)) : "—");
+    // `minimal` here, fixed decimals everywhere else: this table is scanned for relative
+    // size, and 60 rows of `412.00 MB` put noise where the reader wants magnitude.
+    const formatBytes = (v: unknown): string =>
+      hasStat(v) ? formatSizeFromMB(Number(v), { decimals: "minimal" }) : "—";
 
     // How many times smaller the data is on disk than as ingested, e.g. "80.5x".
     // Plain "x", not the "×" multiplication sign — that glyph sits on the maths
@@ -581,7 +618,7 @@ export default defineComponent({
         size: 320,
         minSize: 160,
         // Flex: fills the leftover width on load, freezes on first resize.
-        meta: { align: "left", flex: true },
+        meta: { align: "left", flex: true, mono: true },
       },
       {
         id: "doc_time_max",
@@ -892,10 +929,10 @@ export default defineComponent({
       const s = streamState(row);
       const color =
         s === "stale"
-          ? "var(--color-warning-500)"
+          ? "var(--color-row-rail-warning)"
           : s === "empty"
-            ? "var(--color-grey-400)"
-            : "var(--color-success-500)";
+            ? "var(--color-row-rail-muted)"
+            : "var(--color-row-rail-positive)";
       return { boxShadow: `var(--shadow-rail-geom) ${color}` };
     };
 
@@ -945,20 +982,22 @@ export default defineComponent({
     // none of these numbers is a health signal.
     const summaryStats = computed<StatItem[]>(() => {
       const s = streamSummary.value;
-      const count = (n: unknown): string => (Number(n) > 0 ? formatEventCount(Number(n)) : "—");
+      // Same formatter as the Events column, so the tile above the table and the
+      // rows under it cannot state the same quantity two ways.
+      const count = (n: unknown): string => formatCount(n);
       const size = (n: unknown): string => (Number(n) > 0 ? formatSizeFromMB(Number(n)) : "—");
-      // How much smaller the data is on disk than as ingested — shown as a trend
-      // beside the compressed size, so the tile keeps Home's number AND answers
-      // "how good is that?" without a second size to divide.
-      const compressionTrend = (): StatTrend | undefined => {
+      // A ratio is not a delta: an arrow would say "it fell", which nothing here
+      // measured. It qualifies the figure instead.
+      const compressionNote = () => {
         const ratio = compressionRatio(s?.total_storage_size, s?.total_compressed_size);
-        if (!ratio) return undefined;
-        return { direction: "down", label: raw(ratio), tone: "success" };
+        return ratio ? t("logStream.compressedAtRatio", { ratio }) : undefined;
       };
       return [
         {
           key: "streams",
-          label: t("home.streams"),
+          // The org-wide count beside a table paginated per type: the label names
+          // the set, or "52" beside "Showing 1–20 of 20" reads as a data bug.
+          label: t("logStream.streamsAllTypes"),
           value: count(s?.num_streams),
           icon: "window",
           tone: "primary",
@@ -969,7 +1008,7 @@ export default defineComponent({
           label: t("home.docsCountLbl"),
           value: count(s?.total_records),
           icon: "bar-chart",
-          tone: "info",
+          tone: "primary",
           dataTest: "log-stream-summary-events",
         },
         {
@@ -977,7 +1016,7 @@ export default defineComponent({
           label: t("home.totalDataIngested"),
           value: size(s?.total_storage_size),
           icon: "download",
-          tone: "teal",
+          tone: "neutral",
           dataTest: "log-stream-summary-storage",
         },
         // Cloud does not report compressed size (its column and its Home tile are
@@ -989,8 +1028,8 @@ export default defineComponent({
                 label: t("home.totalDataCompressed"),
                 value: size(s?.total_compressed_size),
                 icon: "compress",
-                tone: "purple",
-                trend: compressionTrend(),
+                tone: "neutral",
+                sub: compressionNote(),
                 dataTest: "log-stream-summary-compressed",
               } as StatItem,
               {

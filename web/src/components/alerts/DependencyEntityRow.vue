@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <template>
   <div
     class="group rounded-default flex items-center gap-2 px-2 py-1.5"
-    :class="[{ 'hover:bg-interactive-hover-bg': !noHover }, deleting ? 'opacity-50' : '']"
+    :class="[{ 'hover:bg-interactive-hover-bg': !noHover }, deleting ? 'text-text-secondary' : '']"
     :data-test="`dependency-impact-row-${node.name}`"
   >
     <OSpinner v-if="deleting" size="xs" class="shrink-0" />
@@ -76,7 +76,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         :data-test="`dependency-impact-delete-${node.name}`"
         @click.stop="emit('delete', node)"
       >
-        <OIcon name="delete" size="sm" class="text-status-negative" />
+        <OIcon name="delete" size="sm" class="text-status-error-text" />
         <OTooltip side="top" :content="t('alert_dependencies.actionDelete')" />
       </OButton>
     </div>

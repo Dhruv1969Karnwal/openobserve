@@ -229,14 +229,19 @@ describe("AwsMarketplaceSetup", () => {
     expect(wrapper.text()).toContain("Link to Existing Organization");
   });
 
-  it("should use correct theme logo", async () => {
+  it("renders the Retrace.ai brand lock-up as inline markup, not a per-theme asset", () => {
     const wrapper = mountSetup();
 
     const logo = wrapper.find('[data-test="aws-marketplace-setup-logo"]');
-    expect(logo.attributes("src")).toContain("light");
+    expect(logo.exists()).toBe(true);
+    expect(logo.attributes("role")).toBe("img");
+    expect(logo.attributes("aria-label")).toBe("Retrace.ai logo");
+    expect(logo.find('[data-test="brand-wordmark-mark"]').exists()).toBe(true);
+    expect(logo.find("img").exists()).toBe(false);
+    expect(logo.text()).toContain("Retrace.ai");
   });
 
-  it("should use dark theme logo when theme is dark", async () => {
+  it("renders the same brand lock-up in the dark theme", () => {
     const darkStore = createStore({
       state: {
         theme: "dark",
@@ -254,7 +259,9 @@ describe("AwsMarketplaceSetup", () => {
     });
 
     const logo = wrapper.find('[data-test="aws-marketplace-setup-logo"]');
-    expect(logo.attributes("src")).toContain("dark");
+    expect(logo.exists()).toBe(true);
+    expect(logo.find("img").exists()).toBe(false);
+    expect(logo.text()).toContain("Retrace.ai");
   });
 
   // ───────────────────────────────────────────────────────────────────────────

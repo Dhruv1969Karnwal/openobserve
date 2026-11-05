@@ -32,8 +32,11 @@ import {
  * non-reactive callers of `checkFeatureAccess` computed once at setup don't
  * get that for free.
  *
- * Template usage: `v-if="!workflowsLock.allowed"` + `@click="workflowsLock.allowed ? action() : open()"`
- * (a `ComputedRef` auto-unwraps in templates; use `.value` in script).
+ * Template usage: `v-if="workflowsLock.visible"` + `@click="workflowsLock.allowed ? action() : open()"`.
+ * The render test is `visible`, never `!allowed`: under the shipped `"hide"` policy a refused key is
+ * `allowed: false, visible: false`, so `!allowed` would render the control and its click would hit
+ * the dialog `useEnterpriseUpgradeDialog` refuses to open — a silent dead click. (a `ComputedRef`
+ * auto-unwraps in templates; use `.value` in script.)
  */
 export function useLockedAffordance(key: FeatureKey): ComputedRef<FeatureAccess> {
   const store = useStore();

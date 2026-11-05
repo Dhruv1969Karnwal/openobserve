@@ -43,6 +43,7 @@ import {
   type Series,
   type WarningEvent,
 } from "./kubernetesModel";
+import { usageBarFill } from "../usageBarFill";
 
 type Resource = "cpu" | "memory";
 
@@ -312,6 +313,7 @@ function openRow(row: WarningListRow) {
               size="xs"
               :value="barValue(row.pct)"
               :variant="usageBarVariant(row.pct)"
+              :color="usageBarFill(usageBarVariant(row.pct))"
               :data-test="`k8s2-overview-${gauge.kind}-${row.id}-bar`"
             />
           </div>
@@ -350,6 +352,7 @@ function openRow(row: WarningListRow) {
               size="xs"
               :value="barValue(podsGauge.pct)"
               :variant="usageBarVariant(podsGauge.pct)"
+              :color="usageBarFill(usageBarVariant(podsGauge.pct))"
               data-test="k8s2-overview-pods-running-bar"
             />
           </div>

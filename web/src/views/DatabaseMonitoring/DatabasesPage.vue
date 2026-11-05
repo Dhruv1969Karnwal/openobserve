@@ -206,14 +206,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <div class="text-text-secondary text-3xs flex min-w-0 items-center gap-1">
               <OTag type="dbSystem" :value="row.db_system" size="xs" />
               <template v-if="row.db_namespace">
-                <span class="opacity-45">·</span>
+                <span class="text-text-secondary">·</span>
                 <OTruncatedText>{{ row.db_namespace }}</OTruncatedText>
               </template>
               <!-- The receiver can reach it, no application asked it anything.
                    That is a finding, not an absence — an idle replica is what
                    the client-vantage list cannot show by construction. -->
               <template v-if="row.trafficless">
-                <span class="opacity-45">·</span>
+                <span class="text-text-secondary">·</span>
                 <span
                   class="text-text-secondary shrink-0 italic"
                   data-test="dbm-databases-no-traffic"

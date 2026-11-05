@@ -168,7 +168,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <OTooltip side="bottom" :content="t('onlineEvals.manualEvaluation.titles.trace')" />
             </OButton>
 
-            <template v-if="canAnnotateContext">
+            <template v-if="canAnnotateContext && queuesAccess.visible">
               <TraceAnnotateMenu
                 v-if="queuesAccess.allowed"
                 ref-type="trace"
@@ -197,7 +197,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </template>
 
             <OButton
-              v-if="canAnnotateContext"
+              v-if="canAnnotateContext && queuesAccess.visible"
               data-test="trace-details-dataset-trace-btn"
               variant="outline"
               size="icon-xs"
@@ -205,14 +205,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               @click="openTraceDataset"
             >
               <OIcon name="table-chart" size="sm" />
-              <template v-if="!queuesAccess.allowed" #icon-right>
-                <OIcon name="lock" size="xs" class="text-warning-600" />
-              </template>
-              <OTooltip
-                v-if="queuesAccess.allowed"
-                side="bottom"
-                :content="t('aiObservability.traceActions.dataset.button')"
-              />
+              <OTooltip side="bottom" :content="t('aiObservability.traceActions.dataset.button')" />
             </OButton>
 
             <!-- Share button -->

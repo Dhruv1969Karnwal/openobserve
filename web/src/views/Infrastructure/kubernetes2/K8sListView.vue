@@ -40,6 +40,7 @@ import {
   type AnyRow,
   type Warning,
 } from "./kubernetesModel";
+import { usageBarFill } from "../usageBarFill";
 import type { EventRow } from "./kubernetesEvents";
 import {
   HIDDEN_BY_DEFAULT,
@@ -322,6 +323,7 @@ const namespaceOf = (row: any): string =>
             class="min-w-0 flex-1"
             :value="Math.min(c.meta.bar?.(row).pct ?? 0, 100) / 100"
             :variant="usageBarVariant(c.meta.bar?.(row).pct ?? null)"
+            :color="usageBarFill(usageBarVariant(c.meta.bar?.(row).pct ?? null))"
             :data-test="`k8s2-bar-${c.id}-${row.key}`"
           />
           <OTooltip :content="c.meta.bar?.(row).tip" />

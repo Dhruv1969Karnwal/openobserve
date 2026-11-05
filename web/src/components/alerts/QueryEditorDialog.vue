@@ -435,7 +435,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <span
                       class="query-editor-run-dot bg-status-positive h-1.5 w-1.5 rounded-full"
                     />
-                    <span class="text-3xs text-status-positive font-semibold">{{
+                    <span class="text-3xs text-status-success-text font-semibold">{{
                       t("alerts.queryEditor.running")
                     }}</span>
                   </div>
@@ -640,7 +640,7 @@ const sqlStatusBarClasses = computed(() => {
     "sql-status-bar--loading": "bg-sql-accent/6 text-sql-accent",
     "sql-status-bar--error": "bg-status-error-bg text-status-error-text cursor-pointer",
     "sql-status-bar--empty": "bg-status-warning-bg text-status-warning-text",
-    "sql-status-bar--success": "bg-status-success-bg text-status-positive",
+    "sql-status-bar--success": "bg-status-success-bg text-status-success-text",
   };
   return map[sqlStatusState.value] ?? "";
 });

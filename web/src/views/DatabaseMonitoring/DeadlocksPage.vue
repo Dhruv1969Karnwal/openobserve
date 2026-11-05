@@ -199,7 +199,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <div class="text-text-secondary text-3xs flex min-w-0 items-center gap-1">
               <OTag type="dbSystem" :value="row.db_system" size="xs" />
               <template v-if="row.db_instance">
-                <span class="opacity-45">·</span>
+                <span class="text-text-secondary">·</span>
                 <OTruncatedText>{{ raw(row.db_instance) }}</OTruncatedText>
               </template>
               <span

@@ -114,7 +114,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           >{{ t("traces.threadView.errors") }}</span
         >
         <span
-          class="thread-chip__value thread-chip__value--error text-error-600 text-xs font-semibold"
+          class="thread-chip__value thread-chip__value--error text-status-error-text text-xs font-semibold"
           >{{ summary.errorCount }}</span
         >
       </OTag>
@@ -298,7 +298,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </span>
                 <span
                   v-if="turn.span.span_status === 'ERROR'"
-                  class="thread-metric thread-metric--error rounded-default text-error-600 dark:text-error-400 text-2xs border-error-600/25 bg-error-600/8 dark:border-error-400/30 dark:bg-error-400/12 inline-flex shrink-0 items-center gap-1 border px-2 py-[0.18rem] leading-none font-medium whitespace-nowrap"
+                  class="thread-metric thread-metric--error rounded-default text-status-error-text text-2xs border-error-600/25 bg-error-600/8 dark:border-error-400/30 dark:bg-error-400/12 inline-flex shrink-0 items-center gap-1 border px-2 py-[0.18rem] leading-none font-medium whitespace-nowrap"
                 >
                   <OIcon name="error-outline" size="xs" />
                   {{ t("traces.threadView.error") }}

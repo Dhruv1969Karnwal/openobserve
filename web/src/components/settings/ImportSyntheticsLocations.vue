@@ -91,7 +91,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <div
             v-for="(err, idx) in validationErrors"
             :key="idx"
-            class="text-status-negative py-1 text-sm"
+            class="text-status-error-text py-1 text-sm"
             :data-test="`synthetics-locations-import-error-${idx}`"
           >
             {{ err }}
@@ -122,7 +122,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             v-for="(result, idx) in importResults"
             :key="idx"
             class="py-1 text-sm"
-            :class="result.ok ? 'text-green' : 'text-status-negative'"
+            :class="result.ok ? 'text-green' : 'text-status-error-text'"
             :data-test="`synthetics-locations-import-result-${idx}`"
           >
             {{ result.ok ? "✓" : "✗" }} {{ result.label || result.id }}

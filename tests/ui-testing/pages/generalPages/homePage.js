@@ -49,8 +49,8 @@ export class HomePage {
         // ===== HOME PAGE CONTENT SELECTORS =====
         this.mainContent = page.locator('[data-test="main-content"]');
 
-        // Logo (data-test attribute in Header.vue)
-        this.logo = page.locator('[data-test="header-openobserve-logo"]').first();
+        // Logo (test-id on the header BrandWordmark; the hook renamed with the wordmark)
+        this.logo = page.locator('[data-test="header-retrace-logo"]').first();
 
         // ===== PAGE LOAD INDICATORS (for verifying navigation completed) =====
         this.logsPageIndicator = page.locator('[data-test="logs-search-bar-refresh-btn"]').or(page.locator('[data-test="o2-table-row-0"] [data-test="o2-table-cell-source"]')).first();

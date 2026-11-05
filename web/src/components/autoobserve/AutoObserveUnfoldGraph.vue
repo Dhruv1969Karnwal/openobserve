@@ -263,7 +263,7 @@ const TONE: Record<UnfoldTone, { bar: string; ink: string }> = {
   danger: { bar: "bg-status-error-text", ink: "text-status-error-text" },
   warning: { bar: "bg-status-warning-text", ink: "text-status-warning-text" },
   info: { bar: "bg-accent", ink: "text-accent" },
-  success: { bar: "bg-status-positive", ink: "text-status-positive" },
+  success: { bar: "bg-status-positive", ink: "text-status-success-text" },
   neutral: { bar: "bg-border-strong", ink: "text-text-secondary" },
 };
 

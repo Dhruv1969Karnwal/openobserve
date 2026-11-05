@@ -155,7 +155,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <span v-else class="text-text-muted text-xs" data-test="version-compare-auto-window">
             <span class="text-accent">{{ armAMeta?.version ?? selectedA }}</span> {{ autoWindowA }}
             <span class="text-text-muted mx-1">·</span>
-            <span class="text-series-b">{{ armBMeta?.version ?? selectedB }}</span>
+            <span class="text-series-b-text">{{ armBMeta?.version ?? selectedB }}</span>
             {{ autoWindowB }}
           </span>
         </div>

@@ -37,6 +37,7 @@ import {
   warningLabel,
   type PodRow,
 } from "./kubernetesModel";
+import { usageBarFill } from "../usageBarFill";
 
 const props = defineProps<{
   pods: PodRow[];
@@ -194,6 +195,7 @@ const openNode = (p: PodRow) =>
           class="min-w-0 flex-1"
           :value="Math.min(shareOf(row, r) ?? 0, 100) / 100"
           :variant="usageBarVariant(shareOf(row, r))"
+          :color="usageBarFill(usageBarVariant(shareOf(row, r)))"
         />
         <OTooltip
           :content="t(r.tip, { pct: formatPct(shareOf(row, r)), value: r.format(r.used(row)) })"

@@ -565,7 +565,7 @@
       "title": "Noch keine Remote-Tasks",
       "description": "Ein Remote-Task ist ein HTTP-Dienst, den Ihre Experimente aufrufen, um Ausgaben zu erzeugen. Veröffentlichen Sie ihn einmal, verifizieren Sie, dass die Verbindung funktioniert, und jedes Experiment kann die exakte Version festlegen, gegen die es ausgeführt wurde.",
       "action": "Neuer Task",
-      "actionDesc": "Richten Sie OpenObserve auf Ihren Endpunkt und testen Sie die Verbindung."
+      "actionDesc": "Richten Sie Retrace.ai auf Ihren Endpunkt und testen Sie die Verbindung."
     },
     "noDowntimes": {
       "title": "Noch keine Wartungsfenster",
@@ -1880,7 +1880,7 @@
       "refresh": "Aktualisieren",
       "refreshDataThrough": "Aktualisieren · Daten bis {time}",
       "sdkSampled": "Zahlen spiegeln gesampelte SDK-Sitzungen wider",
-      "sdkSampledTip": "Nur Sitzungen, die Ihr RUM-SDK behält ({field}), erreichen OpenObserve, daher beziehen sich alle Zahlen hier auf diese Sitzungen.",
+      "sdkSampledTip": "Nur Sitzungen, die Ihr RUM-SDK behält ({field}), erreichen Retrace.ai, daher beziehen sich alle Zahlen hier auf diese Sitzungen.",
       "identityExcluded": "{count} Identitätswert ausgeschlossen ({pct}%) | {count} Identitätswerte ausgeschlossen ({pct}%)",
       "identityIncluded": "Alle Identitätswerte einbezogen",
       "identityExcludedHelp": "Ein Wert deckt {pct}% der identifizierten Sitzungen ab, wahrscheinlich ein Test- oder geteiltes Konto. Er wird aus jeder Benutzerzählung, jedem Funnel und jedem Retention-Raster ausgeschlossen.",
@@ -3011,8 +3011,8 @@
     "clickHere": "klicken Sie hier",
     "loginWithSso": "Mit SSO anmelden",
     "loginAsInternalUser": "Als interner Benutzer anmelden",
-    "openObserveLogoAlt": "OpenObserve Logo",
-    "getStartedBannerMessage": "Probieren Sie OpenObserve noch heute für eine effizientere und leistungsfähigere Observability aus.",
+    "openObserveLogoAlt": "Retrace.ai logo",
+    "getStartedBannerMessage": "Probieren Sie Retrace.ai noch heute für eine effizientere und leistungsfähigere Observability aus.",
     "getStartedBannerAlt": "Erste-Schritte-Banner",
     "getStartedHeading": "Eine letzte Sache, bevor wir beginnen",
     "hearAboutUsLabel": "Wie haben Sie von uns erfahren?",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "Passwort ist erforderlich",
     "mustAcceptTerms": "Sie müssen die Bedingungen akzeptieren, um fortzufahren",
     "getStarted": {
-      "title": "Willkommen bei OpenObserve",
+      "title": "Willkommen bei Retrace.ai",
       "subtitle": "Ihre 14-tägige Testphase hat begonnen. Zwei kurze Fragen, dann führen wir Sie zur Einrichtung.",
       "sourceLabel": "Was möchten Sie zuerst senden?",
       "optional": "(optional)",
@@ -5116,7 +5116,7 @@
       "askAi": "KI fragen",
       "guideDocs": "{guide}-Dokumentation",
       "setupDocs": "Einrichtungsdokumentation",
-      "askAiPrompt": "Ich richte {guide} in OpenObserve ein und es sind noch keine Daten angekommen. Die Erstereignis-Prüfung sagt: {details} Org-ID: {org}. Endpunkt: {endpoint}. Was sollte ich als Nächstes prüfen?",
+      "askAiPrompt": "Ich richte {guide} in Retrace.ai ein und es sind noch keine Daten angekommen. Die Erstereignis-Prüfung sagt: {details} Org-ID: {org}. Endpunkt: {endpoint}. Was sollte ich als Nächstes prüfen?",
       "askAiRejected": "Anfragen werden mit {status} {reason} auf {path} abgewiesen.",
       "askAiNoRequests": "es ist nichts angekommen und keine Anfrage wurde abgewiesen.",
       "askAiUnavailable": "abgewiesene Anfragen konnten nicht gelesen werden, daher ist keine Ursache bekannt.",
@@ -5170,7 +5170,7 @@
       "configTitle": "Speichern Sie dies als {path} und starten Sie Fluent Bit neu",
       "configDescription": "Liest die {server}-Logs mit und sendet sie mit dem Org-Token an den Stream {stream} von {org}.",
       "restartHint": "Führen Sie dann {command} aus.",
-      "verifyTitle": "Daten in OpenObserve überprüfen"
+      "verifyTitle": "Daten in Retrace.ai überprüfen"
     },
     "copyContentError": "Fehler beim Kopieren des Inhalts.",
     "passcodeForbiddenMessage": "Administrator- oder Root-Rolle erforderlich, um das Datenerfassungs-Token anzuzeigen. Fragen Sie einen Administrator nach dem Einrichtungsbefehl oder nach der Rolle, die erforderlich ist, um es hier zu sehen.",
@@ -5253,7 +5253,7 @@
       "singleTargetTitle": "Einzelnes Remote-Write-Ziel",
       "fanoutTitle": "Fan-out an mehrere Backends",
       "tipPrefix": "Tipp: `vmagent` kann Schreibvorgänge duplizieren, indem das",
-      "tipSuffix": "Flag, damit Sie ein bestehendes VictoriaMetrics-Ziel behalten können, während Sie Metriken an OpenObserve weiterleiten.",
+      "tipSuffix": "Flag, damit Sie ein bestehendes VictoriaMetrics-Ziel behalten können, während Sie Metriken an Retrace.ai weiterleiten.",
       "docLinkText": "um mehr über die Konfiguration von vmagent-Remote-Write-Zielen zu erfahren."
     },
     "ai": {
@@ -5339,7 +5339,7 @@
       "selectAtLeastOneCategory": "Wählen Sie oben mindestens eine Protokollkategorie aus.",
       "runCommandAfterDeployment": "Führen Sie diesen Befehl nach Abschluss Ihrer ARM-Bereitstellung aus:",
       "activityLogsTitle": "Azure-Aktivitätsprotokolle",
-      "activityLogsDescription": "Streamen Sie Azure-Abonnement-Aktivitätsprotokolle über {product} nach OpenObserve. Die ARM-Vorlage richtet die Event-Hub-Infrastruktur ein – anschließend konfigurieren Sie Azure, um Protokolle dorthin zu exportieren.",
+      "activityLogsDescription": "Streamen Sie Azure-Abonnement-Aktivitätsprotokolle über {product} nach Retrace.ai. Die ARM-Vorlage richtet die Event-Hub-Infrastruktur ein – anschließend konfigurieren Sie Azure, um Protokolle dorthin zu exportieren.",
       "manualTitle": "Manuelle Konfiguration (zur Referenz)"
     },
     "awsSetup": {
@@ -5462,16 +5462,16 @@
     "splunkHecUrlHelp": "Richten Sie Ihren Splunk-Forwarder auf diese URL und senden Sie den Token als Wert des Authorization-Headers \"Splunk <token>\".",
     "setupCard": {
       "advancedInstallDescCloud": "Für benutzerdefinierte Konfigurationen oder zum Festlegen von Versionen und Anpassen der Chart-Werte. Führen Sie die Schritte der Reihe nach aus.",
-      "advancedInstallDescSelfHosted": "Für benutzerdefinierte Konfigurationen oder zum Festlegen von Versionen und Anpassen der Chart-Werte. Führen Sie die Schritte der Reihe nach aus. Wenn OpenObserve in demselben Cluster läuft, ersetzen Sie die Exporter-Endpunkte durch `{url}`.",
+      "advancedInstallDescSelfHosted": "Für benutzerdefinierte Konfigurationen oder zum Festlegen von Versionen und Anpassen der Chart-Werte. Führen Sie die Schritte der Reihe nach aus. Wenn Retrace.ai in demselben Cluster läuft, ersetzen Sie die Exporter-Endpunkte durch `{url}`.",
       "advancedInstallLabel": "Erweiterte Installation (manuelle Schritte)",
       "aerospikeHostLabel": "Aerospike-Host",
-      "aerospikeTagline": "Sammeln Sie Aerospike-Metriken mit dem OpenTelemetry Collector und senden Sie sie an OpenObserve.",
+      "aerospikeTagline": "Sammeln Sie Aerospike-Metriken mit dem OpenTelemetry Collector und senden Sie sie an Retrace.ai.",
       "agentServiceFixTitle": "Agent-Dienst prüfen",
       "agentTroubleInstanceIdA": "Das ist die EC2-Variante ohne IAM-Rolle. {iamNote} Weisen Sie die Rolle zu und starten Sie den Agent neu.",
       "agentTroubleInstanceIdQ": "Hosts werden unter einer Instanz-ID statt unter einem Namen angezeigt.",
       "agentTroubleNoDataA": "Überprüfen Sie mit {hint}, ob der Agent läuft. Ein 401 in seinen Logs bedeutet, dass das Ingestion-Token veraltet ist – kopieren Sie den Befehl erneut von dieser Seite, der immer das aktuelle Token dieser Organisation enthält.",
       "agentTroubleNoDataQ": "Das Installationsskript wird ausgeführt, aber es kommen keine Daten an.",
-      "agentTroubleUnreachableA": "Der Agent benötigt ausgehenden Zugriff auf diesen OpenObserve-Endpunkt. Bestätigen Sie dies mit `curl -v` vom Host selbst – die übliche Ursache ist ein Proxy oder eine ausgehende Firewall.",
+      "agentTroubleUnreachableA": "Der Agent benötigt ausgehenden Zugriff auf diesen Retrace.ai-Endpunkt. Bestätigen Sie dies mit `curl -v` vom Host selbst – die übliche Ursache ist ein Proxy oder eine ausgehende Firewall.",
       "agentTroubleUnreachableQ": "Der Endpunkt ist vom Host aus nicht erreichbar.",
       "aiCategoryAnalytics": "Analytik & Evaluierung",
       "aiCategoryFrameworks": "KI-Frameworks & Agenten",
@@ -5486,7 +5486,7 @@
       "autoInstrumentTracesDesc": "Beide liefern **verteilte Traces, ohne Anwendungscode anzufassen oder Images neu zu erstellen**. **Sprachbibliotheken:** Der OpenTelemetry-Operator injiziert Auto-Instrumentierung in die Pods eines annotierten Namespace. **eBPF:** Der Collector tract die ausgewählten Prozesse, in jeder Sprache, auch Go.",
       "autoInstrumentTracesTitle": "Anwendungen tracen: Sprachbibliotheken oder eBPF",
       "cassandraJmxNote": "Aktivieren Sie den JMX-Fernzugriff auf Cassandra, damit der Empfänger eine Verbindung herstellen kann.",
-      "cassandraTagline": "Sammeln Sie Cassandra-Metriken über den JMX-Receiver des OpenTelemetry Collectors und senden Sie sie an OpenObserve.",
+      "cassandraTagline": "Sammeln Sie Cassandra-Metriken über den JMX-Receiver des OpenTelemetry Collectors und senden Sie sie an Retrace.ai.",
       "checking": "Prüfen…",
       "checkingForLogs": "Prüfe auf Logs…",
       "checkingForMetrics": "Prüfe auf Metriken…",
@@ -5519,10 +5519,10 @@
       "downloadJmxJarDesc": "Der JMX-Receiver führt dieses Hilfs-JAR aus (erfordert Java auf dem Collector-Host).",
       "downloadJmxJarTitle": "JMX-Metriken-JAR herunterladen",
       "dynamodbFirehoseEndpointDesc": "Verwenden Sie diese als **HTTP-Endpunkt**-Ziel beim Erstellen Ihres Kinesis-Data-Firehose-Delivery-Streams.",
-      "dynamodbFirehoseEndpointTitle": "OpenObserve-Firehose-Endpunkt",
+      "dynamodbFirehoseEndpointTitle": "Retrace.ai-Firehose-Endpunkt",
       "dynamodbPipelineDesc": "Aktivieren Sie **DynamoDB Streams** für Ihre Tabelle, verbinden Sie sie mit einem **Kinesis Data Stream**, und richten Sie dann einen **Kinesis Data Firehose** Delivery Stream auf den obigen HTTP-Endpunkt aus.",
       "dynamodbPipelineTitle": "DynamoDB → Firehose streamen",
-      "dynamodbTagline": "Streamen Sie DynamoDB-Elementänderungen über Kinesis Firehose in OpenObserve.",
+      "dynamodbTagline": "Streamen Sie DynamoDB-Elementänderungen über Kinesis Firehose in Retrace.ai.",
       "ec2IamNote": "Erfordert eine IAM-Rolle auf der Instanz mit ec2:DescribeTags und ec2:DescribeInstances, damit der Agent das Name-Tag lesen und als Host-Identifikator verwenden kann.",
       "enableSessionReplayDesc": "Session Replay wird **getrennt** von RUM konfiguriert und erbt **nicht** `rumConfiguration.customEndpoint`. Geben Sie unten eine eigene Basis-URL an — in derselben Form wie die für RUM/Logs. Die Bridge fügt `/replay` selbst hinzu, fügen Sie es **nicht** selbst hinzu: Ein manuell angehängtes `/replay` verdoppelt den Pfad, und jeder Upload wird mit 401 abgelehnt — das ist der übliche Grund, warum RUM-Ereignisse ankommen, Replays aber nie.",
       "enableSessionReplayTitle": "Session Replay aktivieren",
@@ -5532,15 +5532,15 @@
       "gcpFixBody": "GCP meldet Zustellfehler am Abonnement selbst. Wenn der Sink veröffentlicht, aber hier nichts ankommt, lehnt der Push-Endpunkt die Anfrage normalerweise ab:",
       "gcpFixTitle": "Push-Abonnement prüfen",
       "gcpPushUrlNote": "Halten Sie diese URL geheim – sie enthält den Ingestion-Schlüssel. Wenn sie durchsickert, rotieren Sie sie über den Kopfbereich dieser Seite.",
-      "gcpSinkDesc": "Erstellen Sie in der GCP-Konsole einen **Log-Router-Sink** (Logging → Log Router → Sink erstellen) mit Pub/Sub als Ziel und lassen Sie das Topic erstellen. Der Einschlussfilter des Sinks bestimmt, welche Logs OpenObserve erreichen.",
+      "gcpSinkDesc": "Erstellen Sie in der GCP-Konsole einen **Log-Router-Sink** (Logging → Log Router → Sink erstellen) mit Pub/Sub als Ziel und lassen Sie das Topic erstellen. Der Einschlussfilter des Sinks bestimmt, welche Logs Retrace.ai erreichen.",
       "gcpSinkTitle": "Logs an ein Pub/Sub-Thema weiterleiten",
       "gcpSinkWriterNote": "Gewähren Sie der Writer-Identität des Sinks die Pub/Sub-Publisher-Rolle auf dem Thema, sonst veröffentlicht sie stillschweigend nichts.",
       "gcpStreamHelp": "Wird in der obigen Push-URL verwendet und von der folgenden Prüfung überwacht. Ein dedizierter Stream hält GCP-Logs getrennt.",
       "gcpSubscriptionDesc": "Erstellen Sie ein **Push**-Abonnement für dieses Thema und fügen Sie dies als Endpunkt-URL ein. Es enthält bereits diese Organisation und ihren Ingestionsschlüssel.",
-      "gcpSubscriptionTitle": "Topic an OpenObserve übertragen",
+      "gcpSubscriptionTitle": "Topic an Retrace.ai übertragen",
       "gcpTroubleDeliveryA": "Eine 401 bedeutet, dass der `API-Key` in der URL veraltet ist – kopieren Sie den Endpunkt erneut von dieser Seite. Eine 404 bedeutet normalerweise, dass das Organisations- oder Stream-Segment von Hand bearbeitet wurde; die obige URL ist für diese Organisation bereits korrekt.",
       "gcpTroubleDeliveryQ": "Das Abonnement zeigt Zustellfehler",
-      "gcpTroublePartialA": "Das ist der Einschlussfilter des Sinks, nicht OpenObserve. Erweitern Sie den `--log-filter` am Sink, um die erwarteten Dienste und Schweregrade abzudecken.",
+      "gcpTroublePartialA": "Das ist der Einschlussfilter des Sinks, nicht Retrace.ai. Erweitern Sie den `--log-filter` am Sink, um die erwarteten Dienste und Schweregrade abzudecken.",
       "gcpTroublePartialQ": "Es kommen nur einige Logs an",
       "gcpTroubleTopicA": "Die **Writer-Identität** des Sinks benötigt die Pub/Sub-Publisher-Rolle auf dem Thema. GCP erstellt den Sink auch ohne sie erfolgreich und verwirft dann stillschweigend alles.",
       "gcpTroubleTopicQ": "Der Sink existiert, aber das Thema empfängt nichts",
@@ -5573,7 +5573,7 @@
       "k8sEbpfVariant": "eBPF (jede Sprache, keine Codeänderungen)",
       "k8sLibrariesVariant": "Sprachbibliotheken (Auto-Instrumentierung)",
       "k8sInstallerNote": "Dies installiert cert-manager, den OpenTelemetry-Operator und den OpenObserve-Collector automatisch.",
-      "k8sInternalEndpointNote": "Verwenden Sie dies, wenn OpenObserve in diesem selben Cluster läuft – der Datenverkehr verlässt ihn nie.",
+      "k8sInternalEndpointNote": "Verwenden Sie dies, wenn Retrace.ai in diesem selben Cluster läuft – der Datenverkehr verlässt ihn nie.",
       "k8sTroubleAnnotationA": "Die Injektion erfolgt bei der Pod-Erstellung, daher bleiben bestehende Pods bis zu ihrem Neustart unberührt – führen Sie `kubectl rollout restart deployment -n my-namespace` aus. Bestätigen Sie mit `kubectl get ns my-namespace -o yaml`, dass die Annotation angekommen ist, und prüfen Sie, ob der Wert `openobserve-collector/openobserve-<language>` entspricht.",
       "k8sTroubleAnnotationQ": "Ich habe einen Namespace annotiert, aber es erscheinen keine Traces",
       "k8sTroubleEndpointA": "Verwenden Sie den **internen Endpunkt** nur, wenn OpenObserve selbst in diesem Cluster läuft; der Datenverkehr bleibt dann darin und verlässt das Netzwerk nie. Die URL lautet `http://<helm-release>-openobserve-router.<namespace>.svc.cluster.local:5080` — der Standard geht von Release `o2` im Namespace `openobserve` aus; passen Sie sie an, falls Ihre abweicht. Alle anderen verwenden den externen Endpunkt.",
@@ -5595,7 +5595,7 @@
       "runCollectorMariadbDesc": "Starten Sie den Collector (das Passwort des Benutzers per Umgebungsvariable).",
       "mariadbHostLabel": "MariaDB-Host",
       "verifyMariadbMetricsDesc": "Die Prüfung unten wird grün, sobald Daten eintreffen, oder prüfen Sie Streams auf die `mysql_*`-Metriken (MariaDB meldet über den MySQL-Receiver).",
-      "mariadbTagline": "Sammeln Sie MariaDB-Metriken mit dem OpenTelemetry Collector und senden Sie sie an OpenObserve.",
+      "mariadbTagline": "Sammeln Sie MariaDB-Metriken mit dem OpenTelemetry Collector und senden Sie sie an Retrace.ai.",
       "logsStreamNameLabel": "Logs-Stream-Name",
       "macosAgentFixBody": "Der Installer registriert zwei launchd-Daemons: den Agenten selbst und die Unified-Log-Bridge. Wenn nichts ankommt, bestätigen Sie, dass beide geladen sind, und lesen Sie das Log des Agenten auf einen Authentifizierungs- oder Verbindungsfehler:",
       "macosAgentServicesFixTitle": "Die Agentendienste prüfen",
@@ -5607,11 +5607,11 @@
       "macosTroubleVolumeQ": "Das Unified Log sendet weit mehr als erwartet",
       "macQuarantineNote": "Wenn macOS die unsignierte Binärdatei blockiert, entfernen Sie das Quarantäne-Flag: xattr -d com.apple.quarantine ./otelcol-contrib",
       "mongodbHostLabel": "MongoDB-Host",
-      "mongodbTagline": "Sammeln Sie MongoDB-Metriken mit dem OpenTelemetry Collector und senden Sie sie an OpenObserve.",
+      "mongodbTagline": "Sammeln Sie MongoDB-Metriken mit dem OpenTelemetry Collector und senden Sie sie an Retrace.ai.",
       "mostLikelyFix": "Wahrscheinlichste Lösung —",
       "mysqlAdminNote": "Führen Sie als MySQL-Administrator aus (es fragt nach dem Passwort).",
       "mysqlHostLabel": "MySQL-Host",
-      "mysqlTagline": "Sammeln Sie MySQL-Metriken mit dem OpenTelemetry Collector und senden Sie sie an OpenObserve.",
+      "mysqlTagline": "Sammeln Sie MySQL-Metriken mit dem OpenTelemetry Collector und senden Sie sie an Retrace.ai.",
       "noLogsFoundYet": "Noch keine Logs gefunden",
       "noMetricsFoundYet": "Noch keine Metriken gefunden",
       "noSpansFoundYet": "Noch keine Spans gefunden",
@@ -5620,7 +5620,7 @@
       "onStream": "auf {stream}",
       "optionalLabel": "Optional",
       "oracleHostLabel": "Oracle-Host",
-      "oracleTagline": "Sammeln Sie Oracle-DB-Metriken mit dem OpenTelemetry Collector und senden Sie sie an OpenObserve.",
+      "oracleTagline": "Sammeln Sie Oracle-DB-Metriken mit dem OpenTelemetry Collector und senden Sie sie an Retrace.ai.",
       "otlpFixBody": "Einen Exporter zu definieren reicht nicht — er muss in einer Pipeline aufgeführt sein. Dies ist der häufigste Grund dafür, dass eine korrekt aussehende Konfiguration nichts sendet:",
       "otlpFixTitle": "Prüfen Sie, ob der Exporter tatsächlich in die Pipeline eingebunden ist",
       "otlpGrpcCloudNote": "Öffentliches gRPC-Gateway von OpenObserve Cloud — geringerer Overhead als HTTP bei hohen Span-Volumen, kein selbst gehostetes Netzwerk zu konfigurieren.",
@@ -5708,10 +5708,10 @@
       "pillWireframeCapture": "Wireframe-Erfassung",
       "pillWriteLatency": "Schreib-Latenz",
       "pointExporterDesc": "Fügen Sie dies zu Ihrer Collector-Konfiguration hinzu, oder setzen Sie die Umgebungsvariablen, wenn Ihre App direkt exportiert. Alles ist bereits für diese Organisation ausgefüllt.",
-      "pointExporterTitle": "Richten Sie Ihren Exporter auf OpenObserve aus",
+      "pointExporterTitle": "Richten Sie Ihren Exporter auf Retrace.ai aus",
       "portLabel": "Port",
       "postgresqlHostLabel": "PostgreSQL-Host",
-      "postgresqlTagline": "Sammeln Sie PostgreSQL-Metriken mit dem OpenTelemetry Collector und senden Sie sie an OpenObserve.",
+      "postgresqlTagline": "Sammeln Sie PostgreSQL-Metriken mit dem OpenTelemetry Collector und senden Sie sie an Retrace.ai.",
       "postgresSuperuserNote": "Als Postgres-Superuser ausführen (psql fragt nach dessen Passwort).",
       "prepareMongodbDesc": "Erstellen Sie einen Monitoring-Benutzer mit clusterMonitor — führen Sie den Befehl in mongosh aus, **nicht** in Ihrer Shell.",
       "prepareMongodbTitle": "MongoDB vorbereiten",
@@ -5729,7 +5729,7 @@
       "quickInstallTitle": "Schnellinstallation (empfohlen)",
       "redisHostLabel": "Redis-Host",
       "redisNoAuthNote": "Verwenden Sie REDIS_PASSWORD='' wenn Redis keine Authentifizierung hat.",
-      "redisTagline": "Sammeln Sie Redis-Metriken mit dem OpenTelemetry Collector und senden Sie sie an OpenObserve.",
+      "redisTagline": "Sammeln Sie Redis-Metriken mit dem OpenTelemetry Collector und senden Sie sie an Retrace.ai.",
       "revealToken": "Token anzeigen",
       "rnFixBody": "`localhost` in einem Emulator oder auf einem physischen Gerät ist das Gerät selbst, nicht Ihre Maschine – der häufigste Grund, warum überhaupt nichts ankommt. Verwenden Sie den richtigen Host für den Ort, an dem die App läuft:",
       "rnFixTitle": "Richten Sie das SDK auf einen Host aus, den Ihr Gerät tatsächlich erreichen kann",
@@ -5753,7 +5753,7 @@
       "rnTroubleScreenNamesQ": "Sitzungen erscheinen, aber alle Screens sind gleich benannt",
       "rumCdnInitNote": "Platzieren Sie dies direkt nach dem Loader in <head>. onReady() reiht die Initialisierung ein, bis jedes Bundle eintrifft – nichts blockiert das Rendern.",
       "rumCdnInstallNote": "Fügen Sie es oben in <head> ein. Auf v{version} für unveränderliches Caching festgelegt; async + preconnect halten es aus dem kritischen Rendering-Pfad heraus. Für strikte CSP hosten Sie die zwei Bundles stattdessen selbst.",
-      "rumFixBody": "Wenn Ihre App läuft, aber nichts ankommt, hat der Browser wahrscheinlich das SDK oder seine Anfragen blockiert – normalerweise eine Content-Security-Policy oder einen Werbeblocker. Erlauben Sie das CDN und Ihren OpenObserve-Endpoint und laden Sie dann neu:",
+      "rumFixBody": "Wenn Ihre App läuft, aber nichts ankommt, hat der Browser wahrscheinlich das SDK oder seine Anfragen blockiert – normalerweise eine Content-Security-Policy oder einen Werbeblocker. Erlauben Sie das CDN und Ihren Retrace.ai-Endpoint und laden Sie dann neu:",
       "rumFixTitle": "Erlauben Sie das SDK in Ihrer Content Security Policy",
       "rumInitDesc": "Beide SDKs werden mit den Werten dieser Organisation initialisiert — kopieren Sie sie unverändert und passen Sie dann `service`, `env` und `applicationId` an, um Ihre App zu beschreiben. Das `clientToken` wird absichtlich an die Browser der Besucher gesendet (NPM bündelt es, CDN fügt es ein) — es kann nur RUM-Ereignisse schreiben, und Sie können es jederzeit über den Header dieser Seite rotieren.",
       "rumInitTitle": "RUM + Logs initialisieren",
@@ -5774,7 +5774,7 @@
       "rumTroublePerfA": "Nein — die Bundles laden mit `async` außerhalb des kritischen Rendering-Pfads, `preconnect` wärmt DNS/TLS vor dem ersten Upload auf, und Ereignisse werden vor dem Senden gebündelt. Senken Sie `sessionReplaySampleRate`, wenn Sie den Replay-Overhead weiter begrenzen möchten.",
       "rumTroublePerfQ": "Wird das SDK meine Website verlangsamen?",
       "rumTroublePlainHttpA": "Browser lehnen gemischte Inhalte ab und das SDK verwendet standardmäßig HTTPS — behalten Sie `insecureHTTP: {insecureHTTP}` (bereits vom Endpoint dieser Organisation gesetzt), damit Uploads das richtige Schema verwenden.",
-      "rumTroublePlainHttpQ": "Mein OpenObserve-Endpoint ist reines HTTP",
+      "rumTroublePlainHttpQ": "Mein Retrace.ai-Endpoint ist reines HTTP",
       "rumTroubleTokenVisibleA": "Ja — der `clientToken` ist wie bei jedem Browser-RUM-Produkt ein clientseitiges Token. NPM-Setups legen es im JS-Bundle offen, CDN-Setups inline im HTML; DevTools zeigt es in beiden Fällen. Es kann nur RUM-Ereignisse **schreiben** — es gewährt keinen Lesezugriff und ist vom Ingestion-Passcode getrennt. Wenn jemand es missbraucht, um gefälschte Ereignisse zu senden, generieren Sie es aus dem Kopfbereich dieser Seite neu und stellen Sie Ihre App erneut bereit.",
       "rumTroubleTokenVisibleQ": "Ist es sicher, dass das Token im Seitenquelltext sichtbar ist?",
       "runCollectorDesc": "Starten Sie den Collector.",
@@ -5787,7 +5787,7 @@
       "runtimeCluster": "Cluster",
       "runtimeHost": "Host",
       "seeAllTroubleshooting": "Alle Fehlerbehebungen anzeigen",
-      "sendNotebookLogsDesc": "Fügen Sie es in eine Databricks-Notebook-Zelle ein — es POSTET Datensätze an die Logs-API von OpenObserve.",
+      "sendNotebookLogsDesc": "Fügen Sie es in eine Databricks-Notebook-Zelle ein — es POSTET Datensätze an die Logs-API von Retrace.ai.",
       "sendNotebookLogsTitle": "Logs aus Ihrem Notebook senden",
       "setup": "Einrichtung",
       "setupTime1Min": "~1 Min.",
@@ -5827,23 +5827,23 @@
       "androidTroubleScreenNamesA": "View-Tracking ist nicht eingerichtet. Übergeben Sie eine `useViewTrackingStrategy(...)` — z. B. `ActivityViewTrackingStrategy(trackExtras = true)` für Activities oder `NavigationViewTrackingStrategy(...)`, wenn Sie AndroidX Navigation verwenden — beim Erstellen der `RumConfiguration`.",
       "setupTime5Min": "~5 Min.",
       "snowflakeCollectorVersionNote": "Snowflake benötigt Collector v0.92.0 — neuere Builds haben einen bekannten Fehler.",
-      "snowflakeTagline": "Sammeln Sie Snowflake-Kontometriken mit dem OpenTelemetry Collector und senden Sie sie an OpenObserve.",
+      "snowflakeTagline": "Sammeln Sie Snowflake-Kontometriken mit dem OpenTelemetry Collector und senden Sie sie an Retrace.ai.",
       "sqlClientGuiVariant": "SQL-Client (GUI)",
       "sqlServerHostLabel": "SQL-Server-Host",
       "sqlServerPasswordNote": "Ersetzen Sie YOUR_SA_PASSWORD.",
-      "sqlServerTagline": "Sammeln Sie SQL-Server-Metriken mit dem OpenTelemetry Collector und senden Sie sie an OpenObserve.",
+      "sqlServerTagline": "Sammeln Sie SQL-Server-Metriken mit dem OpenTelemetry Collector und senden Sie sie an Retrace.ai.",
       "startIngestingTestForLogs": "Datenerfassung starten, dann Logs testen",
       "startIngestingTestForMetrics": "Datenerfassung starten, dann Metriken testen",
       "startIngestingTestForSpans": "Starten Sie die Datenerfassung und testen Sie dann auf Spans",
       "streamNameError": "Verwenden Sie nur Buchstaben, Zahlen und _.",
       "streamNameLabel": "Stream-Name",
       "stuck": "Kommen Sie nicht weiter?",
-      "taglineDatabricks": "Senden Sie Databricks-Notebook-Logs über die Logs-API an OpenObserve.",
-      "taglineGcp": "Streamen Sie Google-Cloud-Logs mit einem Pub/Sub-Push-Abonnement in OpenObserve — kein Agent oder Collector erforderlich.",
+      "taglineDatabricks": "Senden Sie Databricks-Notebook-Logs über die Logs-API an Retrace.ai.",
+      "taglineGcp": "Streamen Sie Google-Cloud-Logs mit einem Pub/Sub-Push-Abonnement in Retrace.ai — kein Agent oder Collector erforderlich.",
       "taglineKubernetes": "Stellen Sie den OpenObserve-Collector in Ihrem Cluster bereit — Container-Logs, Kubernetes-Ereignisse und Cluster-Metriken sowie Traces ohne Code für Ihre Workloads.",
       "taglineLinux": "Installieren Sie den OpenObserve-Agenten auf jedem Linux-Host — System- und journald-Logs sowie CPU-, Arbeitsspeicher-, Datenträger- und Netzwerkmetriken, mit optionalen eBPF-Traces.",
       "taglineMacos": "Installieren Sie den OpenObserve-Agenten auf einem beliebigen Mac — das Unified Log und Standard-Logdateien sowie CPU-, Speicher-, Festplatten- und Netzwerkmetriken.",
-      "taglineOtlpTraces": "Richten Sie einen beliebigen OpenTelemetry-Exporter auf OpenObserve aus — Collector oder SDK, HTTP oder gRPC. Ihr Endpunkt und Ihr Token sind unten ausgefüllt.",
+      "taglineOtlpTraces": "Richten Sie einen beliebigen OpenTelemetry-Exporter auf Retrace.ai aus — Collector oder SDK, HTTP oder gRPC. Ihr Endpunkt und Ihr Token sind unten ausgefüllt.",
       "taglineWindows": "Installieren Sie den OpenObserve-Agenten auf einem beliebigen Windows-Host — Ereignisprotokoll, Leistungsindikatoren und Host-Metriken.",
       "testAgain": "Erneut testen",
       "traceCmdHelp": "Für Python-, Node.js- und Java-Anwendungen.",
@@ -5865,7 +5865,7 @@
       "verifyAerospikeMetricsDesc": "Die Prüfung unten wird grün, sobald Daten eintreffen, oder prüfen Sie Streams auf die `aerospike_*`-Metriken.",
       "verifyCassandraMetricsDesc": "Die Prüfung unten wird grün, sobald Daten eintreffen, oder prüfen Sie Streams auf die `cassandra_*`-Metriken.",
       "verifyDatabricksLogsDesc": "Die Prüfung unten wird grün, sobald Daten eintreffen, oder öffnen Sie Logs und suchen Sie nach `source:databricks`.",
-      "verifyDataTitle": "Daten in OpenObserve überprüfen",
+      "verifyDataTitle": "Daten in Retrace.ai überprüfen",
       "verifyDynamodbLogsDesc": "Die Prüfung unten wird grün, sobald Daten eintreffen, oder öffnen Sie Logs für den `dynamodb`-Stream, sobald sich Elemente ändern.",
       "verifyGcpLogsDesc": "Erzeugen Sie einige Aktivität im Projekt (oder warten Sie, bis die Senke ein Log erfasst); die Prüfung unten wird grün, sobald Daten eintreffen.",
       "verifyK8sDataDesc": "Geben Sie dem Collector ein paar Sekunden zum Starten; die Prüfung unten wird grün, sobald Daten eintreffen — Cluster-Logs landen im `default`-Stream.",
@@ -5894,7 +5894,7 @@
       "windowsTroubleScriptQ": "Das Skript lässt sich überhaupt nicht ausführen.",
       "writesTheseKeysTo": "Schreibt diese Schlüssel in",
       "zookeeperHostLabel": "Zookeeper-Host",
-      "zookeeperTagline": "Sammeln Sie Zookeeper-Metriken mit dem OpenTelemetry Collector und senden Sie sie an OpenObserve.",
+      "zookeeperTagline": "Sammeln Sie Zookeeper-Metriken mit dem OpenTelemetry Collector und senden Sie sie an Retrace.ai.",
       "pillKeyspace": "Keyspace",
       "pillZnodes": "Znodes",
       "stepNumber": "Schritt {n}",
@@ -5961,8 +5961,8 @@
       "gpuExporterDesc": "NVIDIAs Exporter liest GPU-Telemetrie über DCGM und stellt sie auf Port `9400` bereit.",
       "gpuExporterDockerNote": "`--network host` behält den echten Maschinennamen im Label `Hostname` bei, und der Listener bleibt auf `127.0.0.1`, sodass GPU-Daten nicht im Netzwerk offengelegt werden. `SYS_ADMIN` wird nur für die Profiling-Metriken (`DCGM_FI_PROF_*`) benötigt.",
       "gpuExporterK8sNote": "Läuft als DaemonSet nur auf GPU-Knoten, ausgewählt über gängige GPU-Knoten-Labels. Die Pod-Annotationen ermöglichen dem OpenObserve-Collector die Erkennung, sodass kein ServiceMonitor oder Prometheus erforderlich ist.",
-      "gpuShipTitle": "GPU-Metriken an OpenObserve senden",
-      "gpuShipDesc": "Bringen Sie die Metriken des Exporters über OTLP in OpenObserve.",
+      "gpuShipTitle": "GPU-Metriken an Retrace.ai senden",
+      "gpuShipDesc": "Bringen Sie die Metriken des Exporters über OTLP in Retrace.ai.",
       "gpuShipDockerNote": "Verwendet die Einstellungen der Anleitung: alle 30 s scrapen, nur die `DCGM_*`-Zeitreihen behalten und Batch 10 s / 1.024 Punkte. Das Collector-Contrib-Image läuft neben dem Exporter, und beide nutzen Host-Netzwerk, sodass `localhost:9400` aufgelöst wird.",
       "gpuShipK8sNote": "Nichts zu installieren: Das OpenObserve-Collector-Gateway scrapt alle 30 s annotierte Pods und übermittelt alles, was sie bereitstellen. Diese Befehle bestätigen, dass der Exporter erreichbar ist.",
       "gpuVerifyDesc": "GPU-Metriken landen innerhalb von ein bis zwei Scrapes als `dcgm_fi_*`-Streams. Sobald sie eintreffen, fügen wir das Dashboard **GPU Monitoring - NVIDIA** Ihrem Default-Ordner hinzu.",
@@ -6017,14 +6017,14 @@
           "description": "Überwachen Sie ALB-Zugriffs-Logs auf Anforderungsmuster, Fehler und Latenz"
         },
         "cloudwatch-logs": {
-          "description": "Streamen Sie CloudWatch-Logs zur Analyse an OpenObserve"
+          "description": "Streamen Sie CloudWatch-Logs zur Analyse an Retrace.ai"
         },
         "cloudwatch-metrics": {
           "description": "Sammeln und analysieren Sie CloudWatch-Metriken"
         },
         "vpc-flow-logs": {
           "description": "Analysieren Sie den Netzwerkverkehr in Ihrer VPC",
-          "cloudwatchIntegrationDescription": "Streamen Sie VPC-Flow-Logs über CloudWatch an OpenObserve",
+          "cloudwatchIntegrationDescription": "Streamen Sie VPC-Flow-Logs über CloudWatch an Retrace.ai",
           "firehoseIntegrationDescription": "Streamen Sie VPC-Flow-Logs direkt über Kinesis Firehose"
         },
         "ec2": {
@@ -6051,12 +6051,12 @@
         },
         "dynamodb": {
           "description": "DynamoDB-Operationen verfolgen",
-          "lambdaIntegrationDescription": "DynamoDB-Daten über Lambda an OpenObserve streamen",
-          "directIntegrationDescription": "DynamoDB-Daten direkt an OpenObserve streamen"
+          "lambdaIntegrationDescription": "DynamoDB-Daten über Lambda an Retrace.ai streamen",
+          "directIntegrationDescription": "DynamoDB-Daten direkt an Retrace.ai streamen"
         },
         "cloudfront": {
           "description": "CloudFront-Zugriffsprotokolle analysieren",
-          "directIntegrationDescription": "CloudFront-Protokolle direkt an OpenObserve streamen",
+          "directIntegrationDescription": "CloudFront-Protokolle direkt an Retrace.ai streamen",
           "s3IntegrationDescription": "CloudFront-Protokolle aus S3-Bucket erfassen"
         },
         "route53": {
@@ -6070,7 +6070,7 @@
         },
         "kinesis": {
           "description": "In Kinesis Data Streams integrieren",
-          "lambdaIntegrationDescription": "Kinesis-Daten über Lambda an OpenObserve streamen",
+          "lambdaIntegrationDescription": "Kinesis-Daten über Lambda an Retrace.ai streamen",
           "firehoseIntegrationDescription": "Kinesis-Daten direkt über Kinesis Firehose streamen"
         }
       },
@@ -6124,7 +6124,7 @@
           "description": "Virtual Network-Flussprotokolle und Diagnosen überwachen"
         },
         "activity-logs": {
-          "description": "Azure-Abonnementaktivitätsprotokolle über Event Hub und Event Publisher an OpenObserve streamen"
+          "description": "Azure-Abonnementaktivitätsprotokolle über Event Hub und Event Publisher an Retrace.ai streamen"
         }
       }
     },
@@ -8233,7 +8233,7 @@
       "regexRedact": "Generieren Sie ein Regex-Muster, um E-Mails zu redigieren",
       "mapStreamSchema": "Mein \"default\"-Stream-Schema zuordnen",
       "promqlCpu": "Schreiben Sie PromQL für Pods mit > 80% CPU",
-      "datadogToO2": "Diese Datadog-Abfrage in OpenObserve SQL konvertieren",
+      "datadogToO2": "Diese Datadog-Abfrage in Retrace.ai SQL konvertieren",
       "lastAlertFired": "Warum wurde mein letzter Alarm ausgelöst?"
     },
     "placeholderRotation": {
@@ -10310,7 +10310,7 @@
         "alertEndTime": "Endzeit des Fensters (ISO 8601)",
         "alertStartTimeMillis": "Startzeit des Fensters in Epoch-Millisekunden",
         "alertEndTimeMillis": "Endzeit des Fensters in Epoch-Millisekunden",
-        "alertUrl": "Link zurück zu OpenObserve zur Untersuchung",
+        "alertUrl": "Link zurück zu Retrace.ai zur Untersuchung",
         "alertTriggerTime": "Wann der Alarm ausgelöst wurde (ISO 8601)",
         "alertTriggerTimeMillis": "Auslösezeit in Epoch-Millisekunden",
         "alertTriggerTimeSeconds": "Auslösezeit in Epoch-Sekunden",
@@ -10611,7 +10611,7 @@
       "servicenowAssignmentGroup": "Zuweisungsgruppe (optional)",
       "servicenowAssignmentGroupHelp": "Gruppe, der Vorfälle zugewiesen werden (z. B. IT-Betrieb)",
       "servicenowResolutionCode": "Lösungscode (optional)",
-      "servicenowResolutionCodeHelp": "Muss mit einem gültigen Lösungscode in Ihrer ServiceNow-Instanz übereinstimmen. Wird verwendet, wenn OpenObserve den Vorfall behebt. Standard ist Solved (Permanently).",
+      "servicenowResolutionCodeHelp": "Muss mit einem gültigen Lösungscode in Ihrer ServiceNow-Instanz übereinstimmen. Wird verwendet, wenn Retrace.ai den Vorfall behebt. Standard ist Solved (Permanently).",
       "usernameRequired": "Benutzername ist erforderlich",
       "passwordRequired": "Passwort ist erforderlich",
       "emailRecipients": "E-Mail-Adressen der Empfänger",
@@ -11512,7 +11512,7 @@
     "notIngestedHint": "Diese Organisation empfängt {stream} nicht, daher würde dieser Alarm nie ausgelöst. Fügen Sie ihn trotzdem hinzu, und er funktioniert, sobald die Daten eintreffen.",
     "alertCount": "{count} Alarm | {count} Alarme",
     "noCollectorTitle": "Hier passt noch nichts zu Ihren Daten.",
-    "noCollectorDescription": "Keiner dieser {count} Alarme fragt einen Stream ab, den diese Organisation empfängt. Senden Sie {group}-Telemetrie an OpenObserve, und sie erscheinen hier.",
+    "noCollectorDescription": "Keiner dieser {count} Alarme fragt einen Stream ab, den diese Organisation empfängt. Senden Sie {group}-Telemetrie an Retrace.ai, und sie erscheinen hier.",
     "setupGuide": "Erfassungsleitfaden",
     "emptyLibraryTitle": "Die Alarm-Bibliothek ist leer",
     "emptyLibraryDescription": "Der Katalog wurde geladen, enthält aber keine Alarme. Dies ist ein Veröffentlichungsproblem und kein Filter – versuchen Sie es in Kürze erneut.",
@@ -11608,7 +11608,7 @@
       "network": "Die Bibliothek konnte nicht erreicht werden. Überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.",
       "http": "Der Bibliotheksserver hat einen Fehler zurückgegeben. Versuchen Sie es gleich noch einmal.",
       "unparseable": "Die Bibliothek hat etwas zurückgegeben, das kein Katalog ist.",
-      "unsupported_version": "Dieser Bibliothekskatalog ist neuer, als diese Version von OpenObserve lesen kann. Aktualisieren Sie, um ihn zu durchsuchen.",
+      "unsupported_version": "Dieser Bibliothekskatalog ist neuer, als diese Version von Retrace.ai lesen kann. Aktualisieren Sie, um ihn zu durchsuchen.",
       "malformed": "Der Bibliothekskatalog ist unvollständig oder beschädigt."
     }
   },
@@ -12029,7 +12029,7 @@
     "search": "Ziel suchen"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "Org-Speicher",
     "title": "Org-Speicher",
     "notEnabled": "{product} ist für diese Organisation nicht aktiviert",
@@ -12067,7 +12067,7 @@
     "continue": "Weiter",
     "save": "Speichern",
     "update": "Aktualisieren",
-    "awsStsCloudInfo": "Hierbei wird AWS STS verwendet, um eine Rolle zu übernehmen und Vorgänge auszuführen. Sie müssen das {product}-AWS-Konto als vertrauenswürdigen Entitätstyp für diese Rolle in der AWS-Konsole hinzufügen. Bitte kontaktieren Sie das Openobserve-Team, um die Kontoinformationen zu erhalten oder weitere Hilfe bei der Einrichtung zu bekommen.",
+    "awsStsCloudInfo": "Hierbei wird AWS STS verwendet, um eine Rolle zu übernehmen und Vorgänge auszuführen. Sie müssen das {product}-AWS-Konto als vertrauenswürdigen Entitätstyp für diese Rolle in der AWS-Konsole hinzufügen. Bitte kontaktieren Sie das Retrace.ai-Team, um die Kontoinformationen zu erhalten oder weitere Hilfe bei der Einrichtung zu bekommen.",
     "awsStsSelfHostedInfo": "Dabei werden AWS sts verwendet, um Rollen zu übernehmen und Operationen durchzuführen. Stellen Sie sicher, dass Sie in der Installationsumgebung AWS-Anmeldeinformationen konfiguriert haben, die Zugriff auf diese Rolle haben."
   },
   "metrics": {
@@ -12672,7 +12672,7 @@
     "dangerZone": "Gefahrenzone",
     "deleteOrganization": "Organisation löschen",
     "deleteOrganizationTitle": "Diese Organisation löschen",
-    "deleteOrganizationDescription": "Alle, Sie eingeschlossen, verlieren sofort den Zugriff auf {name}. Während des Wiederherstellungszeitraums kann nur der OpenObserve-Support sie wiederherstellen; danach werden alle Daten dauerhaft gelöscht.",
+    "deleteOrganizationDescription": "Alle, Sie eingeschlossen, verlieren sofort den Zugriff auf {name}. Während des Wiederherstellungszeitraums kann nur der Retrace.ai-Support sie wiederherstellen; danach werden alle Daten dauerhaft gelöscht.",
     "deleteOrganizationScopeLoading": "Inhalt dieser Organisation wird geprüft…",
     "deleteOrganizationScope": "{dashboards} Dashboards · {streams} Streams · {size} Daten",
     "deleteFactGracePeriod": "Wiederherstellungszeitraum",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "Alle Zugriffe werden sofort entzogen",
     "deleteOrganizationConfirm": "Dadurch werden \"{name}\" und alle zugehörigen Streams, Dashboards, Alarme, Pipelines, Benutzer und Einstellungen zur Löschung eingeplant.",
     "deleteOrganizationWarning": "Die Organisation ist sofort nicht mehr verfügbar und wird für alle Nutzer ausgeblendet. Die Datenaufnahme wird blockiert und geplante Alarme, Pipelines und Berichte werden angehalten, sodass keine Benachrichtigungen gesendet werden, solange die Löschung eingeplant ist.",
-    "deleteOrganizationRecoverable": "Während des Wiederherstellungszeitraums kann sie noch zurückgebracht werden, aber nicht von Ihnen – Sie verlieren den Zugriff auf diese Organisation, sobald die Löschung beginnt, und nur der OpenObserve-Support kann sie wiederherstellen. Sobald das Zeitfenster schließt, werden ihre Daten dauerhaft gelöscht und können von niemandem wiederhergestellt werden.",
+    "deleteOrganizationRecoverable": "Während des Wiederherstellungszeitraums kann sie noch zurückgebracht werden, aber nicht von Ihnen – Sie verlieren den Zugriff auf diese Organisation, sobald die Löschung beginnt, und nur der Retrace.ai-Support kann sie wiederherstellen. Sobald das Zeitfenster schließt, werden ihre Daten dauerhaft gelöscht und können von niemandem wiederhergestellt werden.",
     "deleteOrganizationTypeToConfirm": "Geben Sie zur Bestätigung {name} unten ein:",
     "deleteOrganizationInitiated": "Organisation zur Löschung vorgemerkt. Sie ist jetzt ausgeblendet; kontaktieren Sie den Support, um sie vor Ablauf des Wiederherstellungszeitraums wiederherzustellen.",
     "somethingWentWrong": "Etwas ist schief gelaufen",
@@ -14489,7 +14489,7 @@
     "noTracesDescription": "Für diese Korrelation wurden im ausgewählten Zeitraum keine Traces gefunden.",
     "viewInTraces": "In Traces anzeigen",
     "filters": "Filter",
-    "semanticFieldGroupsCaption": "Ordnen Sie Ihre Telemetrie-Feldnamen gemeinsamen Gruppen zu, damit OpenObserve sie über Streams hinweg korrelieren kann.",
+    "semanticFieldGroupsCaption": "Ordnen Sie Ihre Telemetrie-Feldnamen gemeinsamen Gruppen zu, damit Retrace.ai sie über Streams hinweg korrelieren kann.",
     "exportToJson": "Als JSON exportieren",
     "importFromJson": "Aus JSON importieren",
     "addCustomGroup": "Benutzerdefinierte Gruppe hinzufügen",
@@ -17343,7 +17343,7 @@
         "systemProvided": {
           "about": "Über systembereitgestellte Werte",
           "title": "Systemwerte für {scope}",
-          "description": "OpenObserve erstellt diese Werte separat für jeden {scope}, den dieser Job auswertet. Verwenden Sie sie als Quellen beim Zuordnen der Prompt-Variablen des Scorers.",
+          "description": "Retrace.ai erstellt diese Werte separat für jeden {scope}, den dieser Job auswertet. Verwenden Sie sie als Quellen beim Zuordnen der Prompt-Variablen des Scorers.",
           "badge": "Systembereitgestellt",
           "selectorRequired": "Span-Selector erforderlich",
           "columns": {
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "Aktualisieren Sie Ihr Passwort",
     "signedInAs": "Angemeldet als {email}",
-    "reasonPolicyTightened": "Die Passwortrichtlinie wurde geändert. Aktualisieren Sie Ihr Passwort, um OpenObserve weiter zu verwenden.",
-    "reasonRotationExpired": "Ihr Passwort ist abgelaufen. Legen Sie ein neues fest, um OpenObserve weiter zu verwenden.",
+    "reasonPolicyTightened": "Die Passwortrichtlinie wurde geändert. Aktualisieren Sie Ihr Passwort, um Retrace.ai weiter zu verwenden.",
+    "reasonRotationExpired": "Ihr Passwort ist abgelaufen. Legen Sie ein neues fest, um Retrace.ai weiter zu verwenden.",
     "reasonRotationWarning": "Ihr Passwort läuft bald ab. Legen Sie jetzt ein neues fest, um nicht von Ihrer Arbeit ausgesperrt zu werden.",
     "reused": "Dieses Passwort wurde kürzlich verwendet. Wählen Sie eines, das Sie nicht unter Ihren letzten {count} Passwörtern verwendet haben.",
     "expiryBanner": "Ihr Passwort läuft in {count} Tag ab. Aktualisieren Sie es jetzt, um nicht von Ihrer Arbeit ausgesperrt zu werden. | Ihr Passwort läuft in {count} Tagen ab. Aktualisieren Sie es jetzt, um nicht von Ihrer Arbeit ausgesperrt zu werden.",
@@ -21777,7 +21777,7 @@
       "workloadsStatusScheduled": "Scheduled: {count}",
       "workloadsStatusSuspended": "Suspended: {count}",
       "workloadsNone": "Keine",
-      "workloadsRuleTip": "OpenObserve-Regel, nicht Lens: Ein Objekt ohne Pods wird anhand seiner eigenen Replica- oder Job-Signale gezählt, und unvollständige Daten zählen als Unknown",
+      "workloadsRuleTip": "Retrace.ai-Regel, nicht Lens: Ein Objekt ohne Pods wird anhand seiner eigenen Replica- oder Job-Signale gezählt, und unvollständige Daten zählen als Unknown",
       "workloadsRecentEvents": "Letzte Ereignisse",
       "workloadsViewAll": "Alle anzeigen",
       "workloadsColType": "Typ",
@@ -23052,7 +23052,7 @@
           },
           "sampling": {
             "no": "Nichts tastet die Sitzungstabellen Ihrer Datenbanken ab",
-            "noDetail": "Sitzungsstichproben stammen von Ihrem Collector: Aktivieren Sie db.server.query_sample im Collector-Rezept auf dem Datenbankhost – die Einrichtungsseite führt Sie durch die Schritte. OpenObserve akzeptiert diesen Feed, wann immer die Datenbanküberwachung aktiviert ist, die Lösung liegt also auf der Collector-Seite."
+            "noDetail": "Sitzungsstichproben stammen von Ihrem Collector: Aktivieren Sie db.server.query_sample im Collector-Rezept auf dem Datenbankhost – die Einrichtungsseite führt Sie durch die Schritte. Retrace.ai akzeptiert diesen Feed, wann immer die Datenbanküberwachung aktiviert ist, die Lösung liegt also auf der Collector-Seite."
           }
         }
       }
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "Senden Sie Ihre Daten. OpenObserve findet die Probleme und teilt sie Ihnen mit – mit seiner besten Einschätzung der Ursache. Wenn es still ist, zeigt es Ihnen, was es geprüft hat und was es nicht sehen kann.",
+    "subtitle": "Senden Sie Ihre Daten. Retrace.ai findet die Probleme und teilt sie Ihnen mit – mit seiner besten Einschätzung der Ursache. Wenn es still ist, zeigt es Ihnen, was es geprüft hat und was es nicht sehen kann.",
     "phase2": "Phase 2",
     "tabs": {
       "issues": "Probleme",
@@ -25853,12 +25853,12 @@
     },
     "linking": {
       "title": "Verknüpfung",
-      "removedUsers": "Personen, die aus OpenObserve oder Slack entfernt werden, verlieren ihre Verknüpfung innerhalb einer Stunde",
+      "removedUsers": "Personen, die aus Retrace.ai oder Slack entfernt werden, verlieren ihre Verknüpfung innerhalb einer Stunde",
       "manage": "Verwalten",
       "auto": "Personen automatisch verknüpfen",
-      "autoHelp": "Slack-Mitglieder mit einer bestätigten E-Mail-Adresse auf diesen Domains werden mit dem OpenObserve-Benutzer mit dieser E-Mail-Adresse in einer verbundenen Organisation verknüpft. Gäste und externe Benutzer werden stattdessen mit einem Klick verknüpft.",
+      "autoHelp": "Slack-Mitglieder mit einer bestätigten E-Mail-Adresse auf diesen Domains werden mit dem Retrace.ai-Benutzer mit dieser E-Mail-Adresse in einer verbundenen Organisation verknüpft. Gäste und externe Benutzer werden stattdessen mit einem Klick verknüpft.",
       "mappedSummary": "Automatisch für {domains} · aus der Domain-Zuordnung Ihrer Organisation",
-      "mappedReadonly": "Zugeordnete Domains sind hier schreibgeschützt; Änderungen an der Zuordnung nimmt der OpenObserve-Support vor. Das Deaktivieren der Verknüpfung können Sie weiterhin selbst vornehmen.",
+      "mappedReadonly": "Zugeordnete Domains sind hier schreibgeschützt; Änderungen an der Zuordnung nimmt der Retrace.ai-Support vor. Das Deaktivieren der Verknüpfung können Sie weiterhin selbst vornehmen.",
       "manualSummary": "Automatisch für {domains}",
       "offSummary": "Aus · Personen verknüpfen sich mit einem Klick, wenn sie zum ersten Mal danach fragen",
       "domains": "Domains",
@@ -25868,7 +25868,7 @@
       "domainsHelp": "Nur die eigenen Domains Ihres Unternehmens. Öffentliche E-Mail-Domains wie gmail.com oder outlook.com werden nie akzeptiert.",
       "publicDomain": "{domain} ist eine öffentliche E-Mail-Domain; verwenden Sie die Domain Ihres Unternehmens",
       "counts": "{auto} automatisch verknüpft, {oidc} mit „Konto verknüpfen“",
-      "matches": "{count} Slack-Mitglied entspricht einem OpenObserve-Benutzer | {count} Slack-Mitglieder entsprechen OpenObserve-Benutzern",
+      "matches": "{count} Slack-Mitglied entspricht einem Retrace.ai-Benutzer | {count} Slack-Mitglieder entsprechen Retrace.ai-Benutzern",
       "matchesHelp": "Beigetreten, bevor die automatische Verknüpfung aktiv war · jede Person erhält eine DM",
       "linkAllMatches": "Alle Übereinstimmungen verknüpfen ({count})",
       "linkAllDone": "{count} Person verknüpft | {count} Personen verknüpft",
@@ -25935,7 +25935,7 @@
     },
     "channels": {
       "title": "Kanalstandards",
-      "description": "Welche Organisation eine Frage verwendet, wenn der Thread keine OpenObserve-Verknüpfung hat",
+      "description": "Welche Organisation eine Frage verwendet, wenn der Thread keine Retrace.ai-Verknüpfung hat",
       "setDefault": "Kanalstandard festlegen",
       "columnChannel": "Kanal",
       "columnDefaultOrg": "Standardorganisation",
@@ -25972,7 +25972,7 @@
     "people": {
       "title": "Verknüpfte Personen",
       "description": "Personen in dieser Organisation, die ihr Slack-Konto verknüpft haben",
-      "columnUser": "OpenObserve-Benutzer",
+      "columnUser": "Retrace.ai-Benutzer",
       "columnSlackUser": "Slack-Benutzer",
       "columnMethod": "Verknüpft von",
       "columnLinked": "Verknüpft",
@@ -26038,10 +26038,10 @@
       "sendNewLink": "Neuen Link senden",
       "resentTitle": "Wir haben Ihnen einen neuen Link gesendet",
       "resentDetail": "Öffnen Sie in Slack Ihre Direktnachrichten mit OpenObserve und klicken Sie auf „Konto verknüpfen“.",
-      "noAccessTitle": "Sie haben noch keinen Zugriff auf OpenObserve",
-      "noAccessDetail": "Ihr Slack-Workspace ist mit OpenObserve verbunden, aber Sie haben in keiner der Organisationen von OpenObserve ein Konto.",
+      "noAccessTitle": "Sie haben noch keinen Zugriff auf Retrace.ai",
+      "noAccessDetail": "Ihr Slack-Workspace ist mit Retrace.ai verbunden, aber Sie haben in keiner der Organisationen von Retrace.ai ein Konto.",
       "helpContact": "Bitten Sie {contact} um Zugriff.",
-      "helpContactDefault": "Bitten Sie Ihren OpenObserve-Administrator um Zugriff.",
+      "helpContactDefault": "Bitten Sie Ihren Retrace.ai-Administrator um Zugriff.",
       "wrongAccountTitle": "Mit einem anderen Slack-Konto angemeldet",
       "wrongAccountDetail": "Dieser Link wurde an jemand anderen gesendet. Wechseln Sie in diesem Browser das Slack-Konto und versuchen Sie es erneut.",
       "rateLimitedTitle": "Zu viele Versuche",
@@ -26072,7 +26072,7 @@
     },
     "linkedAccounts": {
       "title": "Verknüpfte Konten",
-      "description": "Apps, die in OpenObserve in Ihrem Namen handeln können",
+      "description": "Apps, die in Retrace.ai in Ihrem Namen handeln können",
       "workspace": "Slack · {team}",
       "detail": "{'@'}{user} · Organisation {org} · {method}",
       "linked": "Verknüpft",
@@ -26576,7 +26576,7 @@
       "restrictedDesc": "Konfigurationen, die diese Komponenten verwenden, bestehen die Validierung nicht.",
       "restrictedPlaceholder": "Keine, alle Komponenten sind erlaubt",
       "targetVersion": "Ziel-Collector-Version",
-      "targetVersionDesc": "Ältere Collector gelten als veraltet. Leer lassen, um die neueste von OpenObserve unterstützte Version zu verwenden.",
+      "targetVersionDesc": "Ältere Collector gelten als veraltet. Leer lassen, um die neueste von Retrace.ai unterstützte Version zu verwenden.",
       "targetVersionPlaceholder": "Neueste unterstützte (z. B. 0.163.1)",
       "save": "Speichern",
       "saved": "Fleet-Manager-Einstellungen gespeichert",

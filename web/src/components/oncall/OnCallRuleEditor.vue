@@ -326,7 +326,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <OText
             v-if="matched.length"
             variant="label"
-            class="text-success ms-auto"
+            class="text-status-success-text ms-auto"
             data-test="oncall-rule-editor-catch-count"
           >
             {{ matchCount }}

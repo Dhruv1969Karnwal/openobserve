@@ -18,10 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <template>
   <div
     class="flex items-center gap-6 max-md:flex-col max-md:items-stretch max-md:gap-2"
-    :class="[
-      !inPair && 'border-border-default border-b px-3 py-3 last:border-b-0',
-      disabled && 'opacity-60',
-    ]"
+    :class="[!inPair && 'border-border-default border-b px-3 py-3 last:border-b-0']"
     :data-test="dataTest"
   >
     <!-- Half of a 45% pair cell, so single and paired controls share one column. -->

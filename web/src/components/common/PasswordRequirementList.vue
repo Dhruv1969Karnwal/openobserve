@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         :key="requirement.key"
         :data-test="`password-requirement-${requirement.key}`"
         class="flex items-center gap-2 text-xs"
-        :class="isMet(requirement) ? 'text-status-positive' : 'text-text-secondary'"
+        :class="isMet(requirement) ? 'text-status-success-text' : 'text-text-secondary'"
       >
         <OIcon
           :name="isMet(requirement) ? 'check-circle' : 'radio-button-unchecked'"

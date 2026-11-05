@@ -59,7 +59,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     >
       <div v-if="errorDiff!.introduced.length" data-test="version-error-diff-group-introduced">
         <div class="border-border-default flex items-baseline gap-1.5 border-b pb-1">
-          <span class="text-error-600 text-xs font-semibold uppercase">
+          <span class="text-status-error-text text-xs font-semibold uppercase">
             {{ t("aiObservability.errorDiff.introduced") }}
           </span>
           <span class="text-2xs text-text-muted">{{
@@ -74,14 +74,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :data-test="`version-error-diff-row-introduced-${row.fail_class}`"
           >
             <OTruncatedText>{{ row.fail_class }}</OTruncatedText>
-            <span class="text-error-600 shrink-0 font-medium tabular-nums">+{{ row.count }}</span>
+            <span class="text-status-error-text shrink-0 font-medium tabular-nums"
+              >+{{ row.count }}</span
+            >
           </li>
         </ul>
       </div>
 
       <div v-if="errorDiff!.fixed.length" data-test="version-error-diff-group-fixed">
         <div class="border-border-default flex items-baseline gap-1.5 border-b pb-1">
-          <span class="text-success-600 text-xs font-semibold uppercase">
+          <span class="text-status-success-text text-xs font-semibold uppercase">
             {{ t("aiObservability.errorDiff.fixed") }}
           </span>
           <span class="text-2xs text-text-muted">{{
@@ -96,7 +98,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :data-test="`version-error-diff-row-fixed-${row.fail_class}`"
           >
             <OTruncatedText>{{ row.fail_class }}</OTruncatedText>
-            <span class="text-success-600 shrink-0 font-medium tabular-nums">−{{ row.count }}</span>
+            <span class="text-status-success-text shrink-0 font-medium tabular-nums"
+              >−{{ row.count }}</span
+            >
           </li>
         </ul>
       </div>
@@ -175,8 +179,8 @@ const showEmpty = computed(() => !props.errorDiff || props.errorDiff.insufficien
 // the new version = WORSE, red ▲) and FEWER when delta>0 (count fell = BETTER,
 // green ▼). The arrow points the direction the count moved from A to B.
 function sharedDeltaColorClass(delta: number): string {
-  if (delta < 0) return "text-error-600"; // B > A → more errors in the new version
-  if (delta > 0) return "text-success-600"; // B < A → fewer errors in the new version
+  if (delta < 0) return "text-status-error-text"; // B > A → more errors in the new version
+  if (delta > 0) return "text-status-success-text"; // B < A → fewer errors in the new version
   return "text-text-secondary";
 }
 

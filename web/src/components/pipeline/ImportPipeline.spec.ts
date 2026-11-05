@@ -1114,7 +1114,7 @@ describe("ImportPipeline.vue", () => {
       expect(classesAt(0)).toContain("text-status-success-text");
       expect(classesAt(1)).toContain("text-status-warning-text");
       expect(classesAt(1)).not.toContain("text-status-success-text");
-      expect(classesAt(2)).toContain("text-status-negative");
+      expect(classesAt(2)).toContain("text-status-error-text");
     });
 
     it("colours a plain-string error like the ones with an inline fix-up", async () => {
@@ -1131,7 +1131,7 @@ describe("ImportPipeline.vue", () => {
       const classesOf = (errorIndex: number) =>
         wrapper.find(`[data-test="pipeline-import-error-0-${errorIndex}"]`).find("span").classes();
 
-      expect(classesOf(1)).toContain("text-status-negative");
+      expect(classesOf(1)).toContain("text-status-error-text");
       // Same colour as the branch that does have an inline control.
       expect(classesOf(1)).toEqual(classesOf(0));
     });

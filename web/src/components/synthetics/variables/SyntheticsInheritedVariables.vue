@@ -78,7 +78,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           >{{ row.name
           }}<OTooltip side="top">
             <template #content>
-              <div v-if="row.overridden" class="text-warning">
+              <div v-if="row.overridden" class="text-status-warning-text">
                 {{ t("synthetics.inherited.overriddenByCheck") }}
               </div>
               <div>{{ hintsLine(row) }}</div>

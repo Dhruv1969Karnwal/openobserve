@@ -81,7 +81,7 @@ const stepNumberClass = computed(() => {
   if (!props.replayDotState) return "w-6! text-center text-sm tabular-nums text-text-muted";
   switch (props.replayDotState) {
     case "active":
-      return "w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-badge-primary-soft-bg text-badge-primary-soft-text border border-badge-primary-soft-text text-white text-xs font-semi-bold";
+      return "w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-badge-primary-soft-bg text-badge-primary-soft-text border border-badge-primary-soft-text text-xs font-semi-bold";
     case "pass":
       return "w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-badge-success-soft-bg text-badge-success-soft-text border border-badge-success-soft-text text-xs font-semi-bold";
     case "fail":

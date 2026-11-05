@@ -22,6 +22,12 @@ import {
 } from "@/utils/zincutils";
 import type { LocationQuery, LocationQueryRaw, RouteLocationRaw } from "vue-router";
 import config from "@/aws-exports";
+import {
+  buildFeatureGateContext,
+  checkFeatureAccess,
+  withFeatureGate,
+  type FeatureGateContext,
+} from "@/utils/enterpriseFeatures";
 import { resolveTraceSearchMode, type TraceSearchMode } from "@/ts/interfaces/traces/trace.types";
 import store from "@/stores";
 import { hasMetricsEditorParams } from "@/utils/metrics/metricsEditorParams";
@@ -41,8 +47,13 @@ const PromQLQueryBuilder = () => import("@/views/PromQL/QueryBuilder.vue");
 const TraceDetails = () => import("@/plugins/traces/TraceDetails.vue");
 const SessionDetails = () => import("@/plugins/traces/SessionDetails.vue");
 
+// The paid trace modes resolve through the registry, the same source the logs
+// sanitizer uses, so the URL coercion cannot drift from the tab it gates.
 const supportedTraceTab = (tab: unknown): TraceSearchMode =>
-  resolveTraceSearchMode(tab, config.isEnterprise === "true");
+  resolveTraceSearchMode(
+    tab,
+    checkFeatureAccess("enterprise", buildFeatureGateContext(store?.state?.zoConfig)).allowed,
+  );
 
 const canonicalTraceQuery = (
   query: LocationQuery | undefined,
@@ -113,12 +124,13 @@ const dbMonitoringEnabled = (): boolean => {
  * aimed at, rather than on a page that renders empty because every fetch was
  * refused. The scope travels so the window and filters survive the bounce.
  *
- * `isEnterprise` is a STRING — compared against the literal `"true"`, never
- * coerced, since `Boolean("false")` is true and would open the gate on OSS.
- * Same shape as the `serviceGraph` guard below.
+ * The edition truth is the registry's `enterprise` predicate, which compares
+ * the STRING `isEnterprise` against the literal `"true"` — never coerce it,
+ * since `Boolean("false")` is true and would open the gate on OSS.
  */
 const dbmEnterpriseGuard = (to: any, from: any, next: any) => {
-  if (config.isEnterprise !== "true") {
+  // Registry predicate (`enterprise`): same edition truth, no local drift.
+  if (!checkFeatureAccess("enterprise", buildFeatureGateContext()).allowed) {
     next({ name: "dbmDatabases", query: to.query });
     return;
   }
@@ -154,6 +166,29 @@ const alertCalibrationRouteGuard = (to: any, from: any, next: any) => {
   routeGuard(to, from, next);
 };
 
+/**
+ * The four enterprise/cloud-only alert surfaces that bounce to the Alerts list —
+ * Alert Sources, the two anomaly-detection editors and the semantic-group
+ * import. They carried byte-identical inline guards, each reading
+ * `(window as any).store`, which nothing in the app ever assigns (see the
+ * Database Monitoring note at the top of this file): `isOss` was a constant
+ * `false`, so the `/config` build_type half of the condition was inert and an
+ * enterprise UI pointed at an OSS backend rendered the paid editor page and ate
+ * 403s on every call. One helper now, reading the IMPORTED store singleton the
+ * way `downtimesRouteGuard` and `alertCalibrationRouteGuard` already do.
+ *
+ * `=== "opensource"`, not falsy: a cold load with `/config` still in flight must
+ * not bounce a real entitled user's bookmark — same stance as its neighbours.
+ */
+const alertSurfaceRouteGuard = (to: any, from: any, next: any) => {
+  const isOss = store?.state?.zoConfig?.build_type === "opensource";
+  if (isOss || (config.isEnterprise !== "true" && config.isCloud !== "true")) {
+    next({ name: "alertList", query: { org_identifier: to.query?.org_identifier } });
+    return;
+  }
+  routeGuard(to, from, next);
+};
+
 // `=== false`, as for Downtimes: a cold load with `/config` still in flight must not bounce.
 const profilesRouteGuard = (to: any, from: any, next: any) => {
   if (store.state.zoConfig?.profiling_enabled === false) {
@@ -161,6 +196,39 @@ const profilesRouteGuard = (to: any, from: any, next: any) => {
     return;
   }
   routeGuard(to, from, next);
+};
+
+/**
+ * The Search Job Inspector's three entry points — the logs SearchBar "Inspect"
+ * menu group, the SearchHistory row action and the results-grid action — are
+ * each hidden behind the enterprise build, a self-hosted deploy AND the backend
+ * `search_inspector_enabled` flag. The route only ever carried `routeGuard`, so
+ * a pasted or bookmarked `/logs/inspector` rendered the paid page with its
+ * entries hidden: exactly what the registry wave closed for `alertInsights` and
+ * `pipelineBackfill` (both `withFeatureGate` now) and missed here.
+ *
+ * The EDITION half lives in the registry as `searchJobInspector` (enterprise AND
+ * not-cloud — the same edition answer the three entries give) so the hide / lock
+ * split stays in the one place it is written (`withFeatureGate`). The runtime
+ * flag is the caller-side conjunct the registry doc leaves to call sites; it
+ * enters through the gate's `getContext` by folding into the single bit that
+ * predicate reads, rather than copying the policy branch here.
+ *
+ * Cold load: `/config` is fetched without await, so an unloaded `zoConfig`
+ * (still `{}`) must not bounce a real entitled user's refresh — same stance as
+ * `dbmMonitoringEnabled` above. Once the config HAS loaded, a missing flag is
+ * off, which is what the three entry points treat it as.
+ */
+const searchInspectorFlagAllows = (): boolean => {
+  const zoConfig = store?.state?.zoConfig;
+  const configLoaded = !!zoConfig && Object.keys(zoConfig).length > 0;
+  if (!configLoaded) return true;
+  return Boolean(zoConfig.search_inspector_enabled);
+};
+
+const searchJobInspectorGateContext = (): FeatureGateContext => {
+  const edition = buildFeatureGateContext(store?.state?.zoConfig);
+  return { ...edition, isEnterprise: edition.isEnterprise && searchInspectorFlagAllows() };
 };
 
 const ViewDashboard = () => import("@/views/Dashboards/ViewDashboard.vue");
@@ -262,6 +330,16 @@ const useRoutes = () => {
       },
     },
     {
+      // Public marketing page: outside MainLayout, so the guard's public branch
+      // (router/index.ts) passes it without touching the login redirect.
+      path: "/welcome",
+      name: "welcome",
+      component: () => import("@/views/WelcomeView.vue"),
+      meta: {
+        public: true,
+      },
+    },
+    {
       // Outside MainLayout and the login redirect: anyone holding a public link can read it.
       path: "/ai/public/:token",
       name: "publicSharedChat",
@@ -350,9 +428,10 @@ const useRoutes = () => {
         keepAlive: false,
         titleKey: "logs.searchJobInspector.title",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        routeGuard(to, from, next);
-      },
+      // Registry gate + the `search_inspector_enabled` conjunct its entries use;
+      // see `searchJobInspectorGateContext`. Hide → home (org preserved), lock →
+      // the shared locked page with `redirect`; home is ungated, so no loop.
+      beforeEnter: withFeatureGate("searchJobInspector", routeGuard, searchJobInspectorGateContext),
     },
     {
       // Standalone page (was a `?action=history` overlay on /logs). Not
@@ -371,8 +450,11 @@ const useRoutes = () => {
     },
     {
       // Standalone page (was a `?action=search_scheduler` overlay on /logs).
-      // Enterprise-only: the scheduled-search endpoints 403 in OSS, so a
-      // hand-typed URL is bounced back to the logs page.
+      // Enterprise/cloud-only: the scheduled-search endpoints 403 in OSS, so a
+      // hand-typed URL is bounced. Same `withFeatureGate` the sibling paid routes
+      // use, so the bounce keeps `org_identifier` and a `"lock"` build lands on
+      // the shared locked page with `redirect` (the inline guard this replaces
+      // dropped both and never reached the lock page).
       path: "logs/search-scheduler",
       name: "searchScheduler",
       component: SearchSchedulersList,
@@ -380,13 +462,7 @@ const useRoutes = () => {
         keepAlive: false,
         titleKey: "routeTitles.searchScheduler",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        if (config.isEnterprise !== "true") {
-          next({ name: "logs" });
-          return;
-        }
-        routeGuard(to, from, next);
-      },
+      beforeEnter: withFeatureGate("scheduledSearch", routeGuard),
     },
     {
       // The zero-query browse grid.
@@ -834,9 +910,9 @@ const useRoutes = () => {
               meta: {
                 titleKey: "routeTitles.pipelineBackfillJobs",
               },
-              beforeEnter(to: any, from: any, next: any) {
-                routeGuard(to, from, next);
-              },
+              // The Pipelines page hides its Backfill entry on un-entitled
+              // editions; the direct URL must not render the paid page.
+              beforeEnter: withFeatureGate("pipelineBackfill", routeGuard),
             },
           ],
         },
@@ -963,15 +1039,7 @@ const useRoutes = () => {
       meta: {
         titleKey: "alert_sources.header",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        const store = (window as any).store;
-        const isOss = store?.state?.zoConfig?.build_type === "opensource";
-        if (isOss || (config.isEnterprise !== "true" && config.isCloud !== "true")) {
-          next({ name: "alertList", query: { org_identifier: to.query.org_identifier } });
-          return;
-        }
-        routeGuard(to, from, next);
-      },
+      beforeEnter: alertSurfaceRouteGuard,
     },
     {
       path: "alert-calibration",
@@ -1094,15 +1162,7 @@ const useRoutes = () => {
       meta: {
         titleKey: "alerts.addAnomalyMode",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        const store = (window as any).store;
-        const isOss = store?.state?.zoConfig?.build_type === "opensource";
-        if (isOss || (config.isEnterprise !== "true" && config.isCloud !== "true")) {
-          next({ name: "alertList", query: { org_identifier: to.query.org_identifier } });
-          return;
-        }
-        routeGuard(to, from, next);
-      },
+      beforeEnter: alertSurfaceRouteGuard,
     },
     {
       path: "alerts/anomaly/edit/:anomaly_id",
@@ -1111,15 +1171,7 @@ const useRoutes = () => {
       meta: {
         titleKey: "alerts.editAnomalyMode",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        const store = (window as any).store;
-        const isOss = store?.state?.zoConfig?.build_type === "opensource";
-        if (isOss || (config.isEnterprise !== "true" && config.isCloud !== "true")) {
-          next({ name: "alertList", query: { org_identifier: to.query.org_identifier } });
-          return;
-        }
-        routeGuard(to, from, next);
-      },
+      beforeEnter: alertSurfaceRouteGuard,
     },
     {
       path: "alerts/history",
@@ -1139,9 +1191,9 @@ const useRoutes = () => {
       meta: {
         titleKey: "alerts.insights.title",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        routeGuard(to, from, next);
-      },
+      // The registry declares alertInsights enterprise-only; its tabs were the
+      // only gate, so a direct URL still rendered the paid shell on OSS.
+      beforeEnter: withFeatureGate("alertInsights", routeGuard),
     },
     {
       // Correlation engine is enterprise/cloud-only: bounce to Alerts on OSS — mirrors anomaly/alert-sources guards.
@@ -1151,15 +1203,7 @@ const useRoutes = () => {
       meta: {
         titleKey: "correlation.importSemanticGroups.title",
       },
-      beforeEnter(to: any, from: any, next: any) {
-        const store = (window as any).store;
-        const isOss = store?.state?.zoConfig?.build_type === "opensource";
-        if (isOss || (config.isEnterprise !== "true" && config.isCloud !== "true")) {
-          next({ name: "alertList", query: { org_identifier: to.query.org_identifier } });
-          return;
-        }
-        routeGuard(to, from, next);
-      },
+      beforeEnter: alertSurfaceRouteGuard,
     },
     {
       path: "ai/shared/:token",

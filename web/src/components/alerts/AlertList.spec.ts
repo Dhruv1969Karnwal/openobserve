@@ -83,6 +83,7 @@ import { toast } from "@/lib/feedback/Toast/useToast";
 import TemplateService from "@/services/alert_templates";
 import DestinationService from "@/services/alert_destination";
 import { resetListViewState, useListViewState } from "@/composables/useListViewState";
+import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 
 const node = document.createElement("div");
 node.setAttribute("id", "app");
@@ -156,6 +157,7 @@ type AlertV2 = {
   stream_type: string;
   enabled: boolean;
   condition: any;
+  alert_type?: string;
   child_count?: number;
   referenced_by_composite_count?: number;
   expression_summary?: string;
@@ -409,7 +411,7 @@ const waitData = async (wrapper: any) => {
       conditions = JSON.stringify(alert.condition.conditions);
     }
 
-    let frequency = "";
+    let frequency: string | number | undefined = "";
     if (alert.trigger_condition?.frequency_type == "cron") {
       frequency = alert.trigger_condition.cron;
     } else {
@@ -590,6 +592,13 @@ describe("AlertList - data fetching and columns", () => {
       }),
       makeAlert(3, { is_real_time: true, name: "RealTime Alert" }),
     ];
+    // WHY: cadence moved to the identity row's second line, so the column is
+    // default-hidden; this pins the CELL renderer, which needs the picker's own
+    // (persisted) "show it" choice to reach the DOM at all.
+    localStorage.setItem(
+      "o2-tables-column-state-v1",
+      JSON.stringify({ "alerts-alert-list": { visibility: { frequency: true } } }),
+    );
     const wrapper: any = await mountAlertList();
     await waitData(wrapper);
 
@@ -600,6 +609,33 @@ describe("AlertList - data fetching and columns", () => {
       .findAll('[data-test="o2-table-cell-frequency"]')
       .map((c: any) => c.text());
     expect(texts).toEqual(["15 Mins", "*/10 * * * *", "--"]);
+    localStorage.removeItem("o2-tables-column-state-v1");
+  });
+
+  it("prints cadence and the rule's own expression on the identity row's second line", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+    wrapper.vm.activeTab = "all";
+    // Rows in the shape `renderAlerts` produces: the line reads the mapped row.
+    wrapper.vm.filteredResults = [
+      {
+        alert_id: "a1",
+        name: "Interval Alert",
+        alert_type: "Scheduled",
+        enabled: true,
+        stream_name: "app_checkout",
+        rawCondition: { type: "threshold", column: "duration_ms", operator: ">", value: 800 },
+        frequency: 15,
+        frequency_type: "minutes",
+      },
+    ];
+    await flushPromises();
+
+    const line = wrapper.find('[data-test="alert-list-Interval Alert-rule-facts"]');
+    expect(line.exists()).toBe(true);
+    expect(line.text()).toContain("app_checkout");
+    expect(line.text()).toContain("duration_ms > 800");
+    expect(line.text()).toContain("every 15 minutes");
   });
 
   // Feature 2 (PT-3/PT-6): the columns that REPLACED them.
@@ -609,6 +645,56 @@ describe("AlertList - data fetching and columns", () => {
     const ids = wrapper.vm.columns.map((c: any) => c.id ?? c.name);
     expect(ids).toContain("priority");
     expect(ids).toContain("tags");
+  });
+
+  describe("dataset-aware optional columns (O16)", () => {
+    const visibleIds = (wrapper: any) =>
+      Object.keys(wrapper.vm.columnVisibilityPlan.visibility).filter(
+        (id) => wrapper.vm.columnVisibilityPlan.visibility[id],
+      );
+
+    it("hides an optional column that is empty across the whole loaded dataset", async () => {
+      const wrapper: any = await mountAlertList();
+      await waitData(wrapper);
+      wrapper.vm.activeTab = "all";
+      await flushPromises();
+
+      const plan = wrapper.vm.columnVisibilityPlan;
+      expect(plan.hidden.priority).toBe("dataset-empty");
+      expect(plan.hidden.tags).toBe("dataset-empty");
+      expect(plan.hidden.groups).toBe("dataset-empty");
+      // Hidden, never removed: the picker still lists them.
+      const ids = wrapper.vm.columns.map((c: any) => c.id);
+      expect(ids).toContain("priority");
+      expect(visibleIds(wrapper)).not.toContain("priority");
+    });
+
+    it("keeps the mandatory columns visible even when they are empty", async () => {
+      alertsDB = [{ ...makeAlert(1, { name: "Bare Alert" }), last_outcome: null } as any];
+      const wrapper: any = await mountAlertList();
+      await waitData(wrapper);
+      wrapper.vm.activeTab = "all";
+      await flushPromises();
+
+      for (const id of ["name", "last_outcome", "actions"]) {
+        expect(wrapper.vm.columnVisibilityPlan.visibility[id], id).toBe(true);
+      }
+    });
+
+    it("brings the columns back when one row of the dataset carries a value", async () => {
+      const wrapper: any = await mountAlertList();
+      await waitData(wrapper);
+      wrapper.vm.activeTab = "all";
+      wrapper.vm.filteredResults = [
+        { alert_id: "a1", name: "Plain Alert", enabled: true, priority: null, tags: [] },
+        { alert_id: "a2", name: "Titled Alert", enabled: true, priority: 1, tags: ["prod"] },
+      ];
+      await flushPromises();
+
+      expect(wrapper.vm.columnVisibilityPlan.visibility.priority).toBe(true);
+      expect(wrapper.vm.columnVisibilityPlan.visibility.tags).toBe(true);
+      expect(wrapper.find('[data-test="alert-list-Titled Alert-priority"]').exists()).toBe(true);
+    });
   });
 
   it("renders the summary strip with operational counts", async () => {
@@ -750,6 +836,55 @@ describe("AlertList - filtering behaviors", () => {
 });
 
 // 4. Actions: toggle, delete, clone, edit, export
+describe("AlertList - paused legibility and outcome wording", () => {
+  it("names the paused state in the row and gives the toggle the row in its accessible name", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+    wrapper.vm.activeTab = "all";
+    await flushPromises();
+
+    // Fixture row 2 is disabled.
+    const paused = wrapper.find('[data-test="alert-list-RealTime Alert B-paused-chip"]');
+    expect(paused.exists()).toBe(true);
+    expect(paused.text()).toBe("Paused");
+    expect(wrapper.find('[data-test="alert-list-Scheduled Alert A-paused-chip"]').exists()).toBe(
+      false,
+    );
+
+    const pausedBtn = wrapper.find('[data-test="alert-list-RealTime Alert B-pause-start-alert"]');
+    expect(pausedBtn.attributes("aria-label")).toBe("Resume RealTime Alert B");
+    expect(
+      wrapper
+        .find('[data-test="alert-list-Scheduled Alert A-pause-start-alert"]')
+        .attributes("aria-label"),
+    ).toBe("Pause Scheduled Alert A");
+  });
+
+  it("prints the ok bucket as Not firing and keeps the server token in the tooltip", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+
+    const row = {
+      alert_id: "a1",
+      name: "Quiet Alert",
+      enabled: true,
+      last_outcome: "succeeded",
+      last_outcome_at: 1793550720000000,
+    };
+    wrapper.vm.filteredResults = [row];
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.vm.outcomePrintLabel(row)).toBe("Not firing");
+    expect(wrapper.find('[data-test="alert-list-Quiet Alert-last-outcome"]').text()).toBe(
+      "Not firing",
+    );
+    // The word is ours; the token stays readable so the mapping is auditable.
+    expect(String(wrapper.vm.runOutcomeTooltip(row))).toContain("(succeeded)");
+    // A firing row keeps the badge's own word.
+    expect(wrapper.vm.outcomePrintLabel({ last_outcome: "firing" })).toBeUndefined();
+  });
+});
+
 describe("AlertList - row actions", () => {
   it("toggles alert enabled state via pause/start button", async () => {
     const wrapper = await mountAlertList();
@@ -817,7 +952,9 @@ describe("AlertList - row actions", () => {
     expect(alertsSvc.listByFolderId).not.toHaveBeenCalled();
     // The store cache backs a folder revisit, so the row must leave it too or it
     // reappears the moment the user navigates away and back.
-    const cached = store.state.organizationData.allAlertsListByFolderId[wrapper.vm.activeFolderId];
+    const cached = (store.state.organizationData.allAlertsListByFolderId as Record<string, any>)[
+      wrapper.vm.activeFolderId
+    ];
     if (Array.isArray(cached)) {
       expect(cached.find((r: any) => r.alert_id === row.alert_id)).toBeUndefined();
     }
@@ -932,7 +1069,7 @@ describe("AlertList - router query behaviors", () => {
     const spy = vi.spyOn(router, "push");
     await wrapper.vm.hideForm();
 
-    const pushedQuery = spy.mock.calls[0][0].query;
+    const pushedQuery = (spy.mock.calls[0][0] as { query: Record<string, unknown> }).query;
     expect(pushedQuery.page).toBe("3");
     expect(pushedQuery.action).toBeUndefined();
     expect(pushedQuery.alert_id).toBeUndefined();
@@ -986,7 +1123,7 @@ describe("AlertList - pagination restoration", () => {
     await flushPromises();
 
     expect(wrapper.vm.currentPage).toBe(1);
-    expect(useListViewState("alerts", {}).currentPage).toBe(1);
+    expect((useListViewState("alerts", {}) as { currentPage: number }).currentPage).toBe(1);
   });
 });
 
@@ -1226,7 +1363,7 @@ describe("AlertList - micro validations", () => {
     await flushPromises();
     expect(wrapper.vm.showImportAlertDialog).toBe(true);
     expect(spy).toHaveBeenCalled();
-    expect(spy.mock.calls[0][0].query.page).toBe("3");
+    expect((spy.mock.calls[0][0] as { query: { page: string } }).query.page).toBe("3");
   });
 
   it("updateFolderIdToBeCloned updates state", async () => {
@@ -1361,15 +1498,14 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     expect(tabValues).toContain("anomalyDetection");
   });
 
-  it("should show anomalyDetection tab locked when build_type=opensource even when enterprise flags are set", async () => {
+  it("should omit the anomalyDetection tab when build_type=opensource even when enterprise flags are set", async () => {
     (config as any).isEnterprise = "true";
     (config as any).isCloud = "false";
     (store.state as any).zoConfig.build_type = "opensource";
 
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
   it("should enable anomalyDetection tab when isCloud=true (cloud build)", async () => {
@@ -1383,23 +1519,21 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     expect(tabValues).toContain("anomalyDetection");
   });
 
-  it("should show anomalyDetection tab locked when isEnterprise=false (opensource frontend)", async () => {
+  it("should omit the anomalyDetection tab when isEnterprise=false (opensource frontend)", async () => {
     (config as any).isEnterprise = "false";
     (config as any).isCloud = "false";
     (store.state as any).zoConfig.build_type = "enterprise";
 
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
-  it("should show anomalyDetection tab locked by default (no env vars set)", async () => {
-    // isEnterprise defaults to "false" → feature locked, not hidden
+  it("should omit the anomalyDetection tab by default (no env vars set)", async () => {
+    // isEnterprise defaults to "false" → the tab is absent, not locked.
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
   it("should include anomalyDetection tab in alertTabs when enabled", async () => {
@@ -1409,28 +1543,161 @@ describe("AlertList - isAnomalyDetectionEnabled", () => {
     (store.state as any).zoConfig.anomaly_detection_enabled = true;
 
     const wrapper: any = await mountAlertList();
-    const tabValues = wrapper.vm.alertTabs.map((t: any) => t.value);
-    expect(tabValues).toContain("anomalyDetection");
+    const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
+    expect(tab).toBeTruthy();
+    expect(tab.locked).toBeFalsy();
   });
 
-  it("should show anomalyDetection tab locked in alertTabs when not entitled", async () => {
+  it("should omit the anomalyDetection tab from alertTabs when not entitled", async () => {
     (config as any).isEnterprise = "false";
     (config as any).isCloud = "false";
 
     const wrapper: any = await mountAlertList();
     const tab = wrapper.vm.alertTabs.find((t: any) => t.value === "anomalyDetection");
-    expect(tab).toBeTruthy();
-    expect(tab.locked).toBe(true);
+    expect(tab).toBeUndefined();
   });
 
   it("should fall back activeTab to 'all' when anomalyDetection tab requested but feature disabled", async () => {
     (config as any).isEnterprise = "false";
     (config as any).isCloud = "false";
 
+    // The query has to be in place BEFORE the mount: activeTab is initialised
+    // once, in setup, from `route.query.tab`. (Assigning it afterwards — which is
+    // what this test used to do — asserted nothing about the restore path.)
+    router.currentRoute.value.query = { tab: "anomalyDetection" } as any;
     const wrapper: any = await mountAlertList();
-    // Simulate URL query requesting anomalyDetection tab when feature is off
-    wrapper.vm.router.currentRoute.value.query = { tab: "anomalyDetection" } as any;
-    // The computed initialises activeTab to 'all' when the feature is disabled
+
+    expect(wrapper.vm.activeTab).toBe("all");
+  });
+
+  /** Entitled mirror: with the feature on, the very same link opens that tab. */
+  it("restores the anomalyDetection tab from the URL when the feature is enabled", async () => {
+    (config as any).isEnterprise = "true";
+    (config as any).isCloud = "false";
+    (store.state as any).zoConfig.build_type = "enterprise";
+    (store.state as any).zoConfig.anomaly_detection_enabled = true;
+
+    router.currentRoute.value.query = { tab: "anomalyDetection" } as any;
+    const wrapper: any = await mountAlertList();
+
+    expect(wrapper.vm.activeTab).toBe("anomalyDetection");
+  });
+
+  /**
+   * The restore used to refuse `anomalyDetection` and nothing else, so any other value
+   * was adopted as a tab. `?tab=incidents` (a branch whose toggle no longer
+   * exists) turned row filtering OFF with nothing lit, and garbage stuck in the
+   * URL — the `activeTab` watcher that re-writes `?tab=` fires on CHANGE only, and
+   * this page is keep-alive, so setup never ran again. Closed set now, exactly
+   * like resolveLogsVisualizeToggle / resolveTraceSearchMode.
+   */
+  it.each(["incidents", "all ", "ALL", "", "undefined-tab", "__proto__", "<script>"])(
+    "coerces the non-tab value %p in the URL to the all tab",
+    async (tab) => {
+      router.currentRoute.value.query = { tab } as any;
+      const wrapper: any = await mountAlertList();
+
+      expect(wrapper.vm.activeTab).toBe("all");
+      // Row filtering is back on: "all" is the branch that shows every alert.
+      // Pinned harder than a value check would: the incidents early-return
+      // that the coercion made unreachable is gone, so whatever the URL
+      // claimed, filterAlertsByTab filters instead of skipping.
+      await waitData(wrapper);
+      expect(wrapper.vm.allAlerts.length).toBeGreaterThan(0);
+      wrapper.vm.filteredResults = [];
+      wrapper.vm.filterAlertsByTab(true);
+      expect(wrapper.vm.filteredResults.length).toBe(wrapper.vm.allAlerts.length);
+      expect(wrapper.vm.alertTabs.map((t: any) => t.value)).not.toContain(tab);
+    },
+  );
+
+  it.each([undefined, null, 0, true, {}, [], ["all", "scheduled"]])(
+    "coerces a non-string tab query shape (%#) to the all tab",
+    async (tab) => {
+      router.currentRoute.value.query = tab === undefined ? ({} as any) : ({ tab } as any);
+      const wrapper: any = await mountAlertList();
+
+      expect(wrapper.vm.activeTab).toBe("all");
+    },
+  );
+
+  /** Free tabs round-trip — the closed set is not a blanket reset to "all". */
+  it.each(["scheduled", "realTime", "composite"])(
+    "restores the %s tab from the URL",
+    async (tab) => {
+      router.currentRoute.value.query = { tab } as any;
+      const wrapper: any = await mountAlertList();
+
+      expect(wrapper.vm.activeTab).toBe(tab);
+    },
+  );
+
+  /**
+   * The coerced value has to reach the URL too — the state/URL desync class — by
+   * REPLACE — a normalization must not add a history entry.
+   */
+  it("re-writes the URL with the coerced tab, with replace rather than push", async () => {
+    const replace = vi.spyOn(router, "replace").mockResolvedValue(undefined as any);
+    const push = vi.spyOn(router, "push").mockResolvedValue(undefined as any);
+    router.currentRoute.value.query = { tab: "incidents", org_identifier: "default" } as any;
+
+    const wrapper: any = await mountAlertList();
+    await wrapper.vm.$nextTick();
+
+    expect(replace).toHaveBeenCalledWith({
+      query: { org_identifier: "default", tab: "all" },
+    });
+    expect(push).not.toHaveBeenCalled();
+    replace.mockRestore();
+    push.mockRestore();
+  });
+
+  /** A valid deep link is left alone: no normalization hop, no extra history entry. */
+  it("does not touch the URL when the tab it restored is already canonical", async () => {
+    const replace = vi.spyOn(router, "replace").mockResolvedValue(undefined as any);
+    router.currentRoute.value.query = { tab: "scheduled" } as any;
+
+    const wrapper: any = await mountAlertList();
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.vm.activeTab).toBe("scheduled");
+    expect(replace).not.toHaveBeenCalled();
+    replace.mockRestore();
+  });
+
+  /**
+   * The closed set is enforced at the CHANGE SINK as well as at the URL restore, so
+   * it has one meaning in this component: a handler that trusts its caller would
+   * adopt a value no tab renders, switch row filtering off with nothing lit, and
+   * have the `activeTab` watcher re-persist that value into the URL. Only the
+   * rendered toggle group feeds this handler today, which is why the assertion pins
+   * the contract instead of a reachable user flow — and it fails the moment the
+   * sink starts assigning the raw value again.
+   */
+  it("refuses a non-tab value at the change handler instead of adopting it", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+
+    wrapper.vm.onAlertTabChange("incidents");
+    await flushPromises();
+
+    expect(wrapper.vm.activeTab).toBe("all");
+    // Row filtering stayed on: "all" is the branch that shows every alert.
+    expect(wrapper.vm.filteredResults.length).toBe(wrapper.vm.allAlerts.length);
+
+    // The ungated values still round-trip — the sink is not a blanket reset.
+    wrapper.vm.onAlertTabChange("scheduled");
+    await flushPromises();
+    expect(wrapper.vm.activeTab).toBe("scheduled");
+  });
+
+  it("keeps refusing to activate the anomaly tab while the feature is off", async () => {
+    const wrapper: any = await mountAlertList();
+    await waitData(wrapper);
+
+    wrapper.vm.onAlertTabChange("anomalyDetection");
+    await flushPromises();
+
     expect(wrapper.vm.activeTab).not.toBe("anomalyDetection");
   });
 });
@@ -1625,7 +1892,8 @@ describe("AlertList - ODialog/ODrawer migration", () => {
   });
 
   it("duplicateAlert still fetches the alert to clone when the stream list fails to load", async () => {
-    global.server.use(
+    // `server` is stubbed onto the global by setupTests.ts via vi.stubGlobal
+    (global as any).server.use(
       http.get(
         `${store.state.API_ENDPOINT}/api/${store.state.selectedOrganization.identifier}/streams`,
         () => HttpResponse.error(),
@@ -2154,5 +2422,82 @@ describe("AlertList - triggered in the last 15 minutes", () => {
     expect(never.length).toBeGreaterThan(0);
     expect(never.every((c: any) => !c.find(".rounded-full").exists())).toBe(true);
     expect(fired.filter((c: any) => c.find(".bg-warning-500").exists())).toHaveLength(4);
+  });
+}, 15000);
+
+describe("AlertList - the two audit timestamp columns", () => {
+  const ABSOLUTE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+  const cellTexts = (wrapper: any, id: string) =>
+    wrapper
+      .findAll(`[data-test="o2-table-cell-${id}"]`)
+      .map((cell: any) => cell.text().trim())
+      .filter((text: string) => text !== "");
+
+  const load = async () => {
+    // One instant for both columns: the row that made two relative ages identical.
+    const firedUs = Date.now() * 1000 - 60_000_000;
+    alertsDB = [
+      makeAlert(1, {
+        name: "fired-and-met",
+        is_real_time: false,
+        last_triggered_at: firedUs,
+        last_satisfied_at: firedUs,
+      }),
+      makeAlert(2, { name: "never-fired", is_real_time: false }),
+    ];
+    const wrapper: any = await mountAlertList();
+    await flushPromises();
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    await flushPromises();
+    await wrapper.vm.handleActionQuery(undefined);
+    await flushPromises();
+    return wrapper;
+  };
+
+  it("prints one format in both columns, and no relative age in either", async () => {
+    const wrapper = await load();
+    expect(wrapper.vm.TIME_COLUMN_MODE).toBe("absolute");
+    for (const id of ["last_triggered_at", "last_satisfied_at"]) {
+      const texts = cellTexts(wrapper, id);
+      expect(texts.length).toBeGreaterThan(0);
+      expect(texts.every((text: string) => ABSOLUTE.test(text) || text === "Never")).toBe(true);
+    }
+  });
+
+  it("names which event each cell's age belongs to", async () => {
+    const wrapper = await load();
+    const fired = wrapper.vm.filteredResults.find((r: any) => r.name === "fired-and-met");
+    const triggered = String(wrapper.vm.triggeredAge(fired));
+    const satisfied = String(wrapper.vm.satisfiedAge(fired));
+    expect(triggered).toMatch(/^Fired .+ ago$/);
+    expect(satisfied).toMatch(/^Condition met .+ ago$/);
+    // The regression this pins: one instant in two columns must never read as one message.
+    expect(triggered).not.toBe(satisfied);
+    const never = wrapper.vm.filteredResults.find((r: any) => r.name === "never-fired");
+    expect(wrapper.vm.triggeredAge(never)).toBeUndefined();
+    // The age is reachable where the reader is looking: in that column's own tooltip.
+    for (const [id, lead] of [
+      ["last_triggered_at", "Fired"],
+      ["last_satisfied_at", "Condition met"],
+    ] as const) {
+      const tip = wrapper
+        .findAll(`[data-test="o2-table-cell-${id}"]`)[0]
+        .findAllComponents(OTooltip)[0];
+      expect(String(tip.props("content"))).toMatch(new RegExp(`^${lead} .+ ago$`));
+    }
+  });
+
+  it("labels and sizes both headers from the same policy, not from a format gap", async () => {
+    const wrapper = await load();
+    const column = (id: string) => wrapper.vm.columns.find((c: any) => c.id === id);
+    const triggered = column("last_triggered_at");
+    const satisfied = column("last_satisfied_at");
+    expect(triggered.header).not.toBe(satisfied.header);
+    expect(triggered.meta.headerSubLabel).toBe(i18n.global.t("alerts.lastTriggeredSub"));
+    expect(satisfied.meta.headerSubLabel).toBe(i18n.global.t("alerts.lastSatisfiedSub"));
+    expect(triggered.meta.headerSubLabel).not.toBe(satisfied.meta.headerSubLabel);
+    expect(triggered.meta.headerTooltip).toBe(i18n.global.t("alerts.lastTriggeredHelp"));
+    expect(satisfied.meta.headerTooltip).toBe(i18n.global.t("alerts.lastSatisfiedHelp"));
+    expect(triggered.size).toBe(satisfied.size);
   });
 }, 15000);

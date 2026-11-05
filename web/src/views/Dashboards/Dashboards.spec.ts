@@ -202,6 +202,26 @@ const createMockI18n = () => {
           folderLabel: "Folders",
           newFolderBtnLabel: "New Folder",
           name: "Name",
+          updated: "Updated",
+          updatedShort: "Updated {when}",
+          context: {
+            ariaLabel: "Ways to add a dashboard to this folder",
+            addTitle: "Add dashboards to {folder}",
+            newTitle: "New dashboard",
+            newDesc: "Start a blank dashboard in this folder",
+            importTitle: "Import",
+            importDesc: "Upload a JSON file or paste a dashboard URL",
+            templatesTitle: "Browse templates",
+            templatesDesc: "Import a ready-made dashboard from the gallery",
+            migrateLead: "Already have dashboards elsewhere?",
+            factFavorites: "In favorites",
+            factChanged: "Last updated",
+          },
+          scope: {
+            dashboards: "{count} dashboard | {count} dashboards",
+            favorites: "{count} in favorites",
+            updated: "updated {when}",
+          },
           identifier: "Identifier",
           description: "Description",
           owner: "Owner",
@@ -464,6 +484,8 @@ describe("Dashboards.vue", () => {
 
   // T1.3 (design 4.3/§6): template cards render only on the true "new org" empty state.
   describe("Empty-state template suggestion cards", () => {
+    // The empty-state instance is the one the assertions are about; the
+    // short-list band below the pager is a second instance of the same component.
     const findCards = () => wrapper.findComponent({ name: "TemplateSuggestionCards" });
 
     it("renders TemplateSuggestionCards for the default folder with no filter", async () => {
@@ -753,9 +775,11 @@ describe("Dashboards.vue", () => {
       const local = wrapper.vm.dashboards.find((r: any) => r.id === "dash1");
       expect(local.name).toBe("Dashboard 1");
 
-      // The favorites view shows the folder column, like cross-folder search.
-      const columnIds = wrapper.vm.columns.map((c: any) => c.id);
-      expect(columnIds).toContain("folder");
+      // Favorites span folders, so the folder groups the rows instead of
+      // costing a column beside an identity column that needs the width.
+      expect(wrapper.vm.spansFolders).toBe(true);
+      expect(wrapper.vm.columns.map((c: any) => c.id)).not.toContain("folder");
+      expect(wrapper.vm.rowSection({ folder: "Folder 1" } as any)).toBe("Folder 1");
     });
 
     it("selecting a folder exits the favorites view and shows that folder", async () => {
@@ -1455,6 +1479,188 @@ describe("Dashboards.vue", () => {
       await flushPromises();
 
       expect(notifications.showErrorNotification).toHaveBeenCalled();
+    });
+  });
+  describe("column set follows the space the list has", () => {
+    const row = {
+      id: "d1",
+      name: "Ingestion health",
+      description: "Delivery and latency for the ingest path",
+      owner: "root@example.com",
+      created: "2026-10-21T09:14:22",
+      folder: "Cost and storage",
+      folder_id: "f-cost",
+      actions: "true",
+    };
+
+    const mountAt = async (shellWidth: number) => {
+      const testStore = createMockStore();
+      testStore.state.organizationData.allDashboardList = {
+        default: [
+          {
+            dashboardId: "d1",
+            title: "Ingestion health",
+            description: "Delivery and latency for the ingest path",
+            owner: "root@example.com",
+            created: "2026-10-21T09:14:22.000Z",
+          },
+        ],
+      };
+      wrapper = shallowMount(Dashboards, {
+        global: buildGlobalConfig(testStore, router, i18n),
+      });
+      await nextTick();
+      await nextTick();
+      wrapper.vm.tableShellWidth = shellWidth;
+      await nextTick();
+      return wrapper;
+    };
+
+    const ids = () => wrapper.vm.columns.map((c: any) => c.id);
+
+    it("keeps every field beside the name while the frame is wide", async () => {
+      await mountAt(1112);
+      expect(ids()).toEqual(["name", "description", "owner", "created", "updated", "actions"]);
+      // Nothing is duplicated: the wide band paints no subline under the name.
+      expect(wrapper.vm.rowSublines(row)).toEqual([]);
+    });
+
+    it("moves the description under the name when the band cannot read it as a column", async () => {
+      await mountAt(700);
+      expect(ids()).toEqual(["name", "owner", "updated", "actions"]);
+      expect(wrapper.vm.rowSublines(row)).toEqual(["Delivery and latency for the ingest path"]);
+    });
+
+    it("moves owner and date under the name too at list width", async () => {
+      await mountAt(388);
+      expect(ids()).toEqual(["name", "actions"]);
+      expect(wrapper.vm.rowSublines(row)).toEqual([
+        // WHY: a subline is read at 12px under a name; the seconds were noise.
+        "Delivery and latency for the ingest path",
+        "root@example.com · Updated Oct 21, 2026",
+      ]);
+    });
+
+    it("sections by folder only where the rows really span folders", async () => {
+      await mountAt(1112);
+      expect(wrapper.vm.spansFolders).toBe(false);
+      expect(wrapper.vm.rowSection(row as any)).toBeNull();
+
+      wrapper.vm.searchAcrossFolders = true;
+      wrapper.vm.searchQuery = "ingest";
+      await nextTick();
+      expect(wrapper.vm.spansFolders).toBe(true);
+      expect(wrapper.vm.rowSection(row as any)).toBe("Cost and storage");
+    });
+
+    it("keeps a row that names no folder inside a sectioned body", async () => {
+      await mountAt(1112);
+      wrapper.vm.searchAcrossFolders = true;
+      wrapper.vm.searchQuery = "ingest";
+      await nextTick();
+      // A null key would drop the row from a sectioned table entirely.
+      expect(wrapper.vm.rowSection({ folder: "", folder_id: "f-x" } as any)).toBe("f-x");
+    });
+  });
+
+  // What a five-persona council measured at 1440x900: 543px of empty canvas, a
+  // three-tile strip whose figures repeated the pager's "Showing 1-2 of 2", a
+  // 368px scope control beside a folder rail that already said "default", and an
+  // "Add dashboards" block of three unthemed text columns.
+  describe("Composition: scope, reach and the create path", () => {
+    // WHY: the saved view carries a cross-folder search the band tests above left
+    // behind, and that branch reads `filteredResults` instead of the folder.
+    beforeEach(() => resetListViewState("dashboards"));
+    afterEach(() => resetListViewState("dashboards"));
+
+    const mountList = async () => {
+      wrapper = shallowMount(Dashboards, { global: buildGlobalConfig(store, router, i18n) });
+      await flushPromises();
+      await nextTick();
+      return wrapper;
+    };
+    // WHY: this file stubs insertBefore/appendChild/getAttribute, so neither the
+    // DOM nor attributes() is readable; the component tree and vnode attrs are.
+    const buttons = () =>
+      wrapper
+        .findAllComponents({ name: "OButton" })
+        .map((b: any) => b.vm.$attrs?.["data-test"])
+        .filter(Boolean);
+
+    it("states the scope as one sentence instead of three tiles", async () => {
+      await mountList();
+      expect(wrapper.vm.scopeFacts).toBe("1 dashboard · 0 in favorites · updated Jan 1, 2023");
+      expect("scopeStats" in wrapper.vm).toBe(false);
+    });
+
+    it("gives the folder a real number and a real date, not a 24px display date", async () => {
+      await mountList();
+      // WHY: the tile read "Oct 28, 2026" at KPI size beside two counts, with the
+      // owner's email pasted inline where the Updated column uses a relative time.
+      expect(wrapper.vm.scopeFacts).toMatch(/^1 dashboard/);
+      expect(wrapper.vm.scopeFacts).toMatch(/updated (Jan 1, 2023|\S+ ago)$/);
+      expect(wrapper.vm.scopeFacts).not.toContain("@");
+    });
+
+    it("gives the two text columns the leftover width", async () => {
+      await mountList();
+      const flexed = wrapper.vm.columns.filter((c: any) => c.meta?.flex).map((c: any) => c.id);
+      expect(flexed).toEqual(["name", "description"]);
+    });
+
+    it("takes Created out of the default set and keeps it in the column toggle", async () => {
+      await mountList();
+      expect(wrapper.vm.defaultColumnVisibility).toEqual({ created: false });
+      expect(wrapper.vm.columns.map((c: any) => c.id)).toContain("created");
+    });
+
+    it("offers the folder's three ways in as buttons, not as text columns", async () => {
+      await mountList();
+      expect(wrapper.vm.contextActions.map((a: any) => a.id)).toEqual([
+        "new",
+        "import",
+        "templates",
+      ]);
+      for (const action of wrapper.vm.contextActions) {
+        expect(action.title).toBeTruthy();
+        expect(action.desc).toBeTruthy();
+      }
+      expect(buttons()).toEqual(
+        expect.arrayContaining([
+          "dashboard-folder-action-new",
+          "dashboard-folder-action-import",
+          "dashboard-folder-action-templates",
+        ]),
+      );
+    });
+
+    it("brings the four migration destinations out of the import menu", async () => {
+      await mountList();
+      expect(wrapper.vm.migrationOptions.map((m: any) => m.key)).toEqual([
+        "datadog",
+        "grafana",
+        "kibana",
+        "cloudwatch",
+      ]);
+      expect(buttons()).toEqual(
+        expect.arrayContaining([
+          "dashboard-folder-migrate-datadog",
+          "dashboard-folder-migrate-grafana",
+          "dashboard-folder-migrate-kibana",
+          "dashboard-folder-migrate-cloudwatch",
+        ]),
+      );
+    });
+
+    it("draws each migration destination as a bordered control, not as bare text", async () => {
+      await mountList();
+      for (const key of ["datadog", "grafana", "kibana", "cloudwatch"]) {
+        const control = wrapper
+          .findAllComponents({ name: "OButton" })
+          .find((b: any) => b.vm.$attrs?.["data-test"] === `dashboard-folder-migrate-${key}`);
+        expect(control?.props("variant")).toBe("outline");
+        expect(control?.props("iconLeft")).toBe("open-in-new");
+      }
     });
   });
 });

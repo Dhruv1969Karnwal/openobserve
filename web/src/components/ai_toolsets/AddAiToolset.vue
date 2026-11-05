@@ -295,7 +295,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               :query="skillContent"
               @update:query="(v: string) => setSkillContent(v)"
             />
-            <div v-if="skillContentError" class="text-error-500 -mt-3 mb-4 text-xs">
+            <div v-if="skillContentError" class="text-status-error-text -mt-3 mb-4 text-xs">
               {{ t("aiToolset.skillContentRequired") }}
             </div>
           </template>

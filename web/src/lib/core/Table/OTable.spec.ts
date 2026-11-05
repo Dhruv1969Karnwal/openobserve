@@ -10,7 +10,7 @@ const i18n = createI18n({
   locale: "en",
   messages: {
     en: {
-      search: { noData: "No data available" },
+      search: { noData: "No data available", showing: "Showing", of: "of" },
       common: { loading: "Loading..." },
       components: {
         table: {
@@ -247,6 +247,47 @@ describe("OTable", () => {
       expect(info.text()).toContain("25");
     });
 
+    // A global filter narrows what the body paints; the footer has to follow it.
+    describe("pagination info under a filter", () => {
+      async function filterTo(term: string) {
+        wrapper = mount(OTable, {
+          props: {
+            data: makeRows(25),
+            columns: makeColumns(),
+            pageSize: 10,
+            showGlobalFilter: true,
+          },
+        });
+        await flushPromises();
+        await wrapper.find('[data-test="o2-table-global-filter-input"]').setValue(term);
+        await flushPromises();
+        return wrapper.find('[data-test="o2-table-pagination-info"]').text();
+      }
+
+      it("prints a zero range when nothing matches", async () => {
+        expect(await filterTo("zzzzz")).toBe("Showing 0 of 25");
+      });
+
+      it("counts the matching rows, not the rows the caller passed in", async () => {
+        expect(await filterTo("User 12")).toBe("Showing 1–1 of 25");
+      });
+
+      it("keeps the full-page range when no filter is typed", async () => {
+        wrapper = mount(OTable, {
+          props: {
+            data: makeRows(25),
+            columns: makeColumns(),
+            pageSize: 10,
+            showGlobalFilter: true,
+          },
+        });
+        await flushPromises();
+        expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toBe(
+          "Showing 1–10 of 25",
+        );
+      });
+    });
+
     it("has page size select", () => {
       expect(wrapper.find('[data-test="o2-table-page-size-select"]').exists()).toBe(true);
     });
@@ -359,11 +400,11 @@ describe("OTable", () => {
           currentPage: 1,
         },
       });
-      expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toContain("1 - 20");
+      expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toContain("1–20");
 
       await wrapper.setProps({ pageSize: 10 });
 
-      expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toContain("1 - 10");
+      expect(wrapper.find('[data-test="o2-table-pagination-info"]').text()).toContain("1–10");
       expect(wrapper.findComponent(OSelect).props("modelValue")).toBe(10);
     });
 
@@ -3048,7 +3089,7 @@ describe("OTable row rail + row tone", () => {
   it.each([
     ["p3", "border-s-priority-p3"],
     ["error", "border-s-icon-chip-error-text"],
-    ["neutral", "border-s-border-default"],
+    ["neutral", "border-s-row-rail-muted"],
   ])("rails tone %s with its own token", async (tone, expected) => {
     wrapper = mountWith({ rowRailTone: () => tone });
     await nextTick();
@@ -3398,6 +3439,38 @@ describe("OTable sort header button", () => {
     const tooltip = wrapper.findAllComponents(OTooltip).find((c) => c.props("content") === reason);
     expect(tooltip).toBeTruthy();
     expect(tooltip!.props("disabled")).toBe(false);
+  });
+
+  it("T-A8: sortDisabled keeps a VISIBLE marker — the neutral sort icon becomes a solid dash", () => {
+    // A6: keyboard users never see the cursor, so the disabled header must differ from an
+    // enabled unsorted one without opacity (tonal token) and without an ungated transition.
+    wrapper = mountServer({
+      sortClearable: false,
+      sortDisabled: true,
+      sortBy: "",
+      sortOrder: undefined,
+    });
+    const icon = wrapper.find('[data-test="o2-table-sort-icon-inactive"]');
+    expect(icon.exists()).toBe(true);
+    expect(icon.attributes("data-test-sort-disabled")).toBe("true");
+    expect(wrapper.findComponent('[data-test="o2-table-sort-icon-inactive"]').props("name")).toBe(
+      "remove",
+    );
+    expect(icon.classes()).toContain("text-text-secondary");
+    expect(icon.classes()).not.toContain("opacity-40");
+  });
+
+  it("T-A8: an ENABLED unsorted header keeps the ghosted unfold-more (bidirectional pin)", () => {
+    wrapper = mountServer({ sortBy: "", sortOrder: undefined });
+    const icon = wrapper.find('[data-test="o2-table-sort-icon-inactive"]');
+    expect(icon.exists()).toBe(true);
+    expect(icon.attributes("data-test-sort-disabled")).toBeUndefined();
+    expect(wrapper.findComponent('[data-test="o2-table-sort-icon-inactive"]').props("name")).toBe(
+      "unfold-more",
+    );
+    // Quieter than the active caret, but at the 3:1 graphic floor rather than
+    // 40% opacity, which measured 1.93:1 and so hid the affordance entirely.
+    expect(icon.classes()).toContain("text-table-sort-icon-inactive");
   });
 
   it("T-A8: the tooltip stays off while sorting is enabled", () => {

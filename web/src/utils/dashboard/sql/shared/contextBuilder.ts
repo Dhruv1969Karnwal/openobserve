@@ -30,7 +30,7 @@ import {
   calculateChartDimensions,
   calculatePieChartRadius,
 } from "../../legendConfiguration";
-import { chartColor, dataZoomBrushStyle } from "@/utils/chartTheme";
+import { chartColor, chartTextColor, dataZoomBrushStyle } from "@/utils/chartTheme";
 import { getPropsByChartTypeForSeries } from "../../sqlChartSeriesProps";
 import { processData } from "../../sqlProcessData";
 import { fillMissingValues } from "../../sqlMissingValueFiller";
@@ -124,7 +124,29 @@ export function buildSQLContext(
 
   const zAxisKeys = getZAxisKeys();
 
-  const breakDownKeys = getBreakDownKeys();
+  // A SQL `GROUP BY time, category` panel arrives with BOTH columns in `x` and an
+  // empty `breakdown`. A category is not a position on a time scale: plotting it as
+  // a second axis put two label rows in one bottom band (they printed over each
+  // other) and drew ONE line that zig-zags between categories at every bucket. A
+  // trailing x column is therefore the grouping dimension — what `breakdown` already
+  // means — so the series split, one axis remains, and the legend names the groups.
+  // Chart types whose second x is a real coordinate keep both.
+  const GROUPABLE_CHART_TYPES = [
+    "line",
+    "area",
+    "bar",
+    "stacked",
+    "area-stacked",
+    "h-bar",
+    "h-stacked",
+    "combo",
+  ];
+  const groupKeysFromX =
+    GROUPABLE_CHART_TYPES.includes(panelSchema?.type) && xAxisKeys.length > 1
+      ? xAxisKeys.slice(1)
+      : [];
+
+  const breakDownKeys = [...getBreakDownKeys(), ...groupKeysFromX];
 
   const getMarkLineData = (panelSchema: any) => {
     return (
@@ -173,6 +195,10 @@ export function buildSQLContext(
   );
 
   // get the axis data using key
+  // The axes rendered under the plot are the POSITIONAL x keys; a column moved into
+  // `breakDownKeys` is a series identity, not an axis.
+  const axisXKeys = xAxisKeys.filter((key: any) => !groupKeysFromX.includes(key));
+
   const getAxisDataFromKey = (key: string) => {
     const data =
       missingValueData?.filter((item: any) => {
@@ -247,16 +273,62 @@ export function buildSQLContext(
 
   const [min, max] = getSQLMinMaxValue(yAxisKeys, missingValueData);
 
+  // Drop the x-axis name on panels too short to fit labels + name + plot.
+  const panelHeightPx = chartPanelRef?.value?.offsetHeight ?? 0;
+  const xAxisNameFits = !panelHeightPx || panelHeightPx >= 150;
+
+  // A tick band must hold its own label line plus air. ECharts' own splitNumber
+  // overshoots on a short panel, which is how "5.00span/s" landed on "4.00span/s".
+  const yAxisSplitNumber = panelHeightPx
+    ? Math.max(2, Math.min(5, Math.floor((panelHeightPx - 40) / 34)))
+    : 5;
+
+  const dataExtent = Math.max(
+    Math.abs(Number.isFinite(min) ? min : 0),
+    Math.abs(Number.isFinite(max) ? max : 0),
+  );
+
+  // A compound unit ("spans/s", "bytes/s") repeated on every tick is a width
+  // problem and a repetition problem at once. Titled on the axis once, the ticks
+  // go back to being numbers. Short marks stay inline — "%" hidden behind a plot
+  // reads as a bare count.
+  const unitTitleCandidate = (axisExtent: number): string => {
+    if (isHorizontalChart) return "";
+    try {
+      const unit = getUnitValue(
+        0,
+        panelSchema?.config?.unit,
+        panelSchema?.config?.unit_custom,
+        0,
+        axisExtent,
+      )?.unit;
+      return typeof unit === "string" && unit.length >= 3 ? unit : "";
+    } catch {
+      return "";
+    }
+  };
+
   // Predict the exact y-axis ticks (mirrors ECharts' nice-interval algo) to
   // measure the widest label and extend decimals when ticks would collide.
   const getYAxisTickInfo = (): {
     decimals: number;
-    widestLabelWidth: number;
+    axisExtent: number;
+    inlineLabelWidth: number;
+    titledLabelWidth: number;
+    unitTitle: string;
   } => {
-    const configured = panelSchema?.config?.decimals ?? 2;
-    const format = (v: number, decimals: number) =>
+    // An unset `decimals` used to mean 2, so an axis of whole event counts
+    // printed "180.00 / 150.00 / 0.00". Precision follows the tick step.
+    const configured = panelSchema?.config?.decimals;
+    const format = (v: number, decimals: number, extent = dataExtent) =>
       formatUnitValue(
-        getUnitValue(v, panelSchema?.config?.unit, panelSchema?.config?.unit_custom, decimals),
+        getUnitValue(
+          v,
+          panelSchema?.config?.unit,
+          panelSchema?.config?.unit_custom,
+          decimals,
+          extent,
+        ),
       );
     try {
       const usesStackExtent =
@@ -282,13 +354,25 @@ export function buildSQLContext(
       const lo = hasCfgMin ? Math.min(cfgMin, dataMin) : Math.min(0, dataMin);
       hi = hasCfgMax ? Math.max(cfgMax, hi) : Math.max(0, hi);
 
-      const ticks = calculateNiceTickValues(lo, hi);
+      const ticks = calculateNiceTickValues(lo, hi, yAxisSplitNumber);
       if (!ticks?.length) throw new Error("no ticks");
 
-      let decimals = configured;
+      // The pin sizes on the largest tick the axis paints; the safety tick below is a width reservation only.
+      const axisExtent = ticks.reduce(
+        (widest: number, tick: number) => Math.max(widest, Math.abs(tick)),
+        0,
+      );
+
+      let decimals = configured ?? 0;
       if (ticks.length > 1) {
         const toDisplay = (v: number) => {
-          const u = getUnitValue(v, panelSchema?.config?.unit, panelSchema?.config?.unit_custom, 8);
+          const u = getUnitValue(
+            v,
+            panelSchema?.config?.unit,
+            panelSchema?.config?.unit_custom,
+            8,
+            axisExtent,
+          );
           return { n: parseFloat(u?.value), unit: u?.unit };
         };
         const a = toDisplay(ticks[ticks.length - 2]);
@@ -297,7 +381,11 @@ export function buildSQLContext(
         if (a?.unit === b?.unit) {
           const interval = Math.abs(b.n - a.n);
           if (Number.isFinite(interval) && interval > 0) {
-            decimals = Math.min(Math.max(configured, Math.ceil(-Math.log10(interval))), 8);
+            // `config.decimals` may extend precision, never inflate a whole step:
+            // the panel default writes 2, which is what printed "180.00" for an
+            // event count and "6.00" beside an Errors panel reading "6".
+            const needed = Math.max(0, Math.ceil(-Math.log10(interval)));
+            decimals = needed === 0 ? 0 : Math.min(Math.max(configured ?? 0, needed), 8);
           }
         }
       }
@@ -306,19 +394,52 @@ export function buildSQLContext(
       // hair short, ECharts' real top tick is still measured
       const interval = ticks.length > 1 ? ticks[1] - ticks[0] : 0;
       const candidates = interval > 0 ? [...ticks, ticks[ticks.length - 1] + interval] : ticks;
-      const widestLabelWidth = Math.max(
-        ...candidates.map((v: number) => calculateWidthText(format(v, decimals))),
-      );
-      return { decimals, widestLabelWidth };
+      // Measure the label the axis will ACTUALLY paint. Sizing the name inset on
+      // a unit-bearing label that the title moved off the ticks pushes the
+      // rotated title out of the panel — which is where "spans/s" went.
+      const widthOf = (withUnit: boolean) =>
+        Math.max(
+          ...candidates.map((v: number) => {
+            const uv = getUnitValue(
+              v,
+              panelSchema?.config?.unit,
+              panelSchema?.config?.unit_custom,
+              decimals,
+              axisExtent,
+            );
+            return calculateWidthText(withUnit ? formatUnitValue(uv) : String(uv?.value ?? ""));
+          }),
+        );
+      const inlineLabelWidth = widthOf(true);
+      const unitTitle = unitTitleCandidate(axisExtent);
+      return {
+        decimals,
+        axisExtent,
+        inlineLabelWidth,
+        titledLabelWidth: unitTitle ? widthOf(false) : inlineLabelWidth,
+        unitTitle,
+      };
     } catch {
       return {
-        decimals: configured,
-        widestLabelWidth: calculateWidthText(format(Number.isFinite(max) ? max : 0, configured)),
+        decimals: configured ?? 0,
+        axisExtent: dataExtent,
+        inlineLabelWidth: calculateWidthText(
+          format(Number.isFinite(max) ? max : 0, configured ?? 0),
+        ),
+        titledLabelWidth: calculateWidthText(
+          format(Number.isFinite(max) ? max : 0, configured ?? 0),
+        ),
+        unitTitle: "",
       };
     }
   };
-  const { decimals: yAxisTickDecimals, widestLabelWidth: widestYAxisTickLabel } =
-    getYAxisTickInfo();
+  const {
+    decimals: yAxisTickDecimals,
+    axisExtent: yAxisTickExtent,
+    inlineLabelWidth: inlineTickLabelWidth,
+    titledLabelWidth: titledTickLabelWidth,
+    unitTitle: yAxisUnitTitleCandidate,
+  } = getYAxisTickInfo();
 
   const getFinalAxisValue = (
     configValue: number | null | undefined,
@@ -331,10 +452,6 @@ export function buildSQLContext(
     return isMin ? Math.min(configValue, dataValue) : Math.max(configValue, dataValue);
   };
 
-  // Drop the x-axis name on panels too short to fit labels + name + plot.
-  const panelHeightPx = chartPanelRef?.value?.offsetHeight ?? 0;
-  const xAxisNameFits = !panelHeightPx || panelHeightPx >= 150;
-
   const axisLabelOf = (field: any) => getAxisLabel(field, panelSchema?.config);
 
   const hasXAxisName = xAxisNameFits && axisLabelOf(panelSchema?.queries?.[0]?.fields?.x?.[0]);
@@ -343,12 +460,28 @@ export function buildSQLContext(
   // right margin (20) + a usable plot (~84); below that ECharts squeezes the
   // labels over the name regardless of nameGap.
   const panelWidthPx = chartPanelRef?.value?.offsetWidth ?? 0;
-  const yAxisNameFits = !panelWidthPx || panelWidthPx >= widestYAxisTickLabel + 140;
+  const yAxisNameFitsAt = (tickLabelWidth: number) =>
+    !panelWidthPx || panelWidthPx >= tickLabelWidth + 140;
 
-  const hasYAxisName =
-    yAxisNameFits &&
-    panelSchema?.queries?.[0]?.fields?.y?.length == 1 &&
-    axisLabelOf(panelSchema?.queries?.[0]?.fields?.y?.[0]);
+  const fieldYAxisName =
+    panelSchema?.queries?.[0]?.fields?.y?.length == 1
+      ? axisLabelOf(panelSchema?.queries?.[0]?.fields?.y?.[0])
+      : "";
+
+  // Taking the unit off the ticks narrows the label column, which is what pulls
+  // the rotated title back inside the panel; only do it when the title fits at
+  // the narrower width it will actually be sized against.
+  const yAxisUnitIsTitled = !!yAxisUnitTitleCandidate && yAxisNameFitsAt(titledTickLabelWidth);
+  const widestYAxisTickLabel = yAxisUnitIsTitled ? titledTickLabelWidth : inlineTickLabelWidth;
+  const yAxisNameFits = yAxisNameFitsAt(widestYAxisTickLabel);
+
+  const yAxisUnitName = yAxisUnitIsTitled ? yAxisUnitTitleCandidate : "";
+
+  const hasYAxisName = yAxisNameFits
+    ? [fieldYAxisName, yAxisUnitName].filter(Boolean).join(" · ")
+    : "";
+
+  const tickLabelCarriesUnit = yAxisUnitName === "";
 
   // Check if x-axis will be time-based by looking for timestamp fields
   const hasTimestampField = panelSchema.queries[0].fields?.x?.some(
@@ -458,9 +591,7 @@ export function buildSQLContext(
                   ? 30
                   : legendConfig.orient === "vertical" && panelSchema.config?.show_legends
                     ? 0
-                    : breakDownKeys.length > 0
-                      ? 25
-                      : 0;
+                    : 0; // a breakdown paints no second label band, so nothing to reserve
               return baseBottom + additionalBottomSpace;
             })()) + (reserveYLabelLeft || reserveHorizontalYName ? X_AXIS_TICK_LABEL_BAND : 0),
     },
@@ -498,16 +629,13 @@ export function buildSQLContext(
                       panelSchema.config?.unit,
                       panelSchema.config?.unit_custom,
                       panelSchema.config?.decimals,
+                      yAxisTickExtent,
                     ),
                   );
 
                 //we does not required any linebreaks for h-stacked because we only use one x axis
                 if (panelSchema.type === "h-stacked") return params?.value?.toString();
-                for (
-                  let i = 0;
-                  i < xAxisKeys.length + breakDownKeys.length - params?.axisIndex - 1;
-                  i++
-                ) {
+                for (let i = 0; i < axisXKeys.length - params?.axisIndex - 1; i++) {
                   lineBreaks += " \n \n";
                 }
                 params.value = params?.value?.toString();
@@ -520,13 +648,10 @@ export function buildSQLContext(
                     panelSchema.config?.unit,
                     panelSchema.config?.unit_custom,
                     panelSchema.config?.decimals,
+                    yAxisTickExtent,
                   ),
                 );
-              for (
-                let i = 0;
-                i < xAxisKeys.length + breakDownKeys.length - params?.axisIndex - 1;
-                i++
-              ) {
+              for (let i = 0; i < axisXKeys.length - params?.axisIndex - 1; i++) {
                 lineBreaks += " \n \n";
               }
               params.value = params?.value?.toString();
@@ -599,8 +724,19 @@ export function buildSQLContext(
         }
       },
     },
-    xAxis: [...xAxisKeys, ...breakDownKeys]?.map((key: any, index: number) => {
-      const data = getAxisDataFromKey(key);
+    // A breakdown is a SERIES dimension, not an axis: `getSeries` emits one series
+    // per breakdown value (named in the legend) and `getSeriesData` positions every
+    // series on xAxis[0]. Emitting an axis per breakdown key put a second row of
+    // category labels in the same bottom band as the time ticks, so the two printed
+    // over each other. Trellis already keeps only xAxis[0].
+    xAxis: axisXKeys?.map((key: any, index: number) => {
+      // With a breakdown the rows are (x, breakdown) pairs, so the raw x column
+      // repeats each bucket; the axis wants one slot per bucket and the lookup map
+      // already resolves `breakdown||x`. Without a breakdown the rows are 1:1 with
+      // the axis, so leave them exactly as they are.
+      const data = breakDownKeys.length
+        ? Array.from(new Set(getAxisDataFromKey(key)))
+        : getAxisDataFromKey(key);
 
       //unique value index array
       const arr: any = [];
@@ -652,17 +788,18 @@ export function buildSQLContext(
           interval:
             panelSchema.type == "h-stacked"
               ? "auto"
-              : index == xAxisKeys.length + breakDownKeys.length - 1
+              : index == axisXKeys.length - 1
                 ? "auto"
                 : function (i: any) {
                     return shownLabelIndexes.has(i);
                   },
-          overflow: index == xAxisKeys.length + breakDownKeys.length - 1 ? "none" : "truncate",
+          overflow: index == axisXKeys.length - 1 ? "none" : "truncate",
           // hide axis label if overlaps
           hideOverlap: true,
           width: labelWidth,
           margin: labelMargin,
           rotate: labelRotation,
+          color: chartTextColor(),
         },
         splitLine: {
           show: showGridlines,
@@ -674,7 +811,7 @@ export function buildSQLContext(
             : (panelSchema.config?.axis_border_show ?? false),
         },
         axisTick: {
-          show: xAxisKeys.length + breakDownKeys.length == 1 ? false : true,
+          show: axisXKeys.length == 1 ? false : true,
           align: "left",
           alignWithLabel: false,
           length: 5,
@@ -692,6 +829,7 @@ export function buildSQLContext(
       type: "value",
       name: hasYAxisName || "",
       nameLocation: "middle",
+      splitNumber: yAxisSplitNumber,
       min: getFinalAxisValue(panelSchema.config.y_axis_min, min, true),
       max: getFinalAxisValue(panelSchema.config.y_axis_max, max, false),
       nameGap: (isHorizontalChart ? horizontalCategoryLabelWidth : widestYAxisTickLabel) + 10,
@@ -707,16 +845,22 @@ export function buildSQLContext(
       },
       axisLabel: {
         hideOverlap: true,
+        // ECharts paints axis text in its own grey, which measured 2.40:1 here
+        // while the same labels on a PromQL panel sat at 5.02:1. One token, both
+        // converters, so a tick is a tick wherever it is drawn.
+        color: chartTextColor(),
         formatter: function (value: any) {
           try {
-            return formatUnitValue(
-              getUnitValue(
-                value,
-                panelSchema?.config?.unit,
-                panelSchema?.config?.unit_custom,
-                yAxisTickDecimals,
-              ),
+            const unitValue = getUnitValue(
+              value,
+              panelSchema?.config?.unit,
+              panelSchema?.config?.unit_custom,
+              yAxisTickDecimals,
+              yAxisTickExtent,
             );
+            return tickLabelCarriesUnit
+              ? formatUnitValue(unitValue)
+              : String(unitValue?.value ?? "");
           } catch (error) {
             return "";
           }

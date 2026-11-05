@@ -1070,9 +1070,11 @@ describe("indicator colours and row classes (A7)", () => {
       expect(base).toContain(token);
       expect(dark).toContain(token);
     }
-    expect(base).toContain("--color-log-severity-warning-indicator: #dd7b00;");
-    expect(base).toContain("--color-log-severity-debug-indicator: #00a3b7;");
-    expect(base).toContain("--color-log-severity-trace-indicator: #8497a0;");
+    // The three rails that only cleared 3:1 on the white plate, re-inked one step
+    // darker so they hold SC 1.4.11 on the row canvas too (surface-panel/-subtle).
+    expect(base).toContain("--color-log-severity-warning-indicator: #c26a00;");
+    expect(base).toContain("--color-log-severity-debug-indicator: #00818f;");
+    expect(base).toContain("--color-log-severity-trace-indicator: #6d7f8b;");
   });
 });
 

@@ -37,10 +37,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <div class="text-text-secondary text-3xs flex min-w-0 items-center gap-1">
       <OTag v-if="dbSystem" type="dbSystem" :value="dbSystem" size="xs" />
       <template v-if="shownItems.length">
-        <span class="opacity-45">·</span>
+        <span class="text-text-secondary">·</span>
         <OTruncatedText :tooltip="shownItemsText">
           <template v-for="(item, index) in shownItems" :key="item.key">
-            <span v-if="index > 0" class="px-1 opacity-45">·</span>
+            <span v-if="index > 0" class="text-text-secondary px-1">·</span>
             <span :class="item.class">{{ item.label }}</span>
           </template>
         </OTruncatedText>

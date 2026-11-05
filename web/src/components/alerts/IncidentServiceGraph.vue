@@ -37,7 +37,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
         <div class="mb-2.5 text-sm font-semibold">{{ t("alerts.serviceGraphLegendTitle") }}</div>
         <div class="graph-legend__row flex items-center gap-2 py-1">
           <span
-            class="graph-legend__dot text-status-negative w-3.5 shrink-0 text-center text-sm leading-none"
+            class="graph-legend__dot text-status-error-text w-3.5 shrink-0 text-center text-sm leading-none"
             >●</span
           >
           {{ t("alerts.serviceGraphRootCause") }}

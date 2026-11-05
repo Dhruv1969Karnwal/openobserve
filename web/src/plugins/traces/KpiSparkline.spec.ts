@@ -44,12 +44,12 @@ describe("KpiSparkline — rendering", () => {
 });
 
 describe("KpiSparkline — defaults", () => {
-  // Default color: brand blue. A future palette tweak should fail
-  // these tests so callers passing custom colors aren't surprised.
-  it("uses #3b82f6 as the default stroke color", () => {
+  // Default color: the series ramp's first seat, as a token, so the sparkline
+  // follows the theme the way every other mark does.
+  it("uses the series-1 token as the default stroke color", () => {
     const wrapper = mount(KpiSparkline, { props: { data: [1, 2, 3] } });
     const linePath = wrapper.findAll("path")[1]; // 0=area, 1=line
-    expect(linePath.attributes("stroke")).toBe("#3b82f6");
+    expect(linePath.attributes("stroke")).toBe("var(--color-chart-series-1)");
   });
 
   // Default height: 38px (the size used under each KPI card).

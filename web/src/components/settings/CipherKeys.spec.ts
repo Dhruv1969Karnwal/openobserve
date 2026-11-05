@@ -62,15 +62,6 @@ vi.mock("@/components/cipherkeys/AddCipherKey.vue", () => ({
   },
 }));
 
-vi.mock("@/components/shared/grid/Pagination.vue", () => ({
-  default: {
-    name: "Pagination",
-    template: "<div data-test='table-pagination'></div>",
-    props: ["scope", "pageTitle", "resultTotal", "perPageOptions", "position"],
-    emits: ["update:changeRecordPerPage"],
-  },
-}));
-
 vi.mock("@/components/shared/grid/NoData.vue", () => ({
   default: {
     name: "NoData",

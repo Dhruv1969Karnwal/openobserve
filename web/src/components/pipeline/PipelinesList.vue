@@ -159,9 +159,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <OButton
                 :data-test="`pipeline-list-${row.name}-pause-start-action`"
                 :data-row-action="row.enabled ? 'pause' : 'resume'"
-                :variant="row.enabled ? 'ghost-destructive' : 'ghost'"
+                variant="ghost"
                 size="icon-sm"
                 :icon-left="row.enabled ? 'pause' : 'play-arrow'"
+                :aria-label="row.enabled ? t('alerts.pause') : t('alerts.start')"
                 class="max-md:hidden"
                 @click.stop="togglePipeline(row)"
               >
@@ -272,10 +273,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   {{ t("pipeline.delete") }}
                 </ODropdownItem>
                 <ODropdownSeparator
-                  v-if="row.source.source_type === 'scheduled' && config.isEnterprise == 'true'"
+                  v-if="row.source.source_type === 'scheduled' && backfillAccess.visible"
                 />
                 <ODropdownItem
-                  v-if="row.source.source_type === 'scheduled' && config.isEnterprise == 'true'"
+                  v-if="row.source.source_type === 'scheduled' && backfillAccess.visible"
                   :data-test="`pipeline-list-${row.name}-backfill-action`"
                   @select="openBackfillDialog(row)"
                 >
@@ -524,7 +525,7 @@ import { useListViewState } from "@/composables/useListViewState";
 import StreamSelection from "./StreamSelection.vue";
 import pipelineService from "@/services/pipelines";
 import { useStore } from "vuex";
-import config from "@/aws-exports";
+import { buildFeatureGateContext, checkFeatureAccess } from "@/utils/enterpriseFeatures";
 
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import OTable from "@/lib/core/Table/OTable.vue";
@@ -653,6 +654,12 @@ const pipelinesList = useQuery(() =>
 const pipelines = computed(() => shapePipelines(pipelinesList.data.value ?? []));
 
 const store = useStore();
+
+// Registry gate for the Backfill row action — Functions.vue's header entry and the
+// `pipelineBackfill` route read the same key, so the three cannot diverge.
+const backfillAccess = computed(() =>
+  checkFeatureAccess("pipelineBackfill", buildFeatureGateContext(store.state.zoConfig)),
+);
 
 const shouldStartfromNow = ref(true);
 const resumePipelineDialogMeta: any = ref({
@@ -783,10 +790,10 @@ const pipelineRowStyle = (row: any): Record<string, string> => {
   const s = pipelineState(row);
   const color =
     s === "errored"
-      ? "var(--color-error-500)"
+      ? "var(--color-row-rail-negative)"
       : s === "paused"
-        ? "var(--color-grey-400)"
-        : "var(--color-success-500)";
+        ? "var(--color-row-rail-muted)"
+        : "var(--color-row-rail-positive)";
   return { boxShadow: `var(--shadow-rail-geom) ${color}` };
 };
 
@@ -840,7 +847,6 @@ const summaryStats = computed<StatItem[]>(() => {
   const c = stateCounts.value;
   const hasData = c.total > 0;
   const v = (n: number): string | number => (hasData ? n : "—");
-  const share = hasData ? c.total : undefined;
   return [
     {
       key: "errored",
@@ -848,7 +854,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.errored),
       icon: "error-outline",
       tone: "error",
-      max: share,
       dataTest: "pipeline-summary-errored",
     },
     {
@@ -857,7 +862,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.paused),
       icon: "pause",
       tone: "neutral",
-      max: share,
       dataTest: "pipeline-summary-paused",
     },
     {
@@ -866,7 +870,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.active),
       icon: "check-circle",
       tone: "success",
-      max: share,
       dataTest: "pipeline-summary-active",
     },
     {

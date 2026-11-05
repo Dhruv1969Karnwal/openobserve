@@ -185,7 +185,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 size="icon-xs-circle"
                 icon-left="cloud-done"
                 disabled
-                class="text-status-positive"
+                class="text-status-success-text"
                 data-test="org-management-storage-enabled-btn"
               >
                 <OTooltip :content="t('settings.organizationManagementPage.storageEnabled')" />

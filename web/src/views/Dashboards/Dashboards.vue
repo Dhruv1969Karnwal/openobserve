@@ -64,7 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <ODropdownItem @select="importDashboard" data-test="dashboard-import-custom">
           <div class="flex flex-col">
             <span>{{ t("dashboard.importCustom") }}</span>
-            <span class="text-dropdown-item-text text-xs opacity-60">{{
+            <span class="text-dropdown-item-text text-xs">{{
               t("dashboard.importCustomDesc")
             }}</span>
           </div>
@@ -75,7 +75,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         >
           <div class="flex flex-col">
             <span>{{ t("dashboard.importTemplates") }}</span>
-            <span class="text-dropdown-item-text text-xs opacity-60">{{
+            <span class="text-dropdown-item-text text-xs">{{
               t("dashboard.importTemplatesDesc")
             }}</span>
           </div>
@@ -90,15 +90,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <div class="flex w-full items-center gap-2">
             <div class="flex min-w-0 flex-1 flex-col">
               <span>{{ t(`dashboard.${migration.labelKey}`) }}</span>
-              <span class="text-dropdown-item-text text-xs opacity-60">{{
+              <span class="text-dropdown-item-text text-xs">{{
                 t(`dashboard.${migration.descKey}`)
               }}</span>
             </div>
-            <OIcon
-              name="open-in-new"
-              size="xs"
-              class="text-dropdown-item-text shrink-0 opacity-60"
-            />
+            <OIcon name="open-in-new" size="xs" class="text-dropdown-item-text shrink-0" />
           </div>
         </ODropdownItem>
       </ODropdown>
@@ -119,7 +115,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
       </div>
       <!-- Right: dashboards table -->
-      <div class="h-full min-w-0 flex-1 max-md:h-auto max-md:min-h-0">
+      <div
+        ref="tableShellRef"
+        class="h-full min-w-0 flex-1 max-md:h-auto max-md:min-h-0"
+        data-test="dashboards-list-shell"
+      >
         <div class="bg-card-glass-bg flex h-full flex-col">
           <div
             v-show="showFirstData"
@@ -129,7 +129,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <FirstDataPanel v-if="showFirstData" signal="any" variant="compact" />
           </div>
           <OTable
-            class="min-h-0 w-full flex-1"
+            class="max-h-full min-h-0 w-full"
             ref="oTableRef"
             :data="dashboards"
             :columns="columns"
@@ -138,7 +138,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             :forbidden="forbidden"
             :frame="false"
             :default-columns="false"
-            show-index
+            :column-visibility="defaultColumnVisibility"
+            fill-height="auto"
+            :row-section="spansFolders ? rowSection : undefined"
             :global-filter="filterQuery"
             :show-global-filter="false"
             :page-size="pageSize"
@@ -158,11 +160,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             @row-click="onRowClick"
             data-test="dashboard-table"
           >
-            <!-- Toolbar inside the table frame: scoped search (fills the bar) + refresh -->
+            <!-- Toolbar inside the table frame: the list's own search, and the
+                 reach toggle down the right with the other query utilities.
+                 The rail on the left is the only control that says WHICH folder
+                 this page is; this one only says how far the search reaches, so
+                 it no longer leads the row in the rail's place. -->
             <template #toolbar>
               <!-- min-w-0: otherwise the wrapper can't shrink below the search's min-content and pushes controls off-edge. -->
               <div class="flex w-full min-w-0 items-center gap-2 max-md:contents">
-                <div class="min-w-0 flex-1 max-md:min-w-40">
+                <div class="min-w-0 flex-1 max-md:min-w-40 lg:max-w-md">
                   <OInput
                     v-model="dynamicQueryModel"
                     :placeholder="
@@ -176,40 +182,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <template #icon-left>
                       <OIcon name="search" size="sm" />
                     </template>
-                    <template #icon-right>
-                      <OToggleGroup
-                        :model-value="searchAcrossFolders ? 'all' : 'this'"
-                        type="single"
-                        class="me-1 self-center"
-                        @update:model-value="(v) => (searchAcrossFolders = v === 'all')"
-                      >
-                        <OToggleGroupItem
-                          value="this"
-                          size="xs"
-                          icon-left="folder-outline"
-                          data-test="dashboard-search-scope-current"
-                          :title="t('dashboard.searchThisFolderTitle')"
-                          ><span class="max-md:hidden">{{
-                            t("dashboard.searchThisFolder")
-                          }}</span></OToggleGroupItem
-                        >
-                        <OToggleGroupItem
-                          value="all"
-                          size="xs"
-                          icon-left="search"
-                          data-test="dashboard-search-across-folders-toggle"
-                          :title="t('dashboard.searchAllFoldersTitle')"
-                          ><span class="max-md:hidden">{{
-                            t("dashboard.searchAllFolders")
-                          }}</span></OToggleGroupItem
-                        >
-                      </OToggleGroup>
-                    </template>
                   </OInput>
                 </div>
               </div>
             </template>
             <template #toolbar-trailing>
+              <OToggleGroup
+                :model-value="searchAcrossFolders ? 'all' : 'this'"
+                type="single"
+                mobile-dropdown
+                class="shrink-0"
+                data-test="dashboard-search-scope"
+                @update:model-value="(v) => (searchAcrossFolders = v === 'all')"
+              >
+                <OToggleGroupItem
+                  value="this"
+                  size="sm"
+                  icon-left="folder-outline"
+                  data-test="dashboard-search-scope-current"
+                  :title="t('dashboard.searchThisFolderTitle')"
+                  >{{ t("dashboard.searchThisFolder") }}</OToggleGroupItem
+                >
+                <OToggleGroupItem
+                  value="all"
+                  size="sm"
+                  icon-left="search"
+                  data-test="dashboard-search-across-folders-toggle"
+                  :title="t('dashboard.searchAllFoldersTitle')"
+                  >{{ t("dashboard.searchAllFolders") }}</OToggleGroupItem
+                >
+              </OToggleGroup>
               <ORefreshButton
                 layout="inline"
                 variant="outline"
@@ -220,52 +222,124 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 @click="refreshDashboards"
               />
             </template>
+            <template #subheader>
+              <!-- What this list IS, stated once above the rows: the scope the rail
+                   and the toolbar chose, how much is in it, and when any of it last
+                   moved. One sentence, not three tiles — every figure it holds is
+                   already printed in a row below it, and a tile cannot say which
+                   row it came from. -->
+              <div
+                class="border-table-row-divider px-page-edge border-b py-1.5"
+                data-test="dashboards-scope-summary"
+              >
+                <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-xs">
+                  <span class="text-text-heading font-medium">{{ scopeLabel }}</span>
+                  <span
+                    v-show="!loading"
+                    class="text-text-secondary tabular-nums"
+                    data-test="dashboards-scope-facts"
+                    >· {{ scopeFacts }}</span
+                  >
+                  <span
+                    v-if="scopeCountLabel"
+                    class="text-text-secondary"
+                    data-test="dashboards-scope-count"
+                    >· {{ scopeCountLabel }}</span
+                  >
+                  <span
+                    v-if="scopeDescription"
+                    class="text-text-secondary max-w-96 min-w-0 truncate"
+                    data-test="dashboards-scope-description"
+                    >· {{ scopeDescription }}</span
+                  >
+                </div>
+              </div>
+            </template>
             <template #cell-name="{ row, value }">
-              <span class="flex min-w-0 items-center gap-1">
-                <!-- One-click favorite toggle — filled gold star when
-                     favorited, neutral outline otherwise. -->
-                <OButton
-                  variant="ghost"
-                  size="icon-xs-sq"
-                  :icon-left="isFavorite(row.id) ? 'star' : 'star-outline'"
-                  :class="isFavorite(row.id) ? 'text-favorite shrink-0' : 'shrink-0'"
-                  :title="
-                    isFavorite(row.id)
-                      ? t('dashboard.removeFromFavorites')
-                      : t('dashboard.addToFavorites')
-                  "
-                  :data-test="`dashboard-favorite-toggle-${value}`"
-                  @click.stop="toggleFavorite(row)"
-                />
+              <span class="flex min-w-0 flex-col">
+                <span class="flex min-w-0 items-center gap-1">
+                  <!-- One-click favorite toggle — filled gold star when
+                       favorited, neutral outline otherwise. -->
+                  <OButton
+                    variant="ghost"
+                    size="icon-xs-sq"
+                    :icon-left="isFavorite(row.id) ? 'star' : 'star-outline'"
+                    :class="isFavorite(row.id) ? 'text-favorite shrink-0' : 'shrink-0'"
+                    :title="
+                      isFavorite(row.id)
+                        ? t('dashboard.removeFromFavorites')
+                        : t('dashboard.addToFavorites')
+                    "
+                    :data-test="`dashboard-favorite-toggle-${value}`"
+                    @click.stop="toggleFavorite(row)"
+                  />
+                  <OTruncatedText
+                    class="text-text-body"
+                    :data-test="`dashboard-name-cell-${value}`"
+                    >{{ value }}</OTruncatedText
+                  >
+                  <!-- At-a-glance indicator: shows which dashboard is the org
+                       home dashboard without an interactive icon on every row. -->
+                  <OIcon
+                    v-if="isHome(row.id)"
+                    name="keep"
+                    size="xs"
+                    class="text-primary shrink-0"
+                    :data-test="`dashboard-home-indicator-${value}`"
+                  />
+                  <OTooltip
+                    v-if="isHome(row.id)"
+                    side="bottom"
+                    :content="t('dashboard.pinnedOnHome')"
+                  />
+                </span>
+                <!-- A field the band cannot fit as a column comes back under the
+                     name rather than off the screen. -->
                 <OTruncatedText
-                  class="text-text-body"
-                  :data-test="`dashboard-name-cell-${value}`"
-                  >{{ value }}</OTruncatedText
+                  v-for="(line, index) in rowSublines(row)"
+                  :key="index"
+                  class="text-text-secondary text-xs"
+                  :data-test="`dashboard-row-subline-${value}`"
+                  >{{ line }}</OTruncatedText
                 >
-                <!-- At-a-glance indicator: shows which dashboard is the org
-                     home dashboard without an interactive icon on every row. -->
-                <OIcon
-                  v-if="isHome(row.id)"
-                  name="keep"
-                  size="xs"
-                  class="text-primary shrink-0"
-                  :data-test="`dashboard-home-indicator-${value}`"
-                />
-                <OTooltip
-                  v-if="isHome(row.id)"
-                  side="bottom"
-                  :content="t('dashboard.pinnedOnHome')"
-                />
               </span>
+            </template>
+            <template #group-header="{ sectionKey, rows: sectionRows }">
+              <div
+                class="text-text-heading flex items-center gap-1.5 px-2 py-1 text-xs font-medium"
+                :data-test="`dashboard-folder-section-${sectionKey}`"
+              >
+                <OIcon name="folder-outline" size="xs" class="shrink-0" />
+                <OTruncatedText>{{ sectionKey }}</OTruncatedText>
+                <span class="text-text-secondary shrink-0 tabular-nums"
+                  >· {{ sectionRows.length }}</span
+                >
+              </div>
             </template>
             <template #cell-identifier="{ value }">
               <span class="text-text-body font-mono text-xs" :title="value">{{ value }}</span>
             </template>
-            <template #cell-description="{ value }">
-              <span class="text-text-body">{{ value || "—" }}</span>
+            <template #cell-description="{ row }">
+              <OTruncatedText
+                as="div"
+                :class="row.description ? 'text-text-body' : 'text-text-secondary'"
+                :tooltip="row.description"
+                data-test="dashboard-description-cell-text"
+                >{{ row.description || "—" }}</OTruncatedText
+              >
             </template>
-            <template #cell-owner="{ value }">
-              <OUserCell :value="value" />
+            <template #cell-owner="{ value, row }">
+              <span class="flex min-w-0 items-center gap-1.5">
+                <OUserCell :value="value" />
+                <OTag
+                  v-if="row.role && row.role !== 'owner'"
+                  :label="roleChipLabel(row.role)"
+                  variant="default-soft"
+                  size="xs"
+                  class="shrink-0"
+                  :data-test="`dashboard-role-${row.role}`"
+                />
+              </span>
             </template>
             <template #cell-created="{ row, value }">
               <OTimeCell
@@ -274,20 +348,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :timezone="store.state.timezone"
               />
             </template>
-            <template #cell-folder="{ row }">
-              <button
-                type="button"
-                class="bg-surface-subtle text-text-body hover:bg-surface-subtle-hover hover:text-text-body focus-visible:ring-focus-ring-accent inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-xs leading-5 transition-colors outline-none focus-visible:ring-4 focus-visible:ring-inset"
-                @click.stop="updateActiveFolderId(row.folder_id)"
-              >
-                <OIcon name="folder-outline" size="xs" />
-                <OTruncatedText>{{ row.folder }}</OTruncatedText>
-              </button>
+            <template #cell-updated="{ row, value }">
+              <OTimeCell
+                :value="row.modified_raw || value"
+                unit="iso"
+                :timezone="store.state.timezone"
+              />
             </template>
             <template #cell-actions="{ row }">
               <span class="row-actions flex items-center justify-end gap-0.5">
                 <OButton
-                  v-if="row.actions == 'true'"
+                  v-if="row.actions == 'true' && inlineRowActions"
                   icon-left="drive-file-move"
                   :title="t('dashboard.move_to_another_folder')"
                   variant="ghost"
@@ -297,7 +368,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   @click.stop="showMoveDashboardPanel(row)"
                 />
                 <OButton
-                  v-if="row.actions == 'true'"
+                  v-if="row.actions == 'true' && inlineRowActions"
                   icon-left="content-copy"
                   :title="t('dashboard.duplicate')"
                   variant="ghost"
@@ -307,20 +378,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   data-row-action="duplicate"
                   @click.stop="duplicateDashboard(row.id, row.folder_id)"
                 />
-                <OButton
-                  v-if="row.actions == 'true'"
-                  icon-left="delete"
-                  :title="t('dashboard.delete')"
-                  variant="ghost-destructive"
-                  size="icon-xs-sq"
-                  class="max-md:hidden"
-                  data-test="dashboard-delete"
-                  data-row-action="delete"
-                  @click.stop="showDeleteDialogFn({ row })"
-                />
-                <!-- Overflow menu (rightmost) — houses the low-frequency "set as
-                     home" action so it doesn't clutter every row with an
-                     always-on icon. Move/Duplicate/Delete stay inline. -->
                 <ODropdown v-if="row.actions == 'true'" side="bottom" align="end">
                   <template #trigger>
                     <OButton
@@ -333,16 +390,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     />
                   </template>
                   <ODropdownItem
+                    v-if="compactRowActions"
                     icon-left="drive-file-move"
-                    class="md:hidden"
                     data-test="dashboard-move-to-another-folder-menu"
                     @select="showMoveDashboardPanel(row)"
                   >
                     <span>{{ t("dashboard.move_to_another_folder") }}</span>
                   </ODropdownItem>
                   <ODropdownItem
+                    v-if="compactRowActions"
                     icon-left="content-copy"
-                    class="md:hidden"
                     data-test="dashboard-duplicate-menu"
                     @select="duplicateDashboard(row.id, row.folder_id)"
                   >
@@ -351,7 +408,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <ODropdownItem
                     icon-left="delete"
                     variant="destructive"
-                    class="md:hidden"
                     data-test="dashboard-delete-menu"
                     @select="showDeleteDialogFn({ row })"
                   >
@@ -441,6 +497,120 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </OButton>
             </template>
           </OTable>
+          <!-- The landing scope is Favorites, and the rows it is missing are already
+               on screen elsewhere: the favorites read fetches every folder a favorite
+               lives in, so the dashboards those folders hold that are NOT starred are
+               held here too. Star one and it joins the list above. -->
+          <section
+            v-show="showFavoriteCandidates"
+            class="border-border-subtle px-page-edge flex min-w-0 shrink-0 flex-col gap-1.5 border-t py-2.5"
+            :aria-label="t('dashboard.context.candidatesAriaLabel')"
+            data-test="dashboard-favorite-candidates"
+          >
+            <div class="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+              <OText variant="card-title" as="h2">{{
+                t("dashboard.context.candidatesTitle")
+              }}</OText>
+              <span class="text-text-secondary min-w-0 truncate text-xs">{{
+                t("dashboard.context.candidatesHint", { folders: candidateFoldersLabel })
+              }}</span>
+            </div>
+            <ul class="flex min-w-0 flex-col gap-0.5">
+              <li
+                v-for="(row, slot) in favoriteCandidateSlots"
+                :key="slot"
+                v-show="row.present"
+                class="hover:bg-table-row-hover-bg group/row rounded-default flex min-w-0 items-center gap-2 px-1 py-1"
+                :data-test="`dashboard-favorite-candidate-${row.id}`"
+              >
+                <OButton
+                  variant="ghost"
+                  size="icon-xs-sq"
+                  icon-left="star-outline"
+                  class="shrink-0"
+                  :title="t('dashboard.addToFavorites')"
+                  :aria-label="t('dashboard.addToFavorites')"
+                  :data-test="`dashboard-favorite-candidate-star-${row.id}`"
+                  @click="toggleFavorite(row)"
+                />
+                <OButton
+                  variant="ghost"
+                  size="sm"
+                  class="min-w-0 px-0 text-left"
+                  :data-test="`dashboard-favorite-candidate-open-${row.id}`"
+                  @click="routeToViewD(row)"
+                >
+                  <OTruncatedText class="text-text-heading font-medium">{{
+                    row.name
+                  }}</OTruncatedText>
+                </OButton>
+                <span class="text-text-secondary ms-auto hidden min-w-0 truncate text-xs md:inline"
+                  >{{ row.owner }} · {{ t("dashboard.scope.updated", { when: row.age }) }}</span
+                >
+              </li>
+            </ul>
+          </section>
+          <!-- A folder with room under the pager spends it on the task that
+               actually fills one, instead of leaving the frame empty. Hidden, not
+               unmounted: the list repaints this on every folder switch. -->
+          <section
+            v-show="showContextPanel"
+            class="border-border-subtle px-page-edge flex min-w-0 shrink-0 flex-col gap-2 border-t py-2.5"
+            :aria-label="contextPanelAriaLabel"
+            data-test="dashboard-folder-actions"
+          >
+            <OText variant="card-title" as="h2">{{ contextPanelTitle }}</OText>
+            <!-- Side by side only once the panel fits both halves without cutting either. -->
+            <div class="grid min-w-0 gap-x-8 gap-y-2 2xl:grid-cols-[minmax(0,42%)_minmax(0,1fr)]">
+              <ul class="flex min-w-0 flex-col gap-1.5">
+                <li
+                  v-for="action in contextActions"
+                  :key="action.id"
+                  class="flex min-w-0 items-center gap-3"
+                >
+                  <OButton
+                    variant="outline"
+                    size="sm"
+                    :icon-left="action.icon"
+                    class="shrink-0"
+                    :data-test="`dashboard-folder-action-${action.id}`"
+                    @click="onContextAction(action.id)"
+                  >
+                    {{ action.title }}
+                  </OButton>
+                  <span class="text-text-secondary min-w-0 truncate text-xs">{{
+                    action.desc
+                  }}</span>
+                </li>
+              </ul>
+              <TemplateSuggestionCards
+                v-if="($route.query.folder ?? 'default') === 'default'"
+                class="w-full min-w-0"
+                :active-folder-id="activeFolderId ?? 'default'"
+                :filter-query="filterQuery"
+                @open-drawer="showAddDashboardFromGitHub = true"
+                @imported="refreshDashboards"
+              />
+            </div>
+            <div class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+              <span class="text-text-secondary text-xs">{{
+                t("dashboard.context.migrateLead")
+              }}</span>
+              <OButton
+                v-for="migration in migrationOptions"
+                :key="migration.key"
+                variant="outline"
+                size="xs"
+                icon-left="open-in-new"
+                class="shrink-0"
+                :data-test="`dashboard-folder-migrate-${migration.key}`"
+                :title="t(`dashboard.${migration.descKey}`)"
+                @click="openMigration(migration.url)"
+              >
+                {{ t(`dashboard.${migration.labelKey}`) }}
+              </OButton>
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -551,9 +721,11 @@ import {
   ref,
   watch,
   toRaw,
+  nextTick,
 } from "vue";
 import { useStore } from "vuex";
 import { isCancelledError } from "@tanstack/vue-query";
+import { formatDistanceToNowStrict } from "date-fns";
 import { useI18nTyped, raw, type I18nText } from "@/types/i18n";
 import { formatDate } from "@/utils/date";
 
@@ -598,6 +770,10 @@ import { useHomeDashboard } from "@/composables/useHomeDashboard";
 import analytics from "@/services/product_analytics";
 import { useFavoriteDashboards, FAVORITES_FOLDER_ID } from "@/composables/useFavoriteDashboards";
 import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
+import OTag from "@/lib/core/Badge/OTag.vue";
+import type { IconName } from "@/lib/core/Icon/OIcon.icons";
+import OText from "@/lib/core/Typography/OText.vue";
+import useBreakpoint from "@/composables/useBreakpoint";
 
 const MoveDashboardToAnotherFolder = defineAsyncComponent(() => {
   return import("@/components/dashboards/MoveDashboardToAnotherFolder.vue");
@@ -612,7 +788,6 @@ const AddDashboardFromGitHub = defineAsyncComponent(() => {
 });
 
 interface DashboardRow {
-  "#": string | number;
   id: string;
   folder?: string;
   folder_id?: string;
@@ -620,10 +795,38 @@ interface DashboardRow {
   identifier: string;
   description: I18nText;
   owner: string;
+  role?: string;
   created_raw: string;
   created: string;
+  modified_raw: string;
+  modified: string;
   actions: string;
 }
+
+/** A "not in your favorites" slot: always rendered, hidden when unfilled. */
+interface FavoriteCandidate extends DashboardRow {
+  age: string;
+  present: boolean;
+}
+
+const CANDIDATE_SLOTS = 3;
+
+const BLANK_CANDIDATE: FavoriteCandidate = {
+  id: "",
+  folder: "",
+  folder_id: "",
+  name: "",
+  identifier: "",
+  description: raw(""),
+  owner: "",
+  created_raw: "",
+  created: "",
+  modified_raw: "",
+  modified: "",
+  actions: "false",
+  age: "",
+  present: false,
+};
 
 interface DashboardSearchResult {
   dashboard: Record<string, any>;
@@ -646,6 +849,8 @@ export default defineComponent({
   components: {
     FirstDataPanel,
     OTruncatedText,
+    OTag,
+    OText,
     OUserCell,
     OTimeCell,
     OPageLayout,
@@ -672,7 +877,13 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const { t } = useI18nTyped();
+    const { t, te } = useI18nTyped();
+    // A role outside the booked ladder prints itself rather than a raw key path.
+    const roleChipLabel = (role: string) => {
+      const key = `dashboard.roleShort.${role}`;
+      return te(key) ? t(key) : raw(role);
+    };
+    const { isMobile } = useBreakpoint();
     const dashboard = ref({});
     const showAddDashboardDialog = ref(false);
     const showAddDashboardFromGitHub = ref(false);
@@ -860,7 +1071,184 @@ export default defineComponent({
     });
 
     let currentSearchAbortController: AbortController | null = null;
+    // The folder rail and the phone stack both eat width the viewport number does
+    // not know about, so the column set follows the space the list actually has.
+    const WIDE_SHELL_PX = 920;
+    const LIST_SHELL_PX = 560;
+    // Which of the optional columns each band can carry. Below the wide band no
+    // description column is wide enough to read, and below the list band the owner
+    // and the date cannot hold their header label beside the identity column; a
+    // field a band drops comes back under the name rather than off the screen.
+    const BAND_COLUMNS: Record<string, string[]> = {
+      wide: ["description", "owner", "created", "updated"],
+      medium: ["owner", "updated"],
+      narrow: [],
+    };
+    const tableShellRef = ref<HTMLElement | null>(null);
+    const tableShellWidth = ref(0);
+    let shellObserver: ResizeObserver | null = null;
+    const columnBand = computed(() => {
+      const width = tableShellWidth.value;
+      if (!width) return "wide";
+      if (width >= WIDE_SHELL_PX) return "wide";
+      return width >= LIST_SHELL_PX ? "medium" : "narrow";
+    });
+    const bandColumns = computed(() => BAND_COLUMNS[columnBand.value] ?? BAND_COLUMNS.wide);
+    const showsColumn = (id: string) => bandColumns.value.includes(id);
+    // Only the wide band can pay for three always-on row buttons beside the
+    // identity column; the compact bands carry the one kebab they already have.
+    const inlineRowActions = computed(() => columnBand.value === "wide");
+    const compactRowActions = computed(() => isMobile.value || !inlineRowActions.value);
+    const actionsColumnSize = computed(() => (isMobile.value ? 56 : 124));
+    // A subline carries a date, not a timestamp: the ISO string with seconds is
+    // noise at 12px under a name.
+    const shortDay = (value?: string) => (value ? formatDate(value, "MMM d, yyyy") : "");
+
+    const rowSublines = (row: DashboardRow) => {
+      const lines: string[] = [];
+      if (!showsColumn("description") && row.description) lines.push(String(row.description));
+      if (!showsColumn("owner") || !showsColumn("updated")) {
+        const when = shortDay(row.modified_raw || row.created_raw || row.created);
+        const meta = [
+          row.owner,
+          showsColumn("updated") ? "" : t("dashboard.updatedShort", { when }),
+        ].filter(Boolean);
+        if (meta.length) lines.push(meta.join(" · "));
+      }
+      return lines;
+    };
+    // Rows carry a folder only where the view spans folders (Favorites, search
+    // across folders); there it is what a reader groups by, so it becomes a
+    // section header instead of a column.
+    const spansSearch = computed(() => searchAcrossFolders.value && searchQuery.value !== "");
+    const spansFolders = computed(() => spansSearch.value || showFavoritesOnly.value);
+    // Never a null key once sectioning is on: a row without a section is dropped
+    // from a sectioned body, and every row the view returned must stay readable.
+    const rowSection = (row: DashboardRow) =>
+      spansFolders.value ? row.folder || row.folder_id || "—" : null;
+
+    const folderNamesById = computed(
+      () =>
+        new Map<string, string>(
+          (store.state.organizationData?.folders ?? []).map((f: any) => [f.folderId, f.name]),
+        ),
+    );
+    const foldersById = computed(
+      () =>
+        new Map<string, any>(
+          (store.state.organizationData?.folders ?? []).map((f: any) => [f.folderId, f]),
+        ),
+    );
+    // The three-second answer this screen never gave: which scope is on screen,
+    // how many rows it holds, and when any of them last moved. All three come
+    // from the rows the view already returned.
+    const scopeLabel = computed(() => {
+      if (spansFolders.value && searchAcrossFolders.value && searchQuery.value !== "")
+        return t("dashboard.searchAllFolders");
+      if (showFavoritesOnly.value) return t("dashboard.favorites");
+      const id = activeFolderId.value ?? "default";
+      return folderNamesById.value.get(id) ?? id;
+    });
+    // The scope's own total is a tile below, so the line only has to say when
+    // the rows on screen are NOT the whole scope.
+    const scopeCountLabel = computed(() => {
+      const query = filterQuery.value.trim();
+      return query ? t("dashboard.scopeMatching", { query }) : "";
+    });
+    const scopeDescription = computed(() => {
+      if (spansFolders.value) return "";
+      const folder = foldersById.value.get(activeFolderId.value ?? "default");
+      return folder?.description ?? "";
+    });
+    const lastTouched = computed(() => {
+      let best: DashboardRow | null = null;
+      for (const row of dashboards.value) {
+        const when = row.modified_raw || row.created_raw;
+        if (!when) continue;
+        if (!best || when > (best.modified_raw || best.created_raw)) best = row;
+      }
+      return best;
+    });
+    const scopeFavoriteCount = computed(
+      () => dashboards.value.filter((row: DashboardRow) => isFavorite(row.id)).length,
+    );
+    // Same relative form the Updated column prints, so the line above the rows and
+    // the column beside it are one fact told once. Past the column's 30-day cutoff
+    // the date takes over — "3 years ago" answers nothing.
+    const relativeAge = (iso: string) => {
+      const then = Date.parse(iso);
+      if (Number.isNaN(then)) return "";
+      return Math.abs(Date.now() - then) <= 30 * 86_400_000
+        ? formatDistanceToNowStrict(new Date(then), { addSuffix: true })
+        : formatDate(new Date(then), "MMM d, yyyy");
+    };
+    // How much is here, how much is starred, when any of it last moved — as one
+    // sentence, because the rows below already carry each of these figures.
+    const scopeFacts = computed(() => {
+      const count = dashboards.value.length;
+      const when = lastTouched.value?.modified_raw || lastTouched.value?.created_raw;
+      return [
+        t("dashboard.scope.dashboards", { count }, count),
+        t("dashboard.scope.favorites", { count: scopeFavoriteCount.value }),
+        when ? t("dashboard.scope.updated", { when: relativeAge(when) }) : "",
+      ]
+        .filter(Boolean)
+        .join(" · ");
+    });
+    const contextActions = computed<
+      { id: "new" | "import" | "templates"; icon: IconName; title: I18nText; desc: I18nText }[]
+    >(() => [
+      {
+        id: "new",
+        icon: "add",
+        title: t("dashboard.context.newTitle"),
+        desc: showFavoritesOnly.value
+          ? t("dashboard.context.newDescFavorites")
+          : t("dashboard.context.newDesc"),
+      },
+      {
+        id: "import",
+        icon: "upload-file",
+        title: t("dashboard.context.importTitle"),
+        desc: t("dashboard.context.importDesc"),
+      },
+      {
+        id: "templates",
+        icon: "dashboard",
+        title: t("dashboard.context.templatesTitle"),
+        desc: t("dashboard.context.templatesDesc"),
+      },
+    ]);
+    // Cross-folder search results are an answer to a question, not a scope you add
+    // to, so they never get the panel. Favorites is a scope you do add to — by
+    // starring — and it is the route the app lands on, so it gets it with copy
+    // that names what creating a dashboard actually does there.
+    const showContextPanel = computed(
+      () =>
+        !loading.value &&
+        !spansSearch.value &&
+        dashboards.value.length > 0 &&
+        dashboards.value.length <= 5 &&
+        filterQuery.value.trim() === "",
+    );
+    const contextPanelTitle = computed(() =>
+      showFavoritesOnly.value
+        ? t("dashboard.context.addTitleFavorites")
+        : t("dashboard.context.addTitle", { folder: scopeLabel.value }),
+    );
+    const contextPanelAriaLabel = computed(() =>
+      showFavoritesOnly.value
+        ? t("dashboard.context.ariaLabelFavorites")
+        : t("dashboard.context.ariaLabel"),
+    );
+    const onContextAction = (id: "new" | "import" | "templates") => {
+      if (id === "new") addDashboard();
+      else if (id === "import") importDashboard();
+      else showAddDashboardFromGitHub.value = true;
+    };
+
     const columns = computed(() => {
+      const wide = columnBand.value === "wide";
       const baseColumns: OTableColumnDef[] = [
         {
           id: "name",
@@ -869,74 +1257,97 @@ export default defineComponent({
           sortable: true,
           resizable: true,
           hideable: true,
-          size: COL.name,
-          minSize: 160,
+          size: wide ? 300 : 200,
+          // The identity column is never the one cut off while another has room.
+          minSize: wide ? 240 : 200,
           meta: { align: "left", flex: true },
         },
-        // {
-        //   id: "identifier",
-        //   header: t("dashboard.identifier"),
-        //   accessorKey: "identifier",
-        //   sortable: true,
-        //   resizable: true,
-        //   hideable: true,
-        //   meta: { align: "left" },
-        // },
-        {
-          id: "description",
-          header: t("dashboard.description"),
-          accessorKey: "description",
-          sortable: true,
-          resizable: true,
-          hideable: true,
-          size: COL.description,
-          meta: { align: "left" },
-        },
-        {
-          id: "owner",
-          header: t("dashboard.owner"),
-          accessorKey: "owner",
-          sortable: true,
-          resizable: true,
-          hideable: true,
-          size: COL.owner,
-          meta: { align: "left" },
-        },
-        {
-          id: "created",
-          header: t("dashboard.created"),
-          accessorKey: "created",
-          sortable: true,
-          resizable: true,
-          hideable: true,
-          size: COL.date,
-          meta: { align: "left" },
-        },
+        ...(showsColumn("description")
+          ? [
+              {
+                id: "description",
+                header: t("dashboard.description"),
+                accessorKey: "description",
+                sortable: true,
+                resizable: true,
+                hideable: true,
+                // Wide band: 44 select + 300 name + 300 description + 160 owner +
+                // 112 updated + 124 actions = 1040, inside the 1100 the rail leaves.
+                // Name and description are BOTH fillers, so the two text columns
+                // share the leftover instead of one of them holding still while
+                // the identity column ate all of it — which is how a sentence was
+                // cut at 270px in a 1100px frame.
+                size: 300,
+                minSize: 180,
+                meta: { align: "left", flex: true },
+              },
+            ]
+          : []),
+        ...(showsColumn("owner")
+          ? [
+              {
+                id: "owner",
+                header: t("dashboard.owner"),
+                accessorKey: "owner",
+                sortable: true,
+                resizable: true,
+                hideable: true,
+                size: wide ? 160 : 150,
+                minSize: 130,
+                meta: { align: "left" },
+              },
+            ]
+          : []),
+        ...(showsColumn("created")
+          ? [
+              {
+                id: "created",
+                header: t("dashboard.created"),
+                accessorKey: "created",
+                sortable: true,
+                resizable: true,
+                hideable: true,
+                size: 122,
+                minSize: 112,
+                meta: { align: "left" },
+              },
+            ]
+          : []),
+        ...(showsColumn("updated")
+          ? [
+              {
+                id: "updated",
+                header: t("dashboard.updated"),
+                accessorKey: "modified",
+                sortable: true,
+                resizable: true,
+                hideable: true,
+                size: 112,
+                minSize: 104,
+                meta: { align: "left" },
+              },
+            ]
+          : []),
         {
           id: "actions",
           header: t("dashboard.actions"),
           sortable: false,
           isAction: true,
-          size: 124,
-          meta: { align: "center", cellClass: "actions-column", actionCount: 4 },
+          size: actionsColumnSize.value,
+          meta: {
+            align: "center",
+            cellClass: "actions-column",
+            actionCount: compactRowActions.value ? 1 : 3,
+          },
         },
       ];
 
-      if ((searchAcrossFolders.value && searchQuery.value != "") || showFavoritesOnly.value) {
-        baseColumns.splice(2, 0, {
-          id: "folder",
-          header: t("dashboard.folder"),
-          accessorKey: "folder",
-          sortable: true,
-          resizable: true,
-          hideable: true,
-          size: COL.folder,
-          meta: { align: "left" },
-        });
-      }
-
       return baseColumns;
     });
+    // Created is the sort the list already applies, and its value sits a few days
+    // from Updated in every row; it stays one click away in the column toggle
+    // rather than holding 122px of the description column's sentence.
+    const defaultColumnVisibility = { created: false };
     const selectedDashboardIds = computed(() => selectedIds.value);
 
     onMounted(async () => {
@@ -1122,6 +1533,8 @@ export default defineComponent({
       }
 
       // Clear reactive refs to prevent memory leaks
+      shellObserver?.disconnect();
+      shellObserver = null;
       if (oTableRef.value) {
         oTableRef.value = null;
       }
@@ -1364,9 +1777,18 @@ export default defineComponent({
       identifier: folderInfo ? board.dashboard.dashboardId : board.dashboardId,
       description: folderInfo ? board.dashboard.description : board.description,
       owner: folderInfo ? board.dashboard.owner : board.owner,
+      role: folderInfo ? board.dashboard.role : board.role,
       created_raw: folderInfo ? board.dashboard.created : board.created,
       created: formatDate(
         folderInfo ? board.dashboard.created : board.created,
+        "YYYY-MM-DDTHH:mm:ss",
+      ),
+      modified_raw:
+        (folderInfo ? board.dashboard.modified : board.modified) ??
+        (folderInfo ? board.dashboard.created : board.created),
+      modified: formatDate(
+        (folderInfo ? board.dashboard.modified : board.modified) ??
+          (folderInfo ? board.dashboard.created : board.created),
         "YYYY-MM-DDTHH:mm:ss",
       ),
       actions: "true",
@@ -1376,10 +1798,10 @@ export default defineComponent({
       // Favorites view is folder-independent, but yield to an active
       // cross-folder search so results from all folders show.
       const crossFolderSearchActive = searchAcrossFolders.value && searchQuery.value !== "";
+      const folderNames = new Map(
+        (store.state.organizationData?.folders ?? []).map((f: any) => [f.folderId, f.name]),
+      );
       if (showFavoritesOnly.value && !crossFolderSearchActive) {
-        const folderNames = new Map(
-          (store.state.organizationData?.folders ?? []).map((f: any) => [f.folderId, f.name]),
-        );
         const allLists = store.state.organizationData?.allDashboardList ?? {};
         return favorites.value.map((fav: any, _index: number) => {
           const cached = (allLists[fav.folderId] ?? []).find(
@@ -1393,8 +1815,15 @@ export default defineComponent({
             identifier: fav.dashboardId,
             description: cached?.description ?? "",
             owner: cached?.owner ?? "",
+            role: cached?.role ?? "",
             created_raw: cached?.created ?? "",
             created: cached?.created ? formatDate(cached.created, "YYYY-MM-DDTHH:mm:ss") : "",
+            modified_raw: cached?.modified ?? cached?.created ?? "",
+            modified: cached?.modified
+              ? formatDate(cached.modified, "YYYY-MM-DDTHH:mm:ss")
+              : cached?.created
+                ? formatDate(cached.created, "YYYY-MM-DDTHH:mm:ss")
+                : "",
             actions: "true",
           };
         });
@@ -1409,12 +1838,79 @@ export default defineComponent({
       } else {
         return filteredResults.value.map((board: Record<string, any>, index: number) =>
           mapDashboard(board, index, {
-            name: board.folder_name,
+            name: board.folder_name || folderNames.get(board.folder_id) || board.folder_id,
             id: board.folder_id,
           }),
         );
       }
     });
+
+    // Favorites reads every folder that holds a favorite and those lists stay in
+    // the cache, so the dashboards this scope is missing are already held. A
+    // candidate is one of those rows that is not starred: nothing is fetched for
+    // this region, and nothing outside the folders the scope already opened.
+    // The list is a fixed set of slots rather than a growing v-for, and a slot with
+    // no candidate is hidden rather than absent.
+    const favoriteCandidates = computed<FavoriteCandidate[]>(() => {
+      if (!showFavoritesOnly.value || spansSearch.value) return [];
+      const lists = (store.state.organizationData?.allDashboardList ?? {}) as Record<
+        string,
+        Record<string, any>[]
+      >;
+      const starred = new Set(favorites.value.map((f: any) => `${f.folderId}/${f.dashboardId}`));
+      const rows: FavoriteCandidate[] = [];
+      for (const [folderId, list] of Object.entries(lists)) {
+        if (!Array.isArray(list)) continue;
+        for (const board of list) {
+          if (!board?.dashboardId || starred.has(`${folderId}/${board.dashboardId}`)) continue;
+          const row = mapDashboard(board, 0) as FavoriteCandidate;
+          row.folder = folderNamesById.value.get(folderId) ?? folderId;
+          row.folder_id = folderId;
+          row.age = relativeAge(row.modified_raw || row.created_raw);
+          row.present = true;
+          rows.push(row);
+        }
+      }
+      return rows
+        .sort((a, b) =>
+          String(b.modified_raw || b.created_raw).localeCompare(
+            String(a.modified_raw || a.created_raw),
+          ),
+        )
+        .slice(0, CANDIDATE_SLOTS);
+    });
+    const favoriteCandidateSlots = computed<FavoriteCandidate[]>(() =>
+      Array.from(
+        { length: CANDIDATE_SLOTS },
+        (_, index) => favoriteCandidates.value[index] ?? BLANK_CANDIDATE,
+      ),
+    );
+    // Same gate as the panel below it: a list that is answering a filter is not a
+    // scope being described, and the hero empty state owns that frame.
+    const showFavoriteCandidates = computed(
+      () =>
+        !loading.value && filterQuery.value.trim() === "" && favoriteCandidates.value.length > 0,
+    );
+    const candidateFoldersLabel = computed(() =>
+      [...new Set(favoriteCandidates.value.map((row) => row.folder))].join(", "),
+    );
+
+    function measureListFrame() {
+      const shell = tableShellRef.value;
+      if (!shell) return;
+      tableShellWidth.value = shell.clientWidth;
+    }
+
+    const scheduleFrameMeasure = () => {
+      nextTick(() => requestAnimationFrame(measureListFrame));
+    };
+
+    onMounted(scheduleFrameMeasure);
+
+    watch(
+      () => [dashboards.value.length, loading.value, pageSize.value, columnBand.value],
+      scheduleFrameMeasure,
+    );
 
     // Clear selection whenever the derived list recomputes (favorites toggle,
     // folder switch, cross-folder search, store list changes). Runs sync so the
@@ -1853,6 +2349,7 @@ export default defineComponent({
     ]);
     return {
       t,
+      roleChipLabel,
       oTableRef,
       store,
       orgData,
@@ -1861,6 +2358,28 @@ export default defineComponent({
       dashboards,
       dashboard,
       columns,
+      columnBand,
+      tableShellRef,
+      scopeLabel,
+      scopeCountLabel,
+      scopeDescription,
+      scopeFacts,
+      contextActions,
+      favoriteCandidateSlots,
+      showFavoriteCandidates,
+      candidateFoldersLabel,
+      contextPanelTitle,
+      contextPanelAriaLabel,
+      defaultColumnVisibility,
+      showContextPanel,
+      onContextAction,
+      tableShellWidth,
+      measureListFrame,
+      inlineRowActions,
+      compactRowActions,
+      spansFolders,
+      rowSection,
+      rowSublines,
       loading,
       showFirstData,
       refreshing,

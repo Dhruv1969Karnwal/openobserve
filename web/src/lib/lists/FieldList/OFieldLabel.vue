@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       v-if="showTypeIcon"
       :name="getTypeIcon(field.type)"
       size="xs"
-      class="text-field-list-label-icon flex-shrink-0 opacity-60"
+      class="text-field-list-label-icon flex-shrink-0"
     />
     <OTooltip overflow-only :content="raw(field.label ?? field.name)" side="right">
       <span class="text-compact text-field-list-label-text min-w-0 flex-1 truncate leading-relaxed">

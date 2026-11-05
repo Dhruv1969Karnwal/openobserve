@@ -128,6 +128,34 @@ describe("ShareButton", () => {
     },
   );
 
+  it("renders the unconfigured-web-URL note outside the faded button, at full-opacity secondary ink", () => {
+    store.state.zoConfig.web_url = "";
+    const wrapper = mount(ShareButton, {
+      props: { url: "https://example.com/logs" },
+      attachTo: document.body,
+      global: { plugins: [store, i18n] },
+    });
+    const button = wrapper.get("button").element;
+    const describedBy = button.getAttribute("aria-describedby");
+    expect(describedBy).toBeTruthy();
+    const note = document.getElementById(describedBy!);
+    expect(note).not.toBeNull();
+    expect(note!.textContent).toBe(
+      "Share URL is disabled until ZO_WEB_URL is configured by your administrator.",
+    );
+    // Inside the button the note inherits its disabled opacity-50 — the
+    // explanation measured 3.09:1. It must live outside that group.
+    expect(button.contains(note)).toBe(false);
+    expect(note!.classList.contains("text-text-secondary")).toBe(true);
+    let ancestor: Element | null = note;
+    while (ancestor) {
+      const faded = [...ancestor.classList].some((c) => c.includes("opacity-"));
+      expect(faded).toBe(false);
+      ancestor = ancestor.parentElement;
+    }
+    wrapper.unmount();
+  });
+
   it("should render the share button", () => {
     const wrapper = mount(ShareButton, {
       props: {

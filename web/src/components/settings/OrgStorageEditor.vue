@@ -71,7 +71,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </div>
               <div class="mb-2 text-sm font-medium">
                 {{ t("settings.orgStorageEditor.selectStorageProviderLabel")
-                }}<span class="text-status-negative">*</span>
+                }}<span class="text-status-error-text">*</span>
               </div>
               <div
                 class="destination-type-grid grid grid-cols-[repeat(auto-fill,minmax(8.75rem,1fr))] gap-3"
@@ -107,7 +107,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </div>
                   <div
                     v-if="selectedProvider === provider.value"
-                    class="check-icon bg-status-positive absolute top-1.5 right-1.5 z-1 flex h-5 w-5 items-center justify-center overflow-hidden rounded-full text-white"
+                    class="check-icon bg-status-positive text-on-status-fill-text absolute top-1.5 right-1.5 z-1 flex h-5 w-5 items-center justify-center overflow-hidden rounded-full"
                   >
                     <OIcon name="check" size="xs" />
                   </div>
@@ -255,7 +255,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <OIcon name="info" size="sm" class="mt-px flex-shrink-0" />
                     <div class="text-compact text-text-body leading-[1.55]">
                       <template v-if="isCloud">
-                        {{ t("storage_settings.awsStsCloudInfo", { product: raw("OpenObserve") }) }}
+                        {{ t("storage_settings.awsStsCloudInfo", { product: raw("Retrace.ai") }) }}
                       </template>
                       <template v-else>
                         {{ t("storage_settings.awsStsSelfHostedInfo") }}

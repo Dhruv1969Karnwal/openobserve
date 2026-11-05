@@ -1136,10 +1136,10 @@ export default defineComponent({
       const h = nodeHealth(row);
       const color =
         h === "offline"
-          ? "var(--color-error-500)"
+          ? "var(--color-row-rail-negative)"
           : h === "prepare"
-            ? "var(--color-warning-500)"
-            : "var(--color-success-500)";
+            ? "var(--color-row-rail-warning)"
+            : "var(--color-row-rail-positive)";
       return { boxShadow: `var(--shadow-rail-geom) ${color}` };
     };
 
@@ -1192,7 +1192,6 @@ export default defineComponent({
       const c = healthCounts.value;
       const hasData = c.total > 0;
       const v = (n: number): string | number => (hasData ? n : "—");
-      const share = hasData ? c.total : undefined;
       return [
         {
           key: "offline",
@@ -1200,7 +1199,6 @@ export default defineComponent({
           value: v(c.offline),
           icon: "error-outline",
           tone: "error",
-          max: share,
           dataTest: "nodes-summary-offline",
         },
         {
@@ -1209,7 +1207,6 @@ export default defineComponent({
           value: v(c.prepare),
           icon: "hourglass-empty",
           tone: "warning",
-          max: share,
           dataTest: "nodes-summary-prepare",
         },
         {
@@ -1218,7 +1215,6 @@ export default defineComponent({
           value: v(c.online),
           icon: "check-circle",
           tone: "success",
-          max: share,
           dataTest: "nodes-summary-online",
         },
         {

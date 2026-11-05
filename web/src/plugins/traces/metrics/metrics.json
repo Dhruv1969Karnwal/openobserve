@@ -68,8 +68,8 @@
             "table_transpose": false,
             "table_dynamic_columns": false,
             "color": {
-              "mode": "fixed",
-              "fixedColor": ["#79abfc"],
+              "mode": "palette-classic",
+              "fixedColor": [],
               "seriesBy": "last",
               "colorBySeries": []
             },
@@ -105,7 +105,7 @@
                     "label": "",
                     "alias": "max_rate",
                     "column": "max_rate",
-                    "color": "#5960b2",
+                    "color": null,
                     "aggregationFunction": "count",
                     "isDerived": false,
                     "havingConditions": [],
@@ -198,7 +198,7 @@
             "table_dynamic_columns": false,
             "color": {
               "mode": "fixed",
-              "fixedColor": ["#fc7b7b"],
+              "fixedColor": ["var(--color-severity-error-color)"],
               "seriesBy": "last",
               "colorBySeries": []
             },

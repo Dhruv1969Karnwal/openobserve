@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <div class="px-page-edge">
       <OSelect
         data-test="log-search-index-list-select-stream"
+        :aria-label="t('search.selectStream')"
         :model-value="searchObj.data.stream.selectedStream?.value ?? null"
         :label="searchObj.data.stream.selectedStream?.label ? raw('') : t('search.selectIndex')"
         :options="streamOptions"

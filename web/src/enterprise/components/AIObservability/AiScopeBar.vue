@@ -50,12 +50,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         :data-test="`${dataTest}-filter-mode`"
         @update:model-value="onFilterModeChange"
       >
-        <!-- Locked case: rendered disabled with a lock suffix rather than
-             omitted, so an OSS caller still advertises Agent mode exists
-             (see `agentToggleLockedMessage`) instead of just disappearing. -->
+        <!-- Locked case (a "lock" build only — "hide" omits this whole group): rendered
+             with the lock suffix and aria-disabled rather than omitted, so an OSS caller
+             still advertises that Agent mode exists (see `agentToggleLockedMessage`).
+             Not `disabled`: a disabled item cannot emit, and the refusal IS the click —
+             onFilterModeChange opens the upgrade dialog. -->
         <OToggleGroupItem
           value="agent"
           size="sm"
+          :aria-disabled="!showAgentToggle || undefined"
           :icon-right="!showAgentToggle ? 'lock' : undefined"
         >
           {{ labels.agent }}
@@ -212,11 +215,20 @@ const props = withDefaults(
         and the parent must never set filterMode to "agent" in that case.
         Defaults to true. */
     showAgentToggle?: boolean;
-    /** Pitch message for the Agent toggle when `showAgentToggle` is false —
-        renders the toggle anyway with the Agent item disabled + a lock
-        suffix, plus this tooltip, instead of omitting it outright. Leave
-        unset for a caller with truly no Agent concept to advertise (there is
-        none today; every `showAgentToggle: false` caller passes this). */
+    /** Pitch message for the Agent toggle when `showAgentToggle` is false.
+        Passing it is the RENDER SWITCH for the locked affordance: the toggle
+        group stays in the bar with the Agent item carrying a lock suffix, and a
+        click on it opens the upgrade dialog (see `onFilterModeChange`) instead of
+        switching mode. NOTE: this component has no consumer that displays the
+        message TEXT — the value's presence is what matters, its content is not
+        rendered. Leave it unset for a caller with no Agent concept to advertise:
+        the whole toggle is then omitted, which is what the shipped "hide" policy
+        needs. Callers therefore pass it behind `.visible` rather than raw: under
+        "hide" the message happens to be `raw("")`, and `raw()` is the identity at
+        runtime so that particular value is falsy — but emptiness is that string's
+        accident, not the contract of a hidden affordance, and keying the render
+        switch off `visible` is what stops a future change to the hidden message
+        from painting a locked control on a free build. */
     agentToggleLockedMessage?: I18nText;
   }>(),
   {

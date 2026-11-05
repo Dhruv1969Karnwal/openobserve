@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <div class="text-sm leading-5 font-semibold whitespace-nowrap opacity-85">
               {{ t("billing.billingGroup.statActive") }}
             </div>
-            <div class="text-status-positive mt-1.5 text-2xl leading-[1.2] font-semibold">
+            <div class="text-status-success-text mt-1.5 text-2xl leading-[1.2] font-semibold">
               {{ activeCount }}
             </div>
           </div>

@@ -23,9 +23,9 @@ const ICONS: Record<SlackCheckStatus, IconName> = {
 };
 
 const ICON_CLASSES: Record<SlackCheckStatus, string> = {
-  pass: "text-status-positive",
+  pass: "text-status-success-text",
   warn: "text-status-warning-text",
-  fail: "text-status-negative",
+  fail: "text-status-error-text",
 };
 
 export const checkIcon = (status: SlackCheckStatus): IconName => ICONS[status];

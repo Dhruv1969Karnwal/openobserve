@@ -15,8 +15,9 @@
 // It always occupies its space (fixed tile height + skeleton while `loading`) so
 // data arriving never shifts the layout below it.
 
-import { computed, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
+import { balancedColumns } from "./balancedColumns";
 import OStatCard from "./OStatCard.vue";
 import type { StatItem } from "./OStatStrip.types";
 
@@ -74,18 +75,48 @@ const activeKey = computed(() => {
 const onCardClick = (item: StatItem) => {
   if (props.selectable && item.selectable !== false) emit("select", item.key);
 };
+
+// Columns are chosen from the tile count as well as the width, so a six-tile
+// strip lands as four-then-two rather than five-plus-one alone.
+const stripRef = ref<HTMLElement | null>(null);
+const stripWidth = ref(0);
+let observer: ResizeObserver | null = null;
+onMounted(() => {
+  if (!stripRef.value || typeof ResizeObserver === "undefined") return;
+  stripWidth.value = stripRef.value.clientWidth;
+  observer = new ResizeObserver((entries) => {
+    stripWidth.value = entries[0]?.contentRect.width ?? stripWidth.value;
+  });
+  observer.observe(stripRef.value);
+});
+onBeforeUnmount(() => observer?.disconnect());
+const gridStyle = computed(() => {
+  if (!stripWidth.value) return {};
+  const cols = balancedColumns(props.items.length, stripWidth.value, props.compact ? 144 : 208);
+  return { gridTemplateColumns: "repeat(" + cols + ", minmax(0, 1fr))" };
+});
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-2 max-lg:gap-1.5" data-test="o-stat-strip">
-    <!-- The basis is the wrap threshold, not a fixed width: tiles still grow to
-         fill a wide strip. The default suits long labels; `compact` is for short
-         ones, where basis-52 would wrap a five-tile strip onto two rows. -->
+  <div
+    ref="stripRef"
+    :style="gridStyle"
+    :class="[
+      'grid gap-2 max-lg:gap-1.5',
+      compact
+        ? 'grid-cols-[repeat(auto-fit,minmax(9rem,1fr))]'
+        : 'grid-cols-[repeat(auto-fit,minmax(13rem,1fr))]',
+    ]"
+    data-test="o-stat-strip"
+  >
+    <!-- An auto-fit grid, not a growing flex row: every tile in the strip is the
+         same width and the columns line up down the strip. Under flex, a strip
+         whose last row held one tile stretched that tile across the canvas, so
+         the same component measured 256px on one screen and 210px plus a full-
+         width orphan on the next. -->
     <OStatCard
       v-for="item in items"
       :key="item.key"
-      class="grow max-lg:shrink-0 max-lg:basis-auto"
-      :class="compact ? 'basis-36' : 'basis-52'"
       :label="item.label"
       :value="item.value"
       :sub="item.sub"

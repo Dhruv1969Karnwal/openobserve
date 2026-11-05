@@ -70,10 +70,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <!-- The right-hand cluster: the query function · unit, Drill down, then
            the freshness clock. None of it truncates; the metric name is what
            gives way when the row runs short. -->
-      <div class="flex shrink-0 flex-nowrap items-center">
+      <div class="flex min-w-0 flex-nowrap items-center">
+        <!-- The note gives way before the identifier does: it truncates rather than
+             squeezing the metric name out of the row, and `title` keeps it whole. -->
         <span
           v-if="restInfo"
-          class="text-2xs text-text-secondary whitespace-nowrap opacity-70"
+          class="text-2xs text-text-secondary hidden min-w-0 truncate @min-[24rem]/panelbar:inline"
           :title="restInfo"
           :data-test="`metrics-explorer-card-rest-info-${card.name}`"
           >{{ restInfo }}</span
@@ -237,7 +239,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
            still works, so the metric stays explorable. -->
       <div
         v-if="card.unsupported"
-        class="text-2xs text-text-secondary flex h-full flex-col items-center justify-center gap-1.5 opacity-65"
+        class="text-2xs text-text-secondary flex h-full flex-col items-center justify-center gap-1.5"
         :data-test="`metrics-explorer-card-unsupported-${card.name}`"
       >
         <OIcon name="help-outline" size="sm" />
@@ -249,7 +251,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
            not use. Drill down, then Open in Visualize, renders the table properly. -->
       <div
         v-else-if="preview?.status === 'unavailable'"
-        class="text-2xs text-text-secondary flex h-full flex-col items-center justify-center gap-1.5 opacity-65"
+        class="text-2xs text-text-secondary flex h-full flex-col items-center justify-center gap-1.5"
         :data-test="`metrics-explorer-card-nopreview-${card.name}`"
       >
         <OIcon name="table-chart" size="sm" />
@@ -258,7 +260,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
       <div
         v-else-if="preview?.status === 'error'"
-        class="text-2xs text-text-secondary flex h-full flex-col items-center justify-center gap-1.5 opacity-65"
+        class="text-2xs text-text-secondary flex h-full flex-col items-center justify-center gap-1.5"
         :data-test="`metrics-explorer-card-error-${card.name}`"
       >
         <!-- The backend's message is the only thing that distinguishes a
@@ -398,6 +400,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         v-else-if="preview?.results?.length"
         :results="preview.results"
         :queries="chartQueries"
+        :title="card.name"
         :chart-type="preview.chartType"
         :unit="o2Unit.unit"
         :unit-custom="o2Unit.unitCustom ?? undefined"

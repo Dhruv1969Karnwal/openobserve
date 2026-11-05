@@ -194,7 +194,7 @@ const indicatorClasses = computed(() => [
 const wrapperClasses = computed(() => {
   if (!hasLabel.value) return "";
   return [
-    "inline-flex gap-2",
+    "inline-flex max-w-full gap-2",
     props.labelPosition === "top"
       ? "flex-col items-start"
       : props.labelPosition === "right"
@@ -343,6 +343,9 @@ provide(TOGGLE_GROUP_CONTEXT_KEY, context);
         'relative inline-flex items-stretch',
         orientation === 'vertical' ? 'flex-col' : 'flex-row',
         'bg-toggle-track-bg rounded-default p-0.5',
+        // The caption takes the row's first measure, so the strip scrolls in its track.
+        orientation !== 'vertical' &&
+          'max-md:max-w-full max-md:overflow-x-auto @max-4xl/page:max-w-full @max-4xl/page:overflow-x-auto',
       ]"
       v-bind="dragListeners"
       @update:model-value="

@@ -260,7 +260,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   v-else
                   :data-test="`report-list-${row.name}-pause-start-report`"
                   :data-row-action="row.enabled ? 'pause' : 'resume'"
-                  :variant="row.enabled ? 'ghost-destructive' : 'ghost'"
+                  variant="ghost"
                   size="icon-sm"
                   :icon-left="row.enabled ? 'pause' : 'play-arrow'"
                   :title="row.enabled ? t('alerts.pause') : t('alerts.start')"

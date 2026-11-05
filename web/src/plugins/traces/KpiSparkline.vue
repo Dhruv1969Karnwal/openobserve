@@ -74,7 +74,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  color: "#3b82f6",
+  // An SVG attribute takes a CSS value, so a token here is theme-live without a JS branch.
+  color: "var(--color-chart-series-1)",
   height: 38,
   type: "line",
 });

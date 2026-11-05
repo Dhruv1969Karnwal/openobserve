@@ -48,365 +48,412 @@
       <FolderList type="alerts" :drawer-on-mobile="false" @update:activeFolderId="onFolderChange" />
     </template>
 
-    <OTable
-      ref="oTableRef"
-      v-model:selected-ids="selectedIds"
-      selection="multiple"
-      :data="visibleRows"
-      :columns="columns"
-      row-key="id"
-      :loading="loading"
-      :error="error"
-      :page-size="pageSize"
-      :page-size-options="[25, 50, 100]"
-      :sort-by="sortBy"
-      :sort-order="sortOrder"
-      @update:sort-by="sortBy = $event"
-      @update:sort-order="sortOrder = $event"
-      @update:page-size="pageSize = $event"
-      :current-page="currentPage"
-      :show-global-filter="false"
-      table-id="slos-list"
-      :persist-columns="true"
-      :column-visibility="defaultColumnVisibility"
-      :enable-column-resize="true"
-      data-test="slos-slolist-table"
-      @row-click="onRowClick"
-      @update:current-page="onPageChange"
-    >
-      <template #toolbar>
-        <div class="flex w-full min-w-0 flex-wrap items-center gap-2 gap-y-1.5 max-md:contents">
-          <OToggleGroup v-model="typeFilter" mobile-dropdown data-test="slos-slolist-type-filter">
-            <OToggleGroupItem
-              v-for="opt in typeOptions"
-              :key="opt.value"
-              :value="opt.value"
-              size="sm"
-              :data-test="`slos-slolist-type-filter-${opt.value}`"
-            >
-              <template v-if="opt.icon" #icon-left>
-                <OIcon :name="opt.icon" size="sm" />
-              </template>
-              {{ opt.label }}
-            </OToggleGroupItem>
-          </OToggleGroup>
-          <!-- min-w-0 on the wrapper, not flex-1 on the input: a flex child
+    <div ref="listShellRef" class="flex h-full min-h-0 min-w-0 flex-col">
+      <OTable
+        ref="oTableRef"
+        v-model:selected-ids="selectedIds"
+        selection="multiple"
+        :data="visibleRows"
+        :columns="columns"
+        row-key="id"
+        :loading="loading"
+        :error="error"
+        :page-size="pageSize"
+        :page-size-options="[25, 50, 100]"
+        :sort-by="sortBy"
+        :sort-order="sortOrder"
+        @update:sort-by="sortBy = $event"
+        @update:sort-order="sortOrder = $event"
+        @update:page-size="pageSize = $event"
+        :current-page="currentPage"
+        :show-global-filter="false"
+        table-id="slos-list"
+        :persist-columns="true"
+        :column-visibility="defaultColumnVisibility"
+        :enable-column-resize="true"
+        fill-height="auto"
+        :row-rail-tone="rowRailTone"
+        :row-tone="rowTone"
+        data-test="slos-slolist-table"
+        @row-click="onRowClick"
+        @update:current-page="onPageChange"
+      >
+        <template #toolbar>
+          <div class="flex w-full min-w-0 flex-wrap items-center gap-2 gap-y-1.5 max-md:contents">
+            <OToggleGroup v-model="typeFilter" mobile-dropdown data-test="slos-slolist-type-filter">
+              <OToggleGroupItem
+                v-for="opt in typeOptions"
+                :key="opt.value"
+                :value="opt.value"
+                size="sm"
+                :data-test="`slos-slolist-type-filter-${opt.value}`"
+              >
+                <template v-if="opt.icon" #icon-left>
+                  <OIcon :name="opt.icon" size="sm" />
+                </template>
+                {{ opt.label }}
+              </OToggleGroupItem>
+            </OToggleGroup>
+            <!-- min-w-0 on the wrapper, not flex-1 on the input: a flex child
                will not shrink below its content width without it, which is
                how a long placeholder pushes the toolbar wider than the table.
                Same wrapper the Alerts toolbar uses. -->
-          <div class="min-w-0 flex-1 max-md:min-w-40">
-            <OSearchInput
-              v-model="search"
-              class="w-full"
-              :placeholder="t('slos.searchPlaceholder')"
-              clearable
-              data-test="slos-slolist-search"
-            />
+            <div class="min-w-0 flex-1 max-md:min-w-40">
+              <OSearchInput
+                v-model="search"
+                class="w-full"
+                :placeholder="t('slos.searchPlaceholder')"
+                clearable
+                data-test="slos-slolist-search"
+              />
+            </div>
           </div>
-        </div>
-      </template>
+        </template>
 
-      <!-- Refresh lives in #toolbar-trailing so it lands AFTER the auto-injected
+        <!-- Refresh lives in #toolbar-trailing so it lands AFTER the auto-injected
            column-visibility toggle, which is the order every other list uses
            (OTable renders toolbar → column toggle → toolbar-trailing). Inside
            #toolbar it sat before the toggle and the two pages disagreed. -->
-      <template #toolbar-trailing>
-        <ORefreshButton
-          layout="inline"
-          variant="outline"
-          :last-run-at="lastUpdatedAt"
-          :loading="fetching"
-          data-test="slos-slolist-refresh"
-          @click="refresh"
-        />
-      </template>
+        <template #toolbar-trailing>
+          <ORefreshButton
+            layout="inline"
+            variant="outline"
+            :last-run-at="lastUpdatedAt"
+            :loading="fetching"
+            data-test="slos-slolist-refresh"
+            @click="refresh"
+          />
+        </template>
 
-      <!-- Health tiles sit in #subheader so search and the type filter stay
+        <!-- Health tiles sit in #subheader so search and the type filter stay
            ABOVE them, matching the Alerts list: you narrow the set first, then
            read the counts for what you narrowed to. Always rendered (skeleton
            while loading) so data arriving never shifts the rows below. -->
-      <template #subheader>
-        <div
-          class="px-page-edge border-table-row-divider border-b py-1.5"
-          data-test="slos-slolist-stats"
-        >
-          <OStatStrip
-            :items="stats"
-            :loading="loading"
-            selectable
-            :selected-key="healthFilter"
-            default-key="total"
-            @select="onStatSelect"
-          />
-        </div>
-      </template>
-
-      <template #cell-name="{ row }">
-        <div class="flex min-w-0 items-center gap-2">
-          <OTruncatedText class="font-medium">{{ row.name }}</OTruncatedText>
-          <OTag
-            v-if="isGrouped(row)"
-            variant="purple-soft"
-            icon="layers"
-            size="xs"
-            :label="raw(String(row.group_by?.length ?? 0))"
-          />
-          <OTag
-            v-if="!row.enabled"
-            variant="default-soft"
-            icon="pause"
-            size="xs"
-            :label="t('slos.paused')"
-          />
-          <span v-if="activeCorrections(row).length" class="inline-flex">
-            <OTag
-              type="downtimeStatus"
-              value="active"
-              :label="t('alerts.downtimes.corrected')"
-              :data-test="`slos-slolist-corrected-${row.name}`"
+        <template #subheader>
+          <div
+            class="px-page-edge border-table-row-divider border-b py-1.5"
+            data-test="slos-slolist-stats"
+          >
+            <!-- The scope sentence carries what the tiles cannot: how old the
+                 measurement behind them is, and when the next budget runs out.
+                 Both are fields the list already returns. -->
+            <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-xs">
+              <span class="text-text-heading font-medium">{{ scopeLabel }}</span>
+              <span
+                v-show="scopeFacts"
+                class="text-text-secondary tabular-nums"
+                data-test="slos-slolist-scope-facts"
+                >· {{ scopeFacts }}</span
+              >
+            </div>
+            <!-- `compact` narrows the strip's wrap basis, which is what puts all six
+                 states on one row on a frame wide enough to hold six: the Alerts
+                 strip — the same six-facet control — already lays itself out that way.
+                 Left off below the wide band, where the narrower tiles would land
+                 four-plus-two with empty cells beside the pair; there the standard
+                 basis lands three-up instead. -->
+            <OStatStrip
+              class="mt-1.5"
+              :items="stats"
+              :loading="loading"
+              :compact="columnBand === 'wide'"
+              selectable
+              :selected-key="healthFilter"
+              default-key="total"
+              @select="onStatSelect"
             />
-            <OTooltip
-              :content="
-                t('alerts.downtimes.correctedBy', {
-                  names: activeCorrections(row)
-                    .map((c) => c.name)
-                    .join(', '),
-                })
+          </div>
+        </template>
+
+        <template #cell-name="{ row }">
+          <div class="flex min-w-0 flex-col">
+            <!-- A chip is never squeezed, so a chip beside the name is what cuts the name. -->
+            <OTruncatedText class="font-medium" :data-test="`slos-slolist-name-${row.id}`">{{
+              row.name
+            }}</OTruncatedText>
+            <!-- A column the band cannot fit comes back under the name, never beside it. -->
+            <div
+              v-if="
+                !compactActions &&
+                (showsStatusInCell || isGrouped(row) || activeCorrections(row).length)
               "
-            />
-          </span>
-        </div>
-      </template>
-
-      <template #cell-health="{ row }">
-        <OTag
-          :variant="healthVariant(row)"
-          :icon="healthIcon(health(row))"
-          size="sm"
-          :label="t(`slos.health.${health(row)}`)"
-        />
-      </template>
-
-      <template #cell-sli="{ row }">
-        <span v-if="row.status && !row.status.no_data" class="tabular-nums">
-          <span class="font-semibold">{{ formatSli(row.status.sli) }}</span>
-          <span class="text-text-secondary"> / {{ formatTarget(row.target) }}</span>
-        </span>
-        <span v-else class="text-text-secondary">{{ ABSENT }}</span>
-      </template>
-
-      <template #cell-budget="{ row }">
-        <div v-if="hasBudget(row)" class="flex items-center gap-2">
-          <OProgressBar :value="budgetBarValue(row)" :tone="budgetTone(row)" class="w-20" />
-          <span class="font-semibold tabular-nums" :class="budgetTextClass(row)">
-            {{ formatBudget(row.status?.error_budget_remaining) }}
-          </span>
-        </div>
-        <span v-else class="text-text-secondary">{{ ABSENT }}</span>
-      </template>
-
-      <template #cell-burn="{ row }">
-        <span
-          v-if="row.status && !row.status.no_data"
-          class="tabular-nums"
-          :class="(row.status.burn_rate ?? 0) > 1 ? 'text-negative font-semibold' : ''"
-        >
-          {{ formatBurn(row.status.burn_rate) }}
-        </span>
-        <span v-else class="text-text-secondary">{{ ABSENT }}</span>
-      </template>
-
-      <template #cell-coverage="{ row }">
-        <span class="tabular-nums" :class="isLowCoverage(row) ? 'text-warning font-semibold' : ''">
-          {{ formatCoverage(row.status?.coverage) }}
-        </span>
-      </template>
-
-      <template #cell-window="{ row }">
-        <OTruncatedText as="div" :tooltip="windowText(row.window_secs)">
-          <span class="tabular-nums">{{ formatWindow(row.window_secs) }}</span>
-          <span class="text-text-secondary text-compact ms-1">{{ t("slos.rolling") }}</span>
-        </OTruncatedText>
-      </template>
-
-      <template #cell-tags="{ row }">
-        <OTruncatedText
-          as="div"
-          class="flex flex-wrap gap-1"
-          :tooltip="raw((row.tags || []).join(', '))"
-        >
-          <OTag
-            v-for="tag in (row.tags || []).slice(0, 2)"
-            :key="tag"
-            variant="default-soft"
-            size="xs"
-            :label="raw(tag)"
-          />
-          <span v-if="(row.tags || []).length > 2" class="text-text-secondary">…</span>
-        </OTruncatedText>
-      </template>
-
-      <template #cell-folder="{ row }">
-        <span class="text-text-secondary">{{ folderName(row.folder_id) }}</span>
-      </template>
-
-      <template #cell-actions="{ row }">
-        <div class="flex items-center gap-1" @click.stop>
-          <OButton
-            variant="ghost"
-            size="icon-sm"
-            icon-left="edit"
-            class="max-md:hidden"
-            :title="t('slos.edit')"
-            :data-test="`slos-slolist-edit-${row.name}`"
-            @click="goToEdit(row)"
-          />
-          <OButton
-            variant="ghost"
-            size="icon-sm"
-            icon-left="drive-file-move"
-            class="max-md:hidden"
-            :title="t('slos.move')"
-            :data-test="`slos-slolist-move-${row.name}`"
-            @click="openMove([row])"
-          />
-          <OButton
-            variant="ghost"
-            size="icon-sm"
-            :icon-left="row.enabled ? 'pause' : 'play-arrow'"
-            class="max-md:hidden"
-            :title="row.enabled ? t('slos.pause') : t('slos.resume')"
-            :data-test="`slos-slolist-toggle-${row.name}`"
-            @click="toggleEnabled(row)"
-          />
-          <OButton
-            variant="ghost"
-            size="icon-sm"
-            icon-left="download"
-            class="max-md:hidden"
-            :title="t('common.export')"
-            :data-test="`slos-slolist-export-${row.name}`"
-            @click="openExport([row])"
-          />
-          <OButton
-            v-if="downtimesEnabled"
-            variant="ghost"
-            size="icon-sm"
-            icon-left="notifications-paused"
-            class="max-md:hidden"
-            :title="t('alerts.downtimes.mute.exclude')"
-            :data-test="`slos-slolist-exclude-${row.name}`"
-            @click="excludeWindow(row)"
-          />
-          <OButton
-            variant="ghost"
-            size="icon-sm"
-            icon-left="delete"
-            class="max-md:hidden"
-            :title="t('slos.delete')"
-            :data-test="`slos-slolist-delete-${row.name}`"
-            @click="confirmDelete(row)"
-          />
-          <ODropdown side="bottom" align="end">
-            <template #trigger>
-              <OButton
-                :aria-label="t('common.moreActions')"
-                icon-left="more-vert"
-                variant="ghost"
-                size="icon-xs-sq"
-                class="md:hidden"
-                data-test="slos-slolist-row-more-actions"
-                @click.stop
+              class="flex min-w-0 items-center gap-1.5"
+            >
+              <OTag
+                v-if="showsStatusInCell"
+                :variant="healthVariant(row)"
+                :icon="stateIcon(row)"
+                size="xs"
+                class="shrink-0"
+                :label="healthLabel(row)"
+                :data-test="`slos-slolist-health-${row.id}`"
               />
-            </template>
-            <ODropdownItem
+              <OTag
+                v-if="isGrouped(row)"
+                variant="default-soft"
+                icon="layers"
+                size="xs"
+                class="shrink-0"
+                :label="groupByKeysLabel(row)"
+                :aria-label="groupByLabel(row)"
+                :data-test="`slos-slolist-group-${row.id}`"
+              />
+              <span v-if="activeCorrections(row).length" class="inline-flex shrink-0">
+                <OTag
+                  type="downtimeStatus"
+                  value="active"
+                  :label="t('alerts.downtimes.corrected')"
+                  :data-test="`slos-slolist-corrected-${row.name}`"
+                />
+                <OTooltip
+                  :content="
+                    t('alerts.downtimes.correctedBy', {
+                      names: activeCorrections(row)
+                        .map((c) => c.name)
+                        .join(', '),
+                    })
+                  "
+                />
+              </span>
+            </div>
+            <div v-if="compactActions" class="flex min-w-0 items-center gap-1.5">
+              <OTag
+                :variant="healthVariant(row)"
+                :icon="stateIcon(row)"
+                size="xs"
+                class="shrink-0"
+                :label="healthLabel(row)"
+                :data-test="`slos-slolist-health-${row.id}`"
+              />
+              <OTag
+                v-if="isGrouped(row)"
+                variant="default-soft"
+                icon="layers"
+                size="xs"
+                class="shrink-0"
+                :label="groupByKeysLabel(row)"
+                :aria-label="groupByLabel(row)"
+                :data-test="`slos-slolist-group-${row.id}`"
+              />
+              <OTruncatedText
+                class="text-text-secondary text-xs"
+                :data-test="`slos-slolist-subline-${row.id}`"
+                >{{ budgetSubline(row) }}</OTruncatedText
+              >
+            </div>
+            <!-- One subline per row, never two. It carries the SLI type and the
+                 tags (filterable since forever, printable until now) and, on rows
+                 whose figures are missing or running out, WHY in the row itself;
+                 on a band that drops columns, the measurement pair it dropped rides
+                 on the same line. Every word comes off the list response:
+                 `sli_type`, `tags`, `status.coverage`, `status.time_to_exhaust_secs`. -->
+            <OTruncatedText
+              class="text-text-secondary text-xs"
+              :data-test="`slos-slolist-facts-${row.id}`"
+              >{{ rowSubline(row) }}</OTruncatedText
+            >
+          </div>
+        </template>
+
+        <template #cell-health="{ row }">
+          <OTag
+            :variant="healthVariant(row)"
+            :icon="stateIcon(row)"
+            size="sm"
+            :label="healthLabel(row)"
+          />
+        </template>
+
+        <template #cell-sli="{ row }">
+          <span v-if="row.status && !row.status.no_data" class="tabular-nums">
+            <span class="font-semibold">{{ formatSli(row.status.sli) }}</span>
+            <span class="text-text-secondary"> / {{ formatTargetAligned(row.target) }}</span>
+          </span>
+          <span v-else class="text-text-secondary">{{ ABSENT }}</span>
+        </template>
+
+        <template #cell-budget="{ row }">
+          <SloBudgetCell :status="row.status" :enabled="row.enabled" />
+        </template>
+
+        <template #cell-burn="{ row }">
+          <span
+            v-if="row.status && !row.status.no_data"
+            class="tabular-nums"
+            :class="(row.status.burn_rate ?? 0) > 1 ? 'text-negative font-semibold' : ''"
+          >
+            {{ formatBurn(row.status.burn_rate) }}
+          </span>
+          <span v-else class="text-text-secondary">{{ ABSENT }}</span>
+        </template>
+
+        <template #cell-coverage="{ row }">
+          <span
+            class="tabular-nums"
+            :class="isLowCoverage(row) ? 'text-status-warning-text font-semibold' : ''"
+          >
+            {{ formatCoverage(row.status?.coverage) }}
+          </span>
+        </template>
+
+        <template #cell-window="{ row }">
+          <OTruncatedText as="div" :tooltip="windowText(row.window_secs)">
+            <span class="tabular-nums">{{ formatWindow(row.window_secs) }}</span>
+            <span class="text-text-secondary text-compact ms-1">{{ t("slos.rolling") }}</span>
+          </OTruncatedText>
+        </template>
+
+        <template #cell-tags="{ row }">
+          <OTruncatedText
+            as="div"
+            class="flex flex-wrap gap-1"
+            :tooltip="raw((row.tags || []).join(', '))"
+          >
+            <OTag
+              v-for="tag in (row.tags || []).slice(0, 2)"
+              :key="tag"
+              variant="default-soft"
+              size="xs"
+              :label="raw(tag)"
+            />
+            <span v-if="(row.tags || []).length > 2" class="text-text-secondary">…</span>
+          </OTruncatedText>
+        </template>
+
+        <template #cell-folder="{ row }">
+          <span class="text-text-secondary">{{ folderName(row.folder_id) }}</span>
+        </template>
+
+        <template #cell-actions="{ row }">
+          <div class="flex min-w-0 items-center justify-end gap-1" @click.stop>
+            <OButton
+              v-if="!compactActions"
+              variant="ghost"
+              size="icon-sm"
               icon-left="edit"
-              class="md:hidden"
-              :data-test="`slos-slolist-edit-${row.name}-menu`"
-              @select="goToEdit(row)"
-            >
-              <span>{{ t("slos.edit") }}</span>
-            </ODropdownItem>
-            <ODropdownItem
-              icon-left="drive-file-move"
-              class="md:hidden"
-              :data-test="`slos-slolist-move-${row.name}-menu`"
-              @select="openMove([row])"
-            >
-              <span>{{ t("slos.move") }}</span>
-            </ODropdownItem>
-            <ODropdownItem
+              :title="t('slos.edit')"
+              :data-test="`slos-slolist-edit-${row.name}`"
+              @click="goToEdit(row)"
+            />
+            <OButton
+              v-if="!compactActions"
+              variant="ghost"
+              size="icon-sm"
               :icon-left="row.enabled ? 'pause' : 'play-arrow'"
-              class="md:hidden"
-              :data-test="`slos-slolist-toggle-${row.name}-menu`"
-              @select="toggleEnabled(row)"
-            >
-              <span>{{ row.enabled ? t("slos.pause") : t("slos.resume") }}</span>
-            </ODropdownItem>
-            <ODropdownItem
-              icon-left="download"
-              class="md:hidden"
-              :data-test="`slos-slolist-export-${row.name}-menu`"
-              @select="openExport([row])"
-            >
-              <span>{{ t("common.export") }}</span>
-            </ODropdownItem>
-            <ODropdownItem
-              v-if="downtimesEnabled"
-              icon-left="notifications-paused"
-              class="md:hidden"
-              :data-test="`slos-slolist-exclude-${row.name}-menu`"
-              @select="excludeWindow(row)"
-            >
-              <span>{{ t("alerts.downtimes.mute.exclude") }}</span>
-            </ODropdownItem>
-            <ODropdownItem
-              icon-left="delete"
-              variant="destructive"
-              class="md:hidden"
-              :data-test="`slos-slolist-delete-${row.name}-menu`"
-              @select="confirmDelete(row)"
-            >
-              <span>{{ t("slos.delete") }}</span>
-            </ODropdownItem>
-          </ODropdown>
-        </div>
-      </template>
+              :title="row.enabled ? t('slos.pause') : t('slos.resume')"
+              :data-test="`slos-slolist-toggle-${row.name}`"
+              @click="toggleEnabled(row)"
+            />
+            <!-- The row's two frequent jobs stay as glyphs where there is room;
+               everything a row only ever needs once — and, on a narrow band, the
+               two frequent jobs too — lives in the kebab, so no action is ever
+               painted past the frame's edge. -->
+            <ODropdown side="bottom" align="end">
+              <template #trigger>
+                <OButton
+                  :aria-label="t('common.moreActions')"
+                  icon-left="more-vert"
+                  variant="ghost"
+                  size="icon-sm"
+                  data-test="slos-slolist-row-more-actions"
+                  @click.stop
+                />
+              </template>
+              <ODropdownItem
+                v-if="compactActions"
+                icon-left="edit"
+                :data-test="`slos-slolist-edit-${row.name}-menu`"
+                @select="goToEdit(row)"
+              >
+                <span>{{ t("slos.edit") }}</span>
+              </ODropdownItem>
+              <ODropdownItem
+                v-if="compactActions"
+                :icon-left="row.enabled ? 'pause' : 'play-arrow'"
+                :data-test="`slos-slolist-toggle-${row.name}-menu`"
+                @select="toggleEnabled(row)"
+              >
+                <span>{{ row.enabled ? t("slos.pause") : t("slos.resume") }}</span>
+              </ODropdownItem>
+              <ODropdownItem
+                icon-left="drive-file-move"
+                :data-test="`slos-slolist-move-${row.name}-menu`"
+                @select="openMove([row])"
+              >
+                <span>{{ t("slos.move") }}</span>
+              </ODropdownItem>
+              <ODropdownItem
+                icon-left="download"
+                :data-test="`slos-slolist-export-${row.name}-menu`"
+                @select="openExport([row])"
+              >
+                <span>{{ t("common.export") }}</span>
+              </ODropdownItem>
+              <ODropdownItem
+                v-if="downtimesEnabled"
+                icon-left="notifications-paused"
+                :data-test="`slos-slolist-exclude-${row.name}-menu`"
+                @select="excludeWindow(row)"
+              >
+                <span>{{ t("alerts.downtimes.mute.exclude") }}</span>
+              </ODropdownItem>
+              <ODropdownItem
+                icon-left="delete"
+                variant="destructive"
+                :data-test="`slos-slolist-delete-${row.name}-menu`"
+                @select="confirmDelete(row)"
+              >
+                <span>{{ t("slos.delete") }}</span>
+              </ODropdownItem>
+            </ODropdown>
+          </div>
+        </template>
 
-      <template #empty>
-        <OEmptyState
-          icon="target"
-          :title="t('slos.empty.title')"
-          :description="t('slos.empty.description')"
-        >
-          <OButton variant="primary" size="sm-action" icon-left="add" @click="goToNew">
-            {{ t("slos.new") }}
+        <template #empty>
+          <!-- A search that matched nothing is not "no SLOs yet": the first-run
+             copy sends someone to create something they already have. -->
+          <OEmptyState
+            icon="target"
+            :filtered="isFiltering"
+            :title="isFiltering ? undefined : t('slos.empty.title')"
+            :description="isFiltering ? undefined : t('slos.empty.description')"
+            @action="isFiltering && (search = '')"
+          >
+            <OButton
+              v-if="!isFiltering"
+              variant="primary"
+              size="sm-action"
+              icon-left="add"
+              @click="goToNew"
+            >
+              {{ t("slos.new") }}
+            </OButton>
+          </OEmptyState>
+        </template>
+
+        <template #selection-actions>
+          <OButton
+            variant="outline"
+            size="sm"
+            icon-left="drive-file-move"
+            data-test="slos-slolist-move-selected"
+            @click="openMove(selectedRows)"
+          >
+            {{ t("common.move") }}
           </OButton>
-        </OEmptyState>
-      </template>
-
-      <template #selection-actions>
-        <OButton
-          variant="outline"
-          size="sm"
-          icon-left="drive-file-move"
-          data-test="slos-slolist-move-selected"
-          @click="openMove(selectedRows)"
-        >
-          {{ t("common.move") }}
-        </OButton>
-        <OButton
-          variant="outline"
-          size="sm"
-          icon-left="download"
-          :loading="exporting"
-          data-test="slos-slolist-export-selected"
-          @click="openExport(selectedRows)"
-        >
-          {{ t("common.export") }}
-        </OButton>
-      </template>
-    </OTable>
+          <OButton
+            variant="outline"
+            size="sm"
+            icon-left="download"
+            :loading="exporting"
+            data-test="slos-slolist-export-selected"
+            @click="openExport(selectedRows)"
+          >
+            {{ t("common.export") }}
+          </OButton>
+        </template>
+      </OTable>
+    </div>
 
     <!-- `v-model:open`, not `v-model` — ODialog's controlled prop is `open`,
          and a plain v-model binds `modelValue`, which it ignores. The dialog
@@ -519,15 +566,18 @@ import { slosQuery } from "@/services/slos.queries";
 // The export reads one SLO's definition on demand and never re-reads it, so it
 // stays off the query layer and calls the endpoint directly.
 import sloService from "@/services/slos";
-import { computed, onMounted, ref, nextTick, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, nextTick, watch } from "vue";
+import { formatDistanceToNowStrict } from "date-fns";
 import { useDowntimesEnabled } from "@/composables/downtimes/useDowntimesEnabled";
 import { raw, useI18nTyped, type I18nText } from "@/types/i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { formatDate } from "@/utils/date";
 
 import ExportResourceDialog from "@/components/common/ExportResourceDialog.vue";
 import FolderList from "@/components/common/sidebar/FolderList.vue";
 import IacRegistryLinks from "@/components/common/IacRegistryLinks.vue";
+import SloBudgetCell from "@/components/slos/SloBudgetCell.vue";
 import SelectFolderDropDown from "@/components/common/sidebar/SelectFolderDropDown.vue";
 import OBanner from "@/lib/feedback/Banner/OBanner.vue";
 import OButton from "@/lib/core/Button/OButton.vue";
@@ -537,7 +587,6 @@ import ODropdownItem from "@/lib/overlay/Dropdown/ODropdownItem.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 import OEmptyState from "@/lib/core/EmptyState/OEmptyState.vue";
 import OPageLayout from "@/lib/core/PageLayout/OPageLayout.vue";
-import OProgressBar from "@/lib/data/ProgressBar/OProgressBar.vue";
 import OSearchInput from "@/lib/forms/SearchInput/OSearchInput.vue";
 import ORefreshButton from "@/lib/core/RefreshButton/ORefreshButton.vue";
 import OStatStrip from "@/lib/data/StatStrip/OStatStrip.vue";
@@ -549,7 +598,7 @@ import type { IconName } from "@/lib/core/Icon/OIcon.icons";
 import OToggleGroup from "@/lib/core/ToggleGroup/OToggleGroup.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OToggleGroupItem from "@/lib/core/ToggleGroup/OToggleGroupItem.vue";
-import type { OTableColumnDef } from "@/lib/core/Table/OTable.types";
+import type { OTableColumnDef, RowRailTone } from "@/lib/core/Table/OTable.types";
 import type { StatItem } from "@/lib/data/StatStrip/OStatStrip.types";
 import type { SloListItem } from "@/ts/interfaces/slo";
 import { toast } from "@/lib/feedback/Toast/useToast";
@@ -565,9 +614,11 @@ import {
   formatBurn,
   formatCoverage,
   formatSli,
-  formatTarget,
+  formatTimeToExhaust,
   formatWindow,
   healthIcon,
+  healthTone,
+  sliTypeLabel,
   sloHealth,
   type SloHealth,
 } from "@/composables/useSloFormat";
@@ -747,84 +798,185 @@ const typeOptions = computed<{ value: string; label: I18nText; icon: IconName }[
   { value: "alert", label: t("slos.type.alert"), icon: "shield-alert-outline" },
 ]);
 
-const columns = computed<OTableColumnDef<SloListItem>[]>(() => [
-  {
-    id: "name",
-    header: t("slos.column.name"),
-    accessor: (r: any) => r.name,
-    sortable: true,
-    size: 260,
-  },
-  { id: "health", header: t("slos.column.status"), accessor: (r: any) => health(r), size: 130 },
-  {
-    id: "sli",
-    header: t("slos.column.statusVsTarget"),
-    accessor: (r: any) => r.status?.sli ?? -1,
-    sortable: true,
-    size: 170,
-  },
-  {
-    id: "budget",
-    header: t("slos.column.budgetRemaining"),
-    // Frozen SLOs sort to the end via the null branch in compareByUrgency.
-    accessor: (r: any) => r.status?.error_budget_remaining ?? null,
-    sortable: true,
-    size: 190,
-  },
-  {
-    id: "burn",
-    header: t("slos.column.burnRate"),
-    accessor: (r: any) => r.status?.burn_rate ?? -1,
-    sortable: true,
-    size: 110,
-  },
-  {
-    id: "coverage",
-    header: t("slos.column.coverage"),
-    accessor: (r: any) => r.status?.coverage ?? 0,
-    sortable: true,
-    size: 100,
-  },
-  { id: "window", header: t("slos.column.window"), accessor: (r: any) => r.window_secs, size: 100 },
-  {
-    id: "tags",
-    header: t("slos.column.tags"),
-    accessor: (r: any) => (r.tags || []).join(","),
-    size: 180,
-  },
-  {
-    id: "folder",
-    header: t("slos.column.folder"),
-    accessor: (r: any) => r.folder_id,
-    sortable: true,
-    hideable: true,
-    size: 140,
-  },
-  // No hardcoded `size`: OTable derives an action column's width from
-  // `actionCount` (4 × 32px button + 3 × 4px gap + padding), but only when
-  // `isAction` marks it as one. Without the flag it fell through to the
-  // generic size and clipped the last two buttons.
-  {
-    id: "actions",
-    header: t("slos.column.actions"),
-    accessor: () => "",
-    sortable: false,
-    isAction: true,
-    meta: { align: "center", actionCount: 4 },
-  },
-]);
+// The rail and the phone stack eat width the viewport number does not know
+// about, so the column set follows the space the list actually has.
+const WIDE_SHELL_PX = 1010;
+const LIST_SHELL_PX = 620;
+const BAND_COLUMNS: Record<string, string[]> = {
+  wide: ["health", "sli", "budget", "coverage", "window"],
+  medium: ["health", "budget"],
+  narrow: [],
+};
+const listShellRef = ref<HTMLElement | null>(null);
+const listShellWidth = ref(0);
+let listShellObserver: ResizeObserver | null = null;
+const columnBand = computed(() => {
+  const width = listShellWidth.value;
+  if (!width) return "wide";
+  if (width >= WIDE_SHELL_PX) return "wide";
+  return width >= LIST_SHELL_PX ? "medium" : "narrow";
+});
+const bandColumns = computed(() => BAND_COLUMNS[columnBand.value] ?? BAND_COLUMNS.wide);
+const showsColumn = (id: string) => bandColumns.value.includes(id);
+const showsStatusInCell = computed(() => !showsColumn("health"));
+// Below the list band a row carries one control: the kebab that holds them all.
+const compactActions = computed(() => !showsColumn("budget"));
+
+/** The measurement pair, the window it covers and how much of that window the
+ *  source actually reported. */
+function measurementSubline(row: SloListItem): string {
+  const parts: string[] = [];
+  parts.push(
+    row.status && !row.status.no_data
+      ? `${formatSli(row.status.sli)} / ${formatTargetAligned(row.target)}`
+      : ABSENT,
+  );
+  parts.push(windowText(row.window_secs) as string);
+  parts.push(formatCoverage(row.status?.coverage));
+  return parts.join("  ·  ");
+}
+
+/** Budget left and the rate it is going, as the budget column renders them. */
+function budgetSubline(row: SloListItem): string {
+  if (!row.status || row.status.no_data || row.status.error_budget_remaining === null)
+    return ABSENT;
+  return `${formatBudget(row.status.error_budget_remaining)}  ·  ${formatBurn(
+    row.status.burn_rate,
+  )}`;
+}
+
+const columns = computed<OTableColumnDef<SloListItem>[]>(() => {
+  const wide = columnBand.value === "wide";
+  const optional = (id: string, def: OTableColumnDef<SloListItem>) =>
+    showsColumn(id) ? [def] : [];
+  return [
+    {
+      id: "name",
+      header: t("slos.column.name"),
+      accessorFn: (r: any) => r.name,
+      sortable: true,
+      resizable: true,
+      hideable: true,
+      // The identity column keeps its width; the cell's chips ride the subline, so
+      // the declared widths are the band's arithmetic and the frame never scrolls
+      // by a few px.
+      size: wide ? 260 : 208,
+      minSize: 200,
+      meta: { align: "left", flex: true },
+    },
+    ...optional("health", {
+      id: "health",
+      header: t("slos.column.status"),
+      accessorFn: (r: any) => rowHealth(r),
+      // A chip is never squeezed: the widest state label keeps its own room.
+      size: wide ? 148 : 144,
+    }),
+    ...optional("sli", {
+      id: "sli",
+      header: t("slos.column.statusVsTarget"),
+      accessorFn: (r: any) => r.status?.sli ?? -1,
+      sortable: true,
+      resizable: true,
+      hideable: true,
+      size: wide ? 150 : 140,
+    }),
+    ...optional("budget", {
+      id: "budget",
+      header: t("slos.column.errorBudget"),
+      accessorFn: (r: any) => r.status?.error_budget_remaining ?? null,
+      sortable: true,
+      resizable: true,
+      hideable: true,
+      // Bar, signed remaining and the burn multiplier are one reading, so they
+      // get one column and one right edge.
+      size: wide ? 236 : 168,
+    }),
+    ...optional("coverage", {
+      id: "coverage",
+      header: t("slos.column.coverage"),
+      accessorFn: (r: any) => r.status?.coverage ?? 0,
+      sortable: true,
+      resizable: true,
+      hideable: true,
+      size: 96,
+    }),
+    ...optional("window", {
+      id: "window",
+      header: t("slos.column.window"),
+      accessorFn: (r: any) => r.window_secs,
+      resizable: true,
+      hideable: true,
+      size: 104,
+    }),
+    {
+      id: "burn",
+      header: t("slos.column.burnRate"),
+      accessorFn: (r: any) => r.status?.burn_rate ?? -1,
+      sortable: true,
+      resizable: true,
+      hideable: true,
+      size: 96,
+    },
+    {
+      id: "tags",
+      header: t("slos.column.tags"),
+      accessorFn: (r: any) => (r.tags || []).join(","),
+      hideable: true,
+      size: 180,
+    },
+    {
+      id: "folder",
+      header: t("slos.column.folder"),
+      accessorFn: (r: any) => r.folder_id,
+      sortable: true,
+      hideable: true,
+      size: 140,
+    },
+    // No hardcoded `size`: OTable derives an action column's width from
+    // `actionCount` (2 × 32px button + 1 kebab + gaps), but only when `isAction`
+    // marks it as one.
+    {
+      id: "actions",
+      header: t("slos.column.actions"),
+      accessorFn: () => "",
+      sortable: false,
+      isAction: true,
+      meta: { align: "center", actionCount: compactActions.value ? 1 : 3 },
+    },
+  ];
+});
 
 // The list is folder-scoped, so every row shows the same folder — the column
 // is only worth its width after a move, or when checking where something
-// landed. Available via the column toggle, off by default.
-const defaultColumnVisibility = { folder: false };
+// landed. Tags stay searchable through the toolbar filter. Burn is inside the
+// budget column's cell. All three stay available from the column toggle.
+const defaultColumnVisibility = { folder: false, tags: false, burn: false };
 
-function health(row: SloListItem): SloHealth {
+/** A paused SLO is not meeting, at risk or blown — it is not being evaluated,
+ *  and painting its last known numbers in the severity colour makes a frozen
+ *  row shout at someone who cannot act on it. */
+type SloRowState = SloHealth | "paused";
+
+function rowState(row: SloListItem): SloRowState {
+  return row.enabled === false ? "paused" : sloHealth(row.status);
+}
+
+function rowHealth(row: SloListItem): SloHealth {
   return sloHealth(row.status);
 }
 
+function healthLabel(row: SloListItem): I18nText {
+  const state = rowState(row);
+  return state === "paused" ? t("slos.paused") : t(`slos.health.${state}`);
+}
+
+/** Same decimals as the SLI beside it, so the pair lines up digit for digit. */
+function formatTargetAligned(value: number): string {
+  return `${value.toFixed(3)}%`;
+}
+
 function healthVariant(row: SloListItem): BadgeVariant {
-  switch (health(row)) {
+  switch (rowState(row)) {
     case "budget_blown":
       return "error-soft";
     case "at_risk":
@@ -836,53 +988,163 @@ function healthVariant(row: SloListItem): BadgeVariant {
   }
 }
 
+function stateIcon(row: SloListItem) {
+  return row.enabled === false ? "pause" : healthIcon(rowHealth(row));
+}
+
+/** Every row carries a rail, painted in its own state's tone — the channel the
+ *  Alerts list already runs down its rows. A rail on the paused row alone is a
+ *  mark with no scale to read it against, which is what made row 04's bar read
+ *  as a decoration that "appears on no other row and is unexplained". */
+function rowRailTone(row: SloListItem): RowRailTone {
+  if (row.enabled === false) return "neutral";
+  return healthTone(rowHealth(row)) as RowRailTone;
+}
+
+function rowTone(row: SloListItem) {
+  return row.enabled === false ? ("muted" as const) : null;
+}
+
 function isGrouped(row: SloListItem): boolean {
   return !!row.group_by && row.group_by.length > 0;
 }
 
-function hasBudget(row: SloListItem): boolean {
-  return (
-    !!row.status &&
-    !row.status.no_data &&
-    row.status.error_budget_remaining !== null &&
-    Number.isFinite(row.status.error_budget_remaining)
+/** What the diamond-and-a-number was standing for, in words: the SLO splits into
+ *  one series per value of these labels. The first label is named, the rest are
+ *  counted — a chip is never squeezed, so the list cannot all fit in it. */
+function groupByLabel(row: SloListItem): I18nText {
+  const keys = row.group_by ?? [];
+  const rest = keys.length - 1;
+  return t("slos.groupedBy", { labels: rest > 0 ? `${keys[0]} +${rest}` : keys[0] });
+}
+
+/** The chip prints the keys and the icon says what they are, so the phrase naming
+ *  them rides on the accessible name instead of on five identical rows. */
+function groupByKeysLabel(row: SloListItem): I18nText {
+  const keys = row.group_by ?? [];
+  const rest = keys.length - 1;
+  return raw(rest > 0 ? `${keys[0]} +${rest}` : `${keys[0]}`);
+}
+
+/** Why a row has no figures, said in the row instead of left to a grey pill: the
+ *  reasons the backend distinguishes are four different follow-ups. */
+function noDataReason(row: SloListItem): I18nText {
+  if (!row.status) return t("slos.neverMeasured");
+  if (row.status.stale_watermark) return t("slos.sourceStopped");
+  if (row.status.measuring_since) {
+    return t("slos.measuringSince", {
+      when: formatDate(row.status.measuring_since * 1000, "MMM d, yyyy"),
+    });
+  }
+  return t("slos.noDataAtCoverage", { coverage: formatCoverage(row.status.coverage) });
+}
+
+/** The measurement facts a column has no room for, plus the one sentence a row
+ *  cannot be left without: what kind of objective this is, what it is tagged, and
+ *  either when its budget runs out or why its figures are missing. */
+function statusSubline(row: SloListItem): string {
+  const parts: string[] = [sliTypeLabel(row.sli_type, t)];
+  const tags = row.tags ?? [];
+  if (tags.length) {
+    parts.push(tags.slice(0, 2).join(", ") + (tags.length > 2 ? " …" : ""));
+  }
+  if (row.enabled !== false) {
+    if (rowState(row) === "no_data") parts.push(noDataReason(row));
+    else if (
+      (row.status?.error_budget_remaining ?? 100) < 25 &&
+      (row.status?.time_to_exhaust_secs ?? 0) > 0
+    ) {
+      parts.push(
+        t("slos.budgetGoneIn", {
+          when: formatTimeToExhaust(row.status?.time_to_exhaust_secs ?? 0),
+        }),
+      );
+    }
+  }
+  return parts.join("  ·  ");
+}
+
+/** The row's one subline: what the band cannot show as a column, then what the row
+ *  cannot be left without saying. */
+function rowSubline(row: SloListItem): string {
+  const lines: string[] = [];
+  if (!showsColumn("sli") || !showsColumn("window") || !showsColumn("coverage")) {
+    lines.push(measurementSubline(row));
+  }
+  lines.push(statusSubline(row));
+  return lines.join("  ·  ");
+}
+
+/** A measurement age, in the same relative form the timestamps beside it use. */
+function ageFromSeconds(epochSeconds: number | null | undefined): string {
+  if (!epochSeconds) return "";
+  return formatDistanceToNowStrict(new Date(epochSeconds * 1000), { addSuffix: true });
+}
+
+const scopeLabel = computed(() => folderName(activeFolderId.value));
+
+/** The two facts the tiles cannot state because they are not counts: how old the
+ *  measurement under them is, and when the next budget in view runs out. */
+const scopeFacts = computed(() => {
+  const live = visibleRows.value.filter(
+    (r) => r.enabled !== false && r.status && !r.status.no_data,
   );
-}
-
-/** The bar fills to the budget REMAINING, clamped at zero.
- *
- *  Clamped only for the bar's geometry — the number beside it stays signed, so
- *  an overspent budget still reads "-38.0%" rather than being flattened to 0. */
-function budgetBarValue(row: SloListItem): number {
-  const v = row.status?.error_budget_remaining ?? 0;
-  return Math.max(0, Math.min(100, v));
-}
-
-function budgetTone(row: SloListItem): string {
-  const v = row.status?.error_budget_remaining ?? 0;
-  if (v <= 0) return "error";
-  if (v < 25) return "warning";
-  return "success";
-}
-
-function budgetTextClass(row: SloListItem): string {
-  const v = row.status?.error_budget_remaining ?? 0;
-  return v <= 0 ? "text-negative" : "";
-}
+  const ages = live
+    .map((r) => r.status?.computed_at ?? 0)
+    .filter((v) => v > 0)
+    .sort((a, b) => a - b);
+  const nextOut = live
+    .filter((r) => (r.status?.error_budget_remaining ?? 100) > 0)
+    .map((r) => r.status?.time_to_exhaust_secs ?? 0)
+    .filter((v) => v > 0)
+    .sort((a, b) => a - b)[0];
+  return [
+    ages.length ? t("slos.measuredAgo", { when: ageFromSeconds(ages[0]) }) : "",
+    nextOut ? t("slos.nextBudgetOut", { when: formatTimeToExhaust(nextOut) }) : "",
+  ]
+    .filter(Boolean)
+    .join("  ·  ");
+});
 
 function isLowCoverage(row: SloListItem): boolean {
   return !!row.status && row.status.no_data;
 }
 
+// Whether anything is narrowing the list right now — a search term, a type tab
+// or a health tile. The empty state and the facet counts both need to know.
+const isFiltering = computed(
+  () =>
+    search.value.trim() !== "" ||
+    typeFilter.value !== "all" ||
+    (healthFilter.value !== null && healthFilter.value !== "total"),
+);
+
+// Everything the reader narrowed to, except the health facet the tiles themselves
+// choose. §11: a count on a facet control is the count for that facet within the
+// rest of the filters — if it also honoured the selected facet, picking one tile
+// would zero every other one.
+const facetRows = computed(() => {
+  const term = search.value.trim().toLowerCase();
+  return rows.value
+    .filter((r) => typeFilter.value === "all" || r.sli_type === typeFilter.value)
+    .filter(
+      (r) =>
+        !term ||
+        r.name.toLowerCase().includes(term) ||
+        (r.tags || []).some((tag) => tag.toLowerCase().includes(term)),
+    );
+});
+
 const stats = computed<StatItem[]>(() => {
-  const counts: Record<SloHealth, number> = {
+  const counts: Record<SloRowState, number> = {
     budget_blown: 0,
     at_risk: 0,
     meeting: 0,
     no_data: 0,
+    paused: 0,
   };
-  for (const r of rows.value) counts[health(r)] += 1;
-  const total = rows.value.length;
+  for (const r of facetRows.value) counts[rowState(r)] += 1;
+  const total = facetRows.value.length;
   return [
     {
       key: "budget_blown",
@@ -891,7 +1153,6 @@ const stats = computed<StatItem[]>(() => {
       value: counts.budget_blown,
       icon: "local-fire-department",
       tone: "error",
-      max: total,
     },
     {
       key: "at_risk",
@@ -900,7 +1161,6 @@ const stats = computed<StatItem[]>(() => {
       value: counts.at_risk,
       icon: "trending-down",
       tone: "warning",
-      max: total,
     },
     {
       key: "meeting",
@@ -908,8 +1168,10 @@ const stats = computed<StatItem[]>(() => {
       label: t("slos.health.meeting"),
       value: counts.meeting,
       icon: "check-circle",
-      tone: "success",
-      max: total,
+      // Ink, not green: a count of objectives that are fine is not a signal about
+      // anything the reader can act on, and 24px green barely clears large-text
+      // contrast. The exception states keep their colour — that is what it is for.
+      tone: "neutral",
     },
     {
       key: "no_data",
@@ -918,7 +1180,14 @@ const stats = computed<StatItem[]>(() => {
       value: counts.no_data,
       icon: "help-outline",
       tone: "neutral",
-      max: total,
+    },
+    {
+      key: "paused",
+      dataTest: "slos-slolist-stat-paused",
+      label: t("slos.paused"),
+      value: counts.paused,
+      icon: "pause",
+      tone: "neutral",
     },
     {
       key: "total",
@@ -931,19 +1200,18 @@ const stats = computed<StatItem[]>(() => {
   ];
 });
 
-const visibleRows = computed(() => {
-  const term = search.value.trim().toLowerCase();
-  return rows.value
-    .filter((r) => typeFilter.value === "all" || r.sli_type === typeFilter.value)
-    .filter((r) => !healthFilter.value || health(r) === healthFilter.value)
-    .filter(
-      (r) =>
-        !term ||
-        r.name.toLowerCase().includes(term) ||
-        (r.tags || []).some((tag) => tag.toLowerCase().includes(term)),
-    )
-    .sort((a, b) => compareByUrgency(a.status, b.status));
-});
+const visibleRows = computed(() =>
+  facetRows.value
+    .filter((r) => !healthFilter.value || rowState(r) === healthFilter.value)
+    // A paused SLO joins the unknowns at the end: its numbers are historical,
+    // and a severity-sorted list that leads with them trains people to skip it.
+    .sort((a, b) =>
+      compareByUrgency(
+        a.enabled === false ? null : a.status,
+        b.enabled === false ? null : b.status,
+      ),
+    ),
+);
 
 function onStatSelect(key: string | null) {
   healthFilter.value = key === "total" ? null : key;
@@ -1125,5 +1393,30 @@ async function doDelete() {
   }
 }
 
-onMounted(load);
+onMounted(() => {
+  load();
+  if (typeof ResizeObserver === "undefined" || !listShellRef.value) return;
+  listShellObserver = new ResizeObserver(() => {
+    listShellWidth.value = listShellRef.value?.clientWidth ?? 0;
+  });
+  listShellObserver.observe(listShellRef.value);
+  listShellWidth.value = listShellRef.value.clientWidth;
+});
+
+onBeforeUnmount(() => {
+  listShellObserver?.disconnect();
+  listShellObserver = null;
+});
+
+// The frame's own height depends on the stretch decision, so the band has to be
+// re-read once the rows have painted.
+watch(
+  () => [visibleRows.value.length, columnBand.value],
+  () =>
+    nextTick(() =>
+      requestAnimationFrame(() => {
+        listShellWidth.value = listShellRef.value?.clientWidth ?? 0;
+      }),
+    ),
+);
 </script>

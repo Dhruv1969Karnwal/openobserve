@@ -402,6 +402,28 @@ describe("Color Palette Utils", () => {
       expect(result).toBeNull();
     });
 
+    it("assigns the palette by series position when the builder knows it", () => {
+      const colorCfg = { mode: "palette-classic" as const };
+      const call = (index: number) =>
+        getSeriesColor(
+          colorCfg,
+          mockSeriesName,
+          mockValue,
+          chartMin,
+          chartMax,
+          mockTheme,
+          undefined,
+          index,
+        );
+      const first = call(0);
+      const second = call(1);
+      expect(first).not.toBeNull();
+      expect(second).not.toBeNull();
+      // Identical colours were the defect: five series drew five identical lines.
+      expect(second).not.toBe(first);
+      expect(getColorPalette()).toContain(second);
+    });
+
     it("should use d3 scale for continuous color modes", () => {
       const colorCfg = {
         mode: "continuous-green-yellow-red" as const,

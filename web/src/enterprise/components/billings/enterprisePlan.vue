@@ -77,7 +77,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               v-if="feature.is_parent"
               name="check-circle"
               size="sm"
-              class="text-status-positive check-icon me-2 mt-0.5 shrink-0"
+              class="text-status-success-text check-icon me-2 mt-0.5 shrink-0"
             />
             <div
               class="text-sm leading-5"

@@ -91,6 +91,21 @@ const ODialogStub = {
     '<slot /><slot name="footer" /></div>',
 };
 
+// WHY: row actions moved into the row's kebab (one kebab per row, never a glyph
+// painted past the frame). reka-ui mounts menu items only while the menu is
+// open, so both halves are stubbed to plain DOM to keep them reachable here.
+const ODropdownStub = {
+  name: "ODropdown",
+  template: '<div class="o-dropdown-stub"><slot name="trigger" /><slot /></div>',
+};
+const ODropdownItemStub = {
+  name: "ODropdownItem",
+  emits: ["select"],
+  template:
+    '<button type="button" class="o-dropdown-item-stub" @click="$emit(\'select\')">' +
+    "<slot /></button>",
+};
+
 async function mountList(rows: any[]) {
   vi.mocked(sloService.list).mockResolvedValue({ data: { list: rows } } as any);
 
@@ -102,6 +117,8 @@ async function mountList(rows: any[]) {
         FolderList: { template: '<div data-test="stub-folder-list"></div>' },
         SelectFolderDropDown: true,
         ODialog: ODialogStub,
+        ODropdown: ODropdownStub,
+        ODropdownItem: ODropdownItemStub,
       },
     },
   });
@@ -112,7 +129,7 @@ async function mountList(rows: any[]) {
 }
 
 const openDeleteFor = async (wrapper: any, name: string) => {
-  await wrapper.find(`[data-test="slos-slolist-delete-${name}"]`).trigger("click");
+  await wrapper.find(`[data-test="slos-slolist-delete-${name}-menu"]`).trigger("click");
   await flushPromises();
 };
 

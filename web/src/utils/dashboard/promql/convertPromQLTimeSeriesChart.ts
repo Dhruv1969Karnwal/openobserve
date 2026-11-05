@@ -18,6 +18,7 @@ import { fillMissingTimestamps } from "./shared/dataProcessor";
 import { buildXAxis, buildYAxis, buildTooltip } from "./shared/axisBuilder";
 import { buildDynamicGrid } from "./shared/gridBuilder";
 import { getSeriesColor } from "../colorPalette";
+import { calculateValueAxisExtent } from "../chartDimensionUtils";
 import { chartColor } from "@/utils/chartTheme";
 
 /**
@@ -131,10 +132,18 @@ export class TimeSeriesConverter implements PromQLChartConverter {
 
     const hasData = series.some((s) => s.data && s.data.length > 0);
 
+    // The value axis is what tells a reader how big the metric is, and it says
+    // so with a number *and* a unit per tick. Left to size each tick on its own
+    // it switches unit mid-column, and the printed numbers then rise and fall
+    // while the data only climbs: `1.43MB/s` over `878.91KB/s` over `0.00B/s`.
+    // Size it once, on the largest tick this axis paints, and hand it down.
+    // 5 is ECharts' own value-axis splitNumber; buildYAxis does not override it.
+    const axisExtent = calculateValueAxisExtent(chartMin, chartMax, config);
+
     return {
       series,
       xAxis: buildXAxis(panelSchema, store, hasData),
-      yAxis: buildYAxis(panelSchema, 0, store),
+      yAxis: buildYAxis(panelSchema, 0, store, axisExtent),
       grid: buildDynamicGrid(panelSchema, chartPanelRef, series),
       tooltip: buildTooltip(panelSchema, "axis", store, extras?.hoveredSeriesState),
       // Legend config will be applied by applyLegendConfiguration in convertPromQLChartData

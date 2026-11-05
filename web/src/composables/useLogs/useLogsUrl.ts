@@ -17,6 +17,7 @@ import { reactive, ref } from "vue";
 import type { LocationQuery, LocationQueryRaw, RouteLocationNormalized, Router } from "vue-router";
 import { b64DecodeUnicodeSafe, b64EncodeUnicode } from "@/utils/formatters";
 import { decodeFtScan } from "@/utils/logs/freeTextScan";
+import { DEFAULT_LOGS_VISUALIZE_TOGGLE } from "@/ts/interfaces/logs";
 import type {
   ExecutedRecordedEvent,
   PersistSurface,
@@ -255,6 +256,33 @@ export function urlWriteMode(
   return changedParams(current, next).every((key) => VIEW_STATE_PARAMS.has(key))
     ? "replace"
     : "push";
+}
+
+/**
+ * The ONE rule for the governed logs-panel param: the default panel is carried by
+ * ABSENCE, never by value. Every writer that can put `logs_visualize_toggle` in a
+ * URL goes through here, because the rule only buys anything if it survives the
+ * next write: a builder that re-materialised `=logs` would hand the link back the
+ * param the restore had just dropped, and "a link that never chose a panel keeps
+ * its byte-shape" would hold only until the first search or grid-state write.
+ *
+ * Readers are presence-gated for exactly this reason (`restoreUrlQueryParams` and
+ * the mount-time restore in logs/Index.vue both skip the param when it is absent,
+ * leaving the `logs` default that utils/logs/constants.ts seeds).
+ *
+ * The writers, enumerated — the only two that can NAME the panel are the canonical
+ * builder (`generateURLQuery`, hence `updateUrlQueryParams` and `patchUrlViewState`)
+ * and the restore in useLogs.ts, and both call this. Everything else that reaches
+ * `writeLogsUrl` re-emits the CURRENT route query and touches only its own keys, so
+ * it preserves absence rather than re-materialising it: `dropLineLinkParams` here,
+ * and SearchBar.vue's `restoreVisualizationData` / `restoreBuildData`.
+ */
+export function writeVisualizeToggleParam(query: Record<string, unknown>, toggle: unknown): void {
+  if (toggle && toggle !== DEFAULT_LOGS_VISUALIZE_TOGGLE) {
+    query["logs_visualize_toggle"] = toggle;
+  } else {
+    delete query["logs_visualize_toggle"];
+  }
 }
 
 export function writeLogsUrl(mode: LogsUrlMode, query: LocationQueryRaw): Promise<unknown> {

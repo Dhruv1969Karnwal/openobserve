@@ -14,6 +14,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
+
+// The component branches on `PAID_FEATURE_POLICY`; both sides are asserted below.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
+
 import { mount } from "@vue/test-utils";
 import i18n from "@/locales";
 import store from "@/test/unit/helpers/store";
@@ -226,13 +236,25 @@ describe("NodePalette - locked nodes", () => {
   });
 
   beforeEach(async () => {
+    // This block describes the LOCKED node; the shipped policy omits it (last case below).
+    setPaidFeaturePolicy("lock");
     vi.clearAllMocks();
     useEnterpriseUpgradeDialog().close();
     wrapper = await mountComp({ items: [lockedNode], onDragStart, onItemClick });
   });
   afterEach(() => {
     wrapper?.unmount();
+    wrapper = null;
     useEnterpriseUpgradeDialog().close();
+    resetPaidFeaturePolicy();
+  });
+
+  it("omits a locked node entirely under the shipped hide policy", async () => {
+    setPaidFeaturePolicy("hide");
+    wrapper = await mountComp({ items: [lockedNode], onDragStart, onItemClick });
+    expect(wrapper.find('[data-test="flow-node-palette-remote_stream-output-btn"]').exists()).toBe(
+      false,
+    );
   });
 
   it("is not draggable", () => {

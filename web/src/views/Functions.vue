@@ -77,7 +77,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 {{ t("pipeline.history") }}
               </OButton>
               <OButton
-                v-if="config.isEnterprise == 'true'"
+                v-if="backfillAccess.visible"
                 data-test="pipeline-list-backfill-btn"
                 variant="outline"
                 size="sm"
@@ -121,7 +121,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 {{ t("pipeline.history") }}
               </ODropdownItem>
               <ODropdownItem
-                v-if="config.isEnterprise == 'true'"
+                v-if="backfillAccess.visible"
                 data-test="pipeline-list-menu-backfill-btn"
                 @select="goToBackfillJobs"
               >
@@ -163,7 +163,7 @@ import { defineComponent, ref, computed, onBeforeMount, onMounted, onUnmounted, 
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { raw, useI18nTyped, type I18nText } from "@/types/i18n";
-import config from "@/aws-exports";
+import { buildFeatureGateContext, checkFeatureAccess } from "@/utils/enterpriseFeatures";
 
 export default defineComponent({
   name: "AppFunctions",
@@ -236,6 +236,12 @@ export default defineComponent({
     // Header actions live on the Pipelines index page only.
     const showPipelineActions = computed(() => routeName.value === "pipelines");
 
+    // Registry gate for the Backfill entry — the route it opens carries the
+    // same `pipelineBackfill` key, entry and page cannot diverge.
+    const backfillAccess = computed(() =>
+      checkFeatureAccess("pipelineBackfill", buildFeatureGateContext(store.state.zoConfig)),
+    );
+
     // Sections that render their OWN OPageLayout header (Functions, Enrichment
     // Tables). They're rendered directly instead of nested inside the shell's
     // OPageLayout, so their header sits flush at the top like any normal page.
@@ -294,13 +300,13 @@ export default defineComponent({
       t,
       raw,
       store,
-      config,
       orgIdentifier,
       activeTab,
       isDetailView,
       breadcrumbLabel,
       detailBack,
       showPipelineActions,
+      backfillAccess,
       sectionOwnsHeader,
       shouldCollapseActions,
       goToAddPipeline,

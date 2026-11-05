@@ -97,6 +97,7 @@
   --color-grey-200: #e5e5e5;
   --color-grey-300: #d4d4d4;
   --color-grey-400: #a3a3a3;
+  --color-grey-450: #91979f; /* cool step between 400 and 500 — dark label/muted, see below */
   --color-grey-500: #737373;
   --color-grey-600: #525252;
   --color-grey-700: #404040;
@@ -177,6 +178,7 @@
   --color-amber-500: #f59e0b;
   --color-amber-600: #d97706;
   --color-amber-700: #b45309;
+  --color-amber-800: #92400e;
 
   /* --- Cyan palette --- */
   --color-cyan-50: #ecfeff;
@@ -214,18 +216,32 @@
   /* --- Dashboard classic series palette — light values (dark overrides in dark.css).
      Read by utils/dashboard/colorPalette.ts getColorPalette() via chartColor(), so the
      light/dark swap lives in CSS instead of a `theme === "dark"` branch in JS. --- */
-  --color-chart-series-1: #5b8ef0;
-  --color-chart-series-2: #34d399;
-  --color-chart-series-3: #fb923c;
-  --color-chart-series-4: #f472b6;
-  --color-chart-series-5: #a78bfa;
-  --color-chart-series-6: #fbbf24;
-  --color-chart-series-7: #38bdf8;
-  --color-chart-series-8: #f87171;
-  --color-chart-series-9: #2dd4bf;
-  --color-chart-series-10: #4ade80;
-  --color-chart-series-11: #e879f9;
-  --color-chart-series-12: #facc15;
+  /* Series ramp, LUMINANCE-STEPPED. Three measured constraints, all verified by
+      ui-review/tools/ramp-separation-probe.mjs and chartSeriesRamp.spec.ts against the tokens:
+    1. every seat clears the 3:1 graphic floor (SC 1.4.11) on every light plot
+       ground (white / #fafafa / #f5f5f5) - worst seat measures 3.15:1;
+    2. neighbours differ in RELATIVE LUMINANCE as well as hue: ODD seats ride a
+       bright tone and even seats a deep tone so the whole 12-seat ring (ECharts
+       cycles 12->1) keeps >=1.6:1 greyscale; the tone-twin pairs that measured
+       ~1.1:1 before - 3/5 (orange/magenta) and 9/11 (teal/olive) - are now re-stepped
+       apart (>=1.68:1) on top of the ring, so they stay separable in greyscale;
+    3. neighbouring hues are 71 deg apart or more, so the separation survives
+       colour-blindness too.
+       Seat 1 stays the brand hue, because that is where a hue belongs. Seats that
+       still share a tone are separated by hue plus the per-seat line style in colorPalette.ts,
+       see getSeriesLineStyleType(). */
+  --color-chart-series-1: #3f7994;
+  --color-chart-series-2: #521a7d;
+  --color-chart-series-3: #a54b08;
+  --color-chart-series-4: #0d361d;
+  --color-chart-series-5: #d155e1;
+  --color-chart-series-6: #243764;
+  --color-chart-series-7: #ab1637;
+  --color-chart-series-8: #0d3634;
+  --color-chart-series-9: #5f9a12;
+  --color-chart-series-10: #6d1437;
+  --color-chart-series-11: #047454;
+  --color-chart-series-12: #46190a;
 
   /* Map heat ramp, calm low (1) to hot high (5): every step keeps 3:1 against surface-base. */
   --color-map-seq-1: #05a92e;
@@ -420,13 +436,21 @@
   --color-bg-gray: color-mix(in srgb, var(--color-theme-accent) 10%, rgb(237, 237, 237));
   --color-card-glass-border: rgba(0, 0, 0, 0.12);
   --color-cancel-query-bg: #f67a7a;
+  --color-cancel-query-foreground: var(--color-grey-900);
+  /* Sheet fallback for the runtime-picked on-fill glyph ink (themePalette
+     libraryForegroundTokens overwrites it with the readable pick per theme). */
+  --color-on-fill-foreground: var(--color-grey-900);
+  /* ink for labels painted on solid status fills (error/negative chips, success pills) in both modes */
+  --color-on-status-fill-text: var(--color-black);
   --color-highlight-bg: #e7e6e6; /* syntax-guide highlight chip (dark: #747474) */
   --color-brand-indigo: #5960b2; /* brand indigo — loading bar, AI accents (theme-independent) */
+  /* AA text role of the brand indigo (the fill above measures 3.34 as ink on the dark page) */
+  --color-brand-indigo-text: #5960b2;
   --color-card-glass-bg: rgba(255, 255, 255, 0.8);
   --color-card-glass-solid: rgba(255, 255, 255);
   --color-dashboard-placeholder-bg: #b3bdf1;
   --color-error-tag-bg: #f9d3d3;
-  --color-error-tag-text: #e74c3c;
+  --color-error-tag-text: #b91c1c;
   --color-field-type-boolean-bg: #e74c3c;
   --color-field-type-boolean-text: #fff;
   --color-field-type-float-bg: oklch(94.6% 0.033 307.174);
@@ -442,6 +466,8 @@
   /* AI-assistant identity accents (welcome hero + prompt chips). Same values in
      both themes — translucent bgs sit fine on light and dark surfaces. */
   --color-ai-accent: #7b61ff;
+  /* AA text tier for the AI identity — the accent itself measures 4.46/3.81 on the page */
+  --color-ai-accent-text: #5b43e0;
   /* SQL / query-editor violet accent (stream-name label, sql status bar). Theme-aware:
      lighter in dark for legibility. */
   --color-sql-accent: #7c3aed;
@@ -531,11 +557,16 @@
   --color-promo-webinar-link: #1e3a8a;
   --color-promo-webinar-link-hover: #1e40af;
   /* Home-banner accent (theme-independent, matches the amber header top-bar).
-     `-accent` is decorative only (gradient wash, border tint, blur blobs, badge
-     dot); `-accent-text` is the darker step the badge LABEL needs to stay legible
-     on the near-white banner. */
+     `-accent` is decorative only (ground wash, border tint, blur blobs, badge dot);
+     `-accent-text` is the darker step the badge LABEL needs to clear AA on that wash. */
   --color-promo-webinar-accent: var(--color-amber-400);
-  --color-promo-webinar-accent-text: var(--color-amber-700);
+  /* home-banner ground: the fixed wash the badge label rides (class bg-promo-webinar-home-bg) */
+  --color-promo-webinar-home-bg: color-mix(
+    in srgb,
+    var(--color-promo-webinar-accent) 10%,
+    var(--color-surface-base)
+  );
+  --color-promo-webinar-accent-text: var(--color-amber-800);
   /* Body text + separator on the amber top-bar. Fixed (theme-independent) like
      the rest of the promo art — the bar is always amber, so the text is always
      the same near-black and the pipe the same muted slate. */
@@ -592,7 +623,7 @@
   --color-brand-email-ink-deep: #0f1c2e;
   --color-hover-gray: color-mix(in srgb, var(--color-theme-accent) 2%, rgb(244, 244, 244));
   --color-hover-shadow: #dddddd;
-  --color-icon-color: #808080;
+  --color-icon-color: #5f636b; /* was #808080: 3.58 light, under the bar the text sites carrying it need */
   --color-info: #4682fa;
   --color-json-boolean: #6d28d9;
   --color-json-key: #b71c1c;
@@ -601,16 +632,17 @@
   --color-json-object: #4b5563;
   --color-json-string: #047857;
   --color-latency-p95: #0a4ce8;
-  /* Logs severity spine/border: non-text, so each clears 3:1 on the page surface. */
+  /* Logs severity spine/border: non-text, so each clears 3:1 on every surface tier,
+     not just on the white plate (row canvas is surface-panel/-subtle). */
   --color-log-severity-emergency-indicator: #e53935;
   --color-log-severity-alert-indicator: #ea580c;
   --color-log-severity-critical-indicator: #f4511e;
   --color-log-severity-error-indicator: #ef5350;
-  --color-log-severity-warning-indicator: #dd7b00;
+  --color-log-severity-warning-indicator: #c26a00;
   --color-log-severity-notice-indicator: #16a34a;
   --color-log-severity-info-indicator: #1e88e5;
-  --color-log-severity-debug-indicator: #00a3b7;
-  --color-log-severity-trace-indicator: #8497a0;
+  --color-log-severity-debug-indicator: #00818f;
+  --color-log-severity-trace-indicator: #6d7f8b;
   --color-log-severity-ok-indicator: #43a047;
   --color-log-table-header-bg: #f1f3f7;
   --color-log-table-row-bg: #ffffff;
@@ -622,21 +654,19 @@
   --color-service-health-degraded: #faad14;
   --color-service-health-healthy: #52c41a;
   --color-service-health-warning: #fa8c16;
-  /* Darkened from #ef5350 to clear 4.5:1 on white — also drawn as literal chart
-     label text (SloBurndownChart.vue), not only as a fill/border/dot. */
-  --color-severity-error-color: #ea1a17;
-  /* Darkened from #fb8c00 to clear 4.5:1 on white — same chart-label-text case. */
-  --color-severity-warning-color: #b16300;
+  /* Darkened from #ea1a17 (4.09 on the runtime light page tint) — genuine text. */
+  --color-severity-error-color: #c8100e;
+  /* Darkened from #b16300 (same 4.09 light miss) — same chart-label-text case. */
+  --color-severity-warning-color: #965300;
   --color-status-info-bg: #edf3ff;
   /* Darkened from #588cf3 (2.92:1 on its own -bg sibling) to clear 4.5:1 for
      genuine text uses painted on --color-status-info-bg — filter chips
      (AlertInsights.vue) and the HTTP-status legend (TraceTree.vue). */
   --color-status-info-text: #2065ef;
-  --color-status-neutral-text: #6c707e;
+  --color-status-neutral-text: #636774; /* was #6c707e — 4.48 on the light page, under AA */
   --color-status-warning-bg: #fff4eb;
-  /* Darkened from #e56d17 to clear 4.5:1 on white for genuine text uses
-     (MonitorRuns.vue row text, chart label text). */
-  --color-status-warning-text: #be5a13;
+  /* Darkened twice (was #e56d17, then #be5a13 at 4.09 on the runtime light page). */
+  --color-status-warning-text: #9c4a10;
   --color-sticky-col-header-bg: #e0e0e0;
   --color-tab-text-color: #19191e;
   --color-trace-border: #e8ecf0;

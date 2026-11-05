@@ -157,4 +157,28 @@ describe("OToggleGroupItem", () => {
     expect(classes).toContain("px-1.5");
     expect(classes).toContain("text-xs");
   });
+
+  // A selected toggle was tint-only at 1.30:1, under the SC 1.4.11 graphic floor.
+  it("gives the active item an edge and a weight, not a tint alone", () => {
+    const wrapper = mount(OToggleGroup, {
+      props: { modelValue: "a" },
+      slots: {
+        default: {
+          render: () =>
+            h("div", [h(OToggleGroupItem, { value: "a" }), h(OToggleGroupItem, { value: "b" })]),
+        },
+      },
+    });
+    const [on, off] = wrapper.findAll("button");
+    expect(on.attributes("data-state")).toBe("on");
+    expect(off.attributes("data-state")).toBe("off");
+    for (const cue of [
+      "data-[state=on]:ring-1",
+      "data-[state=on]:ring-inset",
+      "data-[state=on]:ring-border-strong",
+      "data-[state=on]:font-semibold",
+    ]) {
+      expect(on.classes(), cue).toContain(cue);
+    }
+  });
 });

@@ -273,12 +273,12 @@ export const depKindIcon = (kind: DepNodeKind): string =>
       : "shield-alert-outline";
 
 export const depKindColor = (node: Pick<DepNode, "kind" | "orphan" | "missing">): string => {
-  if (node.missing) return "text-status-negative";
+  if (node.missing) return "text-status-error-text";
   if (node.orphan) return "text-status-warning";
   return node.kind === "destination"
     ? "text-info"
     : node.kind === "alert"
-      ? "text-status-positive"
+      ? "text-status-success-text"
       : "text-text-secondary";
 };
 

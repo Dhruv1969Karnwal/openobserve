@@ -48,6 +48,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <MetricChartTile
         ref="focusedTile"
         :class="heatmap ? 'min-h-60' : 'h-60'"
+        :title="activeLabel || ''"
         :queries="heatmap ? heatmapQueries : queriesByLabel[activeLabel]"
         :chart-type="chartType"
         :unit="unit"
@@ -326,6 +327,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           v-for="label in labels"
           :key="label"
           class="hover:border-primary h-56 cursor-pointer"
+          :title="label"
           :queries="queriesByLabel[label]"
           :chart-type="chartType"
           :unit="unit"

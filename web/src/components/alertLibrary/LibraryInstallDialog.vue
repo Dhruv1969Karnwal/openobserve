@@ -346,7 +346,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 }}</OTruncatedText>
                 <div
                   v-if="result.message"
-                  class="text-status-negative text-xs"
+                  class="text-status-error-text text-xs"
                   :data-test="`alert-library-install-error-${result.id}`"
                 >
                   {{ result.message }}
@@ -819,8 +819,8 @@ const statusIcon = (status: InstallStatus) => {
 };
 
 const statusClass = (status: InstallStatus) => {
-  if (status === "installed") return "text-status-positive";
-  if (status === "failed") return "text-status-negative";
+  if (status === "installed") return "text-status-success-text";
+  if (status === "failed") return "text-status-error-text";
   return "text-text-secondary";
 };
 

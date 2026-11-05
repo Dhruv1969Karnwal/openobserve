@@ -116,7 +116,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 size="sm"
                 class="shrink-0"
                 :class="
-                  item.status === 'reviewed' ? 'text-status-success-text' : 'text-text-disabled'
+                  item.status === 'reviewed' ? 'text-status-success-text' : 'text-text-secondary'
                 "
               />
               <span v-if="item.inputPreview" class="flex min-w-0 flex-1 flex-col text-left">
@@ -266,7 +266,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <span class="text-text-heading text-sm font-bold">
                     {{ t("aiObservability.queues.workbench.systemScores") }}
                   </span>
-                  <span class="text-text-disabled text-sm font-normal">
+                  <span class="text-text-secondary text-sm font-normal">
                     ({{ currentCase.machineScores.length }})
                   </span>
                   <span class="text-text-secondary text-2xs">
@@ -389,7 +389,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                           class="shrink-0 text-right tabular-nums"
                           :class="
                             draft[cfg.scoreConfigId] === undefined
-                              ? 'text-text-disabled text-2xs'
+                              ? 'text-text-secondary text-2xs'
                               : 'text-text-body text-sm font-semibold'
                           "
                         >
@@ -477,7 +477,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     >
                       <OIcon :name="priorExpanded ? 'expand-more' : 'chevron-right'" size="sm" />
                       {{ t("aiObservability.queues.workbench.priorScores") }}
-                      <span class="text-text-disabled font-normal"
+                      <span class="text-text-secondary font-normal"
                         >({{ currentCase.priorAnnotations.length }})</span
                       >
                     </button>

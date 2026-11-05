@@ -29,7 +29,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       >
         {{ t("login.getStarted.title") }}
       </div>
-      <div class="text-text-secondary mt-0.5 text-sm" data-test="onboarding-get-started-subtitle">
+      <!-- The trial claim is true only on paid editions, so the OSS build never shows it — under any paid-feature policy. -->
+      <div
+        v-if="paidEdition"
+        class="text-text-secondary mt-0.5 text-sm"
+        data-test="onboarding-get-started-subtitle"
+      >
         {{ t("login.getStarted.subtitle") }}
       </div>
     </div>
@@ -187,6 +192,7 @@ import analytics from "@/services/product_analytics";
 import { toast } from "@/lib/feedback/Toast/useToast";
 import { useI18nTyped } from "@/types/i18n";
 import { getImageURL } from "@/utils/zincutils";
+import config from "@/aws-exports";
 import { connectDataPromptSessionKey } from "@/utils/slackCommunityInvite";
 
 interface GetStartedAnswers {
@@ -203,6 +209,8 @@ const router = useRouter();
 const route = useRoute();
 const { t } = useI18nTyped();
 const emit = defineEmits(["removeFirstTimeLogin"]);
+
+const paidEdition = computed(() => config.isCloud === "true" || config.isEnterprise === "true");
 
 const orgId = (): string => store.state.selectedOrganization?.identifier ?? "";
 

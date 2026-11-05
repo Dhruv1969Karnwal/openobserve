@@ -107,7 +107,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   :data-test="`alert-import-error-${index}-${errorIndex}`"
                 >
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-if="typeof errorMessage === 'object' && errorMessage.field == 'alert_name'"
                   >
                     {{ errorMessage.message }}
@@ -130,7 +130,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
                   <!-- Check if the errorMessage is an object, if so, display the 'message' property -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'stream_name'
                     "
@@ -155,7 +155,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                   </span>
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'destination_name'
                     "
@@ -187,7 +187,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                   </span>
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'stream_type'
                     "
@@ -212,7 +212,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                   </span>
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="typeof errorMessage === 'object' && errorMessage.field == 'timezone'"
                   >
                     {{ errorMessage.message }}
@@ -237,7 +237,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                   </span>
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="typeof errorMessage === 'object' && errorMessage.field == 'org_id'"
                   >
                     {{ errorMessage.message }}
@@ -263,7 +263,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
 
                   <!-- Errors with no inline fix-up are pushed as plain strings, and must read as errors too. -->
-                  <span v-else class="text-status-negative">{{ errorMessage }}</span>
+                  <span v-else class="text-status-error-text">{{ errorMessage }}</span>
                 </div>
               </div>
             </div>
@@ -283,7 +283,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :class="{
                   'px-0 py-1.25 text-sm font-bold': true,
                   'text-green': val.success,
-                  'text-status-negative': !val.success,
+                  'text-status-error-text': !val.success,
                 }"
                 :data-test="`alert-import-creation-${index}-message`"
               >

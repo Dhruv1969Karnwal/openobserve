@@ -14,7 +14,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { gt } from "@/types/i18n";
-import echartsTokens from "echarts/lib/visual/tokens.js";
 
 import { formatUnitValue, getUnitValue } from "./convertDataIntoUnitValue";
 import { applySeriesColorMappings, getContrastColor } from "./chartColorUtils";
@@ -24,6 +23,7 @@ import { calculateGridPositions } from "./calculateGridForSubPlot";
 import {
   ColorModeWithoutMinMax,
   getMetricMinMaxValue,
+  getColorPalette,
   getSeriesColor,
   getAreaStyleOverride,
   getGridLineStyle,
@@ -34,10 +34,15 @@ import { addCommasToNumber } from "@/utils/formatters";
 import {
   chartColor,
   chartNumber,
+  chartTextColor,
   dataZoomBrushStyle,
   CHART_SELECTION_FILL,
 } from "@/utils/chartTheme";
-import { calculateBottomLegendHeight, calculateRightLegendWidth } from "./legendConfiguration";
+import {
+  calculateBottomLegendHeight,
+  calculateRightLegendWidth,
+  reserveLegendPagerSpace,
+} from "./legendConfiguration";
 import { convertPromQLChartData } from "./promql/convertPromQLChartData";
 import { calculateMetricFontSize, buildMetricSparkline } from "./sql/charts/convertSQLMetricChart";
 import { resolveMetricValueStyle } from "./tableConfigUtils";
@@ -694,6 +699,9 @@ export const convertPromQLData = async (
       axisLabel: {
         // hide axis label if overlaps
         hideOverlap: true,
+        // One tick grey across both converters: ECharts' own grey measured 2.40:1
+        // on the dashboards while these labels sat at 5.02:1.
+        color: chartTextColor(),
         // For time-based x-axis (type: "time"), rotation and truncation are not applicable
         rotate: 0,
         overflow: "none",
@@ -709,6 +717,7 @@ export const convertPromQLData = async (
         // hide colliding tick labels instead of drawing them on top of each
         // other (short panels fit fewer labels than ECharts offers)
         hideOverlap: true,
+        color: chartTextColor(),
         formatter: function (name: any) {
           return formatUnitValue(
             getUnitValue(
@@ -856,6 +865,10 @@ export const convertPromQLData = async (
   const primaryByMetric = new Map<any, any>();
   const shiftedTwins: [any, any][] = [];
 
+  // Palette seat, shared across the queries of one panel so two never draw the
+  // same series colour in the same chart.
+  let seriesSeat = 0;
+
   options.series = limitedSearchQueryData.map((it: any, index: number) => {
     // A stream that has not delivered yet is an undefined slot; the gauge fall-through would make it an undefined series.
     if (!it) return [];
@@ -895,6 +908,7 @@ export const convertPromQLData = async (
                     chartMax,
                     store.state.theme,
                     panelSchema?.config?.color?.colorBySeries,
+                    seriesSeat++,
                   );
                 } catch (error) {
                   console.warn("Failed to get series color:", error);
@@ -1001,6 +1015,7 @@ export const convertPromQLData = async (
                     chartMax,
                     store.state.theme,
                     panelSchema?.config?.color?.colorBySeries,
+                    seriesSeat++,
                   );
                 } catch (error) {
                   console.warn("Failed to get series color:", error);
@@ -1377,7 +1392,7 @@ export const convertPromQLData = async (
   );
   // ECharts gives each name the next theme colour, so a twin would take the next series' colour; pin the primaries' own.
   if (explorerOverlays && panelSchema?.config?.color?.mode === "palette-classic") {
-    const palette: string[] = echartsTokens.color.theme;
+    const palette: string[] = getColorPalette(store.state.theme);
     [...primaryByMetric.entries()].forEach(([metric, primary], position) => {
       if (primary.itemStyle.color) return;
       primary.itemStyle.color = palette[position % palette.length];
@@ -1474,6 +1489,17 @@ export const convertPromQLData = async (
     const legendLeftPx = Math.max(containerWidth - legendWidth, 0);
     options.legend.left = legendLeftPx;
     options.legend.right = 0;
+  }
+
+  // A bottom legend must stop short of its own pager, or the arrows land on top
+  // of the third series name.
+  if (
+    legendConfig.orient != "vertical" &&
+    panelSchema.config?.show_legends &&
+    panelSchema.type != "gauge" &&
+    panelSchema.type != "metric"
+  ) {
+    reserveLegendPagerSpace(options, chartPanelRef?.value?.offsetWidth || 0);
   }
 
   //check if is there any data else filter out axis or series data

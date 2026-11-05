@@ -281,7 +281,10 @@
                 <span v-else class="text-text-secondary">{{ ABSENT }}</span>
               </template>
               <template #cell-coverage="{ row }">
-                <span class="tabular-nums" :class="row.no_data ? 'text-warning font-semibold' : ''">
+                <span
+                  class="tabular-nums"
+                  :class="row.no_data ? 'text-status-warning-text font-semibold' : ''"
+                >
                   {{ formatCoverage(row.coverage) }}
                 </span>
               </template>
@@ -590,35 +593,35 @@ const groupColumns = computed<OTableColumnDef<SloStatus>[]>(() => [
   {
     id: "group_key",
     header: t("slos.column.group"),
-    accessor: (r: any) => r.group_key,
+    accessorFn: (r: any) => r.group_key,
     sortable: true,
     size: 280,
   },
   {
     id: "sli",
     header: t("slos.column.sli"),
-    accessor: (r: any) => r.sli ?? -1,
+    accessorFn: (r: any) => r.sli ?? -1,
     sortable: true,
     size: 130,
   },
   {
     id: "budget",
     header: t("slos.column.budgetRemaining"),
-    accessor: (r: any) => r.error_budget_remaining ?? null,
+    accessorFn: (r: any) => r.error_budget_remaining ?? null,
     sortable: true,
     size: 160,
   },
   {
     id: "burn",
     header: t("slos.column.burnRate"),
-    accessor: (r: any) => r.burn_rate ?? -1,
+    accessorFn: (r: any) => r.burn_rate ?? -1,
     sortable: true,
     size: 120,
   },
   {
     id: "coverage",
     header: t("slos.column.coverage"),
-    accessor: (r: any) => r.coverage,
+    accessorFn: (r: any) => r.coverage,
     sortable: true,
     size: 120,
   },

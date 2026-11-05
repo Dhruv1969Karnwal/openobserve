@@ -60,7 +60,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <!-- Destination Name Error -->
                   <span
                     data-test="destination-import-name-error"
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'destination_name'
                     "
@@ -85,7 +85,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                   <!-- URL Error -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="typeof errorMessage === 'object' && errorMessage.field == 'url'"
                   >
                     {{ errorMessage.message }}
@@ -108,7 +108,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                   <!-- Type Error -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="typeof errorMessage === 'object' && errorMessage.field == 'type'"
                   >
                     {{ errorMessage.message }}
@@ -131,7 +131,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                   <!-- Method Error -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="typeof errorMessage === 'object' && errorMessage.field == 'method'"
                   >
                     {{ errorMessage.message }}
@@ -154,7 +154,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                   <!-- Template Name Error -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'template_name'
                     "
@@ -183,7 +183,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                   <!-- Email Input Error -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'email_input'
                     "
@@ -208,7 +208,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                   <!-- Skip TLS Verify Error -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="
                       typeof errorMessage === 'object' && errorMessage.field == 'skip_tls_verify'
                     "
@@ -225,7 +225,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                   </span>
 
-                  <span class="text-status-negative" v-else>{{ errorMessage }}</span>
+                  <span class="text-status-error-text" v-else>{{ errorMessage }}</span>
                 </div>
               </div>
             </div>
@@ -249,7 +249,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :class="{
                   'px-0 py-1.25 text-sm font-bold wrap-break-word': true,
                   'text-green': val.success,
-                  'text-status-negative': !val.success,
+                  'text-status-error-text': !val.success,
                 }"
                 :data-test="`destination-import-creation-${index}-message`"
               >

@@ -139,6 +139,14 @@ export default defineComponent({
   }
 }
 
+/* Reduced motion drops the travelling sweep but keeps the opacity pulse: the bar
+   must still read as working, and a fade has no vestibular cost. */
+@media (prefers-reduced-motion: reduce) {
+  .loading-progress__shimmer {
+    animation: none;
+  }
+}
+
 @keyframes head-glow-pulse {
   0%,
   100% {

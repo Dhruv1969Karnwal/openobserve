@@ -199,18 +199,18 @@ describe("useManagementRoutes", () => {
     // beforeEnter redirects to the shared locked page in OSS instead of
     // letting navigation reach the real page — see `withFeatureGate` /
     // utils/enterpriseFeatures.ts.
-    it("should have llmProviders route in OSS builds too, and redirect when locked", () => {
+    it("should have llmProviders route in OSS builds too, and bounce it home when gated", () => {
       const llmRoute = routes[0].children.find((child: any) => child.name === "llmProviders");
       expect(llmRoute).toBeDefined();
       const mockNext = vi.fn();
       llmRoute.beforeEnter({ query: {} }, {}, mockNext);
       expect(mockNext).toHaveBeenCalledWith({
-        name: "enterpriseFeatureLocked",
-        query: { feature: "llmProviders" },
+        name: "home",
+        query: { org_identifier: undefined },
       });
     });
 
-    it("should have genAiAgentMapping route in OSS builds too, and redirect when locked", () => {
+    it("should have genAiAgentMapping route in OSS builds too, and bounce it home when gated", () => {
       const genAiRoute = routes[0].children.find(
         (child: any) => child.name === "genAiAgentMapping",
       );
@@ -218,8 +218,8 @@ describe("useManagementRoutes", () => {
       const mockNext = vi.fn();
       genAiRoute.beforeEnter({ query: {} }, {}, mockNext);
       expect(mockNext).toHaveBeenCalledWith({
-        name: "enterpriseFeatureLocked",
-        query: { feature: "genAiAgentMapping" },
+        name: "home",
+        query: { org_identifier: undefined },
       });
     });
 
@@ -309,7 +309,7 @@ describe("useManagementRoutes", () => {
       expect(actualPaths).toEqual(expectedPaths);
     });
 
-    it("should have modelPricing route in OSS builds too, and redirect when locked", () => {
+    it("should have modelPricing route in OSS builds too, and bounce it home when gated", () => {
       const modelPricingRoute = routes[0].children.find(
         (child: any) => child.name === "modelPricing",
       );
@@ -317,8 +317,8 @@ describe("useManagementRoutes", () => {
       const mockNext = vi.fn();
       modelPricingRoute.beforeEnter({ query: {} }, {}, mockNext);
       expect(mockNext).toHaveBeenCalledWith({
-        name: "enterpriseFeatureLocked",
-        query: { feature: "modelPricing" },
+        name: "home",
+        query: { org_identifier: undefined },
       });
       const modelPricingEditor = routes[0].children.find(
         (child: any) => child.name === "modelPricingEditor",
@@ -787,17 +787,17 @@ describe("useManagementRoutes", () => {
     // Registered (redirects to the locked page) rather than absent now, so
     // the route exists and shows why instead of 404ing — see
     // utils/enterpriseFeatures.ts.
-    it("is registered, and redirects to the locked page, in an OSS build", () => {
+    it("is registered in an OSS build, but its guard bounces the reader to the org home", () => {
       config.isEnterprise = "false";
       config.isCloud = "false";
 
       const route = findRoute(useManagementRoutes());
       expect(route).toBeDefined();
       const mockNext = vi.fn();
-      route.beforeEnter({ query: {} }, {}, mockNext);
+      route.beforeEnter({ query: { org_identifier: "o1" } }, {}, mockNext);
       expect(mockNext).toHaveBeenCalledWith({
-        name: "enterpriseFeatureLocked",
-        query: { feature: "passwordPolicy" },
+        name: "home",
+        query: { org_identifier: "o1" },
       });
     });
 
@@ -839,14 +839,12 @@ describe("useManagementRoutes", () => {
       expect(typeof findRoute().component).toBe("function");
     });
 
-    it("is registered in an OSS build but sends the reader to the locked-feature page", () => {
+    it("is registered in an OSS build but never reaches the locked-feature page", () => {
       config.isEnterprise = "false";
       config.isCloud = "false";
       const next = vi.fn();
       findRoute().beforeEnter({ query: {}, fullPath: "/settings/telephony" }, {}, next);
-      expect(next).toHaveBeenCalledWith(
-        expect.objectContaining({ name: "enterpriseFeatureLocked" }),
-      );
+      expect(next).toHaveBeenCalledWith(expect.objectContaining({ name: "home" }));
       expect(vi.mocked(routeGuard)).not.toHaveBeenCalled();
     });
 

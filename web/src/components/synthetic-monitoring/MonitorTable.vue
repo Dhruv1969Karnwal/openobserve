@@ -289,7 +289,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
         <OButton
           v-else
-          :variant="(row as any).enabled ? 'ghost-destructive' : 'ghost'"
+          variant="ghost"
           size="icon-sm"
           :icon-left="(row as any).enabled ? 'pause' : 'play-arrow'"
           class="max-md:hidden"
@@ -636,9 +636,9 @@ const monitorRowStyle = (row: any): Record<string, string> => {
   const status = String(row?.status ?? "").toLowerCase();
   const color =
     status === "failed"
-      ? "var(--color-error-500)"
+      ? "var(--color-row-rail-negative)"
       : status === "warning"
-        ? "var(--color-warning-500)"
+        ? "var(--color-row-rail-warning)"
         : status === "passed"
           ? "var(--color-success-500)"
           : "var(--color-grey-400)";

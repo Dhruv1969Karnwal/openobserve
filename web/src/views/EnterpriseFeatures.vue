@@ -27,18 +27,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     data-test="enterprise-features-page"
   >
     <div class="flex flex-col gap-8 pt-6 pb-4">
+      <!-- White labels here are booked, not oversight: see ACCENT_FILL_WHITE_BY_DESIGN in lib/styles/tokens/themeRuntimeContrast.spec.ts and the DECISION RECORD in constants/themes.ts. -->
       <div
         data-test="enterprise-features-banner"
-        class="rounded-surface flex flex-wrap items-center justify-between gap-4 bg-[linear-gradient(135deg,var(--color-theme-accent)_0%,color-mix(in_srgb,var(--color-theme-accent)_85%,black_15%)_100%)] px-8 py-6 text-white"
+        class="rounded-surface flex flex-wrap items-center justify-between gap-4 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-theme-accent)_50%,black)_0%,color-mix(in_srgb,var(--color-theme-accent)_35%,black)_100%)] px-8 py-6 text-white"
       >
         <div class="flex flex-col gap-1">
           <div class="text-2xl font-bold">{{ dialogConfig.heroTitle }}</div>
-          <div class="text-sm italic opacity-90">{{ dialogConfig.offerText }}</div>
+          <div class="text-sm italic">{{ dialogConfig.offerText }}</div>
         </div>
         <div class="flex flex-wrap items-center gap-4">
           <div
             v-if="!isLoadingLicense"
-            class="rounded-default bg-success-500 px-4 py-2 text-base font-bold text-white"
+            class="rounded-default bg-success-500 text-on-status-fill-text px-4 py-2 text-base font-bold"
           >
             {{ dialogConfig.badgeText }}
           </div>
@@ -46,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             v-if="dialogConfig.showPrimaryButton"
             variant="on-dark-primary"
             data-test="enterprise-features-primary-btn"
-            class="text-theme-accent! bg-white!"
+            class="bg-white!"
             @click="handlePrimaryButtonClick"
           >
             {{ dialogConfig.primaryButtonText }}

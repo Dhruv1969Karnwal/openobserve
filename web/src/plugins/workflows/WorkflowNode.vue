@@ -141,7 +141,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           class="rounded-default! bg-surface-overlay/95! h-5! w-5! min-w-5! border! p-0!"
           :class="
             isDisabled
-              ? 'border-status-positive! text-status-positive!'
+              ? 'border-status-positive! text-status-success-text!'
               : 'border-status-warning-text! text-status-warning-text!'
           "
           :data-test="`workflows-node-disable-toggle`"
@@ -158,7 +158,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <OButton
           variant="ghost"
           size="icon"
-          class="rounded-default! bg-surface-overlay/95! border-status-negative! text-status-negative! h-5! w-5! min-w-5! border! p-0!"
+          class="rounded-default! bg-surface-overlay/95! border-status-negative! text-status-error-text! h-5! w-5! min-w-5! border! p-0!"
           :data-test="`workflow-node-${data?.node_type}-delete-btn`"
           @click.stop="requestDeleteNode(id)"
         >
@@ -198,7 +198,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </div>
       <div
         v-else-if="testStatus === 'ok'"
-        class="wf-test-badge wf-test-pop nodrag bg-status-positive cursor-pointer text-white transition-transform duration-150 hover:scale-110"
+        class="wf-test-badge wf-test-pop nodrag bg-status-positive cursor-pointer text-black transition-transform duration-150 hover:scale-110"
         :data-test="`workflow-node-${data?.node_type}-test-ok`"
         @pointerdown.stop
         @click.stop="openResult"
@@ -248,13 +248,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </div>
       <div
         v-else-if="testStatus === 'error'"
-        class="wf-test-badge wf-test-pop nodrag bg-status-negative cursor-pointer text-white transition-transform duration-150 hover:scale-110"
+        class="wf-test-badge wf-test-pop nodrag bg-status-negative cursor-pointer text-black transition-transform duration-150 hover:scale-110"
         :data-test="`workflow-node-${data?.node_type}-test-error`"
         @pointerdown.stop
         @click.stop="openResult"
       >
         <OIcon name="error" size="xs" />
-        <span v-if="errorCount > 1" class="wf-test-count text-status-negative bg-white">{{
+        <span v-if="errorCount > 1" class="wf-test-count bg-white text-black">{{
           errorCount
         }}</span>
         <OTooltip side="top" align="center" :side-offset="8" max-width="22.5rem">

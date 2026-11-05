@@ -80,7 +80,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           >
             <OTruncatedText
               as="div"
-              class="text-compact text-info max-w-40 leading-[1.3] font-semibold break-words"
+              class="text-compact text-status-info-text max-w-40 leading-[1.3] font-semibold break-words"
               :class="getObservationTypeTextClass(data.gen_ai_operation_name)"
             >
               {{ data.operation_name }}

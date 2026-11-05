@@ -252,6 +252,7 @@ vi.mock("moment-timezone", () => ({
 }));
 
 import ViewDashboard from "@/views/Dashboards/ViewDashboard.vue";
+import DashboardToolbarActions from "@/components/dashboards/DashboardToolbarActions.vue";
 import i18n from "@/locales";
 import enUS from "@/locales/languages/en-US.json";
 import store from "@/test/unit/helpers/store";
@@ -2323,6 +2324,76 @@ describe("ViewDashboard", () => {
         expect(wrapper.vm.isEditingLayout).toBe(true);
         expect(panelLayout().x).toBe(20);
       });
+    });
+  });
+  describe("header action rule", () => {
+    const headerStubs = {
+      OPageLayout: {
+        template: '<div><slot name="actions" /><slot name="actions-overflow" /><slot /></div>',
+      },
+      // The overflow is what the rule moved actions into; stubbing it would
+      // stub away the thing under test.
+      DashboardToolbarActions: false,
+    };
+
+    const mountHeader = async () => {
+      wrapper = createWrapper({ global: { plugins: [i18n, store], stubs: headerStubs } });
+      await flushPromises();
+    };
+
+    it("leaves the six secondary verbs no inline button", async () => {
+      await mountHeader();
+
+      const movedInline = [
+        "dashboard-setting-btn",
+        "dashboard-print-btn",
+        "dashboard-fullscreen-btn",
+        "view-dashboard-scheduled-reports",
+        "dashboard-json-edit-btn",
+        "dashboard-view-set-home-btn",
+      ].filter((test) => wrapper.find('[data-test="' + test + '"]').exists());
+      expect(movedInline).toEqual([]);
+    });
+
+    it("hands each moved action a labelled, iconed row in the one overflow", async () => {
+      await mountHeader();
+
+      const ids = wrapper.vm.toolbarOverflowActions.map((a: any) => a.id);
+      for (const moved of ["settings", "scheduled", "json", "print", "fullscreen", "home"])
+        expect(ids).toContain(moved);
+      // Below 80rem jsdom reports no room for labels, so export folds in too.
+      if (!wrapper.vm.toolbarLabels) expect(ids).toContain("export");
+
+      for (const action of wrapper.vm.toolbarOverflowActions) {
+        expect(action.label.length).toBeGreaterThan(0);
+        expect(action.icon.length).toBeGreaterThan(0);
+      }
+      const overflow = wrapper.findComponent(DashboardToolbarActions);
+      expect(overflow.exists()).toBe(true);
+      expect(overflow.props("actions")).toEqual(wrapper.vm.toolbarOverflowActions);
+      expect(overflow.props("triggerLabel").length).toBeGreaterThan(0);
+      expect(overflow.props("flat")).toBe(wrapper.vm.isMobile);
+    });
+
+    it("keeps the print row and drops the rows that would reload outside it", async () => {
+      // The mocked store is a plain object, so the mode has to be set to mount in it.
+      Object.assign(global.mockStoreState, { printMode: true });
+      await mountHeader();
+
+      expect(wrapper.vm.toolbarOverflowActions.map((a: any) => a.id)).toEqual(["print"]);
+      Object.assign(global.mockStoreState, { printMode: false });
+    });
+
+    it("runs the row through to the dialog it opens", async () => {
+      await mountHeader();
+
+      wrapper.vm.runToolbarAction("settings");
+      await flushPromises();
+      expect(wrapper.vm.showDashboardSettingsDialog).toBe(true);
+
+      wrapper.vm.runToolbarAction("json");
+      await flushPromises();
+      expect(wrapper.vm.showJsonEditorDialog).toBe(true);
     });
   });
 });

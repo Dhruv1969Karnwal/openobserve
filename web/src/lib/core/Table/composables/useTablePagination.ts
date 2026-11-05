@@ -68,12 +68,21 @@ export function useTablePagination<TData>(
   const isFirstPage = computed(() => currentPage.value <= 1);
   const isLastPage = computed(() => currentPage.value >= totalPages.value);
 
+  // Client mode labels the rows the body actually paints: a filter can empty the
+  // set while `data` still holds every row the caller was given.
+  const paintedRowCount = computed(() =>
+    isClientMode.value ? table.getRowModel().rows.length : null,
+  );
+
   const showingFrom = computed(() => {
-    if (totalCount.value === 0) return 0;
+    if (totalCount.value === 0 || paintedRowCount.value === 0) return 0;
     return (currentPage.value - 1) * pageSize.value + 1;
   });
 
   const showingTo = computed(() => {
+    if (paintedRowCount.value !== null) {
+      return showingFrom.value === 0 ? 0 : showingFrom.value - 1 + paintedRowCount.value;
+    }
     const to = currentPage.value * pageSize.value;
     return to > totalCount.value ? totalCount.value : to;
   });

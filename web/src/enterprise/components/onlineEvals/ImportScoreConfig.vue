@@ -46,7 +46,7 @@ the Free Software Foundation, either version 3 of the License, or
               >
                 <span
                   v-if="err.field === 'name'"
-                  class="text-error-600"
+                  class="text-status-error-text"
                   data-test="score-config-import-name-error"
                 >
                   {{ err.message }}
@@ -62,7 +62,7 @@ the Free Software Foundation, either version 3 of the License, or
 
                 <span
                   v-else-if="err.field === 'nameConflict'"
-                  class="text-error-600"
+                  class="text-status-error-text"
                   data-test="score-config-import-name-conflict-error"
                 >
                   {{ err.message }}
@@ -78,7 +78,7 @@ the Free Software Foundation, either version 3 of the License, or
 
                 <span
                   v-else-if="err.field === 'dataType'"
-                  class="text-error-600"
+                  class="text-status-error-text"
                   data-test="score-config-import-datatype-error"
                 >
                   {{ err.message }}
@@ -95,7 +95,7 @@ the Free Software Foundation, either version 3 of the License, or
 
                 <span
                   v-else-if="err.field === 'numericRange' && numericRangeFixers[err.itemIndex]"
-                  class="text-error-600"
+                  class="text-status-error-text"
                   data-test="score-config-import-numeric-range-error"
                 >
                   {{ err.message }}
@@ -119,7 +119,7 @@ the Free Software Foundation, either version 3 of the License, or
 
                 <span
                   v-else-if="err.field === 'categories'"
-                  class="text-error-600"
+                  class="text-status-error-text"
                   data-test="score-config-import-categories-error"
                 >
                   {{ err.message }}
@@ -134,7 +134,7 @@ the Free Software Foundation, either version 3 of the License, or
                   </div>
                 </span>
 
-                <span v-else class="text-error-600">{{ err.message }}</span>
+                <span v-else class="text-status-error-text">{{ err.message }}</span>
               </div>
             </div>
           </div>
@@ -156,7 +156,7 @@ the Free Software Foundation, either version 3 of the License, or
                 :class="{
                   'px-0 py-1.25 text-sm font-bold': true,
                   'text-status-success-text': c.status === 'success',
-                  'text-error-600': c.status === 'error',
+                  'text-status-error-text': c.status === 'error',
                   'text-text-secondary': c.status === 'exists',
                 }"
                 :data-test="`score-config-import-creation-${i}-message`"

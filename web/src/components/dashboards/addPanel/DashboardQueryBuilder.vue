@@ -77,9 +77,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 "
                 class="dragItem bg-theme-accent rounded-default h-full w-5 opacity-70"
                 data-test="dashboard-query-builder-drag-item"
-              >
-                &nbsp;
-              </div>
+              ></div>
               <OButtonGroup
                 class="axis-field border-border-default border-s-badge-indigo-ol-border bg-surface-panel overflow-hidden border border-s-2 [&>*:not(:first-child)]:!border-s"
                 radius="sm"
@@ -247,9 +245,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 "
                 class="dragItem bg-theme-accent rounded-default h-full w-5 opacity-70"
                 data-test="dashboard-query-builder-drag-item"
-              >
-                &nbsp;
-              </div>
+              ></div>
               <OButtonGroup
                 class="axis-field border-border-default border-s-badge-orange-ol-border bg-surface-panel overflow-hidden border border-s-2 [&>*:not(:first-child)]:!border-s"
                 radius="sm"
@@ -384,9 +380,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             "
             class="dragItem bg-theme-accent rounded-default h-full w-5 opacity-70"
             data-test="dashboard-query-builder-drag-item"
-          >
-            &nbsp;
-          </div>
+          ></div>
           <OButtonGroup
             class="axis-field border-border-default border-s-badge-success-ol-border bg-surface-panel overflow-hidden border border-s-2 [&>*:not(:first-child)]:!border-s"
             radius="sm"
@@ -520,9 +514,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               "
               class="dragItem bg-theme-accent rounded-default h-full w-5 opacity-70"
               data-test="dashboard-query-builder-drag-item"
-            >
-              &nbsp;
-            </div>
+            ></div>
             <OButtonGroup
               class="axis-field border-border-default border-s-badge-success-ol-border bg-surface-panel overflow-hidden border border-s-2 [&>*:not(:first-child)]:!border-s"
               radius="sm"

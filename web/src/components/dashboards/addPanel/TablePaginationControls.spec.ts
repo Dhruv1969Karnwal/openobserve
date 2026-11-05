@@ -28,8 +28,8 @@ const mockI18n = createI18n({
       dashboard: {
         rowsPerPage: "Rows per page",
         dashboards: {
-          paginationEmpty: "0 of 0",
-          paginationRange: "{start}-{end} of {total}",
+          paginationEmpty: "Showing 0 of 0",
+          paginationRange: "Showing {start}–{end} of {total}",
         },
       },
     },
@@ -124,7 +124,7 @@ describe("TablePaginationControls", () => {
 
     it("should render count display", () => {
       wrapper = createWrapper();
-      expect(wrapper.text()).toContain("1-10 of 100");
+      expect(wrapper.text()).toContain("Showing 1–10 of 100");
     });
 
     it("should render navigation buttons when pagination is enabled and pages > 1", () => {
@@ -195,7 +195,7 @@ describe("TablePaginationControls", () => {
         totalRows: 100,
       });
 
-      expect(wrapper.text()).toContain("1-10 of 100");
+      expect(wrapper.text()).toContain("Showing 1–10 of 100");
     });
 
     it("should show correct count for middle page", () => {
@@ -205,7 +205,7 @@ describe("TablePaginationControls", () => {
         totalRows: 100,
       });
 
-      expect(wrapper.text()).toContain("21-30 of 100");
+      expect(wrapper.text()).toContain("Showing 21–30 of 100");
     });
 
     it("should show correct count for last page with partial results", () => {
@@ -215,7 +215,7 @@ describe("TablePaginationControls", () => {
         totalRows: 95,
       });
 
-      expect(wrapper.text()).toContain("91-95 of 95");
+      expect(wrapper.text()).toContain("Showing 91–95 of 95");
     });
 
     it("should show correct count when rowsPerPage is 0 (All)", () => {
@@ -225,7 +225,7 @@ describe("TablePaginationControls", () => {
         totalRows: 100,
       });
 
-      expect(wrapper.text()).toContain("1-100 of 100");
+      expect(wrapper.text()).toContain("Showing 1–100 of 100");
     });
 
     it("should show correct count when pagination is disabled", () => {
@@ -235,7 +235,7 @@ describe("TablePaginationControls", () => {
         totalRows: 50,
       });
 
-      expect(wrapper.text()).toContain("1-50 of 50");
+      expect(wrapper.text()).toContain("Showing 1–50 of 50");
     });
 
     it("should handle empty results", () => {
@@ -255,7 +255,7 @@ describe("TablePaginationControls", () => {
         totalRows: 25,
       });
 
-      expect(wrapper.text()).toContain("1-25 of 25");
+      expect(wrapper.text()).toContain("Showing 1–25 of 25");
     });
 
     it("should calculate end correctly when on last page", () => {
@@ -265,7 +265,7 @@ describe("TablePaginationControls", () => {
         totalRows: 100,
       });
 
-      expect(wrapper.text()).toContain("81-100 of 100");
+      expect(wrapper.text()).toContain("Showing 81–100 of 100");
     });
   });
 
@@ -423,7 +423,7 @@ describe("TablePaginationControls", () => {
         pagesNumber: 1,
       });
 
-      expect(wrapper.text()).toContain("1-1 of 1");
+      expect(wrapper.text()).toContain("Showing 1–1 of 1");
     });
 
     it("should handle very large totalRows", () => {
@@ -434,7 +434,7 @@ describe("TablePaginationControls", () => {
         pagesNumber: 100,
       });
 
-      expect(wrapper.text()).toContain("1-100 of 10000");
+      expect(wrapper.text()).toContain("1–100 of 10,000");
     });
 
     it("should handle page number larger than 1 with rowsPerPage 0", () => {
@@ -445,19 +445,19 @@ describe("TablePaginationControls", () => {
       });
 
       // When rowsPerPage is 0, it should still show all rows
-      expect(wrapper.text()).toContain("1-100 of 100");
+      expect(wrapper.text()).toContain("Showing 1–100 of 100");
     });
 
     it("should properly calculate start and end for various page sizes", () => {
       const testCases = [
-        { rowsPerPage: 25, page: 2, totalRows: 100, expected: "26-50 of 100" },
-        { rowsPerPage: 50, page: 1, totalRows: 100, expected: "1-50 of 100" },
-        { rowsPerPage: 100, page: 1, totalRows: 100, expected: "1-100 of 100" },
+        { rowsPerPage: 25, page: 2, totalRows: 100, expected: "Showing 26–50 of 100" },
+        { rowsPerPage: 50, page: 1, totalRows: 100, expected: "Showing 1–50 of 100" },
+        { rowsPerPage: 100, page: 1, totalRows: 100, expected: "Showing 1–100 of 100" },
         {
           rowsPerPage: 10,
           page: 10,
           totalRows: 100,
-          expected: "91-100 of 100",
+          expected: "Showing 91–100 of 100",
         },
       ];
 
@@ -520,7 +520,7 @@ describe("TablePaginationControls", () => {
       });
 
       expect(wrapper.exists()).toBe(true);
-      expect(wrapper.text()).toContain("1-50 of 50");
+      expect(wrapper.text()).toContain("Showing 1–50 of 50");
     });
   });
 
@@ -582,13 +582,13 @@ describe("TablePaginationControls", () => {
         totalRows: 100,
       });
 
-      expect(wrapper.text()).toContain("1-10 of 100");
+      expect(wrapper.text()).toContain("Showing 1–10 of 100");
 
       await wrapper.setProps({
         pagination: { rowsPerPage: 10, page: 2 },
       });
 
-      expect(wrapper.text()).toContain("11-20 of 100");
+      expect(wrapper.text()).toContain("Showing 11–20 of 100");
     });
 
     it("should recalculate countDisplay when totalRows changes", async () => {
@@ -598,13 +598,13 @@ describe("TablePaginationControls", () => {
         totalRows: 100,
       });
 
-      expect(wrapper.text()).toContain("1-10 of 100");
+      expect(wrapper.text()).toContain("Showing 1–10 of 100");
 
       await wrapper.setProps({
         totalRows: 50,
       });
 
-      expect(wrapper.text()).toContain("1-10 of 50");
+      expect(wrapper.text()).toContain("Showing 1–10 of 50");
     });
 
     it("should recalculate countDisplay when showPagination changes", async () => {
@@ -614,14 +614,14 @@ describe("TablePaginationControls", () => {
         totalRows: 100,
       });
 
-      expect(wrapper.text()).toContain("1-10 of 100");
+      expect(wrapper.text()).toContain("Showing 1–10 of 100");
 
       await wrapper.setProps({
         showPagination: false,
         pagination: { rowsPerPage: 0, page: 1 },
       });
 
-      expect(wrapper.text()).toContain("1-100 of 100");
+      expect(wrapper.text()).toContain("Showing 1–100 of 100");
     });
   });
 
@@ -715,7 +715,7 @@ describe("TablePaginationControls", () => {
         totalRows: 50,
       });
       const countEl = wrapper.find('[data-test="dashboard-table-row-count"]');
-      expect(countEl.text()).toContain("1-10 of 50");
+      expect(countEl.text()).toContain("Showing 1–10 of 50");
     });
   });
 

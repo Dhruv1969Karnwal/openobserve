@@ -111,8 +111,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
               </template>
               <template #after>
-                <div class="h-full">
-                  <div class="bg-card-glass-bg relative-position h-full w-full">
+                <div class="flex h-full min-h-0 flex-col">
+                  <!-- Below md the rail folds into the fields drawer, so the canvas owns its only trigger. -->
+                  <div
+                    v-if="isMobile"
+                    class="shrink-0 p-2"
+                    data-test="logs-mobile-stream-picker-row"
+                  >
+                    <OButton
+                      variant="outline"
+                      size="md"
+                      icon-left="database"
+                      data-test="logs-mobile-stream-picker"
+                      :aria-label="t('search.selectStream')"
+                      class="border-border-default text-text-heading min-h-11 w-full justify-start"
+                      @click="onSelectStream"
+                    >
+                      <OTruncatedText
+                        class="min-w-0 flex-1 text-left font-mono"
+                        :tooltip="mobileStreamLabel"
+                        >{{ mobileStreamLabel }}</OTruncatedText
+                      >
+                      <OIcon name="expand-more" size="sm" class="text-text-secondary shrink-0" />
+                    </OButton>
+                  </div>
+                  <div class="bg-card-glass-bg relative-position h-full min-h-0 w-full flex-1">
                     <div
                       v-if="
                         !searchObj.loadingStream &&
@@ -178,9 +201,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         @go-to-page="onSharedPageGo"
                       />
                       <LogsNoStreamState
-                        :org-id="store.state.selectedOrganization.identifier"
-                        :stream-type="searchObj.data.stream.streamType"
-                        :auto-run="isAutoRunOn"
+                        :streams="noStreamPicks"
                         data-test="logs-search-no-stream-selected-text"
                         @select-stream="onSelectStream"
                         @pick-stream="onPickStream"
@@ -493,9 +514,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 searchObj.data.stream.selectedStream.length == 0 &&
                 searchObj.data.filterErrMsg === ''
               "
-              :org-id="store.state.selectedOrganization.identifier"
-              :stream-type="searchObj.data.stream.streamType"
-              :auto-run="isAutoRunOn"
+              :streams="noStreamPicks"
               data-test="logs-drill-down-no-stream-selected-text"
               @select-stream="onSelectStream"
               @pick-stream="onPickStream"
@@ -675,7 +694,12 @@ import { hasLineComment } from "@/utils/query/sqlComments";
 import useNotifications from "@/composables/useNotifications";
 import { checkIfConfigChangeRequiredApiCallOrNot } from "@/utils/dashboard/checkConfigChangeApiCall";
 import SearchBar from "@/plugins/logs/SearchBar.vue";
-import { type ActivationState, PageType } from "@/ts/interfaces/logs.ts";
+import {
+  type ActivationState,
+  PageType,
+  resolveLogsVisualizeToggle,
+} from "@/ts/interfaces/logs.ts";
+import { checkFeatureAccess, buildFeatureGateContext } from "@/utils/enterpriseFeatures";
 import { isWebSocketEnabled, isStreamingEnabled } from "@/utils/zincutils";
 import { allSelectionFieldsHaveAlias } from "@/utils/query/visualizationUtils";
 import { shouldReloadStreamFieldsForVisualize } from "@/utils/logs/visualizeStreamFields";
@@ -706,6 +730,7 @@ import LogsNoDataState from "@/plugins/logs/LogsNoDataState.vue";
 import FirstDataPanel from "@/components/ingestion/FirstDataPanel.vue";
 import type { FirstEventResult } from "@/composables/firstEvent/useFirstEventWatch";
 import LogsNoStreamState from "@/plugins/logs/LogsNoStreamState.vue";
+import { buildStreamPicks, type LogsStreamPick } from "@/plugins/logs/logsStreamPicks";
 import LogsErrorState from "@/plugins/logs/LogsErrorState.vue";
 import LogsNoFtsPanel from "@/plugins/logs/LogsNoFtsPanel.vue";
 import LogsMissingStreamBanner from "@/plugins/logs/LogsMissingStreamBanner.vue";
@@ -736,6 +761,9 @@ import {
 import { useLogsUrlSync } from "@/composables/useLogs/useLogsUrlSync";
 import { useSearchAround } from "@/composables/useLogs/searchAround";
 import OBadge from "@/lib/core/Badge/OBadge.vue";
+import OButton from "@/lib/core/Button/OButton.vue";
+import OIcon from "@/lib/core/Icon/OIcon.vue";
+import OTruncatedText from "@/lib/core/Typography/OTruncatedText.vue";
 import {
   saveLogsSelectedStreams,
   saveLogsStreamType,
@@ -797,6 +825,9 @@ export default defineComponent({
     LogsErrorState,
     LogsAutoRunGuard,
     OBadge,
+    OButton,
+    OIcon,
+    OTruncatedText,
   },
   mixins: [MainLayoutCloudMixin],
   emits: ["sendToAiChat"],
@@ -1461,7 +1492,10 @@ export default defineComponent({
         if (urlToggle === "visualize") {
           isInitialVisualizeRestore.value = true;
         }
-        searchObj.meta.logsVisualizeToggle = urlToggle;
+        searchObj.meta.logsVisualizeToggle = resolveLogsVisualizeToggle(
+          urlToggle,
+          checkFeatureAccess("logPatterns", buildFeatureGateContext(store.state.zoConfig)).allowed,
+        );
       }
 
       // Always setup logs tab on mount
@@ -2009,6 +2043,18 @@ export default defineComponent({
       searchObj.data.stream.selectedStream = [stream];
       onStreamChange("", { origin: "selector" });
     };
+
+    // The no-stream canvas lists real streams from the list the page already
+    // fetched, so picking one is one click and never a fabricated figure.
+    const noStreamPicks = computed<LogsStreamPick[]>(() =>
+      buildStreamPicks(searchObj.data.streamResults, searchObj.data.stream.streamLists),
+    );
+
+    // The phone has no rail, so this row is the only place the chosen stream is named.
+    const mobileStreamLabel = computed(() => {
+      const picked = searchObj.data.stream.selectedStream || [];
+      return picked.length ? picked.join(", ") : t("logs.noStream.selectStream");
+    });
 
     const firstDataArrival = ref<FirstEventResult | null>(null);
     // query_on_stream_selection leaves the selection empty, so the arrival names the stream and its range itself
@@ -4058,6 +4104,7 @@ export default defineComponent({
       splitterModel,
       isMobile,
       mobileFieldsOpen,
+      mobileStreamLabel,
       // loadPageData,
       getQueryData,
       getJobData,
@@ -4094,6 +4141,7 @@ export default defineComponent({
       isAiEnabled,
       onSelectStream,
       onPickStream,
+      noStreamPicks,
       onWidenRange,
       onRemoveFilter,
       onAskAiFixQuery,

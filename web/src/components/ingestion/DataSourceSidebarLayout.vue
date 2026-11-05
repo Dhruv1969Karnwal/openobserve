@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   Shared left-sidebar shell for the Data Sources (ingestion) category pages.
 
   It owns the splitter, the gray side-nav panel + its right-border separator,
-  the optional search box, and the dense vertical tab list. Every data-source
+  the optional search box, and the vertical tab list. Every data-source
   category page (Database, Languages, Custom, …) renders this and supplies its
   own tab list + content. Tune the panel / spacing / tab density HERE to retune
   every data-source side-nav at once.
@@ -103,7 +103,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <OTabs
           :model-value="modelValue"
           orientation="vertical"
-          dense
           :class="['px-1', tabsClass]"
           @update:model-value="
             (v) => {
@@ -151,7 +150,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <OTabs
               :model-value="modelValue"
               orientation="vertical"
-              dense
               :class="['px-1', tabsClass]"
               @update:model-value="(v) => emit('update:modelValue', v)"
             >

@@ -57,37 +57,38 @@ function resetToDefault(): void {
 <template>
   <ODropdown align="end" side="bottom" :side-offset="4">
     <template #trigger>
-      <div class="relative inline-flex">
-        <OButton
-          variant="outline"
-          size="icon-sm"
-          :aria-label="
-            hiddenCount > 0
-              ? t('common.manageColumnsHidden', { count: hiddenCount })
-              : t('common.manageColumns')
-          "
-          data-test="o2-table-column-toggle-btn"
-        >
-          <template #icon-left>
-            <OIcon name="view-column" size="sm" />
-          </template>
-          <OTooltip
-            :content="
-              hiddenCount > 0
-                ? t('common.columnsHidden', { count: hiddenCount })
-                : t('common.columns')
-            "
-            side="bottom"
-          />
-        </OButton>
+      <OButton
+        variant="outline"
+        size="icon-sm"
+        :aria-label="
+          hiddenCount > 0
+            ? t('common.manageColumnsHidden', { count: hiddenCount })
+            : t('common.manageColumns')
+        "
+        data-test="o2-table-column-toggle-btn"
+      >
+        <template #icon-left>
+          <OIcon name="view-column" size="sm" />
+        </template>
+        <!-- The button is already its own positioning context, so the badge hangs
+             off it directly: an extra wrapper here would become the as-child
+             trigger and leave the real <button> without aria-expanded. -->
         <span
           v-if="hiddenCount > 0"
-          class="bg-count-badge-bg text-3xs pointer-events-none absolute -top-1 -right-1 inline-flex h-4 w-4 items-center justify-center rounded-full leading-none font-medium text-white"
+          class="bg-count-badge-bg text-button-primary-foreground text-2xs pointer-events-none absolute -top-1 -right-1 inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-0.5 leading-none font-medium"
           data-test="o2-table-column-toggle-hidden-badge"
         >
           {{ hiddenCount }}
         </span>
-      </div>
+        <OTooltip
+          :content="
+            hiddenCount > 0
+              ? t('common.columnsHidden', { count: hiddenCount })
+              : t('common.columns')
+          "
+          side="bottom"
+        />
+      </OButton>
     </template>
 
     <!-- Column list panel -->

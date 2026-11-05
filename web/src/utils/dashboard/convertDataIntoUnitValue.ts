@@ -125,11 +125,38 @@ Object.assign(units, {
 });
 
 /**
+ * The one ladder step an entire axis prints with, sized to its largest tick, or null when the unit has no ladder.
+ *
+ * @param {any} extent - the largest absolute value the axis shows
+ * @param {string} unit - the unit naming the ladder to size
+ */
+export const getPinnedUnitForExtent = (extent: any, unit: string): UnitStep | null => {
+  const ladder: UnitStep[] | undefined = units[unit];
+  if (!Array.isArray(ladder) || ladder.length === 0) return null;
+  if (extent === null || extent === undefined) return null;
+  const absExtent = Math.abs(Number(extent));
+  if (!Number.isFinite(absExtent)) return null;
+  if (absExtent === 0) {
+    // an axis of nothing but zeros still names the panel's own unit
+    return ladder.find((entry: UnitStep) => entry.divisor === 1) ?? null;
+  }
+  let pinned: UnitStep | null = null;
+  for (const entry of ladder) {
+    if (entry.divisor <= absExtent) pinned = entry;
+  }
+  // an extent below the smallest step still has to print in one unit
+  return pinned ?? ladder[0];
+};
+
+/**
  * Converts a value to a specific unit of measurement.
  *
  * @param {any} value - The value to be converted.
  * @param {string} unit - The unit of measurement to convert to.
  * @param {string} customUnit - (optional) A custom unit of measurement.
+ * @param {number} axisExtent - (optional) largest absolute tick of an axis, pinning every tick of
+ * it to one unit; omit it for a value shown on its own (tooltip, series label), which keeps its
+ * natural unit.
  * @return {object} An object containing the converted value and unit.
  */
 export const getUnitValue = (
@@ -137,6 +164,7 @@ export const getUnitValue = (
   unit: string,
   customUnit: string,
   decimals: number = 2,
+  axisExtent?: number,
 ) => {
   const pinnedLocale = localeFromUnit(unit);
   // console.time("getUnitValue:");
@@ -208,23 +236,31 @@ export const getUnitValue = (
     case "minutes":
     case "hours":
     case "days": {
+      const ladder: UnitStep[] = units[unit];
+      // An axis pins one unit from its extent so no tick switches mid-axis; a value shown alone still walks the ladder for itself.
+      const pinnedUnit =
+        axisExtent === null || axisExtent === undefined
+          ? null
+          : getPinnedUnitForExtent(axisExtent, unit);
       // start with last index
-      let unitIndex = units[unit].length - 1;
+      let unitIndex = ladder.length - 1;
       // while the value is smaller than the divisor
-      while (unitIndex > 0 && absValue < units[unit][unitIndex].divisor) {
+      while (unitIndex > 0 && absValue < ladder[unitIndex].divisor) {
         unitIndex--;
       }
-      // zero has nothing to scale, so it stays in the panel's own unit (divisor 1)
-      if (absValue === 0) {
-        const ownUnit = units[unit].findIndex((entry: { divisor: number }) => entry.divisor === 1);
+      if (pinnedUnit !== null) {
+        unitIndex = ladder.indexOf(pinnedUnit);
+      } else if (absValue === 0) {
+        // zero has nothing to scale, so it stays in the panel's own unit (divisor 1)
+        const ownUnit = ladder.findIndex((entry: UnitStep) => entry.divisor === 1);
         if (ownUnit !== -1) {
           unitIndex = ownUnit;
         }
       }
 
       // calculate the final value: sign * absValue / divisor
-      const finalValue = ((sign * absValue) / units[unit][unitIndex].divisor).toFixed(decimals);
-      const finalUnit = units[unit][unitIndex].unit;
+      const finalValue = ((sign * absValue) / ladder[unitIndex].divisor).toFixed(decimals);
+      const finalUnit = ladder[unitIndex].unit;
 
       // console.timeEnd("getUnitValue:");
       return { value: finalValue, unit: finalUnit };

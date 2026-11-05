@@ -107,6 +107,12 @@ export interface BadgeProps {
    */
   hideZeroCount?: boolean;
   /**
+   * The noun the trailing `count` counts, e.g. `t("search.streams")`. A bare
+   * number on an icon-only control names nothing, so screen readers announce
+   * "6" with no referent; when set it is spoken before the digit.
+   */
+  countNoun?: I18nText;
+  /**
    * Renders a 7px solid status dot before the label. The dot
    * inherits the badge's foreground colour (`currentColor`), so a `success`
    * badge gets a green dot, an `error` badge a red dot, etc. Use for live

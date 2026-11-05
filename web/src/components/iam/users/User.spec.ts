@@ -756,6 +756,110 @@ describe("User Component", () => {
     });
   });
 
+  describe("a row that refuses selection says why", () => {
+    it("stays silent for a row that can be selected", () => {
+      expect(wrapper.vm.rowSelectionReason({ enableDelete: true, role: "member" })).toBeUndefined();
+    });
+
+    it("names the protection on the root row", () => {
+      wrapper.vm.currentUserRole = "admin";
+      expect(wrapper.vm.rowSelectionReason({ enableDelete: false, role: "root" })).toBe(
+        "The root account is protected: it cannot be selected or deleted.",
+      );
+    });
+
+    it("names the identity source on an external row", () => {
+      wrapper.vm.currentUserRole = "admin";
+      expect(
+        wrapper.vm.rowSelectionReason({ enableDelete: false, role: "viewer", isExternal: true }),
+      ).toBe("This user signs in through an external identity source and is managed there.");
+    });
+
+    it("names the signed-in account on its own row", () => {
+      wrapper.vm.currentUserRole = "admin";
+      expect(
+        wrapper.vm.rowSelectionReason({ enableDelete: false, role: "admin", isLoggedinUser: true }),
+      ).toBe("You cannot delete the account you are signed in with.");
+    });
+
+    it("names the missing permission when the viewer cannot manage users", () => {
+      wrapper.vm.currentUserRole = "member";
+      expect(wrapper.vm.rowSelectionReason({ enableDelete: false, role: "viewer" })).toBe(
+        "Only root or an org admin can remove users.",
+      );
+    });
+  });
+
+  describe("role chips rank privilege without a hue", () => {
+    const NEUTRAL = ["default-soft", "default-outline"];
+    const ALL = ["root", "admin", "editor", "member", "viewer", "user", "serviceaccount"];
+
+    it("rings only the pair that can administer the organization", () => {
+      for (const role of ["root", "admin"]) {
+        expect(wrapper.vm.rolePillVariant(role)).toBe("default-outline");
+      }
+      for (const role of ["editor", "member", "viewer", "user", "serviceaccount"]) {
+        expect(wrapper.vm.rolePillVariant(role)).not.toBe(wrapper.vm.rolePillVariant("root"));
+      }
+    });
+
+    it("gives every role OpenObserve defines a round end, and only invented names a corner", () => {
+      // `member` is a legacy spelling the product itself defined, not a role the
+      // organization wrote. It used to be drawn square, which told a reader their
+      // own instance had invented a privilege name - and flatly contradicted both
+      // the legend and the badge rule 40 lines away in the same file.
+      for (const role of ALL) {
+        expect(wrapper.vm.rolePillShape(role)).toBe("pill");
+      }
+      expect(wrapper.vm.rolePillShape("Billing reader")).toBe("square");
+    });
+
+    it("never lets the corner contradict the built-in rule the badge already follows", () => {
+      // One question - did OpenObserve define this name? - may not get two answers
+      // on one screen. This is the invariant whose absence produced the defect.
+      for (const role of [...ALL, "Billing reader", "Member", "project-accountant"]) {
+        expect(wrapper.vm.rolePillShape(role) === "square").toBe(!wrapper.vm.isBuiltinRole(role));
+      }
+    });
+
+    it("marks a custom role by its corner, so the outline keeps meaning one thing", () => {
+      expect(wrapper.vm.rolePillShape("Billing reader")).toBe("square");
+      expect(wrapper.vm.rolePillVariant("Billing reader")).toBe("default-soft");
+    });
+
+    it("never reaches for a decorative hue", () => {
+      for (const role of [...ALL, "Billing reader"]) {
+        expect(NEUTRAL).toContain(wrapper.vm.rolePillVariant(role));
+      }
+    });
+
+    it("states both encodings in words that match what is drawn", () => {
+      const legend = wrapper.find('[data-test="user-list-role-legend"]');
+      expect(legend.exists()).toBe(true);
+      const text = legend.text();
+      // The words have to name the cues a reader can actually see. "Ringed" named
+      // neither: the rank cue is an outline versus a fill, and a filled chip reads
+      // as ringed to some viewers, which is how a rater concluded Viewer could
+      // administer the organization.
+      expect(text).toContain("outlined");
+      expect(text).toContain("filled");
+      expect(text).toContain("administer");
+      expect(text).toContain("square-cornered");
+      expect(text).toContain("round-ended");
+      // Every built-in role really is round-ended, and every invented one is not.
+      for (const role of ALL) {
+        expect(wrapper.vm.rolePillShape(role)).toBe("pill");
+      }
+      expect(wrapper.vm.rolePillShape("Billing reader")).toBe("square");
+    });
+
+    it("prints every facet tile in ink", () => {
+      wrapper.vm.currentUserRole = "admin";
+      const tones = new Set(wrapper.vm.summaryStats.map((tile: any) => tile.tone));
+      expect(tones).toEqual(new Set(["neutral"]));
+    });
+  });
+
   describe.skip("changeMaxRecordToReturn", () => {
     it("should update maxRecordToReturn value", () => {
       wrapper.vm.changeMaxRecordToReturn(1000);

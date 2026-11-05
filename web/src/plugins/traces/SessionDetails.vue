@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </template>
 
       <template #actions>
-        <template v-if="canAnnotateContext">
+        <template v-if="canAnnotateContext && queuesAccess.visible">
           <TraceAnnotateMenu
             v-if="queuesAccess.allowed"
             ref-type="session"
@@ -471,7 +471,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                           class="text-2xs inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full font-bold tabular-nums"
                           :class="
                             trace.status === 'error'
-                              ? 'text-error-500 bg-error-500/15'
+                              ? 'text-status-error-text bg-error-500/15'
                               : 'text-status-success-text bg-success-500/15'
                           "
                         >
@@ -490,7 +490,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             :tooltip="false"
                             class="text-xs"
                             :class="
-                              trace.status === 'error' ? 'text-error-500' : 'text-text-secondary'
+                              trace.status === 'error'
+                                ? 'text-status-error-text'
+                                : 'text-text-secondary'
                             "
                           >
                             {{ secondaryLine(trace) }}
@@ -1135,7 +1137,7 @@ function kpiCardClass(variant?: "danger"): string {
 
 // Accent text colour for a variant's value; "" → use the neutral default.
 function kpiAccentClass(variant?: "danger"): string {
-  if (variant === "danger") return "text-error-500";
+  if (variant === "danger") return "text-status-error-text";
   return "";
 }
 

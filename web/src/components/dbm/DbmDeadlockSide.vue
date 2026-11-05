@@ -57,11 +57,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         {{ raw(participant.application) }}
       </span>
       <template v-if="participant.user">
-        <span class="opacity-45">·</span>
+        <span class="text-text-secondary">·</span>
         <span>{{ raw(participant.user) }}</span>
       </template>
       <template v-if="participant.transaction_id">
-        <span class="opacity-45">·</span>
+        <span class="text-text-secondary">·</span>
         <span>{{ t("dbm.deadlocks.detail.transaction", { id: participant.transaction_id }) }}</span>
       </template>
     </div>

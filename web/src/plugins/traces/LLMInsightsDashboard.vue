@@ -40,9 +40,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       data-test="llm-insights"
       all-agents
       agent-skeleton
-      :show-agent-toggle="genAiAgentMappingAccess.allowed"
+      :show-agent-toggle="genAiAgentMappingAccess.visible && genAiAgentMappingAccess.allowed"
       :agent-toggle-locked-message="
-        !genAiAgentMappingAccess.allowed ? genAiAgentMappingAccess.message : undefined
+        genAiAgentMappingAccess.visible ? genAiAgentMappingAccess.message : undefined
       "
       :show-version="!compareMode"
       :labels="{
@@ -80,11 +80,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             {{ t("traces.lLMInsightsDashboard.compareEntry") }}
           </OButton>
         </OTooltip>
-        <!-- OSS can't reach Agent mode at all, so `canCompare` (which needs
-             real agent-version data) is never meaningful here — show the
-             entry locked instead of hiding it, same treatment as the Agent
-             toggle above. -->
-        <template v-else-if="!genAiAgentMappingAccess.allowed && !compareMode">
+        <!-- Under "hide" the compare entry is dropped with the rest of the gated module; a locked button here would open a refused dialog. -->
+        <template
+          v-else-if="
+            !genAiAgentMappingAccess.allowed && genAiAgentMappingAccess.visible && !compareMode
+          "
+        >
           <OButton
             variant="outline"
             size="sm"
@@ -884,7 +885,7 @@ const kpiCards = computed<KpiCard[]>(() => {
     icon: "payments",
     ...splitCost(kpi.value.totalCost),
     sparkData: sparklines.value.cost,
-    sparkColor: "#0ea5e9",
+    sparkColor: "var(--color-chart-series-1)",
   };
 
   return [
@@ -895,7 +896,7 @@ const kpiCards = computed<KpiCard[]>(() => {
       value: tokens.value,
       unit: tokens.unit,
       sparkData: sparklines.value.tokens,
-      sparkColor: "#a855f7",
+      sparkColor: "var(--color-chart-series-2)",
     },
     {
       label: t("traces.lLMInsightsDashboard.totalTraces"),
@@ -903,7 +904,7 @@ const kpiCards = computed<KpiCard[]>(() => {
       value: traces.value,
       unit: traces.unit,
       sparkData: sparklines.value.traces,
-      sparkColor: "#3b82f6",
+      sparkColor: "var(--color-chart-series-6)",
     },
     {
       label: t("traces.lLMInsightsDashboard.p95Latency"),
@@ -911,7 +912,7 @@ const kpiCards = computed<KpiCard[]>(() => {
       value: p95.value,
       unit: p95.unit,
       sparkData: sparklines.value.p95Micros,
-      sparkColor: "#f97316",
+      sparkColor: "var(--color-chart-series-3)",
       loading: p95Loading.value,
     },
     {
@@ -920,7 +921,7 @@ const kpiCards = computed<KpiCard[]>(() => {
       value: errorRate.toFixed(1),
       unit: "%",
       sparkData: sparklines.value.errorRate,
-      sparkColor: "#ef4444",
+      sparkColor: "var(--color-severity-error-color)",
     },
   ];
 });

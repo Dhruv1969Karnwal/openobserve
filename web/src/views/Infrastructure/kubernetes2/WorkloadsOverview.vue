@@ -30,6 +30,7 @@ import { KIND_INFO, type View } from "./kubernetesQueries";
 import type { DetailsRef, K8sUrlState } from "./kubernetesUrlState";
 import { detailKindOf, type EventRow } from "./kubernetesEvents";
 import { INVENTORY_KEY, filterRows, formatAge, type Inventory } from "./kubernetesModel";
+import { usageBarFill } from "../usageBarFill";
 import {
   statusCounts,
   type StatusKind,
@@ -250,6 +251,7 @@ function setNamespaces(namespaces: string[]) {
               size="xs"
               :value="row.count / card.total"
               :variant="row.variant"
+              :color="usageBarFill(row.variant)"
               :data-test="`k8s2-workloads-bar-${card.kind}-${row.status}`"
             />
           </div>

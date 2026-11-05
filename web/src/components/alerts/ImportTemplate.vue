@@ -62,7 +62,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   :data-test="`template-import-error-${index}-${errorIndex}`"
                 >
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-if="typeof errorMessage === 'object' && errorMessage.field == 'template_name'"
                   >
                     {{ errorMessage.message }}
@@ -83,7 +83,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                   </span>
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="typeof errorMessage === 'object' && errorMessage.field == 'body'"
                   >
                     {{ errorMessage.message }}
@@ -105,7 +105,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   </span>
                   <!-- Check if the errorMessage is an object, if so, display the 'message' property -->
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="typeof errorMessage === 'object' && errorMessage.field == 'type'"
                   >
                     {{ errorMessage.message }}
@@ -126,7 +126,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                   </span>
                   <span
-                    class="text-status-negative"
+                    class="text-status-error-text"
                     v-else-if="typeof errorMessage === 'object' && errorMessage.field == 'title'"
                   >
                     {{ errorMessage.message }}
@@ -146,7 +146,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       />
                     </div>
                   </span>
-                  <span class="text-status-negative" v-else>{{ errorMessage }}</span>
+                  <span class="text-status-error-text" v-else>{{ errorMessage }}</span>
                 </div>
               </div>
             </div>
@@ -166,7 +166,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :class="{
                   'error-item px-0 py-1.25 text-sm font-bold wrap-break-word': true,
                   'text-green': val.success,
-                  'text-status-negative': !val.success,
+                  'text-status-error-text': !val.success,
                 }"
                 :data-test="`template-import-creation-${index}-message`"
               >

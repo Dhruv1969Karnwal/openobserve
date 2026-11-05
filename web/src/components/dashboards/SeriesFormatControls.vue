@@ -66,7 +66,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
         <div
           v-else-if="matchState === 'some'"
-          class="text-2xs text-status-positive flex min-w-0 items-start gap-1 leading-tight"
+          class="text-2xs text-status-success-text flex min-w-0 items-start gap-1 leading-tight"
           data-test="dashboard-series-format-match-line"
           data-state="some"
         >

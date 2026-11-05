@@ -43,6 +43,8 @@ export interface CheckboxProps {
   color?: CheckboxColor;
   /** Prevents interaction */
   disabled?: boolean;
+  /** Element id carrying why the control is disabled; wired to the checkbox's `aria-describedby`. */
+  descriptionId?: string;
   /** Marks the field required — renders a `*` after the label (no manual ` *`). */
   required?: boolean;
   /** HTML id — forwarded to the native input for external label association */

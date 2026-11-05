@@ -303,14 +303,14 @@ describe("dependency kind helpers", () => {
 
   it("colours by state first, then kind", () => {
     expect(depKindColor({ kind: "destination", orphan: false, missing: true })).toBe(
-      "text-status-negative",
+      "text-status-error-text",
     );
     expect(depKindColor({ kind: "destination", orphan: true, missing: false })).toBe(
       "text-status-warning",
     );
     expect(depKindColor({ kind: "destination", orphan: false, missing: false })).toBe("text-info");
     expect(depKindColor({ kind: "alert", orphan: false, missing: false })).toBe(
-      "text-status-positive",
+      "text-status-success-text",
     );
     expect(depKindColor({ kind: "template", orphan: false, missing: false })).toBe(
       "text-text-secondary",

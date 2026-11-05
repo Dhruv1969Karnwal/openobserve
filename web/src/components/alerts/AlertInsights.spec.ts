@@ -20,9 +20,26 @@ import store from "@/test/unit/helpers/store";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
 
 const mockPush = vi.fn();
+const mockReplace = vi.fn();
+// A SHARED route object so a spec can put a `?tab=` in place BEFORE the mount —
+// the restore under test happens once, in `onMounted`.
+const mockRoute: { params: Record<string, any>; query: Record<string, any> } = {
+  params: {},
+  query: {},
+};
+/**
+ * `vi.clearAllMocks()` clears CALL RECORDS, not the object a previous cell
+ * installed, so a `?tab=` set by one test is still in place when the next one
+ * mounts — which made "starts on overview tab" measure a coerced `?tab=correlation`
+ * rather than a clean URL. Every mount has to start from an empty query.
+ */
+const resetMockRoute = () => {
+  mockRoute.params = {};
+  mockRoute.query = {};
+};
 vi.mock("vue-router", () => ({
-  useRouter: () => ({ push: mockPush, back: vi.fn() }),
-  useRoute: () => ({ params: {}, query: {} }),
+  useRouter: () => ({ push: mockPush, replace: mockReplace, back: vi.fn() }),
+  useRoute: () => mockRoute,
 }));
 
 vi.mock("@/services/alerts", async (importOriginal) => {
@@ -115,7 +132,10 @@ async function mountComp(props: Record<string, any> = {}) {
 }
 
 describe("AlertInsights - rendering", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("renders without errors", async () => {
     const w = await mountComp();
@@ -143,24 +163,153 @@ describe("AlertInsights - rendering", () => {
     expect(w.find('[data-test="tab-overview"]').exists()).toBe(true);
   });
 
-  it("shows enterprise tabs locked (not hidden) when isEnterprise is false, as clickable (not disabled) controls", async () => {
+  it("omits the enterprise tabs entirely when isEnterprise is false", async () => {
     const w = await mountComp();
-    const frequencyTab = w.find('[data-test="tab-frequency"]');
-    const correlationTab = w.find('[data-test="tab-correlation"]');
-    expect(frequencyTab.exists()).toBe(true);
-    expect(correlationTab.exists()).toBe(true);
-    // No longer a disabled control — it's clickable, and opens the upgrade
-    // dialog (via onTabsChange) instead of switching tabs.
-    expect(frequencyTab.attributes("aria-disabled")).toBeUndefined();
-    expect(correlationTab.attributes("aria-disabled")).toBeUndefined();
+    expect(w.find('[data-test="tab-frequency"]').exists()).toBe(false);
+    expect(w.find('[data-test="tab-correlation"]').exists()).toBe(false);
   });
 
-  it("opens the upgrade dialog instead of switching when a locked tab is selected", async () => {
+  /**
+   * The `?tab=` restore used to accept any string the URL carried (it only refused
+   * the two locked tabs), so a deep link like `?tab=incidents` became `currentTab`,
+   * matched no tab in the insights config, and `loadDashboard` bailed into its
+   * no-match branch — an empty insights page under a URL that looked like a working
+   * deep link. It is a closed set now, like logs' panel toggle and traces' `?tab=`.
+   */
+  it.each(["incidents", "overview ", "OVERVIEW", "", "🙃", "__proto__", "toString"])(
+    "restores the overview tab instead of adopting the non-tab value %p",
+    async (tab) => {
+      mockRoute.query = { tab };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe("overview");
+      // The no-match branch of loadDashboard left EVERY tab in the payload.
+      expect((w.vm as any).dashboardData.tabs.map((t: any) => t.tabId)).toEqual(["overview"]);
+    },
+  );
+
+  it.each([undefined, null, 0, true, {}, [], ["overview"]])(
+    "restores the overview tab for a non-string query shape (%#)",
+    async (tab) => {
+      mockRoute.query = tab === undefined ? {} : { tab };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe("overview");
+    },
+  );
+
+  /** Free tabs round-trip — the closed set is not a blanket reset to overview. */
+  it.each(["overview", "quality"])("restores the free tab %s from the URL", async (tab) => {
+    mockRoute.query = { tab };
+    const w = await mountComp();
+    await flushPromises();
+
+    expect((w.vm as any).currentTab).toBe(tab);
+  });
+
+  /**
+   * The coercion has to reach the address bar too. This component never writes
+   * `?tab=` on its own, so without the normalization the refused value stayed
+   * parked in the URL: the page rendered overview while the link still promised a
+   * tab that does not render, and a `goBack` forwarded that stale param to the
+   * Alerts list. Same convention as the list surface: the coerced tab is
+   * materialised, and by REPLACE — a normalization must not cost a history entry.
+   */
+  it.each(["incidents", "frequency", "quality "])(
+    "re-writes the URL with the restored tab %p by replace, never push",
+    async (tab) => {
+      mockRoute.query = { tab, org_identifier: "default" };
+      await mountComp();
+      await flushPromises();
+
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith({
+        query: { org_identifier: "default", tab: "overview" },
+      });
+      expect(mockPush).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Bidirectional: a URL whose tab IS canonical is left exactly as it is — no
+   * normalization hop, no extra history entry for a working deep link.
+   */
+  it.each(["overview", "quality"])(
+    "does not touch the URL for the canonical tab %s",
+    async (tab) => {
+      mockRoute.query = { tab };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe(tab);
+      expect(mockReplace).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * The one value that is refused for RENDERING but deliberately left in the URL:
+   * `tab` is shared with the Alerts list, which passes its own active tab on the way
+   * in so `goBack` can hand it back. The two vocabularies do not overlap, so
+   * `?tab=scheduled` shows overview here — and rewriting it to `overview` would
+   * reset the user's list filter on the way back. Refuse the tab, keep the token.
+   */
+  it.each(["scheduled", "realTime", "composite"])(
+    "keeps the carried-over Alerts-list tab %s in the URL while rendering overview",
+    async (tab) => {
+      mockRoute.query = { tab, org_identifier: "default" };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe("overview");
+      expect(mockReplace).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not invent a tab param for a URL that never named one", async () => {
+    mockRoute.query = {};
+    const w = await mountComp();
+    await flushPromises();
+
+    expect((w.vm as any).currentTab).toBe("overview");
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  /** Locked-tab defense in depth, now expressed by the same resolver. */
+  it.each(["frequency", "correlation"])(
+    "refuses the locked tab %s from the URL on the shipped build",
+    async (tab) => {
+      mockRoute.query = { tab };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe("overview");
+    },
+  );
+
+  /** Entitled mirror: the same links DO land on the paid tabs when unlocked. */
+  it.each(["frequency", "correlation"])(
+    "restores the paid tab %s from the URL when the feature is entitled",
+    async (tab) => {
+      const config = await import("@/aws-exports");
+      (config.default as any).isEnterprise = "true";
+      mockRoute.query = { tab };
+      const w = await mountComp();
+      await flushPromises();
+
+      expect((w.vm as any).currentTab).toBe(tab);
+      (config.default as any).isEnterprise = "false";
+    },
+  );
+
+  it("keeps the gated tab selected nowhere and opens no dialog when it is forced", async () => {
     const w = await mountComp();
     const { isOpen, close } = useEnterpriseUpgradeDialog();
     close();
     (w.vm as any).onTabsChange("frequency");
-    expect(isOpen.value).toBe(true);
+    expect(isOpen.value).toBe(false);
+    expect((w.vm as any).currentTab).toBe("overview");
   });
 
   it("renders the quality tab", async () => {
@@ -170,7 +319,10 @@ describe("AlertInsights - rendering", () => {
 });
 
 describe("AlertInsights - initial state", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("starts on overview tab", async () => {
     const w = await mountComp();
@@ -196,7 +348,10 @@ describe("AlertInsights - initial state", () => {
 });
 
 describe("AlertInsights - fetchAlerts on mount", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("calls alertsService.listByFolderId on mount", async () => {
     await mountComp();
@@ -212,7 +367,10 @@ describe("AlertInsights - fetchAlerts on mount", () => {
 });
 
 describe("AlertInsights - goBack", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("calls router.push with alertList", async () => {
     const w = await mountComp();
@@ -286,7 +444,10 @@ describe("AlertInsights - updateDateTime", () => {
 });
 
 describe("AlertInsights - handleViewHistory", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("pushes to alertHistory route with alert_name", async () => {
     const w = await mountComp();
@@ -299,7 +460,10 @@ describe("AlertInsights - handleViewHistory", () => {
 });
 
 describe("AlertInsights - handleEditAlert", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    resetMockRoute();
+    vi.clearAllMocks();
+  });
 
   it("navigates to alertList with update action when alert found", async () => {
     const w = await mountComp();

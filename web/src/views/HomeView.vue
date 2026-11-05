@@ -65,7 +65,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <button
               v-if="tab.id.startsWith('dash:')"
               type="button"
-              class="rounded-default text-text-secondary hover:bg-surface-subtle-hover hover:text-text-body ms-1 inline-flex h-4 w-4 cursor-pointer items-center justify-center border-none bg-transparent text-sm leading-none opacity-60 transition-all duration-200 ease-[ease] hover:opacity-100"
+              class="rounded-default text-text-secondary hover:bg-surface-subtle-hover hover:text-text-body ms-1 inline-flex h-4 w-4 cursor-pointer items-center justify-center border-none bg-transparent text-sm leading-none transition-all duration-200 ease-[ease]"
               :data-test="`home-tab-close-${tab.id}`"
               :aria-label="t('home.removeHomeDashboard')"
               @mousedown.stop.prevent
@@ -268,8 +268,9 @@ export default defineComponent({
       if (isEnterpriseOrCloud && store.state.zoConfig.ai_enabled) {
         tabs.push({ id: "ai", label: t("home.tabAiAssistant") });
       }
-      // Always reachable — Incidents/Services inside render locked (not
-      // hidden) in a build that doesn't unlock them (see OverviewTab.vue).
+      // Always reachable — under the shipped "hide" policy Incidents/Services are
+      // absent in a build that doesn't unlock them, not merely locked as they would
+      // be under "lock" (see OverviewTab.vue).
       tabs.push({ id: "overview", label: t("home.tabOverview") });
       tabs.push({ id: "usage", label: t("home.tabUsage") });
       // Append the org home dashboard as a single tab (if set).

@@ -83,7 +83,7 @@ describe("LabelFilterBar", () => {
       });
 
       const chip = wrapper.find('[data-test="metrics-explorer-label-chip-job"]');
-      expect(chip.text().replace(/\s+/g, " ")).toContain("job = api");
+      expect(chip.text().replace(/\s+/g, " ")).toContain('job = "api"');
     });
 
     it("defaults the operator to = when the filter omits it", () => {
@@ -92,7 +92,7 @@ describe("LabelFilterBar", () => {
       });
 
       const chip = wrapper.find('[data-test="metrics-explorer-label-chip-job"]');
-      expect(chip.text().replace(/\s+/g, " ")).toContain("job = api");
+      expect(chip.text().replace(/\s+/g, " ")).toContain('job = "api"');
     });
 
     it("emits remove with the WHOLE matcher, not just the label", async () => {
@@ -120,8 +120,8 @@ describe("LabelFilterBar", () => {
         .find('[data-test="metrics-explorer-label-filter-bar"]')
         .text()
         .replace(/\s+/g, " ");
-      expect(text).toContain("status =~ 5..");
-      expect(text).toContain("status != 503");
+      expect(text).toContain('status =~ "5.."');
+      expect(text).toContain('status != "503"');
 
       // ...and removing one names WHICH one.
       await wrapper

@@ -290,7 +290,10 @@ const rowStateClass = (row: { org: OrgOption; index: number }) => {
                 </OTruncatedText>
                 <OTruncatedText
                   v-if="row.org.identifier && row.org.identifier !== row.org.label"
-                  class="text-2xs text-text-secondary shrink font-mono leading-tight"
+                  class="text-2xs shrink font-mono leading-tight"
+                  :class="
+                    isSelected(row.org) ? 'text-select-item-selected-text' : 'text-text-secondary'
+                  "
                 >
                   {{ row.org.identifier }}
                 </OTruncatedText>
@@ -298,7 +301,8 @@ const rowStateClass = (row: { org: OrgOption; index: number }) => {
 
               <!-- Copy identifier without selecting the row. Feedback is the
                    tick on the button itself (kept visible during the flash),
-                   no toast. -->
+                   no toast.
+                   The flash ink is the per-theme accent label, not --color-accent: the copied button still sits on the selected row's accent wash, where the raw accent measured 3.03:1 (light O2 Lens) / 3.77:1 (dark O2 Pulse). -->
               <button
                 type="button"
                 data-test="organization-menu-item-copy-id"
@@ -306,7 +310,7 @@ const rowStateClass = (row: { org: OrgOption; index: number }) => {
                 class="rounded-default hover:bg-select-item-selected-bg hover:text-select-item-selected-text inline-flex size-6 shrink-0 items-center justify-center transition"
                 :class="
                   copiedId === row.org.identifier
-                    ? 'text-accent opacity-100'
+                    ? 'text-button-ghost-primary-text opacity-100'
                     : row.index === highlightedIndex
                       ? 'text-text-secondary opacity-100'
                       : 'text-text-secondary opacity-0 focus-visible:opacity-100'

@@ -16,8 +16,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <template>
   <!-- Grouped left rail (prototype admin model): the rail is always present;
-       the chosen section renders its own page (header + table) to the right. -->
-  <OPageLayout bleed :sidebar-width="230" data-test="iam-page">
+       the chosen section renders its own page (header + table) to the right.
+       delegate-sidebar puts that header in the page frame, above the rail. -->
+  <OPageLayout bleed delegate-sidebar :sidebar-width="230" data-test="iam-page">
     <template #sidebar>
       <SectionRail :groups="sectionGroups" :active-key="activeSection" :title="t('menu.iam')" />
     </template>
@@ -141,6 +142,7 @@ const sectionGroups = computed<SectionHubGroup[]>(() => {
           description: t("iam.groupsDesc"),
           icon: "group",
           to: { name: "groups", query: orgQuery.value },
+          visible: rbacAccess.visible,
           locked: !rbacAccess.allowed,
           lockedMessage: rbacAccess.message,
           lockedShowUpgradeCta: rbacAccess.ctaRelevant,
@@ -152,6 +154,7 @@ const sectionGroups = computed<SectionHubGroup[]>(() => {
           description: t("iam.rolesDesc"),
           icon: "shield",
           to: { name: "roles", query: orgQuery.value },
+          visible: rbacAccess.visible,
           locked: !rbacAccess.allowed,
           lockedMessage: rbacAccess.message,
           lockedShowUpgradeCta: rbacAccess.ctaRelevant,
@@ -163,9 +166,8 @@ const sectionGroups = computed<SectionHubGroup[]>(() => {
           description: t("iam.quotaDesc"),
           icon: "speed",
           to: { name: "quota", query: orgQuery.value },
-          // Meta-org is a cluster-topology restriction, not an edition
-          // upsell — stays a hide, not a lock.
-          visible: meta,
+          // Meta-org is a cluster-topology restriction, not an edition upsell — stays a hide, not a lock.
+          visible: meta && rbacAccess.visible,
           locked: !rbacAccess.allowed,
           lockedMessage: rbacAccess.message,
           lockedShowUpgradeCta: rbacAccess.ctaRelevant,

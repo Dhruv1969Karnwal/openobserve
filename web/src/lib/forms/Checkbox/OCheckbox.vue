@@ -116,7 +116,7 @@ const boxSizeClasses: Record<NonNullable<CheckboxProps["size"]>, string> = {
   <label
     :class="[
       'inline-flex items-center gap-2',
-      isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+      isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
     ]"
     @click.stop
   >
@@ -127,6 +127,7 @@ const boxSizeClasses: Record<NonNullable<CheckboxProps["size"]>, string> = {
       type="button"
       role="checkbox"
       :aria-label="ariaLabel"
+      :aria-describedby="descriptionId"
       :aria-checked="checked === 'indeterminate' ? 'mixed' : checked"
       :data-state="dataState"
       :disabled="isDisabled"

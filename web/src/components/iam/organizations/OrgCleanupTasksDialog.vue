@@ -99,9 +99,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :name="statusIcon(row.status)"
                 size="sm"
                 :class="{
-                  'text-success': row.status === 'done',
+                  'text-status-success-text': row.status === 'done',
                   'text-primary animate-spin': row.status === 'running',
-                  'text-error': row.status === 'failed',
+                  'text-status-error-text': row.status === 'failed',
                   'text-text-secondary': row.status === 'pending',
                 }"
               />
@@ -136,9 +136,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     :name="statusIcon(child.status)"
                     size="xs"
                     :class="{
-                      'text-success': child.status === 'done',
+                      'text-status-success-text': child.status === 'done',
                       'text-primary animate-spin': child.status === 'running',
-                      'text-error': child.status === 'failed',
+                      'text-status-error-text': child.status === 'failed',
                       'text-text-secondary': child.status === 'pending',
                     }"
                   />
@@ -158,7 +158,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
                 <div
                   v-if="child.last_error"
-                  class="text-error bg-surface-secondary rounded-default ms-6 px-2 py-1 text-xs break-words whitespace-pre-wrap"
+                  class="text-status-error-text bg-surface-secondary rounded-default ms-6 px-2 py-1 text-xs break-words whitespace-pre-wrap"
                 >
                   {{ child.last_error }}
                 </div>
@@ -178,9 +178,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :name="statusIcon(row.task.status)"
                 size="sm"
                 :class="{
-                  'text-success': row.task.status === 'done',
+                  'text-status-success-text': row.task.status === 'done',
                   'text-primary animate-spin': row.task.status === 'running',
-                  'text-error': row.task.status === 'failed',
+                  'text-status-error-text': row.task.status === 'failed',
                   'text-text-secondary': row.task.status === 'pending',
                 }"
               />
@@ -208,7 +208,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <!-- Error message — full, wrapping, contained (no cut-off) -->
             <div
               v-if="row.task.last_error"
-              class="text-error bg-surface-secondary rounded-default ms-8 px-2 py-1 text-xs break-words whitespace-pre-wrap"
+              class="text-status-error-text bg-surface-secondary rounded-default ms-8 px-2 py-1 text-xs break-words whitespace-pre-wrap"
             >
               {{ row.task.last_error }}
             </div>
@@ -224,7 +224,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <OIcon name="autorenew" size="xs" class="animate-spin" />
         <span>{{ t("iam.orgCleanupTasksDialog.refreshingEvery5s") }}</span>
       </div>
-      <div v-else-if="tasks.length && overallStatus === 'failed'" class="text-error mt-3 text-xs">
+      <div
+        v-else-if="tasks.length && overallStatus === 'failed'"
+        class="text-status-error-text mt-3 text-xs"
+      >
         {{ t("iam.orgCleanupTasksDialog.stepsFailedPermanently", { n: failedCount }) }}
       </div>
     </div>

@@ -192,12 +192,12 @@ const statusIcon = computed(() => {
 const statusClass = computed(() => {
   switch (status.value) {
     case "stopped":
-      return "text-status-negative";
+      return "text-status-error-text";
     case "waiting":
     case "warn":
       return "text-status-warning-text";
     default:
-      return "text-status-positive";
+      return "text-status-success-text";
   }
 });
 

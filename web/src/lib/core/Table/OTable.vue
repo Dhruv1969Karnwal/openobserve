@@ -17,6 +17,8 @@ import { useI18nTyped } from "@/types/i18n";
 import { useTableColumnPersistence } from "./composables/useTableColumnPersistence";
 import OTableColumnToggle from "./sub-components/OTableColumnToggle.vue";
 import { FlexRender, type Row } from "@tanstack/vue-table";
+import { shouldFillHeight } from "./fillPolicy";
+import { shouldShowFoldCue, dockReservePx, dockedBottomBandPx } from "./tableFold";
 import {
   TOOLTIP_OFF_ATTR,
   TOOLTIP_TRIGGER_ATTR,
@@ -925,6 +927,7 @@ onMounted(() => {
     containerWidth.value = scrollContainerRef.value.clientWidth;
     containerRO = new ResizeObserver(() => {
       containerWidth.value = scrollContainerRef.value?.clientWidth ?? 0;
+      measureBodyOverflow();
     });
     containerRO.observe(scrollContainerRef.value);
   }
@@ -933,6 +936,90 @@ onBeforeUnmount(() => {
   containerRO?.disconnect();
   containerRO = null;
 });
+
+// ── fillHeight="auto": the frame sizes to its content until it must scroll ──
+const tableRootRef = ref<HTMLElement | null>(null);
+const autoFills = ref(false);
+const fillsFrame = computed(
+  () => props.fillHeight === true || (props.fillHeight === "auto" && autoFills.value),
+);
+function measureAutoFill() {
+  if (props.fillHeight !== "auto") return;
+  const root = tableRootRef.value;
+  const scroller = scrollContainerRef.value;
+  const parent = root?.parentElement;
+  if (!root || !scroller || !parent) return;
+  // Measure the ROW STACK, never the scroll box: the box is what this decision
+  // stretches, so reading its height would confirm whatever it already chose.
+  // A tbody's height is content-driven and does not change when the frame grows.
+  const body = scroller.querySelector("tbody");
+  const head = scroller.querySelector("thead");
+  const frameChrome = root.offsetHeight - scroller.offsetHeight;
+  const content = body
+    ? (head?.offsetHeight ?? 0) + body.offsetHeight + frameChrome
+    : scroller.scrollHeight;
+  const next = shouldFillHeight(parent.clientHeight, content, autoFills.value);
+  if (next !== autoFills.value) autoFills.value = next;
+}
+let fillRO: ResizeObserver | null = null;
+onMounted(() => {
+  if (props.fillHeight !== "auto") return;
+  autoFills.value = true; // before the first measurement, behave as today
+  nextTick(() => requestAnimationFrame(measureAutoFill));
+  if (typeof ResizeObserver !== "undefined" && tableRootRef.value?.parentElement) {
+    fillRO = new ResizeObserver(() => measureAutoFill());
+    fillRO.observe(tableRootRef.value.parentElement);
+  }
+});
+onBeforeUnmount(() => {
+  fillRO?.disconnect();
+  fillRO = null;
+});
+watch(
+  () => [props.data?.length, props.loading, props.fillHeight],
+  () => nextTick(() => requestAnimationFrame(measureAutoFill)),
+);
+// The chrome term depends on the current stretch, so settle with one more pass.
+watch(autoFills, () => nextTick(() => requestAnimationFrame(measureAutoFill)));
+
+// ── Fold clearance: un-gated, the last row's divider and the pager's rule draw as one ──
+const bodyOverflows = ref(false);
+const scrollOverflowPx = ref(0);
+const scrollAtBottom = ref(false);
+const scrollbarTakesSpace = ref(false);
+const dockedBandReserve = ref(0);
+function measureBodyOverflow() {
+  const sc = scrollContainerRef.value;
+  if (!sc || isDelegatedScroll.value) {
+    bodyOverflows.value = false;
+    scrollOverflowPx.value = 0;
+    dockedBandReserve.value = 0;
+    return;
+  }
+  scrollOverflowPx.value = Math.max(0, sc.scrollHeight - sc.clientHeight);
+  bodyOverflows.value = scrollOverflowPx.value > 1;
+  scrollbarTakesSpace.value = sc.offsetWidth - sc.clientWidth > 0;
+  scrollAtBottom.value = sc.scrollHeight - sc.scrollTop - sc.clientHeight < 4;
+  dockedBandReserve.value = dockReservePx(dockedBottomBandPx(sc), bodyOverflows.value);
+}
+const hasDockedPager = computed(() => !!slots["pagination-bar"] || pagination.isEnabled.value);
+const foldClearance = computed(
+  () => hasDockedPager.value && bodyOverflows.value && !isDelegatedScroll.value,
+);
+const foldCue = computed(
+  () =>
+    !isDelegatedScroll.value &&
+    shouldShowFoldCue({
+      overflowPx: scrollOverflowPx.value,
+      atBottom: scrollAtBottom.value,
+      scrollbarTakesSpace: scrollbarTakesSpace.value,
+    }),
+);
+onMounted(() => nextTick(() => requestAnimationFrame(measureBodyOverflow)));
+watch(
+  () => [props.data?.length, props.loading, props.pageSize, fillsFrame.value],
+  () => nextTick(() => requestAnimationFrame(measureBodyOverflow)),
+);
 
 // ── Flex columns (fill-until-first-resize) ──────────────────────
 // Columns the page marks `meta.flex` divide the leftover width on initial
@@ -1257,6 +1344,7 @@ function handleScroll(event: Event) {
   const el = event.target as HTMLElement;
   if (!el) return;
   emit("scroll", { scrollTop: el.scrollTop, scrollLeft: el.scrollLeft });
+  scrollAtBottom.value = el.scrollHeight - el.scrollTop - el.clientHeight < 4;
 
   // Detect scroll end for lazy loading
   const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
@@ -1328,13 +1416,14 @@ defineExpose({
 
 <template>
   <div
+    ref="tableRootRef"
     data-test="o2-table-root"
     :class="[
       'flex flex-col',
       // Delegated-scroll tables must not clip, or the horizontally-overflowing
       // table is swallowed and the grid loses its bottom scrollbar.
       isDelegatedScroll ? 'overflow-visible' : 'overflow-hidden',
-      props.fillHeight ? 'h-full' : 'h-auto',
+      fillsFrame ? 'h-full' : 'h-auto',
     ]"
   >
     <!-- ── Top slot (search bar, title, actions) ─────────────── -->
@@ -1437,7 +1526,8 @@ defineExpose({
           isDelegatedScroll
             ? 'overflow-visible'
             : ['overflow-y-auto', allowHorizontalScroll ? 'overflow-x-auto' : 'overflow-x-hidden'],
-          props.fillHeight && !isDelegatedScroll ? 'flex-1' : '',
+          fillsFrame && !isDelegatedScroll ? 'flex-1' : '',
+          foldClearance ? 'o2-table-fold-clearance' : '',
         ]"
         :style="{
           maxHeight: props.maxHeight
@@ -1445,6 +1535,7 @@ defineExpose({
               ? `${props.maxHeight}px`
               : props.maxHeight
             : undefined,
+          paddingBottom: dockedBandReserve ? `${dockedBandReserve}px` : undefined,
         }"
         data-test="o2-table-scroll-container"
         @scroll="handleScroll"
@@ -1584,6 +1675,7 @@ defineExpose({
             :selection-multiple="selection.isMultiple.value"
             :is-row-selected-fn="(row: TData) => selection.isRowSelected(row)"
             :is-row-selectable="props.isRowSelectable"
+            :row-selection-reason="props.rowSelectionReason"
             :expansion-enabled="expansion.isEnabled.value"
             :is-expanded-fn="(row: TData) => expansion.isExpanded(row)"
             :get-row-expansion-enabled="props.getRowExpansionEnabled"
@@ -1773,12 +1865,12 @@ defineExpose({
         </table>
 
         <!-- ── Access Denied State ───────────────────────────── -->
-        <OTableEmpty v-if="showForbidden" :floor="!props.fillHeight" data-test="o2-table-forbidden">
+        <OTableEmpty v-if="showForbidden" :floor="!fillsFrame" data-test="o2-table-forbidden">
           <OEmptyState size="hero" preset="no-access" />
         </OTableEmpty>
 
         <!-- ── Empty State ───────────────────────────────────── -->
-        <OTableEmpty v-else-if="showEmpty" :message="props.emptyMessage" :floor="!props.fillHeight">
+        <OTableEmpty v-else-if="showEmpty" :message="props.emptyMessage" :floor="!fillsFrame">
           <template v-if="slots.empty" #default>
             <slot name="empty" />
           </template>
@@ -1816,6 +1908,17 @@ defineExpose({
           class="bg-table-streaming-bar sticky bottom-0 z-10 h-1 w-full animate-pulse"
           :aria-label="t('common.dataStreamingInProgress')"
         />
+      </div>
+
+      <!-- The fold's own cue, in flow so it never covers a row: drawn only while rows remain
+           below the fold and the platform's scrollbar paints nothing. -->
+      <div
+        v-if="foldCue"
+        data-test="o2-table-fold-cue"
+        aria-hidden="true"
+        class="border-table-row-divider bg-surface-subtle flex h-4 shrink-0 items-center justify-center border-t"
+      >
+        <OIcon name="chevron-down" size="xs" class="text-text-secondary" />
       </div>
 
       <!-- A caller-drawn pager replaces the built-in bar and is kept with pagination off, where it may still carry a row count. -->
@@ -1933,5 +2036,12 @@ defineExpose({
   position: sticky;
   top: 0;
   z-index: 1000;
+}
+
+/* The fold band a scrolled-away row ends in: keeps the last row's divider off the
+   docked pager's own rule, and lets scroll-into-view clear it too. */
+.o2-table-fold-clearance {
+  padding-bottom: 0.5rem;
+  scroll-padding-bottom: 0.5rem;
 }
 </style>

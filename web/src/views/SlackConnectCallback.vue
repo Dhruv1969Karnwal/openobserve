@@ -190,7 +190,7 @@ onMounted(() => {
         working
         :title="
           handedOff
-            ? t('alert_destinations.slackOAuth.callbackWorking', { product: raw('OpenObserve') })
+            ? t('alert_destinations.slackOAuth.callbackWorking', { product: raw('Retrace.ai') })
             : t('slackApp.connectCallback.working')
         "
       />

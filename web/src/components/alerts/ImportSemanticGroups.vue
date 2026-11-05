@@ -116,7 +116,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <!-- Additions -->
             <div v-if="diffData.additions.length > 0" class="mb-2">
               <div
-                class="border-separator text-status-positive mb-1 border-b p-1 text-sm font-semibold"
+                class="border-separator text-status-success-text mb-1 border-b p-1 text-sm font-semibold"
               >
                 <OIcon name="add-circle" size="sm" />
                 {{ t("correlation.importSemanticGroups.new") }} ({{ selectedAdditions.length }}/{{
@@ -317,7 +317,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
       </div>
       <div class="w-1/2">
-        <div class="text-status-positive mb-2 text-sm font-medium">
+        <div class="text-status-success-text mb-2 text-sm font-medium">
           {{ t("correlation.importSemanticGroups.proposed") }}
         </div>
         <div class="mb-1 text-xs">

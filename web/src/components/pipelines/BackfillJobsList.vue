@@ -174,7 +174,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <div class="flex items-center justify-center">
               <OButton
                 v-if="canPauseJob(row)"
-                variant="ghost-destructive"
+                variant="ghost"
                 size="icon-sm"
                 class="max-md:hidden"
                 @click="confirmPauseJob(row)"

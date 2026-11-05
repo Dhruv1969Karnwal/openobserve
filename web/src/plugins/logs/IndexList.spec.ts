@@ -3032,3 +3032,94 @@ describe("Index List — field values query for pipe-bearing filters", () => {
     expect(sql.slice(sql.toUpperCase().indexOf(" FROM "))).toContain("match_all('error')");
   });
 });
+
+describe("Index List stream rail", async () => {
+  const RAIL = '[data-test="logs-search-stream-quick-pick"]';
+  const ROWS = '[data-test^="logs-search-stream-quick-pick-"]';
+
+  const mountRail = async () => {
+    const w = mount(IndexList, {
+      attachTo: "#app",
+      global: {
+        provide: { store },
+        plugins: [i18n, router],
+        stubs: {},
+      },
+    });
+    await flushPromises();
+    w.vm.searchObj.data.stream.selectedStream = [];
+    w.vm.searchObj.data.streamResults = {
+      list: [
+        { name: "app_payments", stats: { doc_num: 331900, doc_time_max: 1762070300000000 } },
+        { name: "container_stdout", stats: { doc_num: 1550240, doc_time_max: 1762070400000000 } },
+        { name: "node_syslog", stats: {} },
+      ],
+    };
+    await flushPromises();
+    wrappers.push(w);
+    return w;
+  };
+
+  const wrappers: any[] = [];
+  afterEach(() => {
+    wrappers.splice(0).forEach((w) => w.unmount());
+  });
+
+  it("offers a filter before the stream list, since the org has more streams than fit the rail", async () => {
+    const w = await mountRail();
+    expect(w.find(RAIL).exists()).toBe(true);
+    expect(w.find('[data-test="logs-search-stream-filter"]').exists()).toBe(true);
+    expect(w.findAll(ROWS)).toHaveLength(3);
+  });
+
+  it("narrows the rail to the streams that match the filter", async () => {
+    const w = await mountRail();
+    await w.find('[data-test="logs-search-stream-filter"] input').setValue("app_");
+    const rows = w.findAll(ROWS);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].text()).toContain("app_payments");
+  });
+
+  it("says so when the filter matches nothing", async () => {
+    const w = await mountRail();
+    await w.find('[data-test="logs-search-stream-filter"] input').setValue("nothing-here");
+    expect(w.findAll(ROWS)).toHaveLength(0);
+    expect(w.find('[data-test="logs-search-stream-filter-empty"]').text()).toContain(
+      "No stream matches this filter.",
+    );
+  });
+
+  it("separates the streams by the volume the page already fetched", async () => {
+    const w = await mountRail();
+    const row = w.find('[data-test="logs-search-stream-quick-pick-container_stdout"]');
+    expect(row.text()).toContain("container_stdout");
+    expect(row.text()).not.toBe("container_stdout");
+    expect(w.find('[data-test="logs-search-stream-quick-pick-node_syslog"]').text()).toContain("—");
+  });
+
+  it("prints a stream's event count the same way the table beside it does", async () => {
+    // This rail and the stream table on the same screen both print
+    // `stats.doc_num` for the same stream. The rail used to abbreviate
+    // (`1.6M`, `331.9K`) while the table spelled the same quantity out
+    // (`1,550,240`, `331,900`), so one screen showed two numbers for one fact and
+    // raters read it as two different quantities. One quantity, one format.
+    const w = await mountRail();
+    expect(w.find('[data-test="logs-search-stream-quick-pick-container_stdout"]').text()).toContain(
+      "1,550,240",
+    );
+    expect(w.find('[data-test="logs-search-stream-quick-pick-app_payments"]').text()).toContain(
+      "331,900",
+    );
+    // The abbreviated forms are what made the two surfaces disagree.
+    expect(w.text()).not.toContain("1.6M");
+    expect(w.text()).not.toContain("331.9K");
+  });
+
+  it("keeps a stream row a real button so the picker is keyboard reachable", async () => {
+    const w = await mountRail();
+    const row = w.find('[data-test="logs-search-stream-quick-pick-app_payments"]');
+    expect(row.element.tagName).toBe("BUTTON");
+    await row.trigger("click");
+    expect(w.vm.searchObj.data.stream.selectedStream).toEqual(["app_payments"]);
+  });
+});

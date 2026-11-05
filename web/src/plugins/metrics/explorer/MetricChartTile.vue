@@ -76,6 +76,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <MetricCardChart
           :results="state.results"
           :queries="queries ?? []"
+          :title="title"
           :chart-type="chartType"
           :unit="o2Unit.unit"
           :unit-custom="o2Unit.unitCustom ?? undefined"
@@ -158,6 +159,8 @@ const props = withDefaults(
     color: string;
     timeRange: { start_time: number; end_time: number };
     legend?: boolean;
+    /** What the tile plots; becomes the chart's accessible name. */
+    title?: string;
     /** Offer the chart's right-click "Create alert" menu. */
     allowAlertCreation?: boolean;
     compare?: TileCompare | null;
@@ -176,6 +179,7 @@ const props = withDefaults(
     unit: null,
     bucketUnit: null,
     legend: false,
+    title: "",
     allowAlertCreation: false,
     compare: null,
     forecast: null,

@@ -31,7 +31,7 @@ const mockFetchPage = vi.fn();
 const mockCancelAll = vi.fn();
 const mockListAgents = vi.fn();
 const mockRouterPush = vi.fn();
-const mockRouterReplace = vi.fn(() => Promise.resolve());
+const mockRouterReplace = vi.fn((_to: any) => Promise.resolve());
 let mockRouteQuery: Record<string, any> = {};
 
 // The real module pulls in the streaming-search stack (vuex store et al), so
@@ -707,13 +707,11 @@ describe("SessionsList — OSS builds (neither isEnterprise nor isCloud is 'true
     config.isCloud = "false";
   });
 
-  it("locks the Agent item in the Stream/Agent toggle instead of hiding it — Agent mode needs the enterprise-only agent-mapping API", async () => {
+  it("drops the Agent item from the Stream/Agent toggle instead of locking it — Agent mode needs the enterprise-only agent-mapping API", async () => {
     config.isEnterprise = "false";
     const wrapper = await mountComponent();
-    expect(wrapper.find("[data-test='sessions-list-filter-mode']").exists()).toBe(true);
-    const agentItem = wrapper.find("[data-test='sessions-list-filter-mode-agent']");
-    expect(agentItem.exists()).toBe(true);
-    expect(agentItem.attributes("icon-right")).toBe("lock");
+    expect(wrapper.find("[data-test='sessions-list-filter-mode']").exists()).toBe(false);
+    expect(wrapper.find("[data-test='sessions-list-filter-mode-agent']").exists()).toBe(false);
   });
 
   it("forces Stream mode even when the URL asks for Agent mode", async () => {
@@ -721,8 +719,8 @@ describe("SessionsList — OSS builds (neither isEnterprise nor isCloud is 'true
     mockRouteQuery = { type: "agent" };
     const wrapper = await mountComponent();
     await flushPromises();
-    // The toggle itself is visible (locked), but filterMode is still pinned
-    // to stream — the stream selector stays up regardless.
+    // The toggle is gone under the hide policy, and filterMode is pinned to
+    // stream anyway — the stream selector stays up regardless.
     expect(wrapper.find("[data-test='sessions-list-stream-selector']").exists()).toBe(true);
     expect(wrapper.findComponent(AgentScopeCascade).exists()).toBe(false);
   });

@@ -274,7 +274,7 @@ const setRedactTools = (value: unknown) => {
         <div v-if="sharesLoading" class="flex justify-center py-3">
           <OSpinner size="sm" />
         </div>
-        <span v-else-if="sharesError" class="text-status-negative text-xs">
+        <span v-else-if="sharesError" class="text-status-error-text text-xs">
           {{ t("aiChatShare.loadFailed") }}
         </span>
         <span

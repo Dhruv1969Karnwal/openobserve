@@ -75,9 +75,11 @@ test.describe('G1 visible action reasons C2', () => {
         await trigger.click();
         await settleMenu(page);
         const scheduled = page.locator('[data-test="search-scheduler-create-new-btn"]');
-        const scheduleLocked = menu === 'more' && await page.locator('[data-test="search-scheduler-locked-icon"]').count() > 0;
-        // A locked item opens the upgrade dialog, not the query, so it carries no edited-query note.
-        if (scheduleLocked) await expect(page.locator('[data-test="search-scheduler-create-new-btn-reason"]')).toHaveCount(0);
+        // Locked-build oracle: the schedule group names itself per entitlement (web/src/plugins/logs/SearchBar.vue);
+        // the label-action lock glyph this counted is not rendered any more, and under "hide" the group is absent.
+        const scheduleLocked = menu === 'more' && await page.locator('[data-test="search-scheduler-menu-group-locked"]').count() > 0;
+        // A locked item still explains itself; its click routes to the upgrade dialog, pinned in SearchBar.paidAffordances.spec.ts.
+        if (scheduleLocked) await expect(page.locator('[data-test="search-scheduler-create-new-btn-reason"]')).toHaveCount(1);
         const availableIds = [...ids[menu], ...(menu === 'more' && !scheduleLocked && await scheduled.count() ? ['search-scheduler-create-new-btn'] : [])];
         for (const id of availableIds) {
           const item = page.locator(`[data-test="${id}"]`);

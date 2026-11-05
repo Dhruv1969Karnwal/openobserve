@@ -18,9 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <template>
   <IngestionContent ref="content" :target-stream="targetStream">
     <OText variant="body" as="p" data-test="ingestion-logs-splunkhec-intro">
-      {{
-        t("ingestion.splunkHec.intro", { brand: raw("OpenObserve"), product: raw("Splunk HEC") })
-      }}
+      {{ t("ingestion.splunkHec.intro", { brand: raw("Retrace.ai"), product: raw("Splunk HEC") }) }}
     </OText>
 
     <section class="flex flex-col gap-2" data-test="ingestion-logs-splunkhec-endpoint">
@@ -49,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <section class="flex flex-col gap-2" data-test="ingestion-logs-splunkhec-auth">
       <OText variant="body-strong" as="h3">{{ t("ingestion.splunkHec.authTitle") }}</OText>
       <OText variant="body" as="p">
-        {{ t("ingestion.splunkHec.authBody", { header: authHeader, brand: raw("OpenObserve") }) }}
+        {{ t("ingestion.splunkHec.authBody", { header: authHeader, brand: raw("Retrace.ai") }) }}
       </OText>
       <OText variant="body" as="p">
         {{ t("ingestion.splunkHec.tokenWhere") }}
@@ -170,7 +168,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <OText variant="meta" as="p" class="leading-snug">
           {{
             t("ingestion.splunkHec.tlsBody", {
-              brand: raw("OpenObserve"),
+              brand: raw("Retrace.ai"),
               setting: raw("ZO_HTTP_TLS_ENABLED"),
             })
           }}

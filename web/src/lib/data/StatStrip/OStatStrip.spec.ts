@@ -25,12 +25,12 @@ const items = [
   { key: "b", label: raw("Regressed"), value: 93 },
 ];
 
-function basisOf(compact: boolean) {
+function stripClasses(compact = false) {
   const wrapper = mount(OStatStrip, {
     props: { items, compact },
-    global: { stubs: { OStatCard: { template: '<div v-bind="$attrs" />' } } },
+    global: { stubs: { OStatCard: { template: "<div />" } } },
   });
-  return wrapper.findAll("[class]")[1]?.classes() ?? [];
+  return wrapper.find('[data-test="o-stat-strip"]').classes();
 }
 
 describe("OStatStrip", () => {
@@ -59,16 +59,15 @@ describe("OStatStrip", () => {
     });
   });
 
-  // A five-tile filter strip wraps to two rows at the default basis, which is
-  // sized for long labels.
-  it("narrows the wrap threshold when compact", () => {
-    expect(basisOf(false)).toContain("basis-52");
-    expect(basisOf(true)).toContain("basis-36");
+  // Columns are fitted by the grid, not by a growing flex row: a tile that
+  // absorbs the leftover width made the same component measure 256px on one
+  // screen and 210px plus a full-width orphan on the next.
+  it("fits equal-width columns, sized for long labels", () => {
+    expect(stripClasses()).toContain("grid-cols-[repeat(auto-fit,minmax(13rem,1fr))]");
   });
 
-  it("keeps the tiles growing to fill the strip either way", () => {
-    expect(basisOf(false)).toContain("grow");
-    expect(basisOf(true)).toContain("grow");
+  it("narrows the column minimum when compact", () => {
+    expect(stripClasses(true)).toContain("grid-cols-[repeat(auto-fit,minmax(9rem,1fr))]");
   });
 
   // ── which tile reads as active ────────────────────────────────────────────

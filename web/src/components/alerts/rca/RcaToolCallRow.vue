@@ -57,7 +57,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <p
       v-if="call.error"
       data-test="rca-tool-call-error"
-      class="text-status-negative text-2xs m-0 font-mono break-words"
+      class="text-status-error-text text-2xs m-0 font-mono break-words"
     >
       {{ call.error }}
     </p>
@@ -125,9 +125,9 @@ const statusText = computed(() => {
 const statusClass = computed(() => {
   switch (props.call.status) {
     case "ok":
-      return "text-status-positive";
+      return "text-status-success-text";
     case "error":
-      return "text-status-negative";
+      return "text-status-error-text";
     default:
       return "text-accent";
   }

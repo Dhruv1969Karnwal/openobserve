@@ -15,40 +15,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <template>
-  <OButton
-    :data-test="dataTest"
-    :aria-label="t('search.shareLink')"
-    :class="buttonClass"
-    :variant="variant"
-    :size="size"
-    :loading="isLoading"
-    :disabled="disabled || !url || isWebUrlNotConfigured"
-    :focusable-unavailable="isWebUrlNotConfigured || (disabled && !!tooltip)"
-    @click="handleShareClick"
-    icon-left="share"
-  >
-    <template #unavailable-reason>{{
-      isWebUrlNotConfigured ? t("search.webUrlNotConfigured") : tooltip
-    }}</template>
-    <span v-if="showLabel" class="ms-1">{{ t("search.shareLink") }}</span>
-    <OTooltip v-if="isWebUrlNotConfigured">
-      <template #content
-        ><OIcon name="warning" size="sm" class="me-1" />{{
-          t("search.webUrlNotConfigured")
-        }}</template
-      >
-    </OTooltip>
-    <OTooltip
-      v-else-if="tooltip || !showLabel"
-      :content="tooltip || t('search.shareLink')"
-      :shortcut="shortcut || undefined"
-      :shortcut-id="shortcutId || undefined"
-    />
-  </OButton>
+  <!-- display:contents so fallthrough attrs (data-test, class) keep a single root. -->
+  <span class="contents">
+    <OButton
+      :data-test="dataTest"
+      :aria-label="t('search.shareLink')"
+      :class="buttonClass"
+      :variant="variant"
+      :size="size"
+      :loading="isLoading"
+      :disabled="disabled || !url || isWebUrlNotConfigured"
+      :focusable-unavailable="isWebUrlNotConfigured || (disabled && !!tooltip)"
+      :description-id="isWebUrlNotConfigured ? noteId : undefined"
+      @click="handleShareClick"
+      icon-left="share"
+    >
+      <template v-if="!isWebUrlNotConfigured" #unavailable-reason>{{ tooltip }}</template>
+      <span v-if="showLabel" class="ms-1">{{ t("search.shareLink") }}</span>
+      <OTooltip v-if="isWebUrlNotConfigured">
+        <template #content
+          ><OIcon name="warning" size="sm" class="me-1" />{{
+            t("search.webUrlNotConfigured")
+          }}</template
+        >
+      </OTooltip>
+      <OTooltip
+        v-else-if="tooltip || !showLabel"
+        :content="tooltip || t('search.shareLink')"
+        :shortcut="shortcut || undefined"
+        :shortcut-id="shortcutId || undefined"
+      />
+    </OButton>
+    <!-- An explanation that lives inside a disabled button inherits the button's
+         0.5 opacity and measures 3.09:1 — the note explaining WHY a control is
+         unusable was the least legible text on the screen. Outside the faded
+         group it renders at full opacity in secondary ink, and description-id
+         keeps aria-describedby pointing at this same node. -->
+    <span v-if="isWebUrlNotConfigured" :id="noteId" class="text-text-secondary sr-only">{{
+      t("search.webUrlNotConfigured")
+    }}</span>
+  </span>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onBeforeUnmount, computed, type PropType } from "vue";
+import { defineComponent, ref, onBeforeUnmount, computed, useId, type PropType } from "vue";
 import { raw, type I18nText, useI18nTyped } from "@/types/i18n";
 import { useStore } from "vuex";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -121,6 +131,7 @@ export default defineComponent({
     const store = useStore();
 
     const isLoading = ref(false);
+    const noteId = useId();
     let pollIntervalId: number | null = null;
     let isPolling = false; // Flag to prevent multiple polling instances
 
@@ -321,6 +332,7 @@ export default defineComponent({
       t,
       isLoading,
       isWebUrlNotConfigured,
+      noteId,
       handleShareClick,
     };
   },

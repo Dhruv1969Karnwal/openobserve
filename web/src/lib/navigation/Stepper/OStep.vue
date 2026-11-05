@@ -154,7 +154,7 @@ const indicatorClasses = computed<string>(() => {
   const cursor = canClick.value ? "cursor-pointer" : "cursor-default";
 
   if (props.error) {
-    return `${base} ${cursor} bg-stepper-indicator-error text-stepper-indicator-fg`;
+    return `${base} ${cursor} bg-stepper-indicator-error text-stepper-indicator-error-fg`;
   }
   if (props.done) {
     return `${base} ${cursor} bg-stepper-indicator-done text-stepper-indicator-fg`;

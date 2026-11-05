@@ -149,7 +149,7 @@ const isStopped = computed(() =>
           >
             <div class="stream-error-header flex items-center gap-2">
               <OIcon name="warning" size="sm" />
-              <span class="stream-error-message text-status-negative font-medium">{{
+              <span class="stream-error-message text-status-error-text font-medium">{{
                 block.message
               }}</span>
             </div>

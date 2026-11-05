@@ -206,9 +206,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   v-if="!row.is_draft"
                   :data-test="`workflow-list-${row.name}-pause-start-action`"
                   :data-row-action="row.enabled ? 'pause' : 'resume'"
-                  :variant="row.enabled ? 'ghost-destructive' : 'ghost-success'"
+                  variant="ghost"
                   size="icon-sm"
                   :icon-left="row.enabled ? 'pause' : 'play-arrow'"
+                  :aria-label="row.enabled ? t('alerts.pause') : t('alerts.start')"
                   class="max-md:hidden"
                   @click.stop="toggleWorkflow(row)"
                 >

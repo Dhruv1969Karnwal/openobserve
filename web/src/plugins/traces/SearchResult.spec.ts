@@ -172,6 +172,54 @@ describe("SearchResult", () => {
   // A long operation name is often the widest thing on a trace or span row,
   // and clipping it hides exactly the part that tells two entries apart. The
   // logs table has this affordance; traces and spans need it too.
+  // The chip is a FILTER, not a second count: it has to say it is on, say how to
+  // turn it off, and it must not shout louder than the result count beside it.
+  describe("error filter chip", () => {
+    const mountWithChip = async (showErrorOnly: boolean) => {
+      mockSearchObj.data.queryResults.errorCount = 235;
+      const w = mount(SearchResult, { global: globalOptions, props: { showErrorOnly } });
+      await flushPromises();
+      return w;
+    };
+
+    afterEach(() => {
+      mockSearchObj.data.queryResults.errorCount = null;
+    });
+
+    it("exposes the filter state as a pressed toggle", async () => {
+      const on = await mountWithChip(true);
+      expect(on.find('[data-test="traces-error-count-badge"]').attributes("aria-pressed")).toBe(
+        "true",
+      );
+      on.unmount();
+      const off = await mountWithChip(false);
+      expect(off.find('[data-test="traces-error-count-badge"]').attributes("aria-pressed")).toBe(
+        "false",
+      );
+      off.unmount();
+    });
+
+    it("carries an edge when it is filtering, so the state is not tint-only", async () => {
+      const on = await mountWithChip(true);
+      const off = await mountWithChip(false);
+      const classesOf = (w: any) =>
+        w.find('[data-test="traces-error-count-badge"]').classes().join(" ");
+      expect(classesOf(on)).toContain("border-border-control");
+      expect(classesOf(off)).not.toContain("border-border-control");
+      on.unmount();
+      off.unmount();
+    });
+
+    it("tints the filter with the same error pair the status pills use", async () => {
+      const w = await mountWithChip(true);
+      const html = w.find('[data-test="traces-error-count-badge"]').html();
+      expect(html).not.toContain("badge-error-solid");
+      expect(html).not.toContain("error-tag-bg");
+      expect(html).toContain("badge-error-soft");
+      w.unmount();
+    });
+  });
+
   describe("wrap toggle", () => {
     it("renders a wrap button", () => {
       expect(wrapper.find('[data-test="traces-search-result-wrap-btn"]').exists()).toBe(true);

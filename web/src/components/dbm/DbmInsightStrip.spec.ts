@@ -92,4 +92,61 @@ describe("DbmInsightStrip", () => {
     await wrapper.find('[data-test="dbm-insight-new-expensive"]').trigger("click");
     expect(wrapper.emitted("filter")?.[0]).toEqual([one]);
   });
+
+  /**
+   * An applied insight keeps its chip on the accent-active ground until the filter
+   * is cleared, so the sentence has to survive that ground as long as the filter
+   * does — the secondary tier measures 4.15:1 there, under AA.
+   */
+  describe("the applied chip keeps its evidence sentence legible", () => {
+    const applied = () => mountStrip([insight(), insight({ id: "rank-churn" })], "new-expensive");
+    const sentenceIn = (id: string) =>
+      applied().get(`[data-test="dbm-insight-${id}"] [data-test="dbm-insight-sentence"]`);
+
+    it("paints the accent-active ground on the applied chip only", () => {
+      expect(applied().get('[data-test="dbm-insight-new-expensive"]').classes()).toContain(
+        "bg-surface-accent-active",
+      );
+      expect(applied().get('[data-test="dbm-insight-rank-churn"]').classes()).not.toContain(
+        "bg-surface-accent-active",
+      );
+    });
+
+    it("binds the heading tier to the sentence the accent-active ground holds", () => {
+      const classes = sentenceIn("new-expensive").classes();
+      expect(classes).toContain("text-text-heading");
+      expect(classes).not.toContain("text-text-secondary");
+    });
+
+    it("keeps the secondary tier on the chip that is not applied", () => {
+      const classes = sentenceIn("rank-churn").classes();
+      expect(classes).toContain("text-text-secondary");
+      expect(classes).not.toContain("text-text-heading");
+    });
+
+    it("moves the sentence to the heading tier as soon as its filter applies", async () => {
+      const wrapper = mountStrip([insight()]);
+      expect(wrapper.get('[data-test="dbm-insight-sentence"]').classes()).toContain(
+        "text-text-secondary",
+      );
+      await wrapper.setProps({ activeId: "new-expensive" });
+      expect(wrapper.get('[data-test="dbm-insight-sentence"]').classes()).toContain(
+        "text-text-heading",
+      );
+    });
+  });
+
+  /**
+   * The affordance rides the same held accent-active ground as the sentence, where
+   * --color-text-link measures 3.03:1 (light O2 Lens) / 3.77:1 (dark O2 Pulse); the
+   * per-theme picked accent label is the AA ink on that ground (5.24–12.19).
+   */
+  describe("the affordance ink survives the runtime accent ground", () => {
+    it("binds the picked accent label, never the ramp link token", () => {
+      const wrapper = mountStrip([insight()], "new-expensive");
+      const classes = wrapper.get('[data-test="dbm-insight-affordance"]').classes();
+      expect(classes).toContain("text-button-ghost-primary-text");
+      expect(classes).not.toContain("text-text-link");
+    });
+  });
 });

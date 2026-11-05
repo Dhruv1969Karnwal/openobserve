@@ -383,7 +383,7 @@ describe("ONavbar", () => {
         document.body.innerHTML = `
           <header class="o2-app-header">
             <button data-test="hamburger" style="display: none">menu</button>
-            <a data-test="header-openobserve-logo" href="/web/">logo</a>
+            <a data-test="header-retrace-logo" href="/web/">logo</a>
             <button data-test="menu-link-ai-item">ai</button>
           </header>
           <div class="o2-content-scroll"><input data-test="content-input" /></div>`;
@@ -404,7 +404,7 @@ describe("ONavbar", () => {
         nav.dispatchEvent(
           new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }),
         );
-        expect(getActiveElement()?.getAttribute("data-test")).toBe("header-openobserve-logo");
+        expect(getActiveElement()?.getAttribute("data-test")).toBe("header-retrace-logo");
       });
 
       it("Shift+Tab reaches the hamburger when it is visible", () => {

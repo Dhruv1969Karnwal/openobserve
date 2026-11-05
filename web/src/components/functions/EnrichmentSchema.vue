@@ -68,7 +68,7 @@
         <div class="mt-4 flex items-center justify-between gap-4">
           <div
             data-test="enrichment-schema-total-fields"
-            class="rounded-default bg-theme-accent text-text-inverse flex h-7.5 w-28.75 items-center justify-center text-sm"
+            class="rounded-default bg-badge-primary-soft-bg text-badge-primary-soft-text flex h-7.5 w-28.75 items-center justify-center text-sm"
           >
             {{ t("logStream.allFieldsCount", { count: schemaData.schema.length }) }}
           </div>

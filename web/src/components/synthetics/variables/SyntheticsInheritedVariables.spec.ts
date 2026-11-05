@@ -132,7 +132,7 @@ describe("SyntheticsInheritedVariables", () => {
     const tip = wrapper.find(`${rowSel} .tip-slot`);
     expect(tip.text().indexOf("Overridden by local variable")).toBe(0);
     expect(tip.text()).toContain("USER — staging: u@stage");
-    expect(tip.find("div").classes()).toContain("text-warning");
+    expect(tip.find("div").classes()).toContain("text-status-warning-text");
   });
 
   it("names the shadow relation when an env row overrides a global", () => {

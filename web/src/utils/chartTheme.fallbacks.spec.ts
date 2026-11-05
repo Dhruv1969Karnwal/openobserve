@@ -95,6 +95,39 @@ const collectCallSiteTokens = (): Set<string> => {
 };
 
 /**
+ * A helper call of the form `someResolver("--color-x", "#hex")` — the hand-rolled duplicate of
+ * `chartColor()`. Four components shipped one (SloBurndownChart, SloTimeSlicePreview,
+ * ErrorsOverTimeChart, ErrorOccurrencesChart) with pre-redesign literals that the FALLBACKS
+ * resync could not reach: the guard's call-site regex only saw `chartColor()`, the runtime census
+ * only sees DOM classes, and the raw-palette check only keys on utility class names. The sites are
+ * migrated onto `chartColor()`; this shape stays policed so a new private seam must equal the sheet
+ * the same way every FALLBACKS entry does (F-159).
+ */
+const FALLBACK_CALL =
+  /\b[A-Za-z_$][\w$]*\s*\(\s*["'](--[a-zA-Z0-9-]+)["']\s*,\s*["'](#[0-9a-fA-F]{3,8})["']\s*\)/g;
+
+const collectFallbackSites = (): Array<{ file: string; token: string; hex: string }> => {
+  const found: Array<{ file: string; token: string; hex: string }> = [];
+  for (const file of walk(SRC)) {
+    // A spec may hand its helper any fake token/fallback pair it likes; only production seams
+    // claim to mirror the sheet.
+    if (file.endsWith(".spec.ts") || file.endsWith(".spec.js")) continue;
+    const text = readFileSync(file, "utf8");
+    for (const [, token, hex] of text.matchAll(FALLBACK_CALL)) {
+      found.push({
+        file: file
+          .slice(SRC.length + 1)
+          .split("\\")
+          .join("/"),
+        token,
+        hex,
+      });
+    }
+  }
+  return found;
+};
+
+/**
  * Split CSS into (selector, body) pairs, dropping any block whose selector names
  * a dark scope — those carry the dark override of a token declared in light.
  */
@@ -219,5 +252,32 @@ describe("chartTheme FALLBACKS", () => {
       })
       .filter((offender): offender is string => offender !== null);
     expect(offenders).toEqual([]);
+  });
+
+  // The same lock, on the OTHER side of the seam: a component that resolves a token itself must
+  // carry the value the sheet has today (F-159 caught four such helpers quoting #5960b2, #6b7280,
+  // #e5e7eb, #ea1a17 and #b16300 — all pre-redesign palette, all invisible to the tests above).
+  it("resyncs every hand-rolled (token, hex) fallback call to the value the CSS declares", () => {
+    const sites = collectFallbackSites();
+    const offenders = sites
+      .map((site) => {
+        const declared = resolveToken(site.token);
+        if (declared === null)
+          return `${site.file}: ${site.token} has no light declaration in token CSS`;
+        if (normalise(declared) !== normalise(site.hex))
+          return `${site.file}: ${site.token} fallback ${site.hex} vs CSS ${declared}`;
+        return null;
+      })
+      .filter((offender): offender is string => offender !== null);
+    expect(offenders).toEqual([]);
+  });
+
+  // Anti-vacuity for the regex above: a broken pattern would pass over an empty site list.
+  it("still recognises the hand-rolled fallback call form it polices", () => {
+    const sample =
+      'const danger = resolveToken("--color-severity-error-color", "#ea1a17");' +
+      'const other = useToken("--color-accent", "#000000");';
+    const found = [...sample.matchAll(new RegExp(FALLBACK_CALL.source, "g"))].map((m) => m[1]);
+    expect(found).toEqual(["--color-severity-error-color", "--color-accent"]);
   });
 });

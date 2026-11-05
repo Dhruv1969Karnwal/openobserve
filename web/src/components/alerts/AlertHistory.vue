@@ -203,7 +203,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <template #cell-is_realtime="{ value }">
             <OIcon
               :name="value ? 'check-circle' : 'schedule'"
-              :class="value ? 'text-status-positive' : 'text-text-body'"
+              :class="value ? 'text-status-success-text' : 'text-text-body'"
               size="xs"
             >
               <OTooltip :content="value ? t('common.realTime') : t('alerts.scheduled')" />
@@ -213,7 +213,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           <template #cell-is_silenced="{ value }">
             <OIcon
               :name="value ? 'volume-off' : 'volume-up'"
-              :class="value ? 'text-text-body' : 'text-status-positive'"
+              :class="value ? 'text-text-body' : 'text-status-success-text'"
               size="md"
             >
               <OTooltip
@@ -251,7 +251,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </OIcon>
               <span class="ms-1 text-xs">×{{ row.group_size || 1 }}</span>
             </div>
-            <div v-else class="text-status-positive flex items-center justify-center">
+            <div v-else class="text-status-success-text flex items-center justify-center">
               <OIcon name="check-circle" size="md">
                 <OTooltip>
                   <template #content>

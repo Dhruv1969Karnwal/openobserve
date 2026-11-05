@@ -162,10 +162,29 @@ const useEnterpriseRoutes = () => {
           },
           component: ServiceAccountsList,
           beforeEnter(to: any, from: any, next: any) {
-            // Check if service accounts are enabled
-            // Note: Using window.store here because useStore() doesn't work in route guards
-            const store = (window as any).store;
-            const serviceAccountEnabled = store?.state?.zoConfig?.service_account_enabled ?? true;
+            // Service accounts ride the backend `/config` flag
+            // `service_account_enabled`. The `(window as any).store` read here was
+            // permanently `undefined` — nothing ever assigns `window.store` — so
+            // `?? true` made this guard fail OPEN: an org that turned service
+            // accounts off kept hiding the IAM tile while a bookmarked
+            // /iam/serviceAccounts still rendered the page.
+            //
+            // It reads the store this module already imports (the same fix the
+            // Database Monitoring gate documents in router.ts), which is what makes
+            // the flag-off bounce reachable at all. What it does NOT buy is a
+            // fail-closed default in production: the store seeds `zoConfig` as `{}`
+            // and every writer commits an object, so the `zoConfig ? … : false` arm
+            // below only fires for a caller that has no state to read — a test or a
+            // module-loaded-before-the-store edge, never a real cold load. A hard
+            // refresh before `/config` lands therefore still ALLOWS the page:
+            // "loaded but silent" is on for both `/config` itself and
+            // `useNavGateContext`, and bouncing an un-awaited cold load would break
+            // a real user's bookmark. The residual window is UI-hiding only — the
+            // backend refuses the call regardless of what this guard renders.
+            const zoConfig = store?.state?.zoConfig;
+            const serviceAccountEnabled = zoConfig
+              ? (zoConfig.service_account_enabled ?? true)
+              : false;
 
             if (!serviceAccountEnabled) {
               // Redirect to users page if service accounts are disabled

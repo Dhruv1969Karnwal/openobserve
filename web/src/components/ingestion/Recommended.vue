@@ -182,7 +182,7 @@ export default defineComponent({
           },
         },
         icon: "img:" + getImageURL("images/ingestion/aws.svg"),
-        label: raw("Amazon Web Services(AWS)"),
+        label: raw("Amazon Web Services (AWS)"),
         contentClass: "tab_content",
       },
       {
@@ -194,7 +194,7 @@ export default defineComponent({
           },
         },
         icon: "img:" + getImageURL("images/ingestion/gcp.svg"),
-        label: raw("Google Cloud Platform(GCP)"),
+        label: raw("Google Cloud Platform (GCP)"),
         contentClass: "tab_content",
       },
       {

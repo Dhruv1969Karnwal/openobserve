@@ -36,11 +36,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     onItemClick — (item) => void          click-to-add (workflows); omit for drag-only
     testPrefix  — data-test prefix, so each editor keeps its existing selectors
 
-  A `locked: true` item (edition doesn't unlock it, e.g. Remote Destination on
-  OSS/Cloud) stays IN the list rather than being omitted by the caller — a gold
-  lock glyph, not draggable, and a click opens the upgrade dialog instead of
-  adding the node, same "visible but locked" treatment as the rest of this
-  gating pass.
+  A `locked: true` item (edition doesn't unlock it, e.g. Remote Destination) is kept by
+  the caller and rendered here with a gold lock glyph, not draggable, its click opening
+  the upgrade dialog — but only in a "lock" build. Under the shipped "hide" policy
+  `visibleItems` omits locked items (and any header left childless), because their
+  dialog is refused and the row would be a dead control.
 -->
 <script lang="ts">
 import type { I18nText } from "@/types/i18n";
@@ -49,11 +49,13 @@ import type { I18nText } from "@/types/i18n";
 // than through an SFC style block, so this component carries none at all.
 import "@/components/flow/node-palette.css";
 import type { PropType } from "vue";
+import { computed } from "vue";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 import OSeparator from "@/lib/core/Separator/OSeparator.vue";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 
 interface NodePaletteItem {
   subtype?: string;
@@ -62,7 +64,7 @@ interface NodePaletteItem {
   label?: I18nText;
   tooltip?: I18nText;
   icon?: string;
-  /** Edition doesn't unlock this node — shown with a gold lock glyph; drag is disabled and click opens the upgrade dialog. */
+  /** Edition doesn't unlock this node — a "lock" build renders it with a gold lock glyph; "hide" omits it. */
   locked?: boolean;
   lockedMessage?: I18nText;
   [key: string]: unknown;
@@ -76,9 +78,19 @@ export default {
     onItemClick: { type: Function, default: undefined },
   },
   components: { OButton, OTooltip, OIcon, OSeparator },
-  setup() {
+  setup(props) {
     const { open: onLockedClick } = useEnterpriseUpgradeDialog();
-    return { onLockedClick };
+    // A locked node under "hide" is a dead control, so it is omitted with any childless section header.
+    const visibleItems = computed(() => {
+      if (showsLockedAffordances) return props.items;
+      const kept = props.items.filter((node) => !node.locked);
+      return kept.filter((node, i) => {
+        if (!node.isSectionHeader) return true;
+        const nextHeader = kept.slice(i + 1).findIndex((n) => n.isSectionHeader);
+        return nextHeader === -1 ? kept.slice(i + 1).length > 0 : nextHeader > 0;
+      });
+    });
+    return { onLockedClick, visibleItems };
   },
 };
 </script>
@@ -89,7 +101,7 @@ export default {
     :data-test="testPrefix"
   >
     <div class="np-body min-h-0 flex-1 overflow-y-auto px-1.5 py-2">
-      <template v-for="(node, idx) in items" :key="`${node.subtype}-${node.io_type}-${idx}`">
+      <template v-for="(node, idx) in visibleItems" :key="`${node.subtype}-${node.io_type}-${idx}`">
         <!-- section label (Source / Transform / Destination). Same mb-3 outer
              gap as the node cards (matching the original NodeSidebar). -->
         <div v-if="node.isSectionHeader" class="rounded-default mb-3">

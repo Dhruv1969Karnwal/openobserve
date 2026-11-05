@@ -40,7 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             v-if="locked"
             class="bg-surface-base absolute -top-1 -right-1 z-1 flex h-3.5 w-3.5 items-center justify-center rounded-full"
           >
-            <OIcon name="lock" size="xs" class="text-warning-600" />
+            <OIcon name="lock" size="xs" class="text-status-warning-text" />
           </div>
           <div
             v-if="badge && badge > 0"
@@ -263,13 +263,11 @@ export default defineComponent({
 
     const activePillClass = computed(() => {
       if (slideActive.value) {
-        return isDark.value
-          ? "text-tabs-active-text border-s-2 border-transparent"
-          : "text-accent border-s-2 border-transparent";
+        return "text-tabs-active-text border-s-2 border-transparent";
       }
       return isDark.value
         ? "text-tabs-active-text bg-tabs-active-bg border-s-2 border-accent"
-        : "text-accent bg-surface-base border-s-2 border-accent";
+        : "text-tabs-active-text bg-surface-base border-s-2 border-accent";
     });
     const activeIconClass = computed(() =>
       isDark.value ? "text-tabs-active-text!" : "text-accent!",

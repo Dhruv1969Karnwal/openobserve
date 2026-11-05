@@ -366,15 +366,15 @@ describe("SearchJobInspector — getResponseTimeLabel", () => {
   it("uses the positive status color class in dark theme for ultra-fast/fast", () => {
     store.commit("appTheme", "dark");
     const wrapper = mountComponent();
-    expect(wrapper.vm.getResponseTimeLabel(10).colorClass).toBe("text-status-positive");
-    expect(wrapper.vm.getResponseTimeLabel(100).colorClass).toBe("text-status-positive");
+    expect(wrapper.vm.getResponseTimeLabel(10).colorClass).toBe("text-status-success-text");
+    expect(wrapper.vm.getResponseTimeLabel(100).colorClass).toBe("text-status-success-text");
   });
 
   it("uses the positive status color class in light theme for ultra-fast/fast", () => {
     store.commit("appTheme", "light");
     const wrapper = mountComponent();
-    expect(wrapper.vm.getResponseTimeLabel(10).colorClass).toBe("text-status-positive");
-    expect(wrapper.vm.getResponseTimeLabel(100).colorClass).toBe("text-status-positive");
+    expect(wrapper.vm.getResponseTimeLabel(10).colorClass).toBe("text-status-success-text");
+    expect(wrapper.vm.getResponseTimeLabel(100).colorClass).toBe("text-status-success-text");
     store.commit("appTheme", "dark"); // restore
   });
 });

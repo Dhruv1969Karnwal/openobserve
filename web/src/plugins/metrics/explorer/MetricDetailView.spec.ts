@@ -15,6 +15,15 @@
 
 import { mount, flushPromises, type VueWrapper } from "@vue/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
+
+// The component branches on `PAID_FEATURE_POLICY`; both sides are asserted below.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
 
 import MetricDetailView from "./MetricDetailView.vue";
 import i18n from "@/locales";
@@ -705,7 +714,21 @@ describe("MetricDetailView", () => {
 
     describe("on an OSS build", () => {
       beforeEach(() => {
+        // These cases describe the LOCKED drilldown; the shipped policy renders nothing (first case).
+        setPaidFeaturePolicy("lock");
         (config as any).isEnterprise = "false";
+      });
+
+      afterEach(() => resetPaidFeaturePolicy());
+
+      it("renders no drilldown control at all under the shipped hide policy", async () => {
+        setPaidFeaturePolicy("hide");
+        wrapper = mountView();
+        await flushPromises();
+        expect(button().exists()).toBe(false);
+        expect(document.querySelector('[data-test="metrics-detail-drilldown-lock"]')).toBeNull();
+        // Hiding the affordance must not turn into a request for its data.
+        expect(drilldownApi.getIdentityConfig).not.toHaveBeenCalled();
       });
 
       it("is visible, disabled and locked, inside a span the tooltip hovers on, with no menu around it", () => {

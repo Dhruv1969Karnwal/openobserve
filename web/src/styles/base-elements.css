@@ -197,6 +197,14 @@ body {
     text-decoration: none;
   }
 
+  /* Monochrome brand: colour cannot mark a link, so prose links get an underline; chrome links carry a class. */
+  a:not([class]) {
+    text-decoration: underline;
+    text-underline-offset: 0.125em;
+    text-decoration-thickness: 0.0625em;
+    text-decoration-color: var(--color-border-strong);
+  }
+
   a:hover {
     color: var(--color-text-link-hover);
     text-decoration: underline;
@@ -211,6 +219,38 @@ body {
     font-size: var(--text-compact);
     color: var(--color-text-label);
     font-weight: var(--font-normal);
+  }
+}
+
+@layer base {
+  /* Global keyboard-focus indicator. Most components draw their own ring, but a
+     bare anchor, router-link or [tabindex] row had none at all — 170 `outline-none`
+     sites strip the UA default without naming a substitute. `:where()` keeps the
+     specificity at 0 so a component's own ring still wins, and the base layer
+     means any utility outranks it. */
+  :where(
+    a[href],
+    button,
+    summary,
+    input,
+    select,
+    textarea,
+    audio[controls],
+    video[controls],
+    [role="button"],
+    [role="link"],
+    [role="checkbox"],
+    [role="radio"],
+    [role="switch"],
+    [role="tab"],
+    [role="menuitem"],
+    [role="option"],
+    [role="combobox"],
+    [role="slider"],
+    [tabindex]:not([tabindex="-1"])
+  ):focus-visible {
+    outline: 0.125rem solid var(--color-focus-ring-accent);
+    outline-offset: 0.0625rem;
   }
 }
 

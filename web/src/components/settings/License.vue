@@ -56,7 +56,7 @@
                   <div
                     class="bg-banner-success-bg border-banner-success-border rounded-default flex items-center border border-solid px-4 py-3 backdrop-blur-md transition-all duration-200 dark:shadow-md"
                   >
-                    <OIcon name="check-circle" class="text-status-positive me-2" size="md" />
+                    <OIcon name="check-circle" class="text-status-success-text me-2" size="md" />
                     <span class="text-sm">{{ t("about.license_auto_filled") }}</span>
                   </div>
                 </div>
@@ -257,7 +257,7 @@
                   <div
                     class="bg-banner-success-bg border-banner-success-border rounded-default flex items-center border border-solid px-4 py-3 backdrop-blur-md transition-all duration-200 dark:shadow-md"
                   >
-                    <OIcon name="check-circle" class="text-status-positive me-2" size="md" />
+                    <OIcon name="check-circle" class="text-status-success-text me-2" size="md" />
                     <span class="text-sm">{{ t("about.license_auto_filled") }}</span>
                   </div>
                 </div>
@@ -355,7 +355,7 @@
                       v-else
                       name="check-circle"
                       size="sm"
-                      class="text-status-positive flex-shrink-0"
+                      class="text-status-success-text flex-shrink-0"
                     />
                     <span>
                       <span

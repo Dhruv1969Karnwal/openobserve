@@ -52,7 +52,7 @@ export function useSlackOAuthPopup<T>(options: UseSlackOAuthPopupOptions<T>) {
 
   const defaultMessages: Record<SlackOAuthPopupToast, () => I18nText> = {
     popupBlocked: () =>
-      t("alert_destinations.slackOAuth.popupBlocked", { product: raw("OpenObserve") }),
+      t("alert_destinations.slackOAuth.popupBlocked", { product: raw("Retrace.ai") }),
     startFailed: () => t("alert_destinations.slackOAuth.startFailed"),
     authorizationDenied: () => t("alert_destinations.slackOAuth.authorizationDenied"),
     exchangeFailed: () => t("alert_destinations.slackOAuth.exchangeFailed"),

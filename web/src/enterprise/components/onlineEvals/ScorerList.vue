@@ -370,7 +370,6 @@ const summaryStats = computed<StatItem[]>(() => {
   const c = typeCounts.value;
   const has = c.total > 0;
   const v = (n: number): string | number => (has ? n : "—");
-  const share = has ? c.total : undefined;
   return [
     {
       key: "llm_judge",
@@ -378,7 +377,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.llm),
       icon: "auto-awesome",
       tone: "blue",
-      max: share,
       dataTest: "scorer-summary-llm",
     },
     {
@@ -387,7 +385,6 @@ const summaryStats = computed<StatItem[]>(() => {
       value: v(c.remote),
       icon: "cloud",
       tone: "teal",
-      max: share,
       dataTest: "scorer-summary-remote",
     },
     {

@@ -193,7 +193,7 @@ describe("SlackLink (N7 pass-through)", () => {
     const w = await mountLink();
     const state = w.find(testId("slack-link-state-noAccess"));
     expect(state.text()).toContain("You don't have access to OpenObserve in Acme yet");
-    expect(state.text()).not.toContain("You don't have access to OpenObserve yet");
+    expect(state.text()).not.toContain("You don't have access to Retrace.ai yet");
     expect(w.find(testId("slack-link-help-contact")).text()).toBe(
       "Ask #observability-help for access.",
     );
@@ -203,11 +203,12 @@ describe("SlackLink (N7 pass-through)", () => {
   it("403 without a help contact names the administrator", async () => {
     vi.mocked(slack.startLinkRequest).mockRejectedValue(refusal(403, { message: "" }));
     const w = await mountLink();
-    expect(w.find(testId("slack-link-state-noAccess")).text()).toContain(
-      "you have no account in its organizations",
-    );
+    const state = w.find(testId("slack-link-state-noAccess"));
+    expect(state.text()).toContain("You don't have access to Retrace.ai yet");
+    expect(state.text()).not.toContain("You don't have access to OpenObserve yet");
+    expect(state.text()).toContain("you have no account in its organizations");
     expect(w.find(testId("slack-link-help-contact")).text()).toBe(
-      "Ask your OpenObserve administrator for access.",
+      "Ask your Retrace.ai administrator for access.",
     );
   });
 

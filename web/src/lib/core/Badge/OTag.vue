@@ -60,6 +60,8 @@ const props = withDefaults(
     dot?: boolean;
     /** Trailing numeric count segment (OBadge passthrough). */
     count?: number;
+    /** The noun `count` counts, spoken to screen readers before the number. */
+    countNoun?: I18nText;
     /** Suppress the trailing segment when count is 0 (OBadge passthrough). */
     hideZeroCount?: boolean;
     /** Make the badge interactive (OBadge passthrough). */
@@ -139,6 +141,7 @@ const dot = computed(() => props.dot ?? (props.type ? resolved.value.dot : false
     :dot="dot"
     :icon="icon"
     :count="count"
+    :count-noun="countNoun"
     :hide-zero-count="hideZeroCount"
     :clickable="clickable"
     :disabled="disabled"

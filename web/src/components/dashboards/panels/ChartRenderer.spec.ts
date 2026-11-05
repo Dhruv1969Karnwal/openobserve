@@ -197,10 +197,29 @@ describe("ChartRenderer", () => {
       expect(wrapper.find('[data-test="chart-renderer"]').exists()).toBe(true);
       const container = wrapper.find('[data-test="chart-renderer"]');
       expect(container.attributes("id")).toMatch(/^chart-/);
-      expect(container.attributes("role")).toBeUndefined();
+      // Unlabelled is not an option any more: an unnameable chart is unreadable.
+      expect(container.attributes("role")).toBe("img");
+      expect(container.attributes("aria-label")).toBeTruthy();
+      expect(container.attributes("aria-describedby")).toBeTruthy();
       // Sizing moved from inline `style="height:100%;width:100%"` to utilities.
       expect(container.classes()).toContain("h-full");
       expect(container.classes()).toContain("w-full");
+    });
+
+    it("ships a text equivalent and a data-table control with every chart", () => {
+      expect(wrapper.find('[data-test="chart-text-equivalent"]').text()).toContain("Series key");
+      const toggle = wrapper.find('[data-test="chart-data-table-toggle"]');
+      expect(toggle.attributes("aria-expanded")).toBe("false");
+      expect(wrapper.find('[data-test="chart-data-table"]').exists()).toBe(false);
+    });
+
+    it("renders the payload as a table with header scopes when the control is opened", async () => {
+      await wrapper.find('[data-test="chart-data-table-toggle"]').trigger("click");
+      const table = wrapper.find('[data-test="chart-data-table"] table');
+      expect(table.exists()).toBe(true);
+      expect(table.find("caption").text()).toContain("plotted values");
+      expect(table.findAll('thead th[scope="col"]').length).toBeGreaterThan(1);
+      expect(table.findAll('tbody th[scope="row"]').length).toBeGreaterThan(0);
     });
 
     it("should initialize ECharts instance", async () => {
@@ -624,7 +643,7 @@ describe("ChartRenderer", () => {
       const handlerFor = (mockChart: { on: { mock: { calls: unknown[][] } } }, name: string) =>
         mockChart.on.mock.calls.find((call) => call[0] === name)?.[1] as (params: unknown) => void;
 
-      it("lets ECharts describe the chart only when no label names it", async () => {
+      it("keeps ECharts' own description off — the component states the equivalent", async () => {
         const mockChart = await chartMock();
         const lastAria = () => vi.mocked(mockChart.setOption).mock.calls.at(-1)?.[0].aria;
 
@@ -632,7 +651,7 @@ describe("ChartRenderer", () => {
           data: { ...mockChartData, options: { ...mockChartData.options } },
         });
         await flushPromises();
-        expect(lastAria()).toEqual({ enabled: true });
+        expect(lastAria()).toEqual({ enabled: false });
 
         await wrapper.setProps({
           label: raw("CPU usage"),

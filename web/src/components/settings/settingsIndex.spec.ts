@@ -36,7 +36,8 @@ const mockRouter = {
   replace: mockReplace,
   currentRoute: {
     value: {
-      name: "settings",
+      // widened so the `name = undefined` case below stays type-valid
+      name: "settings" as string | undefined,
       path: "/settings",
       query: {},
     },
@@ -497,6 +498,26 @@ describe("SettingsIndex.vue", () => {
     });
   });
 
+  describe("readingMeasure computed property", () => {
+    it("gives General the narrow column its handful of fields needs", () => {
+      mockRouter.currentRoute.value.name = "general";
+      wrapper = createWrapper();
+      expect(wrapper.vm.readingMeasure).toBe("md");
+    });
+
+    it("keeps the other form sections at the hub width", () => {
+      mockRouter.currentRoute.value.name = "organization";
+      wrapper = createWrapper();
+      expect(wrapper.vm.readingMeasure).toBe("lg");
+    });
+
+    it("leaves password policy on the full width it already used", () => {
+      mockRouter.currentRoute.value.name = "passwordPolicy";
+      wrapper = createWrapper({ zoConfig: { meta_org: "_meta" } });
+      expect(wrapper.vm.readingMeasure).toBe("full");
+    });
+  });
+
   describe("password policy section", () => {
     const findEntry = (w: any) =>
       w.vm.sectionGroups
@@ -525,12 +546,12 @@ describe("SettingsIndex.vue", () => {
       expect(findEntry(wrapper)?.visible).toBe(false);
     });
 
-    it("shows locked (not hidden) in an OSS build, even in the meta org", () => {
+    it("is hidden, not locked, in an OSS build under the shipped hide policy", () => {
       config.isEnterprise = "false";
       isMetaOrgRef.value = true;
       wrapper = createWrapper();
 
-      expect(findEntry(wrapper)?.visible).toBe(true);
+      expect(findEntry(wrapper)?.visible).toBe(false);
       expect(findEntry(wrapper)?.locked).toBe(true);
     });
 

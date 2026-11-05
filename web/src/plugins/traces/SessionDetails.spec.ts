@@ -528,7 +528,7 @@ describe("SessionDetails — turn rows", () => {
     // Look for the status badge span within the header
     const badgeSpan = header
       .findAll("span")
-      .find((s) => s.classes().join("").includes("text-error-500"));
+      .find((s) => s.classes().join("").includes("text-status-error-text"));
     expect(badgeSpan).toBeTruthy();
   });
 

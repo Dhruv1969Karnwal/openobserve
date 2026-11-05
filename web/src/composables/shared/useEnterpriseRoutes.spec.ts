@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import useEnterpriseRoutes from "./useEnterpriseRoutes";
 import enLocale from "@/locales/languages/en-US.json";
 import store from "@/stores";
@@ -127,8 +127,8 @@ describe("useEnterpriseRoutes.ts", () => {
 
       // Compare structure without function instances
       expect(routes1.length).toBe(routes2.length);
-      expect(routes1.map((r) => ({ path: r.path, name: r.name }))).toEqual(
-        routes2.map((r) => ({ path: r.path, name: r.name })),
+      expect(routes1.map((r: any) => ({ path: r.path, name: r.name }))).toEqual(
+        routes2.map((r: any) => ({ path: r.path, name: r.name })),
       );
     });
   });
@@ -657,20 +657,148 @@ describe("useEnterpriseRoutes.ts", () => {
       expect(routeGuard).toHaveBeenCalledWith(mockTo, mockFrom, mockNext);
     });
 
-    it("redirects to the locked page when rbac_enabled is explicitly false", async () => {
+    // Shipped policy: `PAID_FEATURE_POLICY = "hide"` in utils/enterpriseFeatures.ts makes an
+    // admin-disabled RBAC surface invisible rather than locked, so the guard sends the visit to
+    // home — the consequence of shipping "hide": `enterpriseFeature.rbacDisabled` is unreachable
+    // by design, and the bounce drops `redirect: to.fullPath`, since a hidden feature has no
+    // in-app unlock path to return from.
+    it("redirects to home when rbac_enabled is explicitly false under the shipped hide policy", async () => {
       store.state.zoConfig = { ...store.state.zoConfig, rbac_enabled: false };
+      const { routeGuard } = await import("@/utils/zincutils");
       const routes = useEnterpriseRoutes();
       const iamRoute = routes.find((route: any) => route.name === "iam");
       const groupsRoute = iamRoute.children.find((child: any) => child.name === "groups");
 
-      const mockTo = { query: {}, fullPath: "/iam/groups" };
+      const mockTo = { query: { org_identifier: "ox" }, fullPath: "/iam/groups" };
       const mockFrom = {};
       const mockNext = vi.fn();
 
       groupsRoute.beforeEnter(mockTo, mockFrom, mockNext);
-      expect(mockNext).toHaveBeenCalledWith(
+      expect(mockNext).toHaveBeenCalledWith({ name: "home", query: { org_identifier: "ox" } });
+      expect(mockNext).not.toHaveBeenCalledWith(
         expect.objectContaining({ name: "enterpriseFeatureLocked" }),
       );
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    // The lock-era intent behind the test above, restated as the decision the guard reads. The
+    // `enterpriseFeatureLocked` branch of `withFeatureGate` cannot
+    // be exercised in place: `withFeatureGate` and `checkFeatureAccess` read the shipped constant
+    // from inside their own module, which is exactly the limitation the helper file
+    // documents — `setPaidFeaturePolicy("lock")` would only change what CONSUMERS import, so a
+    // "lock mode" case here would be testing the helper's spread, not this guard.
+    it("reports admin-disabled rbac as hidden and not upgradable", async () => {
+      const { checkFeatureAccess } = await import("@/utils/enterpriseFeatures");
+      const access = checkFeatureAccess("rbac", {
+        isEnterprise: false,
+        isCloud: true,
+        rbac: false,
+      });
+
+      expect(access.allowed).toBe(false);
+      expect(access.visible).toBe(false);
+      expect(access.ctaRelevant).toBe(false);
+      expect(String(access.message)).toBe("");
+      // The explanation this policy can no longer show still ships, for whoever flips the constant.
+      expect(enMessage("enterpriseFeature.rbacDisabled")).toContain("RBAC is turned off");
+    });
+  });
+
+  // ==========================================================================
+  // The serviceAccounts guard used to read a `window.store` nothing assigns
+  // ==========================================================================
+  /**
+   * `store?.state?.zoConfig?.service_account_enabled ?? true` on a permanently
+   * `undefined` read made this guard fail OPEN: an org that turns service
+   * accounts off keeps hiding the IAM tile — which reads the REAL store — while a
+   * bookmarked `/iam/serviceAccounts` still rendered the page. It now reads the
+   * store singleton this module already imports for the synthetics/workflow
+   * guards, and fails CLOSED when there is no config state to read at all.
+   */
+  describe("serviceAccounts guard reads the real store", () => {
+    let previousZoConfig: any;
+
+    beforeEach(() => {
+      previousZoConfig = store.state.zoConfig;
+    });
+
+    afterEach(() => {
+      store.state.zoConfig = previousZoConfig;
+    });
+
+    const serviceAccountsRoute = () => {
+      const iamRoute = useEnterpriseRoutes().find((route: any) => route.name === "iam");
+      return iamRoute.children.find((child: any) => child.name === "serviceAccounts");
+    };
+
+    /** The cell the dead read could never reach: the flag-off bounce is alive. */
+    it("bounces to users when the loaded /config turns service accounts off", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      store.state.zoConfig = { ...store.state.zoConfig, service_account_enabled: false };
+      const to = { query: { org_identifier: "ox" } };
+      const next = vi.fn();
+
+      serviceAccountsRoute().beforeEnter(to, {}, next);
+
+      expect(next).toHaveBeenCalledWith({ name: "users", query: { org_identifier: "ox" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /** Bidirectional mirror: the same config with the flag on reaches the page. */
+    it("lets the page through when the loaded /config keeps service accounts on", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      store.state.zoConfig = { ...store.state.zoConfig, service_account_enabled: true };
+      const to = { query: { org_identifier: "ox" } };
+      const next = vi.fn();
+
+      serviceAccountsRoute().beforeEnter(to, {}, next);
+
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+      expect(next).not.toHaveBeenCalledWith(expect.objectContaining({ name: "users" }));
+    });
+
+    /** Fail-closed negative: "no state to read" is not evidence the flag is on. */
+    it("denies the page when the store carries no zoConfig at all", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      store.state.zoConfig = null as any;
+      const to = { query: { org_identifier: "ox" } };
+      const next = vi.fn();
+
+      serviceAccountsRoute().beforeEnter(to, {}, next);
+
+      expect(next).toHaveBeenCalledWith({ name: "users", query: { org_identifier: "ox" } });
+      expect(routeGuard).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Cold-load counterpart, and the one case the old guard got right by
+     * accident: an un-awaited `/config` is `{}`, and both `/config` itself and
+     * `useNavGateContext` read an absent flag as on — bouncing here would break a
+     * real user's refresh of a page they are entitled to.
+     */
+    it("lets an entitled cold load through while /config is still unloaded", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      store.state.zoConfig = {};
+      const to = { query: { org_identifier: "ox" } };
+      const next = vi.fn();
+
+      serviceAccountsRoute().beforeEnter(to, {}, next);
+
+      expect(routeGuard).toHaveBeenCalledWith(to, {}, next);
+    });
+
+    /** The read is the store singleton, not a global: deleting one changes nothing. */
+    it("ignores a window.store global entirely", async () => {
+      const { routeGuard } = await import("@/utils/zincutils");
+      (window as any).store = { state: { zoConfig: { service_account_enabled: true } } };
+      store.state.zoConfig = { service_account_enabled: false };
+      const next = vi.fn();
+
+      serviceAccountsRoute().beforeEnter({ query: {} }, {}, next);
+
+      expect(next).toHaveBeenCalledWith({ name: "users", query: {} });
+      expect(routeGuard).not.toHaveBeenCalled();
+      delete (window as any).store;
     });
   });
 

@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     role="banner"
     data-test="webinar-header-banner"
   >
-    <div class="flex flex-wrap items-center justify-center gap-2">
+    <div class="bg-promo-webinar-accent flex flex-wrap items-center justify-center gap-2">
       <span class="webinar-top-bar-text text-center font-bold">
         <strong>{{ webinarData.tag }}:</strong> {{ webinarData.title }}
         <span v-if="webinarData.date" class="webinar-top-bar-date font-medium">
@@ -45,7 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </a>
 
       <span
-        class="webinar-top-bar-sep text-promo-webinar-sep font-normal opacity-60 select-none"
+        class="webinar-top-bar-sep text-promo-webinar-sep font-normal select-none"
         aria-hidden="true"
         >|</span
       >
@@ -64,7 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <!-- Home variant: larger banner -->
   <div
     v-else-if="webinarData && !isExpired && variant === 'home'"
-    class="webinar-home-banner rounded-default border-promo-webinar-accent/35 relative mb-3 overflow-hidden border bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-promo-webinar-accent)_14%,var(--color-surface-base))_0%,var(--color-surface-base)_55%,color-mix(in_srgb,var(--color-promo-webinar-accent)_7%,var(--color-surface-base))_100%)]"
+    class="webinar-home-banner rounded-default border-promo-webinar-accent/35 bg-promo-webinar-home-bg relative mb-3 overflow-hidden border"
     data-test="webinar-home-banner"
   >
     <!-- Decorative blobs -->

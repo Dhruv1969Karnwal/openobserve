@@ -42,14 +42,14 @@ const { t } = useI18nTyped();
           </div>
           <span
             v-if="getToolCallDisplayData(context)?.stream"
-            class="context-tag text-2xs rounded-default text-ai-accent dark:text-text-secondary inline-flex items-center px-2 py-1 font-medium [background:color-mix(in_srgb,var(--color-ai-accent)_10%,transparent)] dark:[background:color-mix(in_srgb,var(--color-ai-accent)_20%,transparent)]"
+            class="context-tag text-2xs rounded-default text-ai-accent-text dark:text-text-secondary inline-flex items-center px-2 py-1 font-medium [background:color-mix(in_srgb,var(--color-ai-accent)_10%,transparent)] dark:[background:color-mix(in_srgb,var(--color-ai-accent)_20%,transparent)]"
           >
             {{ t("aiAssistant.streamPrefix") }}
             {{ getToolCallDisplayData(context)?.stream }}
           </span>
           <span
             v-if="getToolCallDisplayData(context)?.query_type"
-            class="context-tag text-2xs rounded-default text-ai-accent dark:text-text-secondary inline-flex items-center px-2 py-1 font-medium [background:color-mix(in_srgb,var(--color-ai-accent)_10%,transparent)] dark:[background:color-mix(in_srgb,var(--color-ai-accent)_20%,transparent)]"
+            class="context-tag text-2xs rounded-default text-ai-accent-text dark:text-text-secondary inline-flex items-center px-2 py-1 font-medium [background:color-mix(in_srgb,var(--color-ai-accent)_10%,transparent)] dark:[background:color-mix(in_srgb,var(--color-ai-accent)_20%,transparent)]"
           >
             {{ t("aiAssistant.typePrefix") }}
             {{ getToolCallDisplayData(context)?.query_type }}

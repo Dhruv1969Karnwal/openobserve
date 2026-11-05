@@ -26,8 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   Shapes mirror the real sections so the layout doesn't shift on swap:
     incidents     joined rows in one bordered container (icon, tag, title, time)
     services      horizontally scrolling fixed-width cards
-    anomalies     free-standing rows, gap-separated
-    recentEvents  joined compact rows (denser padding than incidents)
+    anomalies     free-standing cards, gap-separated (title line + figures)
+    recentEvents  joined compact rows (exceptions, then the runs that were clean)
 
   Row counts are deliberately small: a placeholder should suggest shape, not
   imply a quantity we don't know yet.
@@ -75,25 +75,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </div>
     </div>
 
-    <!-- ANOMALIES: free-standing rows, gap-separated -->
+    <!-- ANOMALIES: free-standing cards, gap-separated; each card is the title
+         line plus its figures beneath -->
     <div v-else-if="section === 'anomalies'" class="flex flex-col gap-1.5">
       <div
         v-for="i in 2"
         :key="i"
-        class="rounded-default border-border-default bg-surface-base flex items-center gap-3 border border-[0.0625em] px-3.5 py-2.5"
+        class="rounded-default border-border-default bg-surface-base flex flex-col gap-2 border border-[0.0625em] px-3.5 py-2.5"
       >
-        <OSkeleton type="circle" class="w-4 shrink-0" />
-        <OSkeleton class="h-4 max-w-[24em]" />
+        <div class="flex items-center gap-3">
+          <OSkeleton type="circle" class="w-4 shrink-0" />
+          <OSkeleton class="h-4 max-w-[24em]" />
+        </div>
+        <div class="flex items-center gap-3 ps-7">
+          <OSkeleton class="h-3 w-[13.5rem]" />
+          <OSkeleton class="ms-auto h-3 w-28" />
+        </div>
       </div>
     </div>
 
-    <!-- RECENT EVENTS: joined compact rows -->
+    <!-- RECENT EVENTS: joined compact rows, exceptions above clean runs -->
     <div
       v-else
       class="border-border-default rounded-default bg-surface-base flex flex-col gap-0 overflow-hidden border border-[0.0625em]"
     >
       <div
-        v-for="i in 3"
+        v-for="i in 5"
         :key="i"
         class="border-b-border-default flex items-center gap-3 border-b border-b-[0.0625em] px-3.5 py-2 last:border-b-0"
       >

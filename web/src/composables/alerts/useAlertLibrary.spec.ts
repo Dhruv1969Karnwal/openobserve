@@ -15,6 +15,16 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
+
+// Both sides of the policy are asserted below, so the shipped constant must be switchable here.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
+
 // The store is the cache — not a module-level variable that happens to be
 // warm. Several tests below deliberately seed the STORE while leaving the
 // module cold (and vice versa) so that an implementation which memoises
@@ -35,7 +45,7 @@ function freshLibraryState() {
 // here would also reset cacheExpiry and quietly diverge from production.
 const mockStore = {
   state: { alertLibrary: freshLibraryState() },
-  commit: vi.fn((type: string, payload: unknown) => {
+  commit: vi.fn((type: string, payload?: unknown) => {
     const lib = mockStore.state.alertLibrary;
     if (type === "setAlertLibraryManifest") {
       lib.manifest = payload;
@@ -61,6 +71,7 @@ import {
   SUPPORTED_MANIFEST_MAJOR,
   alertFileUrl,
 } from "@/constants/alertLibrary";
+import type { AlertLibraryEntry } from "@/types/alertLibrary";
 
 // The composable memoises its in-flight request at module scope (that is what
 // makes concurrent callers share one GET), so each test needs a fresh module
@@ -85,7 +96,7 @@ function entry(overrides: Record<string, unknown> = {}) {
     path: "packs/k8s/alerts/pod/pod_oom_killed.json",
     content_hash: "1c09e8f6ac33",
     ...overrides,
-  };
+  } as unknown as AlertLibraryEntry;
 }
 
 function manifest(overrides: Record<string, unknown> = {}) {
@@ -453,6 +464,7 @@ describe("useAnomalyLibraryAccess", () => {
 
   afterEach(() => {
     delete (mockStore.state as { zoConfig?: unknown }).zoConfig;
+    resetPaidFeaturePolicy();
   });
 
   const access = (isEnterprise: string, zoConfig: Record<string, unknown>) => {
@@ -461,13 +473,30 @@ describe("useAnomalyLibraryAccess", () => {
     return useAnomalyLibraryAccess().value;
   };
 
-  it("is locked on a build that is not enterprise", () => {
+  // Which treatment an un-entitled build gets is the policy's call, so both sides are asserted.
+  it("is hidden on a build that is not enterprise, under the shipped hide policy", () => {
+    setPaidFeaturePolicy("hide");
+    expect(access("false", { build_type: "enterprise", anomaly_detection_enabled: true })).toBe(
+      "hidden",
+    );
+  });
+
+  it("is hidden when an enterprise UI talks to an OSS backend, under the shipped hide policy", () => {
+    setPaidFeaturePolicy("hide");
+    expect(access("true", { build_type: "opensource", anomaly_detection_enabled: true })).toBe(
+      "hidden",
+    );
+  });
+
+  it("is locked on a build that is not enterprise, under the lock policy", () => {
+    setPaidFeaturePolicy("lock");
     expect(access("false", { build_type: "enterprise", anomaly_detection_enabled: true })).toBe(
       "locked",
     );
   });
 
-  it("is locked when an enterprise UI talks to an OSS backend", () => {
+  it("is locked when an enterprise UI talks to an OSS backend, under the lock policy", () => {
+    setPaidFeaturePolicy("lock");
     expect(access("true", { build_type: "opensource", anomaly_detection_enabled: true })).toBe(
       "locked",
     );
@@ -501,7 +530,7 @@ describe("useAlertLibrary — loadAlertFile", () => {
     respondOnceWith({ name: "pod_oom_killed", trigger_condition: { threshold: 1 } });
     const file = await useAlertLibrary().loadAlertFile(entry());
 
-    expect(file.trigger_condition.threshold).toBe(1);
+    expect((file.trigger_condition as any).threshold).toBe(1);
   });
 
   it("caches the file under its id AND content hash", async () => {

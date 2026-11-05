@@ -35,11 +35,11 @@ const cache = new Map<string, string>();
 const FALLBACKS: Record<string, string> = {
   "--color-text-heading": "#262626",
   "--color-text-body": "#404040",
-  "--color-text-secondary": "#737373",
+  "--color-text-secondary": "#525252",
   "--color-border-default": "#d4d4d4",
-  "--color-border-strong": "#a3a3a3",
+  "--color-border-strong": "#737373",
   "--color-border-subtle": "#ededed",
-  "--color-border-control": "#949494",
+  "--color-border-control": "#737373",
   "--color-surface-base": "#ffffff",
   "--color-surface-overlay": "#ffffff",
   "--color-map-card-header": "#e5e5e5",
@@ -48,6 +48,7 @@ const FALLBACKS: Record<string, string> = {
   "--color-map-seq-3": "#a57c04",
   "--color-map-seq-4": "#bd6100",
   "--color-map-seq-5": "#d72601",
+  "--color-grey-500": "#737373",
   "--color-status-positive": "#208a3c",
   "--color-surface-subtle": "#f5f5f5",
   "--color-white": "#ffffff",
@@ -60,18 +61,19 @@ const FALLBACKS: Record<string, string> = {
   "--color-service-health-warning": "#fa8c16",
   // Dashboard classic series palette (light values) — so getColorPalette() has
   // sensible colors before the token stylesheet is live (jsdom / very-early render).
-  "--color-chart-series-1": "#5b8ef0",
-  "--color-chart-series-2": "#34d399",
-  "--color-chart-series-3": "#fb923c",
-  "--color-chart-series-4": "#f472b6",
-  "--color-chart-series-5": "#a78bfa",
-  "--color-chart-series-6": "#fbbf24",
-  "--color-chart-series-7": "#38bdf8",
-  "--color-chart-series-8": "#f87171",
-  "--color-chart-series-9": "#2dd4bf",
-  "--color-chart-series-10": "#4ade80",
-  "--color-chart-series-11": "#e879f9",
-  "--color-chart-series-12": "#facc15",
+  // Mirrors base.css seat-for-seat; chartTheme.fallbacks.spec.ts keeps them equal.
+  "--color-chart-series-1": "#3f7994",
+  "--color-chart-series-2": "#521a7d",
+  "--color-chart-series-3": "#a54b08",
+  "--color-chart-series-4": "#0d361d",
+  "--color-chart-series-5": "#d155e1",
+  "--color-chart-series-6": "#243764",
+  "--color-chart-series-7": "#ab1637",
+  "--color-chart-series-8": "#0d3634",
+  "--color-chart-series-9": "#5f9a12",
+  "--color-chart-series-10": "#6d1437",
+  "--color-chart-series-11": "#047454",
+  "--color-chart-series-12": "#46190a",
   // Mark-line drop shadow (light value) — dark override lives in dark.css.
   "--color-chart-markline-shadow": "rgba(255, 255, 255, 0.7)",
   // Dashboard table row-highlight palette (light values) + grid line.
@@ -125,14 +127,17 @@ const FALLBACKS: Record<string, string> = {
   // Brand accent (--color-primary-600), light value — metric sparkline default color.
   "--color-accent": "#3f7994",
   // Alert threshold marklines (light values from semantic.css / base.css).
-  "--color-status-error-text": "#cc3645",
-  "--color-status-warning-text": "#be5a13",
+  "--color-status-error-text": "#b91c1c",
+  "--color-status-warning-text": "#9c4a10",
   // Error series in canvas charts (light value from base.css).
-  "--color-severity-error-color": "#ea1a17",
+  "--color-severity-error-color": "#c8100e",
+  // SLO warning budget line (light value from base.css) — the four hand-rolled
+  // resolveToken() seams were resynced onto chartColor(), which needs the mirror.
+  "--color-severity-warning-color": "#965300",
   // Status accents used by SLO / health charts (light values from semantic.css, base.css).
   "--color-status-negative": "#db3b4b",
   "--color-status-success-bg": "#f2fcf3",
-  "--color-status-success-text": "#20883b",
+  "--color-status-success-text": "#1a7a33",
   "--color-success-200": "#bbf7d0",
   // Threshold step presets (light values from base.css).
   "--color-success-500": "#22c55e",
@@ -179,6 +184,17 @@ export function chartColor(token: `--${string}`): string {
 /** Clear the resolved-token cache. Call on theme change so charts pick up new values. */
 export function invalidateChartTheme(): void {
   cache.clear();
+}
+
+/**
+ * A mark may be handed a token (`"--color-x"` / `"var(--color-x)"`) where a canvas or
+ * SVG attribute needs a pixel; this resolves it and passes any concrete colour through,
+ * so schema JSON can name a token instead of embedding a hex.
+ */
+export function resolveChartInk(color?: string | null): string | null | undefined {
+  if (typeof color !== "string" || !color) return color;
+  const token = color.trim().match(/^(?:var\(\s*)?(--[\w-]+)(?:\s*\))?$/)?.[1];
+  return token ? chartColor(token as `--${string}`) : color;
 }
 
 /**

@@ -41,7 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <!-- Vue Flow gives edge coordinates in px, so the label offset derived from them is px too. -->
     <div
       class="text-status-error-text pointer-events-auto absolute top-0 left-0 z-10 [transform:var(--fleet-edge-at)] text-xs font-medium whitespace-nowrap tabular-nums"
-      :class="data.dimmed ? 'opacity-30' : ''"
+      :class="data.dimmed ? 'text-text-secondary' : ''"
       :style="{
         '--fleet-edge-at': `translate(0.25rem, -50%) translate(${targetX}px, ${targetY}px)`,
       }"

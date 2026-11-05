@@ -116,15 +116,17 @@ describe("About", () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it("should display logo image", () => {
+  it("should display the product wordmark", () => {
     const wrapper = mount(About, {
       global: {
         plugins: [i18n, store, router],
       },
     });
 
-    const img = wrapper.find("img");
-    expect(img.exists()).toBe(true);
+    // The hero brand is the token-painted lock-up, not an <img> of an external SVG.
+    const mark = wrapper.find('[data-test="about-retrace-logo"]');
+    expect(mark.exists()).toBe(true);
+    expect(mark.text()).toBe("Retrace.ai");
   });
 
   it("should display version from zoConfig", () => {
@@ -202,7 +204,7 @@ describe("About", () => {
     expect(wrapper.text()).toContain("License Information");
   });
 
-  it("should use dark logo src when theme is dark", () => {
+  it("should render the same wordmark when the theme is dark", () => {
     const darkStore = createStore({
       state: {
         theme: "dark",
@@ -227,19 +229,23 @@ describe("About", () => {
       },
     });
 
-    const img = wrapper.find("img");
-    expect(img.attributes("src")).toContain("dark");
+    // Painted from tokens, so no per-theme asset exists whose `src` a test could pin.
+    const mark = wrapper.find('[data-test="about-retrace-logo"]');
+    expect(mark.exists()).toBe(true);
+    expect(mark.text()).toBe("Retrace.ai");
   });
 
-  it("should use light logo src when theme is light", () => {
+  it("should render the same wordmark when the theme is light", () => {
     const wrapper = mount(About, {
       global: {
         plugins: [i18n, store, router],
       },
     });
 
-    const img = wrapper.find("img");
-    expect(img.attributes("src")).toContain("light");
+    // Painted from tokens, so no per-theme asset exists whose `src` a test could pin.
+    const mark = wrapper.find('[data-test="about-retrace-logo"]');
+    expect(mark.exists()).toBe(true);
+    expect(mark.text()).toBe("Retrace.ai");
   });
 
   it("should navigate to license page when manage license is clicked", async () => {
@@ -279,9 +285,8 @@ describe("About", () => {
       },
     });
 
-    // Hero section contains the logo image
-    const img = wrapper.find("img");
-    expect(img.exists()).toBe(true);
+    // Hero section carries the brand lock-up.
+    expect(wrapper.find('[data-test="about-retrace-logo"]').exists()).toBe(true);
   });
 
   it("should display info cards grid with at least two cards", () => {
@@ -314,10 +319,8 @@ describe("About", () => {
       },
     });
 
-    // The component renders t("about.logoMsg") which is the tagline text
-    // Verify the outer container exists and contains the logo image at minimum
-    const img = wrapper.find("img");
-    expect(img.exists()).toBe(true);
+    // Assert the tagline itself rather than an image as a proxy for it.
+    expect(wrapper.text()).toContain(i18n.global.t("about.logoMsg"));
   });
 
   it("should render the scrollable content container", () => {

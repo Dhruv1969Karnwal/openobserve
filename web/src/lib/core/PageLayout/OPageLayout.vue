@@ -37,6 +37,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   Left rail — optional:
     #sidebar      — FolderList / SectionRail. `sidebarWidth` (px) for a fixed
                     rail, or `resizable` for a drag-resizable OSplitter.
+    delegate-sidebar — section hub (IAM, Settings): the rail belongs UNDER the
+                    hosted page's header, not beside it, so it is handed to the
+                    hosted OPageLayout, which renders it inside its own body row.
+                    The hub keeps drawing it when the hosted page has no layout.
 
   Body — the default slot. Inset to the ONE `--spacing-page-edge` grid line by
   default (so it lines up with the header, tabs and rails). Escape hatches:
@@ -93,8 +97,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <slot name="subnav" />
     </div>
 
+    <!-- ── Hub fallback on a phone: the rail it still holds opens from a drawer ── -->
+    <div
+      v-if="isRailHub && isMobile && showRail && !sidebarTriggerOwner"
+      class="border-border-default px-page-edge flex shrink-0 items-center border-b py-1"
+      data-drawer-anchor="page-layout-sidebar"
+    >
+      <OButton
+        variant="ghost"
+        size="sm"
+        data-test="o-page-layout-mobile-sidebar-btn"
+        @click="mobileSidebarOpen = true"
+      >
+        <template #icon-left><OIcon name="menu" size="sm" /></template>
+        {{ t("common.sidePanel") }}
+      </OButton>
+    </div>
+
     <!-- ── Body (mobile): sidebar collapses into an off-canvas drawer ── -->
-    <template v-if="!!slots.sidebar && isMobile">
+    <template v-if="showRail && isMobile && !isRailHub">
       <div
         v-if="!sidebarTriggerOwner"
         class="border-border-default px-page-edge flex shrink-0 items-center border-b py-1"
@@ -128,14 +149,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         data-test="o-page-layout-mobile-sidebar-drawer"
       >
         <div class="flex h-full flex-col overflow-hidden">
-          <slot name="sidebar" />
+          <RailContent :content="railContent" />
         </div>
       </ODrawer>
     </template>
 
     <!-- ── Body: resizable sidebar + main (OSplitter) ───────────── -->
     <OSplitter
-      v-else-if="!!slots.sidebar && resizable"
+      v-else-if="showRail && resizable && !holdsRail && !isRailHub"
       v-model="internalWidth"
       unit="px"
       :limits="splitterLimits"
@@ -147,7 +168,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           v-if="sidebarVisible"
           class="border-border-default flex h-full w-full flex-col overflow-hidden border-e"
         >
-          <slot name="sidebar" />
+          <RailContent :content="railContent" />
         </div>
       </template>
       <template #separator>
@@ -165,14 +186,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </OSplitter>
 
     <!-- ── Body: fixed-width sidebar + main ─────────────────────── -->
-    <div v-else-if="!!slots.sidebar" class="flex min-h-0 flex-1">
+    <!-- A delegating hub keeps the row wrapper even while nothing holds the rail:
+         swapping the whole branch when the hosted page claims it would remount the
+         page (and TanStack fields die when unmounted inside their mount tick). -->
+    <div v-else-if="railInRow || isRailHub" class="flex min-h-0 flex-1">
       <aside
+        v-if="railInRow"
         class="border-border-default flex h-full shrink-0 flex-col overflow-hidden border-e"
-        :style="{ width: sidebarWidth + 'px' }"
+        :style="{ width: railWidth + 'px' }"
       >
-        <slot name="sidebar" />
+        <RailContent :content="railContent" />
       </aside>
-      <OContent as="section" :bleed="bleed" :y="padY" class="h-full min-w-0 flex-1 overflow-hidden">
+      <OContent
+        as="section"
+        :bleed="bleed"
+        :y="padY"
+        class="flex h-full min-w-0 flex-1 flex-col overflow-hidden"
+      >
         <slot />
       </OContent>
     </div>
@@ -193,12 +223,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     >
       <slot />
     </OContent>
+
+    <!-- The hub's fallback drawer sits outside the body so the hosted page keeps
+         its DOM when it takes the rail. -->
+    <ODrawer
+      v-if="isRailHub && isMobile && showRail"
+      v-model:open="mobileSidebarOpen"
+      side="left"
+      size="sm"
+      bleed
+      seamless
+      anchor='[data-drawer-anchor="page-layout-sidebar"]'
+      :anchor-edge="sidebarTriggerOwner ? 'bottom' : 'top'"
+      data-test="o-page-layout-mobile-sidebar-drawer"
+    >
+      <div class="flex h-full flex-col overflow-hidden">
+        <RailContent :content="railContent" />
+      </div>
+    </ODrawer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useI18nTyped, type I18nText } from "@/types/i18n";
-import { ref, computed, watch, useSlots, provide } from "vue";
+import {
+  ref,
+  computed,
+  watch,
+  useSlots,
+  provide,
+  inject,
+  defineComponent,
+  onActivated,
+  onDeactivated,
+  onBeforeUnmount,
+} from "vue";
+import type { PropType } from "vue";
 import { useRouter } from "vue-router";
 import OSplitter from "@/lib/core/Splitter/OSplitter.vue";
 import ConstrainedPage from "@/components/common/ConstrainedPage.vue";
@@ -209,6 +269,8 @@ import OIcon from "@/lib/core/Icon/OIcon.vue";
 import ODrawer from "@/lib/overlay/Drawer/ODrawer.vue";
 import useBreakpoint from "@/composables/useBreakpoint";
 import { PAGE_LAYOUT_SIDEBAR_KEY } from "./pageLayoutSidebar";
+import { PAGE_SECTION_RAIL_KEY, type RailRenderer } from "./pageSectionRail";
+import type { PageSectionRailSource } from "./pageSectionRail";
 import type { IconName } from "@/lib/core/Icon/OIcon.icons";
 
 interface BackTarget {
@@ -219,6 +281,13 @@ interface BackTarget {
 }
 
 const RAIL_WIDTH = 230;
+
+// One shim renders the rail whether it came from this slot or from the hub above.
+const RailContent = defineComponent({
+  name: "RailContent",
+  props: { content: { type: Function as PropType<RailRenderer>, required: true } },
+  setup: (railProps) => () => railProps.content(),
+});
 
 const props = withDefaults(
   defineProps<{
@@ -247,6 +316,9 @@ const props = withDefaults(
     sidebarWidth?: number;
     resizable?: boolean;
     splitterLimits?: [number, number];
+    /** Section-hub shell: hand #sidebar to the routed page's layout, so the rail
+     *  sits under that page's header instead of beside it. */
+    delegateSidebar?: boolean;
     // Reading-column mode
     constrained?: boolean;
     contentSize?: "sm" | "md" | "lg" | "xl";
@@ -262,6 +334,7 @@ const props = withDefaults(
     sidebarWidth: RAIL_WIDTH,
     resizable: false,
     splitterLimits: () => [0, 400] as [number, number],
+    delegateSidebar: false,
     constrained: false,
     contentSize: "lg",
     headerClass: undefined,
@@ -283,9 +356,78 @@ watch(
   () => router?.currentRoute?.value?.fullPath,
   () => (mobileSidebarOpen.value = false),
 );
+
+// ── Section rail ─────────────────────────────────────────────────
+// A hub (delegate-sidebar) owns the rail but the page it routes to owns the
+// header, so the rail is handed down: the hosted layout renders it under its own
+// header and the title keeps the single page-frame left edge.
+const upstreamRail = inject(PAGE_SECTION_RAIL_KEY, null);
+const isRailHub = props.delegateSidebar && !!slots.sidebar;
+const railToken = Symbol("page-layout-rail");
+const railClaims = ref<symbol[]>([]);
+const railOwner = computed(() => railClaims.value[railClaims.value.length - 1] ?? null);
+const instanceActive = ref(true);
+
+const hubRailSource: PageSectionRailSource | null = isRailHub
+  ? {
+      render: () => (slots.sidebar ? slots.sidebar() : []),
+      width: computed(() => props.sidebarWidth),
+      blocked: computed(() => false),
+      owner: railOwner,
+      claim: (token) => {
+        if (railClaims.value.includes(token)) return;
+        railClaims.value = [...railClaims.value, token];
+      },
+      release: (token) => {
+        if (!railClaims.value.includes(token)) return;
+        railClaims.value = railClaims.value.filter((entry) => entry !== token);
+      },
+    }
+  : null;
+const railSource = hubRailSource ?? upstreamRail;
+
+// The hub draws its own rail only until a hosted page claims it, and a layout
+// with a rail of its own never reaches for the hub's.
+const canTakeRail = computed(
+  () => !!railSource && !railSource.blocked.value && !isRailHub && !slots.sidebar,
+);
+const holdsRail = computed(() => canTakeRail.value && railSource!.owner.value === railToken);
+const showRail = computed(() =>
+  holdsRail.value ? true : !!slots.sidebar && (!isRailHub || railOwner.value === null),
+);
+// A hub parks its rail in the drawer on a phone, so the row only ever holds its own.
+const railInRow = computed(() => showRail.value && !(isRailHub && isMobile.value));
+const railWidth = computed(() => (holdsRail.value ? railSource!.width.value : props.sidebarWidth));
+const railContent: RailRenderer = () =>
+  holdsRail.value ? railSource!.render() : slots.sidebar ? slots.sidebar() : [];
+// A rail shown here (or by a hidden keep-alive page) leaves no room for one from below it.
+const blocksRailDownstream = computed(
+  () => (!!slots.sidebar && !isRailHub) || holdsRail.value || !instanceActive.value,
+);
+
+if (railSource) {
+  provide(PAGE_SECTION_RAIL_KEY, {
+    ...railSource,
+    blocked: computed(() => railSource!.blocked.value || blocksRailDownstream.value),
+  });
+}
+const takeRail = () => {
+  if (canTakeRail.value) railSource!.claim(railToken);
+};
+takeRail();
+onActivated(() => {
+  instanceActive.value = true;
+  takeRail();
+});
+onDeactivated(() => {
+  instanceActive.value = false;
+  railSource?.release(railToken);
+});
+onBeforeUnmount(() => railSource?.release(railToken));
+
 // Only a sidebar host provides, so a nested sidebar-less layout doesn't shadow its parent's trigger.
 const sidebarTriggerOwner = ref<symbol | null>(null);
-if (slots.sidebar) {
+if (slots.sidebar || holdsRail.value) {
   provide(PAGE_LAYOUT_SIDEBAR_KEY, {
     owner: sidebarTriggerOwner,
     open: () => (mobileSidebarOpen.value = true),

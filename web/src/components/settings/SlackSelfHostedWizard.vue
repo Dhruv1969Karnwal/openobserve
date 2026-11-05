@@ -941,7 +941,7 @@ const nextBlocked = computed(() => {
             </div>
           </OBanner>
           <span v-else class="flex items-center gap-2 text-sm">
-            <OIcon name="check-circle" size="sm" class="text-status-positive" />
+            <OIcon name="check-circle" size="sm" class="text-status-success-text" />
             {{ t("slackApp.wizard.install.created", { appId: current?.app_id ?? "" }) }}
           </span>
 
@@ -1006,7 +1006,7 @@ const nextBlocked = computed(() => {
             class="flex items-center gap-2 text-sm"
             data-test="slack-wizard-installed"
           >
-            <OIcon name="check-circle" size="sm" class="text-status-positive" />
+            <OIcon name="check-circle" size="sm" class="text-status-success-text" />
             {{ t("slackApp.wizard.install.installed", { team: installedTeam }) }}
           </span>
 
@@ -1117,7 +1117,7 @@ const nextBlocked = computed(() => {
             {{ t("slackApp.wizard.install.verifyTitle") }}
           </OButton>
           <span v-if="signInPassed" class="flex items-center gap-2 text-sm">
-            <OIcon name="check-circle" size="sm" class="text-status-positive" />
+            <OIcon name="check-circle" size="sm" class="text-status-success-text" />
             {{ t("slackApp.wizard.test.signInPassed") }}
           </span>
 

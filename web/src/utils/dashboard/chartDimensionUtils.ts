@@ -75,6 +75,92 @@ export const calculateNiceTickValues = (
 };
 
 /**
+ * The largest magnitude in a set of axis ticks - the one number a whole axis is
+ * sized to, because every tick has to be printed in the unit that number picks.
+ *
+ * @param ticks - tick values the axis paints
+ * @return {number} the largest absolute tick
+ */
+export const widestTickOf = (ticks: number[]): number =>
+  (ticks ?? []).reduce((widest: number, tick: number) => Math.max(widest, Math.abs(tick)), 0);
+
+/**
+ * The magnitude every tick of a value axis must be sized to, so the whole axis
+ * prints in one unit. Returns undefined when the extent is unusable (no data,
+ * or data that is not a number), which is the caller's cue to leave the axis
+ * unpinned rather than pin it on a guess.
+ *
+ * An axis label is a number *and* a unit. Sized per tick, each tick picks the
+ * unit that flatters it, and the column stops being a scale: `1.43MB/s` printed
+ * above `878.91KB/s` above `0.00B/s` reads as an axis that falls then rises,
+ * because as bare numbers it does. Sizing once, on the largest tick the axis
+ * actually paints, keeps every tick in one unit and the order readable.
+ *
+ * @param lo - lowest value the axis can show (data minimum, or a configured bound)
+ * @param hi - highest value the axis can show
+ * @param splitNumber - intervals the axis divides into; ECharts' value-axis default is 5
+ * @return {number | undefined} the largest absolute tick, or undefined when unmeasurable
+ */
+export const calculateAxisTickExtent = (
+  lo: number,
+  hi: number,
+  splitNumber: number = 5,
+): number | undefined => {
+  if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi < lo) return undefined;
+  return widestTickOf(calculateNiceTickValues(lo, hi, splitNumber));
+};
+
+/**
+ * The extent to size a value axis on, from what the panel plotted and what its
+ * config pins. Two rules the axis itself obeys and a caller has to mirror:
+ *
+ * - A value axis is drawn from zero, not from the first sample, so a panel
+ *   plotting 1.1-1.4 MB/s still shows a `0` tick. Sizing on the data alone
+ *   would pick a unit the real top tick then disagrees with.
+ * - A configured `y_axis_min`/`y_axis_max` replaces the data's own bound: the
+ *   axis paints those, so those are what the ticks must be measured against.
+ *
+ * @param dataMin - lowest plotted value; Infinity when nothing was plotted
+ * @param dataMax - highest plotted value; -Infinity when nothing was plotted
+ * @param config - panel config, whose y_axis_min/y_axis_max bounds win over data
+ * @param splitNumber - intervals the axis divides into; ECharts' default is 5
+ * @return {number | undefined} the largest absolute tick, or undefined when the
+ * panel has nothing to size on (no samples, no usable bound)
+ */
+export const calculateValueAxisExtent = (
+  dataMin: number,
+  dataMax: number,
+  config: any,
+  splitNumber: number = 5,
+): number | undefined => {
+  const cfgMin = Number(config?.y_axis_min);
+  const cfgMax = Number(config?.y_axis_max);
+  const boundMin =
+    config?.y_axis_min !== null &&
+    config?.y_axis_min !== undefined &&
+    config?.y_axis_min !== "" &&
+    Number.isFinite(cfgMin)
+      ? Math.min(cfgMin, dataMin)
+      : dataMin;
+  const boundMax =
+    config?.y_axis_max !== null &&
+    config?.y_axis_max !== undefined &&
+    config?.y_axis_max !== "" &&
+    Number.isFinite(cfgMax)
+      ? Math.max(cfgMax, dataMax)
+      : dataMax;
+
+  // Nothing plotted and no bound pinned: there is no honest extent to claim.
+  if (!Number.isFinite(boundMin) && !Number.isFinite(boundMax)) return undefined;
+
+  return calculateAxisTickExtent(
+    Math.min(0, Number.isFinite(boundMin) ? boundMin : 0),
+    Math.max(0, Number.isFinite(boundMax) ? boundMax : 0),
+    splitNumber,
+  );
+};
+
+/**
  * Calculates the optimal font size for a given text that fits the canvas width
  * and, when provided, the canvas height.
  * @param text - The text to calculate the font size for.

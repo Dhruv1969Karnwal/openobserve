@@ -1360,9 +1360,9 @@ const stepDotClass = (status: string | null): string =>
 // Circle badge (child count) ring + text colour, keyed to the step's run status.
 const stepRingClass = (status: string | null): string =>
   status === "error"
-    ? "border-status-negative text-status-negative"
+    ? "border-status-negative text-status-error-text"
     : status === "ok"
-      ? "border-status-positive text-status-positive"
+      ? "border-status-positive text-status-success-text"
       : status === "noMatch"
         ? "border-status-warning-text text-status-warning-text"
         : "border-border-strong text-text-secondary";

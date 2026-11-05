@@ -287,7 +287,7 @@ describe("General", () => {
     mockSettingsService.updateCustomText.mockResolvedValue({ status: 200 });
     mockConfigService.get_config.mockResolvedValue({ data: {} });
     mockConfigService.get_config_full.mockResolvedValue({ data: {} });
-    mockDOMPurify.sanitize.mockImplementation((text) => text);
+    mockDOMPurify.sanitize.mockImplementation((text: any) => text);
   });
 
   afterEach(() => {
@@ -419,10 +419,9 @@ describe("General", () => {
     });
   });
 
-  // customBranding is self-hosted-only (cloudOffers: false): OSS sees the
-  // section locked-but-visible (disabled controls + lock), pure Cloud doesn't
-  // see it at all — same split as the other cloudOffers:false gates (e.g.
-  // cipherKeys in settings/index.vue).
+  // customBranding is self-hosted-only (cloudOffers: false), so pure Cloud never
+  // sees it at all; on OSS the shipped "hide" policy hides it too — same shape as
+  // the other cloudOffers:false gates (e.g. cipherKeys in settings/index.vue).
   describe("Custom branding gating", () => {
     const originalIsEnterprise = config.isEnterprise;
     const originalIsCloud = config.isCloud;
@@ -432,32 +431,31 @@ describe("General", () => {
       config.isCloud = originalIsCloud;
     });
 
-    it("should keep the branding section visible but locked on OSS", () => {
+    // Under "hide" branding is absent rather than locked: there is no upsell click to route to.
+    it("should hide the branding section entirely on OSS", () => {
       mockStore.state.zoConfig.meta_org = "test-org";
       config.isEnterprise = "false";
       config.isCloud = "false";
       const wrapper = createWrapper();
 
-      expect(wrapper.find("#enterpriseFeature").exists()).toBe(true);
-      const lockedText = wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]');
-      expect(lockedText.exists()).toBe(true);
-      // Clickable (not disabled) — the wrapping row opens the upgrade dialog
-      // on click instead of the field being an inert disabled control.
-      expect(lockedText.find("input").attributes("disabled")).toBeUndefined();
+      expect(wrapper.find("#enterpriseFeature").exists()).toBe(false);
+      expect(wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]').exists()).toBe(
+        false,
+      );
       expect(
         wrapper.find('[data-test="setting_ent_custom_logo_img_file_upload_locked"]').exists(),
-      ).toBe(true);
+      ).toBe(false);
       expect(
         wrapper.find('[data-test="setting_ent_custom_logo_dark_img_file_upload_locked"]').exists(),
-      ).toBe(true);
-      // The functional controls must not render alongside the locked ones.
+      ).toBe(false);
+      // And of course the functional controls are not offered either.
       expect(wrapper.find('[data-test="settings_ent_logo_custom_text"]').exists()).toBe(false);
       expect(wrapper.find('[data-test="settings_ent_logo_custom_text_edit_btn"]').exists()).toBe(
         false,
       );
     });
 
-    it("opens the upgrade dialog when a locked branding row is clicked", async () => {
+    it("offers no upsell click from an un-entitled Settings › General", async () => {
       mockStore.state.zoConfig.meta_org = "test-org";
       config.isEnterprise = "false";
       config.isCloud = "false";
@@ -465,8 +463,9 @@ describe("General", () => {
 
       const { isOpen, close } = useEnterpriseUpgradeDialog();
       close();
-      await wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]').trigger("click");
-      expect(isOpen.value).toBe(true);
+      const clickable = wrapper.find('[data-test="settings_ent_logo_custom_text_locked"]');
+      expect(clickable.exists()).toBe(false);
+      expect(isOpen.value).toBe(false);
     });
 
     it("should hide the branding section entirely on a pure Cloud build", () => {
@@ -641,7 +640,7 @@ describe("General", () => {
     });
 
     it("should show file upload when no logo exists", async () => {
-      mockStore.state.zoConfig.custom_logo_img = null;
+      mockStore.state.zoConfig.custom_logo_img = null as any;
       const wrapper = createWrapper();
 
       const fileUpload = wrapper.find('[data-test="setting_ent_custom_logo_img_file_upload"]');
@@ -714,7 +713,7 @@ describe("General", () => {
         expect(wrapper.vm.confirmDeleteImage).toBe(true);
       } else {
         // Fallback: call the confirmDeleteLogo method directly
-        await wrapper.vm.confirmDeleteLogo();
+        await wrapper.vm.confirmDeleteLogo(undefined as any);
         expect(wrapper.vm.confirmDeleteImage).toBe(true);
       }
     });
@@ -811,6 +810,52 @@ describe("General", () => {
   });
 
   describe("Color picker ODialog", () => {
+    it("renders the mode chips as buttons that open the picker for their own mode", async () => {
+      const wrapper = createWrapper();
+      const light = wrapper.find('[data-test="theme-light-chip"]');
+      const dark = wrapper.find('[data-test="theme-dark-chip"]');
+      expect(light.element.tagName).toBe("BUTTON");
+      expect(dark.element.tagName).toBe("BUTTON");
+
+      await dark.trigger("click");
+      await nextTick();
+      expect(wrapper.vm.showColorPicker).toBe(true);
+      expect(wrapper.vm.currentPickerMode).toBe("dark");
+    });
+
+    it("names the applied mode's chip as the current one and leaves the other unmarked", () => {
+      const wrapper = createWrapper();
+      for (const mode of ["light", "dark"]) {
+        const chip = wrapper.find(`[data-test="theme-${mode}-chip"]`).attributes("aria-label");
+        expect(chip?.includes("current mode")).toBe(wrapper.vm.isModeActive(mode));
+      }
+    });
+
+    it("labels the chip group with the section heading it belongs to", () => {
+      const wrapper = createWrapper();
+      const group = wrapper.find('[data-test="general-settings-theme-chips"]');
+      expect(group.attributes("role")).toBe("group");
+      const labelledBy = group.attributes("aria-labelledby");
+      expect(labelledBy).toBe("general-settings-appearance-heading");
+      expect(wrapper.find(`#${labelledBy}`).element.tagName).toBe("H2");
+    });
+
+    it("groups the two number fields under their own section headings", () => {
+      const wrapper = createWrapper();
+      const headings = wrapper.findAll('[data-test="settings-section-title"]').map((h) => h.text());
+      expect(headings.slice(0, 3)).toEqual(["Metrics collection", "Query limits", "Appearance"]);
+      expect(headings).toContain("Custom branding");
+    });
+
+    it("gives every branding control its label above it, not beside it", () => {
+      const wrapper = createWrapper();
+      const html = wrapper.find('[data-test="settings-field-logo-text"]').element.innerHTML;
+      const labelAt = html.indexOf("Custom Logo Text");
+      const controlAt = html.indexOf("settings_ent_logo_custom_text");
+      expect(labelAt).toBeGreaterThanOrEqual(0);
+      expect(controlAt).toBeGreaterThan(labelAt);
+    });
+
     it("opens the color picker ODialog when a theme chip is clicked", async () => {
       const wrapper = createWrapper();
       await wrapper.vm.handleThemeChipClick("light");
@@ -841,7 +886,7 @@ describe("General", () => {
       // Select the color-picker dialog by title (order-independent — other dialogs
       // like the delete-org confirmation also exist in the template).
       const dialogs = wrapper.findAll('[data-test-stub="o-dialog"]');
-      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color");
+      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color")!;
       const closeBtn = colorDialog.find('[data-test-stub="o-dialog-primary"]');
       await closeBtn.trigger("click");
       await nextTick();
@@ -864,9 +909,91 @@ describe("General", () => {
       const dialogs = wrapper.findAll('[data-test-stub="o-dialog"]');
       // Select by title (order-independent — the delete-org confirmation dialog also
       // exists and would otherwise be the last dialog in the template).
-      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color");
+      const colorDialog = dialogs.find((d) => d.attributes("data-title") === "Pick Custom Color")!;
       expect(colorDialog.attributes("data-size")).toBe("xs");
       expect(colorDialog.attributes("data-primary-label")).toBe("Close");
+    });
+  });
+
+  describe("Appearance theme-mode chips", () => {
+    const MODE_OF = {
+      "theme-light-chip": "light",
+      "theme-dark-chip": "dark",
+    } as const;
+
+    /** What a sighted reader sees: the chip's text minus the screen-reader-only accent. */
+    const visibleText = (wrapper: any, hook: string) => {
+      const el = wrapper.find(`[data-test="${hook}"]`).element.cloneNode(true) as HTMLElement;
+      el.querySelector(".chip-accent-value")?.remove();
+      return (el.textContent || "").replace(/\s+/g, " ").trim();
+    };
+
+    it("labels each chip with the mode it configures, never with a hex", () => {
+      const wrapper = createWrapper();
+      expect(wrapper.find('[data-test="theme-light-chip"] .chip-label').text()).toBe("Light");
+      expect(wrapper.find('[data-test="theme-dark-chip"] .chip-label').text()).toBe("Dark");
+      for (const hook of Object.keys(MODE_OF)) {
+        expect(visibleText(wrapper, hook)).toBe(
+          wrapper.find(`[data-test="${hook}"] .chip-label`).text(),
+        );
+        expect(visibleText(wrapper, hook)).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+      }
+    });
+
+    it("names each chip as the accent picker it is and says which mode is current", () => {
+      const wrapper = createWrapper();
+      for (const [hook, mode] of Object.entries(MODE_OF)) {
+        const button = wrapper.find(`[data-test="${hook}"]`);
+        // A chip opens a picker, so it is named as an action rather than as a toggle.
+        expect(button.attributes("aria-pressed")).toBeUndefined();
+        expect((button.attributes("aria-label") || "").toLowerCase()).toContain(
+          button.find(".chip-label").text().toLowerCase(),
+        );
+        expect(button.attributes("aria-label")).toContain("accent color");
+        expect(wrapper.vm.isModeActive(mode)).toBe(
+          (button.attributes("aria-label") || "").includes("current mode"),
+        );
+      }
+      // Exactly one chip claims "current mode", so "which one is applied" is never a guess.
+      const current = Object.keys(MODE_OF).filter((hook) =>
+        (wrapper.find(`[data-test="${hook}"]`).attributes("aria-label") || "").includes(
+          "current mode",
+        ),
+      );
+      expect(current).toHaveLength(1);
+    });
+
+    it("marks the selected chip with a glyph and leaves the other unmarked", () => {
+      const wrapper = createWrapper();
+      const activeHook = wrapper.vm.isModeActive("light") ? "theme-light-chip" : "theme-dark-chip";
+      const idleHook = wrapper.vm.isModeActive("light") ? "theme-dark-chip" : "theme-light-chip";
+      expect(wrapper.find(`[data-test="${activeHook}"] .chip-mark`).exists()).toBe(true);
+      expect(wrapper.find(`[data-test="${idleHook}"] .chip-mark`).exists()).toBe(false);
+    });
+
+    it("hides the decorative swatch from assistive tech, which cannot see a colour", () => {
+      const wrapper = createWrapper();
+      for (const hook of Object.keys(MODE_OF)) {
+        expect(wrapper.find(`[data-test="${hook}"] .color-circle`).attributes("aria-hidden")).toBe(
+          "true",
+        );
+      }
+    });
+
+    it("keeps both chips and the reset control hit-testable at 44px on touch", () => {
+      const wrapper = createWrapper();
+      for (const hook of Object.keys(MODE_OF)) {
+        expect(wrapper.find(`[data-test="${hook}"]`).classes()).toContain("max-md:min-h-11");
+      }
+      expect(wrapper.find('[data-test="reset-theme-colors-btn"]').classes()).toContain(
+        "max-md:size-11",
+      );
+    });
+
+    it("never dims the reset control, whose glyph and border are its whole affordance", () => {
+      const classes = createWrapper().find('[data-test="reset-theme-colors-btn"]').classes();
+      expect(classes.filter((c: string) => c.includes("opacity-"))).toEqual([]);
+      expect(classes).toContain("border-border-control");
     });
   });
 
@@ -996,7 +1123,7 @@ describe("General", () => {
     it("should use default organization when no selected organization", async () => {
       // Create wrapper first, then modify store state
       const wrapper = createWrapper();
-      mockStore.state.selectedOrganization = null;
+      mockStore.state.selectedOrganization = null as any;
 
       await wrapper.vm.uploadImage(new File(["test"], "test.png"));
 
@@ -1019,7 +1146,7 @@ describe("General", () => {
 
   describe("Edge cases", () => {
     it("should handle missing organization settings gracefully", () => {
-      mockStore.state.organizationData.organizationSettings = null;
+      mockStore.state.organizationData.organizationSettings = null as any;
       const wrapper = createWrapper();
 
       // The form falls back to the default scrape_interval (15) from the schema defaults.
@@ -1058,6 +1185,119 @@ describe("General", () => {
         // Fallback: verify store state shows empty text
         expect(mockStore.state.zoConfig.custom_logo_text).toBe("");
       }
+    });
+  });
+
+  describe("mobile action-bar space reservation", () => {
+    it("keeps the Save bar in flow below lg, where a pinned bar covered the controls", () => {
+      const w = createWrapper();
+      const footer = w.find('[data-test="general-settings-form-footer"]');
+      const classes = (footer.attributes("class") || "").split(/\s+/);
+      expect(classes).toContain("pb-safe");
+      for (const floating of ["sticky", "bottom-0", "z-10", "fixed"]) {
+        expect(classes).not.toContain(floating);
+      }
+      // From lg the reading column is tall enough that the bar needs pinning to be found.
+      expect(classes).toContain("lg:sticky");
+      expect(classes).toContain("lg:bottom-0");
+    });
+
+    it("wraps the theme-chip row so a narrow measure never clips a pill", () => {
+      const w = createWrapper();
+      const group = w.find('[data-test="general-settings-theme-chips"]');
+      expect(group.attributes("class") || "").toContain("flex-wrap");
+    });
+  });
+
+  describe("an empty field with a default says so", () => {
+    it("never paints the system default as a placeholder value", () => {
+      const w = createWrapper();
+      const field = w.find('[data-test="general-settings-max-series-per-query"]');
+      expect(field.find("input").attributes("placeholder")).toBeUndefined();
+      expect(field.text()).toContain("Empty");
+      expect(field.text()).toContain("the system default of 40,000 applies");
+    });
+
+    it("renames the same field once a value is set", async () => {
+      mockStore.state.organizationData.organizationSettings = {
+        scrape_interval: 30,
+        max_series_per_query: 25000,
+      };
+      const w = createWrapper();
+      await nextTick();
+      const field = w.find('[data-test="general-settings-max-series-per-query"]');
+      expect(field.find("input").element.value).toBe("25000");
+      expect(field.text()).toContain("Set to 25,000 series per query.");
+      expect(field.text()).not.toContain("system default");
+      mockStore.state.organizationData.organizationSettings = { scrape_interval: 30 };
+    });
+
+    it("states the scrape interval as the age it allows", () => {
+      const w = createWrapper();
+      expect(w.text()).toContain("The newest metric point can be up to 30 seconds old.");
+    });
+
+    it("names which mode's accent is custom and which is still the default", () => {
+      mockStore.state.organizationData.organizationSettings = {
+        scrape_interval: 30,
+        dark_mode_theme_color: "#3F7994",
+      };
+      const w = createWrapper();
+      expect(w.find('[data-test="general-settings-accent-state-light"]').text()).toContain(
+        "uses the default color",
+      );
+      expect(w.find('[data-test="general-settings-accent-state-dark"]').text()).toContain(
+        "uses a custom color",
+      );
+      mockStore.state.organizationData.organizationSettings = { scrape_interval: 30 };
+    });
+  });
+
+  describe("save affordance", () => {
+    const save = (w: any) => w.find('[data-test="dashboard-add-submit"]');
+
+    it("refuses Save with a reason while nothing differs from what is saved", () => {
+      const w = createWrapper();
+      expect(w.vm.isDirty).toBe(false);
+      expect(save(w).attributes("disabled")).toBeDefined();
+      expect(save(w).attributes("disabled-reason")).toBe("Nothing to save yet.");
+      expect(w.find('[data-test="general-settings-dirty-note"]').text()).toContain(
+        "No unsaved changes.",
+      );
+    });
+
+    it("never describes the idle form as an autosave promise next to the Save button", () => {
+      const w = createWrapper();
+      const note = w.find('[data-test="general-settings-dirty-note"]').text();
+      expect(save(w).exists()).toBe(true);
+      expect(note).not.toMatch(/is saved|everything.*saved/i);
+    });
+
+    it("opens Save the moment a field differs from what is saved", async () => {
+      const w = createWrapper();
+      const form = w.findComponent({ name: "OForm" });
+      form.vm.form.setFieldValue("scrape_interval", 45);
+      await nextTick();
+      expect(w.vm.isDirty).toBe(true);
+      expect(save(w).attributes("disabled")).toBeUndefined();
+      expect(w.find('[data-test="general-settings-dirty-note"]').text()).toContain(
+        "Unsaved changes — select Save to apply.",
+      );
+    });
+
+    it("names the manual save action once a change is pending", async () => {
+      const w = createWrapper();
+      const form = w.findComponent({ name: "OForm" });
+      form.vm.form.setFieldValue("scrape_interval", 45);
+      await nextTick();
+      expect(w.find('[data-test="general-settings-dirty-note"]').text()).toMatch(/Save/);
+    });
+
+    it("counts a previewed accent color as an unsaved change", async () => {
+      const w = createWrapper();
+      w.vm.customDarkColor = "#3F7994";
+      await nextTick();
+      expect(w.vm.isDirty).toBe(true);
     });
   });
 });

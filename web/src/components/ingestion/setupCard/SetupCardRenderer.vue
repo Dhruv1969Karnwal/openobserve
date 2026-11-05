@@ -295,6 +295,17 @@ const displayCode = (step: RichCardStep) =>
 const currentVariantNote = (step: RichCardStep) =>
   step.variants?.length ? activeVariant(step)?.note : undefined;
 
+// A value the card filled in for the user is indistinguishable from one the command always had, so the block cannot say which part is theirs to change.
+const filledInputs = (step: RichCardStep): RichCardInput[] => {
+  const template = displayCode(step)?.raw ?? "";
+  if (!template) return [];
+  return [...(step.inputs ?? []), ...(activeVariant(step)?.inputs ?? [])].filter(
+    (inp) => !inp.flag && !inp.helmSet && template.includes(`{${inp.id}}`),
+  );
+};
+/** An untouched default is the shipped example, not a choice this user made. */
+const isSampleValue = (inp: RichCardInput): boolean => inputValue(inp.id) === inp.default.trim();
+
 // Content modules are plain data with no i18n context, so their `*Key` fields
 // are translated here, on render, and win over the resolved-text counterpart.
 const stepTitle = (step: RichCardStep): I18nText =>
@@ -414,11 +425,9 @@ const onNoteClick = (e: MouseEvent) => {
 
 const chipIcon = (kind: StepChipKind) =>
   ({ terminal: "", editor: "code", run: "play-arrow", traces: "timeline" })[kind];
-// A code block with a filename is a file, not a shell command — render it with
-// editor chrome even under a terminal-chip step. Needed when one step mixes
-// command and file variants (e.g. RUM's npm install vs CDN HTML snippet).
-const codeChrome = (step: RichCardStep): "terminal" | "editor" =>
-  !displayCode(step)?.filename && step.chip?.kind === "terminal" ? "terminal" : "editor";
+// Only a filename earns the editor tab; a command needs no window chrome, since the step's own chip already says Terminal.
+const codeChrome = (step: RichCardStep): "editor" | undefined =>
+  displayCode(step)?.filename ? "editor" : undefined;
 
 const extras = computed(() => props.content.extras ?? {});
 const hasInstallerAccordion = computed(
@@ -517,7 +526,10 @@ function fireConfetti() {
       <!-- Hero -->
       <div v-if="!hideHero" class="c-hero">
         <div class="c-hero-head">
-          <span class="ds-mono xl text-white" :class="{ logo: logoSrc }">
+          <span
+            class="ds-mono xl bg-theme-accent text-button-primary-foreground"
+            :class="{ logo: logoSrc }"
+          >
             <img
               v-if="logoSrc"
               :src="logoSrc"
@@ -528,7 +540,7 @@ function fireConfetti() {
             />
             <template v-else>{{ content.provider.name.charAt(0) }}</template>
           </span>
-          <h1 class="c-h1">{{ content.provider.name }}</h1>
+          <h2 class="c-h2">{{ content.provider.name }}</h2>
         </div>
         <!-- Optional control on its own row directly under the title, ahead of the
              tagline and meta chips (e.g. RUM's Browser / React Native / Android /
@@ -591,10 +603,13 @@ function fireConfetti() {
           :done="isStepDone(step)"
           :data-test="`ai-step-${step.id}`"
         >
-          <template v-if="step.chip" #title-suffix>
+          <template #title-suffix>
+            <!-- A required step needs no mark; only the exception is chipped, and
+                 the chip's colour follows the word it carries, not a second fact. -->
             <OTag
+              v-if="step.chip"
               type="stepChip"
-              :value="step.required ? 'required' : 'optional'"
+              :value="step.required ? 'meta' : 'optional'"
               :icon="step.chip.kind === 'terminal' ? undefined : chipIcon(step.chip.kind)"
             >
               <template v-if="step.chip.kind === 'terminal'" #icon>
@@ -636,6 +651,7 @@ function fireConfetti() {
             >
               <OToggleGroup
                 :model-value="currentVariantId(step)"
+                :label="t('ingestion.stepVariantCaption')"
                 @update:model-value="(v) => selectVariant(variantKey(step), v)"
               >
                 <OToggleGroupItem
@@ -666,6 +682,7 @@ function fireConfetti() {
             >
               <OToggleGroup
                 :model-value="currentSubVariantId(step)"
+                :label="t('ingestion.stepVariantCaption')"
                 @update:model-value="(v) => selectVariant(subVariantKey(step), v)"
               >
                 <OToggleGroupItem
@@ -725,11 +742,34 @@ function fireConfetti() {
               <slot :name="`step-${step.id}-controls`" :step="step" />
             </div>
 
+            <p
+              v-for="inp in filledInputs(step)"
+              :key="inp.id"
+              class="step-note"
+              :data-test="`ai-step-input-note-${inp.id}`"
+            >
+              <OIcon name="edit" size="sm" />
+              <span>
+                {{
+                  isSampleValue(inp)
+                    ? t("ingestion.setupCard.commandValueIsSample", {
+                        value: inputValue(inp.id) || inp.default,
+                        label: inputLabel(inp),
+                      })
+                    : t("ingestion.setupCard.commandValueFromField", {
+                        value: inputValue(inp.id) || inp.default,
+                        label: inputLabel(inp),
+                      })
+                }}
+              </span>
+            </p>
+
             <OCodeBlock
               v-if="displayCode(step) && !missingRequired(activeVariant(step))"
               :lang="displayCode(step)?.lang"
               :chrome="codeChrome(step)"
               :filename="displayCode(step)?.filename"
+              wrap
               :code="subStream(displayCode(step)?.raw, activeVariant(step)) || ''"
               :code-masked="subStream(displayCode(step)?.masked, activeVariant(step))"
               :data-test="displayCode(step)?.dataTest ?? SETUP_CODE_BLOCK"
@@ -877,8 +917,9 @@ function fireConfetti() {
             ></p>
             <OCodeBlock
               :lang="extras.advanced.code.lang"
-              :chrome="extras.advanced.code.filename ? 'editor' : 'terminal'"
+              :chrome="extras.advanced.code.filename ? 'editor' : undefined"
               :filename="extras.advanced.code.filename"
+              wrap
               :code="subStream(extras.advanced.code.raw) || ''"
               :code-masked="subStream(extras.advanced.code.masked)"
               data-test="ai-advanced-code"
@@ -1018,6 +1059,8 @@ function fireConfetti() {
   --text-3: var(--color-text-label);
   --primary-ink: var(--color-text-link);
   --track: var(--color-surface-subtle);
+  /* Prose holds one measure so a run-on line never reaches the code block's right edge. */
+  --reading-measure: 72ch;
   color: var(--text-1);
   font-size: var(--text-sm);
 }
@@ -1046,10 +1089,10 @@ function fireConfetti() {
 }
 
 .ds-mono.xl {
-  width: 2.875rem;
-  height: 2.875rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: var(--radius-surface);
-  font-size: var(--text-xl);
+  font-size: var(--text-base);
 }
 
 .ds-mono.logo {
@@ -1068,10 +1111,10 @@ function fireConfetti() {
 
 /* ---- hero — its own header band: [logo + name] row, then tagline + chips ---- */
 .c-hero {
-  padding: 0.375rem 0 1.125rem;
+  padding: 0.25rem 0 0.875rem;
   /* eslint-disable-next-line local/no-hardcoded-px -- hairline: a 1-device-pixel border must not scale with text or it smears at fractional zoom */
   border-bottom: 1px solid var(--border);
-  margin-bottom: 1.375rem;
+  margin-bottom: 1.125rem;
 }
 
 .c-hero-head {
@@ -1080,18 +1123,19 @@ function fireConfetti() {
   gap: 0.875rem;
 }
 
-.c-h1 {
-  font-weight: 800;
-  font-size: var(--text-2xl);
-  letter-spacing: -0.02em;
+.c-h2 {
+  font-weight: 600;
+  font-size: var(--text-lg);
+  letter-spacing: -0.01em;
   margin: 0;
-  line-height: 1.1;
+  line-height: 1.2;
 }
 
 .c-sub {
   color: var(--text-2);
   font-size: var(--text-sm);
   margin: 0.625rem 0 0;
+  max-width: var(--reading-measure);
 }
 
 /* Hero meta chips are now <OTag> (lib) — just lay them out. */
@@ -1160,6 +1204,7 @@ function fireConfetti() {
   font-size: var(--text-compact);
   margin: 0 0 0.625rem;
   line-height: 1.45;
+  max-width: var(--reading-measure);
 }
 
 .step-note {
@@ -1170,6 +1215,7 @@ function fireConfetti() {
   font-size: var(--text-xs);
   line-height: 1.5;
   margin: 0.625rem 0 0;
+  max-width: var(--reading-measure);
 }
 
 /* ---- page-supplied step content + action button ---- */

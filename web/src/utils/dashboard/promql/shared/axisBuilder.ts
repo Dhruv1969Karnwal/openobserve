@@ -20,6 +20,19 @@ import { escapeHtml } from "@/utils/html";
 import { createSeriesOverrideLookup } from "../../seriesOverrides";
 import { TOOLTIP_SCROLL_STYLE } from "./types";
 
+/** Largest magnitude a value axis can show; undefined when neither the caller nor the config bounds it. */
+const axisExtentOf = (config: any, axisExtent?: number): number | undefined => {
+  const explicit = Number(axisExtent);
+  if (axisExtent !== null && axisExtent !== undefined && Number.isFinite(explicit)) {
+    return Math.abs(explicit);
+  }
+  const bounds = [config?.y_axis_min, config?.y_axis_max]
+    .filter((value: any) => value !== null && value !== undefined && value !== "")
+    .map(Number)
+    .filter((value: number) => Number.isFinite(value));
+  return bounds.length ? Math.max(...bounds.map((value: number) => Math.abs(value))) : undefined;
+};
+
 /**
  * Build tooltip configuration with unit formatting and decimals
  *
@@ -155,11 +168,18 @@ export function buildXAxis(panelSchema: any, store: any, hasData: boolean = true
  *
  * @param panelSchema - Panel configuration schema
  * @param queryIndex - Index of the query (for multi-query support)
+ * @param axisExtent - Largest absolute tick of this axis; pins every tick to one unit
  * @returns Y-axis configuration object for ECharts
  */
-export function buildYAxis(panelSchema: any, queryIndex: number = 0, store?: any): any {
+export function buildYAxis(
+  panelSchema: any,
+  queryIndex: number = 0,
+  store?: any,
+  axisExtent?: number,
+): any {
   const config = panelSchema.config || {};
   const showGridlines = config.show_grid !== false; // Default to true
+  const tickExtent = axisExtentOf(config, axisExtent);
 
   // Get Y-axis label from query configuration (same as SQL)
   const query = panelSchema.queries?.[queryIndex];
@@ -173,7 +193,7 @@ export function buildYAxis(panelSchema: any, queryIndex: number = 0, store?: any
       // Add unit formatting to Y-axis labels
       formatter: (value: any) => {
         return formatUnitValue(
-          getUnitValue(value, config?.unit, config?.unit_custom, config?.decimals),
+          getUnitValue(value, config?.unit, config?.unit_custom, config?.decimals, tickExtent),
         );
       },
     },
@@ -194,7 +214,7 @@ export function buildYAxis(panelSchema: any, queryIndex: number = 0, store?: any
         // Preserve unit formatter when axis_width is set
         formatter: (value: any) => {
           return formatUnitValue(
-            getUnitValue(value, config?.unit, config?.unit_custom, config?.decimals),
+            getUnitValue(value, config?.unit, config?.unit_custom, config?.decimals, tickExtent),
           );
         },
       },
@@ -292,11 +312,13 @@ export function buildCategoryYAxis(categories: string[], panelSchema: any, store
  * Build value axis configuration (for horizontal bar charts' X-axis)
  *
  * @param panelSchema - Panel configuration schema
+ * @param axisExtent - Largest absolute tick of this axis; pins every tick to one unit
  * @returns Value axis configuration object for ECharts
  */
-export function buildValueAxis(panelSchema: any, store?: any): any {
+export function buildValueAxis(panelSchema: any, store?: any, axisExtent?: number): any {
   const config = panelSchema.config || {};
   const showGridlines = config.show_grid !== false;
+  const tickExtent = axisExtentOf(config, axisExtent);
 
   const valueAxis: any = {
     type: "value",
@@ -307,7 +329,7 @@ export function buildValueAxis(panelSchema: any, store?: any): any {
       // Add unit formatting to value axis labels
       formatter: (value: any) => {
         return formatUnitValue(
-          getUnitValue(value, config?.unit, config?.unit_custom, config?.decimals),
+          getUnitValue(value, config?.unit, config?.unit_custom, config?.decimals, tickExtent),
         );
       },
     },

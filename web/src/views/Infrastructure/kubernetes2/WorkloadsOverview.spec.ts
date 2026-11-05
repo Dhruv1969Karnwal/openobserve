@@ -171,10 +171,11 @@ describe("WorkloadsOverview", () => {
       expect(wrapper.findComponent({ name: "PanelSchemaRenderer" }).exists()).toBe(false);
     });
 
-    it("carries the OpenObserve rule tooltip on zero-pod and Unknown rows only", async () => {
+    it("carries the Retrace.ai rule tooltip on zero-pod and Unknown rows only", async () => {
       await mountView();
       const tip = (testId: string) => find(testId).find('[data-test="tooltip"]');
-      expect(tip("k8s2-workloads-status-pod-unknown").text()).toContain("OpenObserve rule");
+      expect(tip("k8s2-workloads-status-pod-unknown").text()).toContain("Retrace.ai rule");
+      expect(tip("k8s2-workloads-status-pod-unknown").text()).toContain("not Lens");
       expect(tip("k8s2-workloads-status-pod-running").exists()).toBe(false);
       // `idle` is scaled to zero with no pods, so the Deployment running row used the zero-pod rule.
       expect(statusRows("deployment")).toEqual(["Running: 2"]);

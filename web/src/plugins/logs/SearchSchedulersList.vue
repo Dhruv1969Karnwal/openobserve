@@ -874,7 +874,7 @@ export default defineComponent({
         case 1:
           return "text-status-info-text"; // Running
         case 2:
-          return "text-status-positive"; // Finished
+          return "text-status-success-text"; // Finished
         case 3:
           return "text-status-error-text"; // Cancelled
         default:

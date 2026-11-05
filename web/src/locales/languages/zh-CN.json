@@ -565,7 +565,7 @@
       "title": "暂无远程任务",
       "description": "远程任务是实验调用以生成输出的 HTTP 服务。发布一次并验证连接可用后，每个实验都能固定它所使用的确切版本。",
       "action": "新建任务",
-      "actionDesc": "将 OpenObserve 指向您的端点并测试连接。"
+      "actionDesc": "将 Retrace.ai 指向您的端点并测试连接。"
     },
     "noDowntimes": {
       "title": "暂无静默期",
@@ -1880,7 +1880,7 @@
       "refresh": "刷新",
       "refreshDataThrough": "刷新 · 数据截至 {time}",
       "sdkSampled": "计数反映采样的 SDK 会话",
-      "sdkSampledTip": "只有 RUM SDK 保留的会话（{field}）才会到达 OpenObserve，因此这里的每个计数都涵盖这些会话。",
+      "sdkSampledTip": "只有 RUM SDK 保留的会话（{field}）才会到达 Retrace.ai，因此这里的每个计数都涵盖这些会话。",
       "identityExcluded": "{count} 个身份值已排除（{pct}%） | {count} 个身份值已排除（{pct}%）",
       "identityIncluded": "包含所有身份值",
       "identityExcludedHelp": "一个值覆盖了已识别会话的 {pct}%，可能是测试或共享账号。它被排除在所有用户计数、漏斗和留存网格之外。",
@@ -3011,8 +3011,8 @@
     "clickHere": "点击此处",
     "loginWithSso": "使用 SSO 登录",
     "loginAsInternalUser": "以内部用户身份登录",
-    "openObserveLogoAlt": "OpenObserve 徽标",
-    "getStartedBannerMessage": "立即试用 OpenObserve，获得更高效、更高性能的可观测性。",
+    "openObserveLogoAlt": "Retrace.ai 徽标",
+    "getStartedBannerMessage": "立即试用 Retrace.ai，获得更高效、更高性能的可观测性。",
     "getStartedBannerAlt": "开始使用横幅",
     "getStartedHeading": "开始前最后一件事",
     "hearAboutUsLabel": "您是如何了解到我们的？",
@@ -3034,7 +3034,7 @@
     "passwordRequired": "密码为必填",
     "mustAcceptTerms": "您必须接受条款才能继续",
     "getStarted": {
-      "title": "欢迎使用 OpenObserve",
+      "title": "欢迎使用 Retrace.ai",
       "subtitle": "您的 14 天试用已开始。两个小问题，然后我们将带您进入设置。",
       "sourceLabel": "您想先发送什么？",
       "optional": "（可选）",
@@ -5116,7 +5116,7 @@
       "askAi": "询问 AI",
       "guideDocs": "{guide} 文档",
       "setupDocs": "设置文档",
-      "askAiPrompt": "我正在 OpenObserve 中设置 {guide}，但尚未收到任何数据。首条事件检查显示：{details} 组织 ID：{org}。端点：{endpoint}。接下来我该检查什么？",
+      "askAiPrompt": "我正在 Retrace.ai 中设置 {guide}，但尚未收到任何数据。首条事件检查显示：{details} 组织 ID：{org}。端点：{endpoint}。接下来我该检查什么？",
       "askAiRejected": "请求在 {path} 上被拒绝，状态为 {status} {reason}。",
       "askAiNoRequests": "尚未收到任何数据，也没有请求被拒绝。",
       "askAiUnavailable": "无法读取被拒绝的请求，因此原因未知。",
@@ -5170,7 +5170,7 @@
       "configTitle": "将此文件保存为 {path} 并重启 Fluent Bit",
       "configDescription": "跟踪 {server} 日志，并使用组织令牌将其发送到 {org} 的 {stream} 数据流。",
       "restartHint": "然后运行 {command}。",
-      "verifyTitle": "在 OpenObserve 中验证数据"
+      "verifyTitle": "在 Retrace.ai 中验证数据"
     },
     "copyContentError": "复制内容时出错",
     "passcodeForbiddenMessage": "查看数据摄取令牌需要管理员或 Root 角色。请向管理员索取设置命令，或获取在此处查看它所需的角色。",
@@ -5253,7 +5253,7 @@
       "singleTargetTitle": "单一远程写入目标",
       "fanoutTitle": "扇出到多个后端",
       "tipPrefix": "提示：`vmagent` 可以通过重复使用",
-      "tipSuffix": "flag，这样您就可以在将指标转发到 OpenObserve 的同时保留现有的 VictoriaMetrics 目标。",
+      "tipSuffix": "flag，这样您就可以在将指标转发到 Retrace.ai 的同时保留现有的 VictoriaMetrics 目标。",
       "docLinkText": "了解更多关于配置 vmagent 远程写入目标的信息。"
     },
     "ai": {
@@ -5339,7 +5339,7 @@
       "selectAtLeastOneCategory": "请至少选择上面的一个日志类别。",
       "runCommandAfterDeployment": "ARM 部署完成后，运行此命令：",
       "activityLogsTitle": "Azure 活动日志",
-      "activityLogsDescription": "通过 {product} 将 Azure 订阅活动日志流式传输到 OpenObserve。ARM 模板会设置事件中心基础设施——然后你配置 Azure 将日志导出到其中。",
+      "activityLogsDescription": "通过 {product} 将 Azure 订阅活动日志流式传输到 Retrace.ai。ARM 模板会设置事件中心基础设施——然后你配置 Azure 将日志导出到其中。",
       "manualTitle": "手动配置（供参考）"
     },
     "awsSetup": {
@@ -5462,16 +5462,16 @@
     "splunkHecUrlHelp": "将 Splunk 转发器指向此 URL，并将令牌作为 Authorization 头的值 \"Splunk <token>\" 发送。",
     "setupCard": {
       "advancedInstallDescCloud": "用于自定义配置，或固定版本并自定义图表值。请按顺序执行这些步骤。",
-      "advancedInstallDescSelfHosted": "用于自定义配置，或固定版本并自定义图表值。请按顺序执行这些步骤。如果 OpenObserve 在同一集群中运行，请将 exporter 端点替换为 `{url}`。",
+      "advancedInstallDescSelfHosted": "用于自定义配置，或固定版本并自定义图表值。请按顺序执行这些步骤。如果 Retrace.ai 在同一集群中运行，请将 exporter 端点替换为 `{url}`。",
       "advancedInstallLabel": "高级安装（手动步骤）",
       "aerospikeHostLabel": "Aerospike 主机",
-      "aerospikeTagline": "使用 OpenTelemetry Collector 采集 Aerospike 指标并将其发送到 OpenObserve。",
+      "aerospikeTagline": "使用 OpenTelemetry Collector 采集 Aerospike 指标并将其发送到 Retrace.ai。",
       "agentServiceFixTitle": "检查代理服务",
       "agentTroubleInstanceIdA": "这是没有 IAM 角色的 EC2 变体。{iamNote} 附加角色，然后重启代理。",
       "agentTroubleInstanceIdQ": "主机以实例 ID 而非名称显示",
       "agentTroubleNoDataA": "使用 {hint} 检查代理是否正在运行。日志中的 401 表示摄取令牌已过期——请从本页重新复制命令，该命令始终包含此组织当前的令牌。",
       "agentTroubleNoDataQ": "安装脚本运行了，但没有数据到达",
-      "agentTroubleUnreachableA": "代理需要出站访问此 OpenObserve 端点。请从主机本身使用 `curl -v` 确认——常见原因是代理或出口防火墙。",
+      "agentTroubleUnreachableA": "代理需要出站访问此 Retrace.ai 端点。请从主机本身使用 `curl -v` 确认——常见原因是代理或出口防火墙。",
       "agentTroubleUnreachableQ": "从主机无法访问该端点",
       "aiCategoryAnalytics": "分析与评估",
       "aiCategoryFrameworks": "AI 框架与代理",
@@ -5486,7 +5486,7 @@
       "autoInstrumentTracesDesc": "两种方式都能**无需改动应用代码或重新构建镜像即可获得分布式追踪**。**语言库：**OpenTelemetry Operator 会向带注解命名空间中的 Pod 注入自动插桩。**eBPF：**采集器会追踪你选择的进程，支持任意语言，包括 Go。",
       "autoInstrumentTracesTitle": "追踪你的应用：语言库或 eBPF",
       "cassandraJmxNote": "在 Cassandra 上启用 JMX 远程访问，以便接收器连接。",
-      "cassandraTagline": "通过 OpenTelemetry Collector 的 JMX 接收器采集 Cassandra 指标并将其发送到 OpenObserve。",
+      "cassandraTagline": "通过 OpenTelemetry Collector 的 JMX 接收器采集 Cassandra 指标并将其发送到 Retrace.ai。",
       "checking": "正在检查…",
       "checkingForLogs": "正在检查日志…",
       "checkingForMetrics": "正在检查指标…",
@@ -5519,10 +5519,10 @@
       "downloadJmxJarDesc": "JMX 接收器运行此辅助 jar（在收集器主机上需要 Java）。",
       "downloadJmxJarTitle": "下载 JMX 指标 Jar",
       "dynamodbFirehoseEndpointDesc": "在创建 Kinesis Data Firehose 交付流时，使用这些作为 **HTTP 端点** 目标。",
-      "dynamodbFirehoseEndpointTitle": "OpenObserve Firehose 端点",
+      "dynamodbFirehoseEndpointTitle": "Retrace.ai Firehose 端点",
       "dynamodbPipelineDesc": "在您的表上启用 **DynamoDB Streams**，将其连接到 **Kinesis Data Stream**，然后将 **Kinesis Data Firehose** 交付流指向上面的 HTTP 端点。",
       "dynamodbPipelineTitle": "流式传输 DynamoDB → Firehose",
-      "dynamodbTagline": "通过 Kinesis Firehose 将 DynamoDB 数据项更改流式传输到 OpenObserve。",
+      "dynamodbTagline": "通过 Kinesis Firehose 将 DynamoDB 数据项更改流式传输到 Retrace.ai。",
       "ec2IamNote": "需要在实例上具有 ec2:DescribeTags 和 ec2:DescribeInstances 的 IAM 角色，以便代理可以读取 Name 标签并将其用作主机标识符。",
       "enableSessionReplayDesc": "会话回放是**独立**于 RUM 进行配置的，并且**不会**继承 `rumConfiguration.customEndpoint`。请在下方为它提供独立的 base URL，格式与 RUM/Logs 的 base URL 相同。桥接器会自行追加 `/replay`，所以请**不要**自行添加：手动添加 `/replay` 会导致路径被重复追加，所有上传都会被 401 拒绝——这也是 RUM 事件可以到达但会话回放始终不出现的最常见原因。",
       "enableSessionReplayTitle": "启用会话重放",
@@ -5532,15 +5532,15 @@
       "gcpFixBody": "GCP 在订阅本身上报告投递失败。如果接收器正在发布但这里没有任何数据，通常是推送端点拒绝了请求：",
       "gcpFixTitle": "检查推送订阅",
       "gcpPushUrlNote": "请对 URL 保密——它包含摄取密钥。如果泄露，请从本页的页眉处轮换它。",
-      "gcpSinkDesc": "在 GCP 控制台中，创建一个以 Pub/Sub 为目标的 **Log Router sink**（Logging → Log Router → Create sink），并让其创建主题。sink 的包含过滤器决定哪些日志会到达 OpenObserve。",
+      "gcpSinkDesc": "在 GCP 控制台中，创建一个以 Pub/Sub 为目标的 **Log Router sink**（Logging → Log Router → Create sink），并让其创建主题。sink 的包含过滤器决定哪些日志会到达 Retrace.ai。",
       "gcpSinkTitle": "将日志路由到 Pub/Sub 主题",
       "gcpSinkWriterNote": "为接收器的写入者身份授予主题上的 Pub/Sub Publisher 角色，否则它会静默地不发布任何内容。",
       "gcpStreamHelp": "用于上面的推送 URL，并由下面的检查监控。专用流可将 GCP 日志分开保存。",
       "gcpSubscriptionDesc": "在该主题上创建一个 **推送** 订阅，并将此粘贴为端点 URL。它已经携带了此组织及其摄取密钥。",
-      "gcpSubscriptionTitle": "将主题推送到 OpenObserve",
+      "gcpSubscriptionTitle": "将主题推送到 Retrace.ai",
       "gcpTroubleDeliveryA": "401 表示 URL 中的 `API-Key` 已过期 — 请重新从此页面复制端点。404 通常表示组织或流名称段被手动编辑；上面的 URL 对此组织已是正确的。",
       "gcpTroubleDeliveryQ": "订阅显示传递错误",
-      "gcpTroublePartialA": "那是接收器的包含过滤器，不是 OpenObserve。扩大接收器上的 `--log-filter` 以覆盖你期望的服务和严重级别。",
+      "gcpTroublePartialA": "那是接收器的包含过滤器，不是 Retrace.ai。扩大接收器上的 `--log-filter` 以覆盖你期望的服务和严重级别。",
       "gcpTroublePartialQ": "只有部分日志到达",
       "gcpTroubleTopicA": "接收器的 **写入者身份** 需要在主题上具有 Pub/Sub 发布者角色。GCP 在没有它的情况下也能成功创建接收器，然后静默丢弃所有内容。",
       "gcpTroubleTopicQ": "接收器存在但主题未收到任何内容",
@@ -5573,7 +5573,7 @@
       "k8sEbpfVariant": "eBPF（任意语言，无需改代码）",
       "k8sLibrariesVariant": "语言库（自动插桩）",
       "k8sInstallerNote": "这会自动安装 cert-manager、OpenTelemetry operator 和 OpenObserve collector。",
-      "k8sInternalEndpointNote": "当 OpenObserve 运行在同一集群中使用此项 — 流量永远不会离开它。",
+      "k8sInternalEndpointNote": "当 Retrace.ai 运行在同一集群中使用此项 — 流量永远不会离开它。",
       "k8sTroubleAnnotationA": "注入发生在 pod 创建时，因此现有 pod 在重启前不受影响 — 运行 `kubectl rollout restart deployment -n my-namespace`。使用 `kubectl get ns my-namespace -o yaml` 确认注解已生效，并检查值是否与 `openobserve-collector/openobserve-<language>` 匹配。",
       "k8sTroubleAnnotationQ": "我注解了命名空间但没有出现 trace",
       "k8sTroubleEndpointA": "仅当 OpenObserve 本身运行在此集群中时才使用**内部端点**；这样流量会留在集群内部，不会跨越网络。URL 为 `http://<helm-release>-openobserve-router.<namespace>.svc.cluster.local:5080` — 默认假定发布名为 `o2`、命名空间为 `openobserve`，如果你的不同请自行修改。其他所有情况都使用外部端点。",
@@ -5595,7 +5595,7 @@
       "runCollectorMariadbDesc": "启动采集器（通过环境变量提供用户密码）。",
       "mariadbHostLabel": "MariaDB 主机",
       "verifyMariadbMetricsDesc": "数据到达后下方检查项会变为绿色，也可在数据流中查看 `mysql_*` 指标（MariaDB 通过 MySQL 接收器上报）。",
-      "mariadbTagline": "使用 OpenTelemetry Collector 收集 MariaDB 指标并将其发送到 OpenObserve。",
+      "mariadbTagline": "使用 OpenTelemetry Collector 收集 MariaDB 指标并将其发送到 Retrace.ai。",
       "logsStreamNameLabel": "日志流名称",
       "macosAgentFixBody": "安装程序注册了两个 launchd 守护进程：代理本身和统一日志桥。如果没有内容到达，请确认两者都已加载并阅读代理的日志以查找认证或连接错误：",
       "macosAgentServicesFixTitle": "检查代理服务",
@@ -5607,11 +5607,11 @@
       "macosTroubleVolumeQ": "统一日志发送的量远超预期",
       "macQuarantineNote": "如果 macOS 阻止未签名的二进制文件，请清除隔离标志：xattr -d com.apple.quarantine ./otelcol-contrib",
       "mongodbHostLabel": "MongoDB 主机",
-      "mongodbTagline": "使用 OpenTelemetry Collector 采集 MongoDB 指标并将其发送到 OpenObserve。",
+      "mongodbTagline": "使用 OpenTelemetry Collector 采集 MongoDB 指标并将其发送到 Retrace.ai。",
       "mostLikelyFix": "最可能的修复方法 —",
       "mysqlAdminNote": "以 MySQL 管理员身份运行（它会提示输入密码）。",
       "mysqlHostLabel": "MySQL 主机",
-      "mysqlTagline": "使用 OpenTelemetry Collector 收集 MySQL 指标并将其发送到 OpenObserve。",
+      "mysqlTagline": "使用 OpenTelemetry Collector 收集 MySQL 指标并将其发送到 Retrace.ai。",
       "noLogsFoundYet": "尚未找到日志",
       "noMetricsFoundYet": "尚未找到指标",
       "noSpansFoundYet": "尚未找到 Span",
@@ -5620,7 +5620,7 @@
       "onStream": "在 {stream} 上",
       "optionalLabel": "可选",
       "oracleHostLabel": "Oracle 主机",
-      "oracleTagline": "使用 OpenTelemetry Collector 收集 Oracle DB 指标并将其发送到 OpenObserve。",
+      "oracleTagline": "使用 OpenTelemetry Collector 收集 Oracle DB 指标并将其发送到 Retrace.ai。",
       "otlpFixBody": "仅定义导出器是不够的 — 它必须列在 pipeline 中。这是看起来正确的配置不发送任何内容的唯一最常见原因：",
       "otlpFixTitle": "检查导出器是否确实已接入 pipeline",
       "otlpGrpcCloudNote": "OpenObserve Cloud 的公共 gRPC 网关 — 在高 Span 量下比 HTTP 开销更低，无需配置自托管网络。",
@@ -5708,10 +5708,10 @@
       "pillWireframeCapture": "线框图捕获",
       "pillWriteLatency": "写入延迟",
       "pointExporterDesc": "将此添加到您的收集器配置中，或者如果您的应用直接导出，请设置环境变量。此组织的所有内容均已填写完毕。",
-      "pointExporterTitle": "将您的导出器指向 OpenObserve",
+      "pointExporterTitle": "将您的导出器指向 Retrace.ai",
       "portLabel": "端口",
       "postgresqlHostLabel": "PostgreSQL 主机",
-      "postgresqlTagline": "使用 OpenTelemetry Collector 收集 PostgreSQL 指标并将其发送到 OpenObserve。",
+      "postgresqlTagline": "使用 OpenTelemetry Collector 收集 PostgreSQL 指标并将其发送到 Retrace.ai。",
       "postgresSuperuserNote": "以 Postgres 超级用户身份运行（psql 会提示输入其密码）。",
       "prepareMongodbDesc": "创建具有 clusterMonitor 角色的监控用户 — 在 mongosh 中运行，**而不是**在你的 shell 中运行。",
       "prepareMongodbTitle": "准备 MongoDB",
@@ -5729,7 +5729,7 @@
       "quickInstallTitle": "快速安装（推荐）",
       "redisHostLabel": "Redis 主机",
       "redisNoAuthNote": "如果 Redis 没有认证，请使用 REDIS_PASSWORD=''。",
-      "redisTagline": "使用 OpenTelemetry Collector 采集 Redis 指标并将其发送到 OpenObserve。",
+      "redisTagline": "使用 OpenTelemetry Collector 采集 Redis 指标并将其发送到 Retrace.ai。",
       "revealToken": "显示 Token",
       "rnFixBody": "模拟器或物理设备中的 `localhost` 指的是设备本身，而不是您的电脑——这是完全收不到数据的常见原因。请根据应用运行位置使用正确的主机：",
       "rnFixTitle": "将 SDK 指向设备实际可访问的主机",
@@ -5753,7 +5753,7 @@
       "rnTroubleScreenNamesQ": "会话出现，但所有屏幕的名称都相同",
       "rumCdnInitNote": "将其放在 <head> 中 loader 之后。onReady() 会将初始化排队，直到每个 bundle 到达——不会阻塞渲染。",
       "rumCdnInstallNote": "粘贴到 <head> 顶部。固定到 v{version} 以实现不可变缓存；async + preconnect 使其不阻塞关键渲染路径。对于严格的 CSP，请自行托管这两个 bundle。",
-      "rumFixBody": "如果您的应用运行正常但收不到任何数据，很可能是浏览器阻止了 SDK 或其请求——通常是内容安全策略或广告拦截器。请允许 CDN 和您的 OpenObserve 端点，然后重新加载：",
+      "rumFixBody": "如果您的应用运行正常但收不到任何数据，很可能是浏览器阻止了 SDK 或其请求——通常是内容安全策略或广告拦截器。请允许 CDN 和您的 Retrace.ai 端点，然后重新加载：",
       "rumFixTitle": "在您的内容安全策略中允许 SDK",
       "rumInitDesc": "两个 SDK 都使用此组织的值进行初始化 — 按原样复制，然后调整 `service`、`env` 和 `applicationId` 来描述您的应用。`clientToken` 按设计会发送到访问者的浏览器（NPM 打包它，CDN 内联它） — 它只能写入 RUM 事件，您可以随时从此页面顶部轮换它。",
       "rumInitTitle": "初始化 RUM + 日志",
@@ -5774,7 +5774,7 @@
       "rumTroublePerfA": "不会——bundle 通过 `async` 加载，不阻塞关键渲染路径，`preconnect` 在首次上传前预热 DNS/TLS，事件在发送前会进行批处理。如果您想进一步限制回放开销，可以降低 `sessionReplaySampleRate`。",
       "rumTroublePerfQ": "SDK 会拖慢我的网站吗？",
       "rumTroublePlainHttpA": "浏览器会拒绝混合内容，SDK 默认使用 HTTPS——请保留 `insecureHTTP: {insecureHTTP}`（已根据本组织的端点设置），以便上传使用正确的协议。",
-      "rumTroublePlainHttpQ": "我的 OpenObserve 端点是纯 HTTP",
+      "rumTroublePlainHttpQ": "我的 Retrace.ai 端点是纯 HTTP",
       "rumTroubleTokenVisibleA": "是的——`clientToken` 在设计上就是客户端令牌，与所有浏览器 RUM 产品一样。NPM 设置会在 JS bundle 中暴露它，CDN 设置会将其内联在 HTML 中；无论哪种方式，DevTools 都能显示它。它只能**写入** RUM 事件——它不授予读取权限，并且与摄取密码分开。如果有人滥用它发送虚假事件，请从此页面头部重新生成并重新部署您的应用。",
       "rumTroubleTokenVisibleQ": "令牌在我的页面源代码中可见，这样安全吗？",
       "runCollectorDesc": "启动收集器。",
@@ -5787,7 +5787,7 @@
       "runtimeCluster": "集群",
       "runtimeHost": "主机",
       "seeAllTroubleshooting": "查看所有故障排查",
-      "sendNotebookLogsDesc": "粘贴到 Databricks 笔记本单元格中 — 它会将记录 POST 到 OpenObserve 的日志 API。",
+      "sendNotebookLogsDesc": "粘贴到 Databricks 笔记本单元格中 — 它会将记录 POST 到 Retrace.ai 的日志 API。",
       "sendNotebookLogsTitle": "从您的笔记本发送日志",
       "setup": "设置",
       "setupTime1Min": "~1 分钟",
@@ -5827,23 +5827,23 @@
       "androidTroubleScreenNamesA": "视图跟踪未接入。在构建 `RumConfiguration` 时传入 `useViewTrackingStrategy(...)` — 例如 Activity 使用 `ActivityViewTrackingStrategy(trackExtras = true)`，如果使用 AndroidX Navigation 则使用 `NavigationViewTrackingStrategy(...)`。",
       "setupTime5Min": "~5 分钟",
       "snowflakeCollectorVersionNote": "Snowflake 需要 collector v0.92.0 — 较新的构建存在已知错误。",
-      "snowflakeTagline": "使用 OpenTelemetry Collector 采集 Snowflake 账户指标并将其发送到 OpenObserve。",
+      "snowflakeTagline": "使用 OpenTelemetry Collector 采集 Snowflake 账户指标并将其发送到 Retrace.ai。",
       "sqlClientGuiVariant": "SQL 客户端 (GUI)",
       "sqlServerHostLabel": "SQL Server 主机",
       "sqlServerPasswordNote": "替换 YOUR_SA_PASSWORD。",
-      "sqlServerTagline": "使用 OpenTelemetry Collector 收集 SQL Server 指标并将其发送到 OpenObserve。",
+      "sqlServerTagline": "使用 OpenTelemetry Collector 收集 SQL Server 指标并将其发送到 Retrace.ai。",
       "startIngestingTestForLogs": "开始采集，然后测试日志",
       "startIngestingTestForMetrics": "开始采集，然后测试指标",
       "startIngestingTestForSpans": "开始摄取，然后测试 Span",
       "streamNameError": "仅使用字母、数字和下划线。",
       "streamNameLabel": "流名称",
       "stuck": "卡住了？",
-      "taglineDatabricks": "通过日志 API 将 Databricks notebook 日志发送到 OpenObserve。",
-      "taglineGcp": "使用 Pub/Sub 推送订阅将 Google Cloud 日志流式传输到 OpenObserve — 无需运行 agent 或 collector。",
+      "taglineDatabricks": "通过日志 API 将 Databricks notebook 日志发送到 Retrace.ai。",
+      "taglineGcp": "使用 Pub/Sub 推送订阅将 Google Cloud 日志流式传输到 Retrace.ai — 无需运行 agent 或 collector。",
       "taglineKubernetes": "将 OpenObserve collector 部署到您的集群 — 容器日志、Kubernetes 事件和集群指标，以及您的工作负载的无代码追踪。",
       "taglineLinux": "在任意 Linux 主机上安装 OpenObserve agent——采集系统日志和 journald 日志，以及 CPU、内存、磁盘和网络指标，并可选择启用 eBPF 追踪。",
       "taglineMacos": "在任何 Mac 上安装 OpenObserve agent — 统一日志和标准日志文件，以及 CPU、内存、磁盘和网络指标。",
-      "taglineOtlpTraces": "将任何 OpenTelemetry exporter 指向 OpenObserve — 无论是 collector 还是 SDK，HTTP 或 gRPC。您的端点和令牌已填写在下方。",
+      "taglineOtlpTraces": "将任何 OpenTelemetry exporter 指向 Retrace.ai — 无论是 collector 还是 SDK，HTTP 或 gRPC。您的端点和令牌已填写在下方。",
       "taglineWindows": "在任何 Windows 主机上安装 OpenObserve agent — 事件日志、性能计数器和主机指标。",
       "testAgain": "再次测试",
       "traceCmdHelp": "适用于 Python、Node.js 和 Java 应用。",
@@ -5865,7 +5865,7 @@
       "verifyAerospikeMetricsDesc": "数据到达后下方检查项会变为绿色，也可在数据流中查看 `aerospike_*` 指标。",
       "verifyCassandraMetricsDesc": "数据到达后下方检查项会变为绿色，也可在数据流中查看 `cassandra_*` 指标。",
       "verifyDatabricksLogsDesc": "数据到达后下方检查项会变为绿色，也可打开日志并搜索 `source:databricks`。",
-      "verifyDataTitle": "在 OpenObserve 中验证数据",
+      "verifyDataTitle": "在 Retrace.ai 中验证数据",
       "verifyDynamodbLogsDesc": "数据到达后下方检查项会变为绿色，也可在条目发生变化后打开 `dynamodb` 数据流的日志。",
       "verifyGcpLogsDesc": "在项目中产生一些活动（或等待日志接收器匹配到日志）；数据到达后下方检查项会变为绿色。",
       "verifyK8sDataDesc": "给采集器几秒钟启动时间；数据到达后下方检查项会变为绿色 —— 集群日志会进入 `default` 数据流。",
@@ -5894,7 +5894,7 @@
       "windowsTroubleScriptQ": "脚本根本无法运行",
       "writesTheseKeysTo": "将这些键写入",
       "zookeeperHostLabel": "Zookeeper 主机",
-      "zookeeperTagline": "使用 OpenTelemetry Collector 采集 Zookeeper 指标并将其发送到 OpenObserve。",
+      "zookeeperTagline": "使用 OpenTelemetry Collector 采集 Zookeeper 指标并将其发送到 Retrace.ai。",
       "pillKeyspace": "键空间",
       "pillZnodes": "Znodes",
       "stepNumber": "步骤 {n}",
@@ -5961,8 +5961,8 @@
       "gpuExporterDesc": "NVIDIA 的 exporter 通过 DCGM 读取 GPU 遥测数据，并在端口 `9400` 上提供。",
       "gpuExporterDockerNote": "`--network host` 可将真实机器名保留在 `Hostname` 标签中，监听地址保持在 `127.0.0.1`，因此 GPU 数据不会暴露到网络。只有性能分析（`DCGM_FI_PROF_*`）指标才需要 `SYS_ADMIN`。",
       "gpuExporterK8sNote": "仅以 DaemonSet 形式在 GPU 节点上运行，通过常见 GPU 节点标签进行匹配。Pod 注解让 OpenObserve 采集器可以发现它，因此无需 ServiceMonitor 或 Prometheus。",
-      "gpuShipTitle": "将 GPU 指标发送到 OpenObserve",
-      "gpuShipDesc": "通过 OTLP 将 exporter 的指标送入 OpenObserve。",
+      "gpuShipTitle": "将 GPU 指标发送到 Retrace.ai",
+      "gpuShipDesc": "通过 OTLP 将 exporter 的指标送入 Retrace.ai。",
       "gpuShipDockerNote": "使用指南中的设置：每 30 秒抓取一次，仅保留 `DCGM_*` 序列，批处理为 10 秒 / 1,024 个点。Collector Contrib 镜像与 exporter 一起运行，两者都使用主机网络，因此 `localhost:9400` 可以解析。",
       "gpuShipK8sNote": "无需安装任何东西：OpenObserve 采集器网关每 30 秒抓取带注解的 Pod，并发送它们暴露的所有内容。以下命令可确认 exporter 可达。",
       "gpuVerifyDesc": "GPU 指标会在一到两次抓取内以 `dcgm_fi_*` 数据流的形式出现。当它们到达后，我们会将 **GPU Monitoring - NVIDIA** 仪表盘添加到你的默认文件夹。",
@@ -6017,14 +6017,14 @@
           "description": "监控 ALB 访问日志中的请求模式、错误和延迟"
         },
         "cloudwatch-logs": {
-          "description": "将 CloudWatch 日志流式传输到 OpenObserve 进行分析"
+          "description": "将 CloudWatch 日志流式传输到 Retrace.ai 进行分析"
         },
         "cloudwatch-metrics": {
           "description": "收集并分析 CloudWatch 指标"
         },
         "vpc-flow-logs": {
           "description": "分析您 VPC 中的网络流量",
-          "cloudwatchIntegrationDescription": "通过 CloudWatch 将 VPC Flow Logs 流式传输到 OpenObserve",
+          "cloudwatchIntegrationDescription": "通过 CloudWatch 将 VPC Flow Logs 流式传输到 Retrace.ai",
           "firehoseIntegrationDescription": "通过 Kinesis Firehose 直接流式传输 VPC Flow Logs"
         },
         "ec2": {
@@ -6051,12 +6051,12 @@
         },
         "dynamodb": {
           "description": "跟踪 DynamoDB 操作",
-          "lambdaIntegrationDescription": "通过 Lambda 将 DynamoDB 数据流式传输到 OpenObserve",
-          "directIntegrationDescription": "直接将 DynamoDB 数据流式传输到 OpenObserve"
+          "lambdaIntegrationDescription": "通过 Lambda 将 DynamoDB 数据流式传输到 Retrace.ai",
+          "directIntegrationDescription": "直接将 DynamoDB 数据流式传输到 Retrace.ai"
         },
         "cloudfront": {
           "description": "分析 CloudFront 访问日志",
-          "directIntegrationDescription": "直接将 CloudFront 日志流式传输到 OpenObserve",
+          "directIntegrationDescription": "直接将 CloudFront 日志流式传输到 Retrace.ai",
           "s3IntegrationDescription": "从 S3 存储桶摄取 CloudFront 日志"
         },
         "route53": {
@@ -6070,7 +6070,7 @@
         },
         "kinesis": {
           "description": "与 Kinesis 数据流集成",
-          "lambdaIntegrationDescription": "通过 Lambda 将 Kinesis 数据流式传输到 OpenObserve",
+          "lambdaIntegrationDescription": "通过 Lambda 将 Kinesis 数据流式传输到 Retrace.ai",
           "firehoseIntegrationDescription": "通过 Kinesis Firehose 直接流式传输 Kinesis 数据"
         }
       },
@@ -6124,7 +6124,7 @@
           "description": "监控 Virtual Network 流日志和诊断"
         },
         "activity-logs": {
-          "description": "通过 Event Hub 和 Event Publisher 将 Azure 订阅活动日志流式传输到 OpenObserve"
+          "description": "通过 Event Hub 和 Event Publisher 将 Azure 订阅活动日志流式传输到 Retrace.ai"
         }
       }
     },
@@ -8233,7 +8233,7 @@
       "regexRedact": "生成用于编辑电子邮件的正则表达式模式",
       "mapStreamSchema": "映射我的 “默认” 数据流架构",
       "promqlCpu": "使用 > 80% 的 CPU 为 pod 编写 PromQL",
-      "datadogToO2": "将此 Datadog 查询转换为 OpenObserve SQL",
+      "datadogToO2": "将此 Datadog 查询转换为 Retrace.ai SQL",
       "lastAlertFired": "为什么我上一个告警会触发？"
     },
     "placeholderRotation": {
@@ -10310,7 +10310,7 @@
         "alertEndTime": "窗口结束时间（ISO 8601）",
         "alertStartTimeMillis": "窗口开始时间（epoch 毫秒）",
         "alertEndTimeMillis": "窗口结束时间（epoch 毫秒）",
-        "alertUrl": "返回 OpenObserve 调查的链接",
+        "alertUrl": "返回 Retrace.ai 调查的链接",
         "alertTriggerTime": "告警触发时间（ISO 8601）",
         "alertTriggerTimeMillis": "触发时间（epoch 毫秒）",
         "alertTriggerTimeSeconds": "触发时间（epoch 秒）",
@@ -10611,7 +10611,7 @@
       "servicenowAssignmentGroup": "分配组（可选）",
       "servicenowAssignmentGroupHelp": "事件分配到的组（例如，IT Operations）",
       "servicenowResolutionCode": "解决代码（可选）",
-      "servicenowResolutionCodeHelp": "必须与您 ServiceNow 实例上的有效解决代码匹配。在 OpenObserve 解决事件时使用。默认为 Solved (Permanently)。",
+      "servicenowResolutionCodeHelp": "必须与您 ServiceNow 实例上的有效解决代码匹配。在 Retrace.ai 解决事件时使用。默认为 Solved (Permanently)。",
       "usernameRequired": "用户名是必填项",
       "passwordRequired": "密码是必填项",
       "emailRecipients": "收件人电子邮件地址",
@@ -11512,7 +11512,7 @@
     "notIngestedHint": "此组织未接收 {stream}，因此此告警永远不会触发。仍要添加，数据到达后它将开始工作。",
     "alertCount": "{count} 个告警 | {count} 个告警",
     "noCollectorTitle": "这里还没有与你的数据匹配的内容",
-    "noCollectorDescription": "这些 {count} 个告警都没有查询此组织正在接收的数据流。将 {group} 遥测数据发送到 OpenObserve，它们就会在这里亮起。",
+    "noCollectorDescription": "这些 {count} 个告警都没有查询此组织正在接收的数据流。将 {group} 遥测数据发送到 Retrace.ai，它们就会在这里亮起。",
     "setupGuide": "摄取指南",
     "emptyLibraryTitle": "告警库为空",
     "emptyLibraryDescription": "目录已加载，但不包含任何告警。这是发布问题，不是过滤器——请稍后重试。",
@@ -11608,7 +11608,7 @@
       "network": "无法访问库。请检查网络连接并重试。",
       "http": "库服务器返回错误。请稍后重试。",
       "unparseable": "库的响应不是目录。",
-      "unsupported_version": "此库目录比此版本的 OpenObserve 能读取的版本新。请升级以浏览它。",
+      "unsupported_version": "此库目录比此版本的 Retrace.ai 能读取的版本新。请升级以浏览它。",
       "malformed": "库目录不完整或已损坏。"
     }
   },
@@ -12029,7 +12029,7 @@
     "search": "搜索目标"
   },
   "storage_settings": {
-    "heroBrand": "OpenObserve.",
+    "heroBrand": "Retrace.ai.",
     "tabLabel": "组织存储",
     "title": "组织存储",
     "notEnabled": "{product} 未在此组织启用",
@@ -12067,7 +12067,7 @@
     "continue": "继续",
     "save": "保存",
     "update": "更新",
-    "awsStsCloudInfo": "此操作使用 AWS sts 来代入角色并执行操作。您必须在 AWS 控制台中将 {product} AWS 账户添加为此角色的可信实体类型。请联系 Openobserve 团队以获取账户信息或获得有关设置此功能的进一步帮助。",
+    "awsStsCloudInfo": "此操作使用 AWS sts 来代入角色并执行操作。您必须在 AWS 控制台中将 {product} AWS 账户添加为此角色的可信实体类型。请联系 Retrace.ai 团队以获取账户信息或获得有关设置此功能的进一步帮助。",
     "awsStsSelfHostedInfo": "这使用 AWS sts 来代入角色并执行操作。确保您在安装环境中配置了有权访问此角色的 aws 证书。"
   },
   "metrics": {
@@ -12672,7 +12672,7 @@
     "dangerZone": "危险区域",
     "deleteOrganization": "删除组织",
     "deleteOrganizationTitle": "删除此组织",
-    "deleteOrganizationDescription": "包括您在内的所有人将立即失去对 {name} 的访问权限。在恢复窗口期间，只有 OpenObserve 支持人员可以恢复它；之后，所有数据将被永久删除。",
+    "deleteOrganizationDescription": "包括您在内的所有人将立即失去对 {name} 的访问权限。在恢复窗口期间，只有 Retrace.ai 支持人员可以恢复它；之后，所有数据将被永久删除。",
     "deleteOrganizationScopeLoading": "正在检查该组织包含的内容…",
     "deleteOrganizationScope": "{dashboards} 个仪表板 · {streams} 个数据流 · {size} 数据",
     "deleteFactGracePeriod": "恢复窗口",
@@ -12686,7 +12686,7 @@
     "deleteFactMembersDetail": "立即撤销所有访问权限",
     "deleteOrganizationConfirm": "这将安排删除“{name}”及其所有数据流、仪表盘、告警、流水线、用户和设置。",
     "deleteOrganizationWarning": "该组织将立即变为不可用，并对所有使用者隐藏。数据摄取被阻止，定时告警、流水线和报表停止运行，因此在计划删除期间不会发送任何通知。",
-    "deleteOrganizationRecoverable": "在恢复窗口期间，它仍然可以恢复，但您无法恢复 — 删除一开始您就会失去对此组织的访问权限，只有 OpenObserve 支持人员才能恢复它。窗口关闭后，其数据将被永久删除，任何人都无法恢复。",
+    "deleteOrganizationRecoverable": "在恢复窗口期间，它仍然可以恢复，但您无法恢复 — 删除一开始您就会失去对此组织的访问权限，只有 Retrace.ai 支持人员才能恢复它。窗口关闭后，其数据将被永久删除，任何人都无法恢复。",
     "deleteOrganizationTypeToConfirm": "如需确认，请在下方输入 {name}：",
     "deleteOrganizationInitiated": "组织已计划删除。它现在已隐藏；请在恢复窗口关闭前联系支持人员以恢复它。",
     "somethingWentWrong": "出了点问题",
@@ -14489,7 +14489,7 @@
     "noTracesDescription": "在所选时间范围内未找到与此关联匹配的追踪。",
     "viewInTraces": "在轨迹中查看",
     "filters": "过滤器",
-    "semanticFieldGroupsCaption": "将遥测字段名称映射到通用分组，以便 OpenObserve 跨数据流关联它们。",
+    "semanticFieldGroupsCaption": "将遥测字段名称映射到通用分组，以便 Retrace.ai 跨数据流关联它们。",
     "exportToJson": "导出到 JSON",
     "importFromJson": "从 JSON 导入",
     "addCustomGroup": "添加自定义群组",
@@ -17343,7 +17343,7 @@
         "systemProvided": {
           "about": "关于系统提供的值",
           "title": "{scope} 系统值",
-          "description": "OpenObserve 会为此任务评估的每个 {scope} 分别构建这些值。在映射评分器提示变量时，将它们用作源。",
+          "description": "Retrace.ai 会为此任务评估的每个 {scope} 分别构建这些值。在映射评分器提示变量时，将它们用作源。",
           "badge": "系统提供",
           "selectorRequired": "Span 选择器必填",
           "columns": {
@@ -21146,8 +21146,8 @@
   "passwordReset": {
     "title": "更新您的密码",
     "signedInAs": "已登录为 {email}",
-    "reasonPolicyTightened": "密码策略已更改。请更新您的密码以继续使用 OpenObserve。",
-    "reasonRotationExpired": "您的密码已过期。请设置新密码以继续使用 OpenObserve。",
+    "reasonPolicyTightened": "密码策略已更改。请更新您的密码以继续使用 Retrace.ai。",
+    "reasonRotationExpired": "您的密码已过期。请设置新密码以继续使用 Retrace.ai。",
     "reasonRotationWarning": "您的密码即将过期。请立即设置新密码，以免无法继续您的工作。",
     "reused": "此密码最近使用过。请选择一个未在您最近 {count} 个密码中使用过的密码。",
     "expiryBanner": "您的密码将在 {count} 天后过期。请立即更新，以免无法继续您的工作。 | 您的密码将在 {count} 天后过期。请立即更新，以免无法继续您的工作。",
@@ -21777,7 +21777,7 @@
       "workloadsStatusScheduled": "已调度：{count}",
       "workloadsStatusSuspended": "已暂停：{count}",
       "workloadsNone": "无",
-      "workloadsRuleTip": "OpenObserve 规则，而非 Lens：没有 Pod 的对象按其自身的副本或 Job 信号计数，数据不完整则计为未知",
+      "workloadsRuleTip": "Retrace.ai 规则，而非 Lens：没有 Pod 的对象按其自身的副本或 Job 信号计数，数据不完整则计为未知",
       "workloadsRecentEvents": "最近事件",
       "workloadsViewAll": "查看全部",
       "workloadsColType": "类型",
@@ -23052,7 +23052,7 @@
           },
           "sampling": {
             "no": "没有采集器在采样您的数据库会话表",
-            "noDetail": "会话样本来自您的采集器：在数据库主机上的采集器配方中启用 db.server.query_sample — 设置页面会逐步介绍。只要数据库监控开启，OpenObserve 就会接受此数据流，因此修复在采集器端。"
+            "noDetail": "会话样本来自您的采集器：在数据库主机上的采集器配方中启用 db.server.query_sample — 设置页面会逐步介绍。只要数据库监控开启，Retrace.ai 就会接受此数据流，因此修复在采集器端。"
           }
         }
       }
@@ -24599,7 +24599,7 @@
   },
   "autoobserve": {
     "title": "AutoObserve",
-    "subtitle": "发送您的数据。OpenObserve 会发现问题并告知您，同时给出对原因的最佳判断。当一切平静时，它会展示已检查的内容以及无法看到的内容。",
+    "subtitle": "发送您的数据。Retrace.ai 会发现问题并告知您，同时给出对原因的最佳判断。当一切平静时，它会展示已检查的内容以及无法看到的内容。",
     "phase2": "阶段 2",
     "tabs": {
       "issues": "问题",
@@ -25853,12 +25853,12 @@
     },
     "linking": {
       "title": "关联",
-      "removedUsers": "从 OpenObserve 或 Slack 中移除的人员将在一小时内失去关联",
+      "removedUsers": "从 Retrace.ai 或 Slack 中移除的人员将在一小时内失去关联",
       "manage": "管理",
       "auto": "自动关联人员",
-      "autoHelp": "在这些域名下拥有已验证邮箱的 Slack 成员，将自动关联到已连接组织中邮箱相同的 OpenObserve 用户。访客和外部用户则通过一键关联。",
+      "autoHelp": "在这些域名下拥有已验证邮箱的 Slack 成员，将自动关联到已连接组织中邮箱相同的 Retrace.ai 用户。访客和外部用户则通过一键关联。",
       "mappedSummary": "对 {domains} 自动关联 · 来自您组织的域名映射",
-      "mappedReadonly": "映射的域名在此处为只读；映射由 OpenObserve 支持团队更改。关闭关联仍由您操作。",
+      "mappedReadonly": "映射的域名在此处为只读；映射由 Retrace.ai 支持团队更改。关闭关联仍由您操作。",
       "manualSummary": "对 {domains} 自动关联",
       "offSummary": "已关闭 · 人员首次请求时通过一键关联",
       "domains": "域名",
@@ -25868,7 +25868,7 @@
       "domainsHelp": "仅限您公司自有域名。永不接受 gmail.com 或 outlook.com 等公共邮箱域名。",
       "publicDomain": "{domain} 是公共邮箱域名；请使用您公司的域名",
       "counts": "{auto} 个已自动关联，{oidc} 个通过“关联您的账户”关联",
-      "matches": "{count} 位 Slack 成员与 OpenObserve 用户匹配 | {count} 位 Slack 成员与 OpenObserve 用户匹配",
+      "matches": "{count} 位 Slack 成员与 Retrace.ai 用户匹配 | {count} 位 Slack 成员与 Retrace.ai 用户匹配",
       "matchesHelp": "在自动关联开启前加入 · 每人会收到一条私信",
       "linkAllMatches": "关联所有匹配项（{count}）",
       "linkAllDone": "已关联 {count} 人 | 已关联 {count} 人",
@@ -25935,7 +25935,7 @@
     },
     "channels": {
       "title": "频道默认设置",
-      "description": "当会话线程没有 OpenObserve 链接时，问题使用哪个组织",
+      "description": "当会话线程没有 Retrace.ai 链接时，问题使用哪个组织",
       "setDefault": "设置频道默认组织",
       "columnChannel": "频道",
       "columnDefaultOrg": "默认组织",
@@ -25972,7 +25972,7 @@
     "people": {
       "title": "已关联人员",
       "description": "此组织中已关联 Slack 账户的人员",
-      "columnUser": "OpenObserve 用户",
+      "columnUser": "Retrace.ai 用户",
       "columnSlackUser": "Slack 用户",
       "columnMethod": "关联方式",
       "columnLinked": "已关联",
@@ -26038,10 +26038,10 @@
       "sendNewLink": "向我发送新链接",
       "resentTitle": "我们已向您发送新链接",
       "resentDetail": "在 Slack 中打开与 OpenObserve 的私信，然后点击“关联您的账户”。",
-      "noAccessTitle": "您还没有 OpenObserve 的访问权限",
-      "noAccessDetail": "您的 Slack 工作区已连接到 OpenObserve，但您在其中任何组织中都没有账号。",
+      "noAccessTitle": "您还没有 Retrace.ai 的访问权限",
+      "noAccessDetail": "您的 Slack 工作区已连接到 Retrace.ai，但您在其中任何组织中都没有账号。",
       "helpContact": "请联系 {contact} 获取访问权限。",
-      "helpContactDefault": "请联系您的 OpenObserve 管理员获取访问权限。",
+      "helpContactDefault": "请联系您的 Retrace.ai 管理员获取访问权限。",
       "wrongAccountTitle": "已使用其他账号登录 Slack",
       "wrongAccountDetail": "此链接是发送给他人的。请在此浏览器中切换 Slack 账号，然后重试。",
       "rateLimitedTitle": "尝试次数过多",
@@ -26072,7 +26072,7 @@
     },
     "linkedAccounts": {
       "title": "已关联账号",
-      "description": "可以在 OpenObserve 中代表您操作的应用",
+      "description": "可以在 Retrace.ai 中代表您操作的应用",
       "workspace": "Slack · {team}",
       "detail": "{'@'}{user} · 组织 {org} · {method}",
       "linked": "已关联",
@@ -26576,7 +26576,7 @@
       "restrictedDesc": "使用这些组件的配置将无法通过校验。",
       "restrictedPlaceholder": "无，允许所有组件",
       "targetVersion": "目标 Collector 版本",
-      "targetVersionDesc": "低于此版本的 Collector 视为已过期。留空则使用 OpenObserve 支持的最新版本。",
+      "targetVersionDesc": "低于此版本的 Collector 视为已过期。留空则使用 Retrace.ai 支持的最新版本。",
       "targetVersionPlaceholder": "受支持的最新版本（例如 0.163.1）",
       "save": "保存",
       "saved": "Fleet Manager 设置已保存",

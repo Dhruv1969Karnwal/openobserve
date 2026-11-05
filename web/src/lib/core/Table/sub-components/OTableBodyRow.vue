@@ -3,7 +3,7 @@
 <script setup lang="ts">
 import type { Row, Table } from "@tanstack/vue-table";
 import { computed, inject, ref, onMounted, useSlots } from "vue";
-import { raw, useI18nTyped } from "@/types/i18n";
+import { raw, useI18nTyped, type I18nText } from "@/types/i18n";
 import OTableBodyCell from "./OTableBodyCell.vue";
 import OTableSelectCheckbox from "./OTableSelectCheckbox.vue";
 import OTableExpandButton from "./OTableExpandButton.vue";
@@ -22,6 +22,8 @@ const props = defineProps<{
    *  (visual not-allowed cursor + ignored toggles). Used e.g. to block bulk
    *  selection of the root user in IAM. */
   isRowSelectable?: (row: any) => boolean;
+  /** Why this row cannot be selected; surfaced on its disabled checkbox. */
+  rowSelectionReason?: (row: any) => I18nText | undefined;
   expansionEnabled?: boolean;
   canExpand?: boolean;
   isExpanded?: boolean;
@@ -202,8 +204,9 @@ function onRowMouseleave() {
       'transition-colors duration-150',
       clickable ? 'cursor-pointer' : '',
       'hover:bg-table-row-hover-bg',
-      clickable ? 'focus-visible:bg-table-row-hover-bg focus:outline-none' : '',
+      clickable ? 'focus-visible:bg-table-row-hover-bg' : '',
       isRowSelected || isActive ? 'bg-table-row-selected-bg' : '',
+      isRowSelected ? 'o2-table-row-selected' : '',
       isActive ? 'ring-focus-ring-accent ring-2 ring-inset' : '',
       !isRowSelected && !isActive && isStriped ? 'bg-table-row-striped-bg' : '',
       statusBarColor ? 'o2-table-row-with-status' : '',
@@ -260,6 +263,11 @@ function onRowMouseleave() {
           :row-id="String(row.index)"
           :label="selectLabel"
           :disabled="isRowSelectable ? !isRowSelectable(row.original) : false"
+          :disabled-reason="
+            isRowSelectable && !isRowSelectable(row.original) && rowSelectionReason
+              ? rowSelectionReason(row.original)
+              : undefined
+          "
           @update:model-value="emit('toggle-selection', row.original)"
         />
       </div>
@@ -369,6 +377,28 @@ function onRowMouseleave() {
 </template>
 
 <style scoped>
+/* keep(generated-content): a selected row's edge is drawn on its first cell because
+   box-shadow does not paint on a <tr> under border-collapse, so the row's own ring
+   would be invisible. */
+.o2-table-row-selected > td:first-child {
+  position: relative;
+}
+.o2-table-row-selected > td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0.1875rem;
+  background-color: var(--color-border-strong);
+  z-index: 3;
+  pointer-events: none;
+}
+/* A row's status spine is data; selection steps past it rather than overwriting it. */
+.o2-table-row-with-status.o2-table-row-selected > td:first-child::before {
+  left: 0.25rem;
+}
+
 /* keep(complex-state): per-row status spine on the row's first cell (an extra
    <td> would add a phantom column and misalign cells under table-fixed). Drawn
    as a stacked ::before rather than an inset box-shadow so the expand button,

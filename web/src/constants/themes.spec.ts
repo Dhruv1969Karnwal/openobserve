@@ -72,8 +72,10 @@ describe("theme registry", () => {
   });
 
   describe("themeDisplayName", () => {
-    it("keeps the O2 prefix on the signature theme", () => {
-      expect(themeDisplayName("O2 Signature")).toBe("O2 Signature");
+    it("displays the signature theme under the product name", () => {
+      // The stored name stays "O2 Signature" so saved preferences resolve; only the display name moved.
+      expect(DEFAULT_THEME_NAME).toBe("O2 Signature");
+      expect(themeDisplayName(DEFAULT_THEME_NAME)).toBe("Retrace Signature");
     });
 
     it("strips the O2 prefix from every other theme", () => {

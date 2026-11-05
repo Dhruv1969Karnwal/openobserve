@@ -38,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <!-- Trace ID Section -->
       <div class="bg-card-glass-bg p-3">
         <div class="mb-3 flex items-center">
-          <div class="text-text-label w-1/4">{{ t("traces.correlation.traceIdLabel") }}</div>
+          <div class="text-text-body w-1/4">{{ t("traces.correlation.traceIdLabel") }}</div>
           <div class="flex w-3/4 flex-nowrap items-center">
             <code
               data-test="trace-correlation-card-trace-id-text"
@@ -58,7 +58,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </div>
 
         <div class="mb-3 flex items-center" v-if="spanId">
-          <div class="text-text-label w-1/4">{{ t("traces.correlation.spanIdLabel") }}</div>
+          <div class="text-text-body w-1/4">{{ t("traces.correlation.spanIdLabel") }}</div>
           <div class="w-3/4">
             <code
               data-test="trace-correlation-card-span-id-text"
@@ -70,16 +70,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         <!-- Span Hierarchy -->
         <div v-if="hasBackendTrace" class="mb-3">
-          <div class="text-text-label mb-1">{{ t("traces.correlation.spanHierarchy") }}</div>
+          <div class="text-text-body mb-1">{{ t("traces.correlation.spanHierarchy") }}</div>
           <div class="ms-3">
             <div class="flex items-center py-1 text-sm">
               <OIcon name="circle" size="xs" class="me-1" />
-              <span class="text-text-secondary">{{ t("traces.correlation.applicationSpan") }}</span>
+              <span class="text-text-body">{{ t("traces.correlation.applicationSpan") }}</span>
             </div>
             <div class="ms-3 flex items-center py-1 text-sm">
               <OIcon name="arrow-right" size="sm" class="me-1" />
               <OIcon name="circle" size="xs" class="me-1" />
-              <span class="text-text-secondary"
+              <span class="text-text-body"
                 >{{ t("traces.correlation.browserSdkSpanPrefix") }}{{ formatSpanId(spanId)
                 }}{{ t("traces.correlation.closingParen") }}</span
               >
@@ -87,7 +87,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <div class="ms-4 flex items-center py-1 text-sm" v-if="backendSpanCount > 0">
               <OIcon name="arrow-right" size="sm" class="me-1" />
               <OIcon name="circle" size="xs" class="me-1" />
-              <span class="text-text-secondary"
+              <span class="text-text-body"
                 >{{ t("traces.correlation.backendSpansPrefix") }}{{ backendSpanCount
                 }}{{ t("traces.correlation.closingParen") }}</span
               >
@@ -97,17 +97,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         <!-- Performance Breakdown -->
         <div v-if="performanceData" class="mb-3">
-          <div class="text-text-label mb-1">{{ t("traces.correlation.performanceBreakdown") }}</div>
+          <div class="text-text-body mb-1">{{ t("traces.correlation.performanceBreakdown") }}</div>
           <div class="bg-surface-accent rounded-default p-2 text-sm">
             <div class="mb-1 flex items-center">
-              <div class="text-text-label w-5/12">{{ t("traces.correlation.totalDuration") }}</div>
+              <div class="text-text-body w-5/12">{{ t("traces.correlation.totalDuration") }}</div>
               <div class="w-7/12 font-bold">{{ performanceData.total_duration_ms }}ms</div>
             </div>
             <div class="mb-1 flex items-center" v-if="performanceData.browser_duration_ms">
-              <div class="text-text-label w-5/12">{{ t("traces.correlation.browserLabel") }}</div>
+              <div class="text-text-body w-5/12">{{ t("traces.correlation.browserLabel") }}</div>
               <div class="w-7/12">
                 {{ performanceData.browser_duration_ms }}ms
-                <span class="text-text-secondary"
+                <span class="text-text-body"
                   >({{
                     calculatePercentage(
                       performanceData.browser_duration_ms,
@@ -118,10 +118,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </div>
             </div>
             <div class="mb-1 flex items-center" v-if="performanceData.network_latency_ms">
-              <div class="text-text-label w-5/12">{{ t("traces.correlation.networkLabel") }}</div>
+              <div class="text-text-body w-5/12">{{ t("traces.correlation.networkLabel") }}</div>
               <div class="w-7/12">
                 {{ performanceData.network_latency_ms }}ms
-                <span class="text-text-secondary"
+                <span class="text-text-body"
                   >({{
                     calculatePercentage(
                       performanceData.network_latency_ms,
@@ -132,10 +132,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               </div>
             </div>
             <div class="mb-1 flex items-center" v-if="performanceData.backend_duration_ms">
-              <div class="text-text-label w-5/12">{{ t("traces.correlation.backendLabel") }}</div>
+              <div class="text-text-body w-5/12">{{ t("traces.correlation.backendLabel") }}</div>
               <div class="w-7/12">
                 {{ performanceData.backend_duration_ms }}ms
-                <span class="text-text-secondary"
+                <span class="text-text-body"
                   >({{
                     calculatePercentage(
                       performanceData.backend_duration_ms,
@@ -174,7 +174,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <div v-if="!hasBackendTrace && traceId" class="bg-surface-accent rounded-default mt-3 p-2">
           <div class="flex items-center">
             <OIcon name="info" size="sm" class="me-2" />
-            <div class="text-text-secondary text-xs">
+            <div class="text-text-body text-xs">
               {{ t("traces.correlation.backendTraceNotAvailable") }}
             </div>
           </div>

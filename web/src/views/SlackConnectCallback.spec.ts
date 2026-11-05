@@ -171,6 +171,9 @@ describe("SlackConnectCallback", () => {
     const w = await mountCallback(undefined, createStore({ state: { selectedOrganization: {} } }));
     expect(slack.confirmConnection).not.toHaveBeenCalled();
     expect(w.find(testId("slack-connect-callback-refused")).text()).toContain(
+      "You don't have access to Retrace.ai yet",
+    );
+    expect(w.find(testId("slack-connect-callback-refused")).text()).not.toContain(
       "You don't have access to OpenObserve yet",
     );
   });

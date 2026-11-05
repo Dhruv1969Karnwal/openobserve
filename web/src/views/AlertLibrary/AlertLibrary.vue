@@ -298,11 +298,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       class="text-text-secondary flex items-center gap-2 text-xs font-semibold"
                       :data-test="`alert-library-group-${group.id}`"
                     >
-                      <span v-if="group.packLabel" class="opacity-70"
-                        >{{ group.packLabel }} &middot;</span
-                      >
+                      <span v-if="group.packLabel">{{ group.packLabel }} &middot;</span>
                       <span>{{ group.label }}</span>
-                      <span class="tabular-nums opacity-70">{{ group.entries.length }}</span>
+                      <span class="tabular-nums">{{ group.entries.length }}</span>
                     </h2>
                     <!-- Suppressed at one group, where it duplicates the toolbar control. -->
                     <OButton
@@ -689,7 +687,6 @@ const statItems = computed<StatItem[]>(() => [
     value: readinessKnown.value ? readyCount.value : "—",
     icon: "check-circle",
     tone: "success",
-    max: scopedEntries.value.length,
     dataTest: "alert-library-stat-ready",
   },
   {
@@ -700,7 +697,6 @@ const statItems = computed<StatItem[]>(() => [
     // Same tone as the chip on every card this tile selects — StatTone exists
     // so one semantic state reads as one colour across the screen.
     tone: "warning",
-    max: scopedEntries.value.length,
     dataTest: "alert-library-stat-missing",
   },
   // Last, and never highlighted: it is the way OUT of a filter, not a filter.

@@ -73,7 +73,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <span
                   class="text-text-heading group-hover:text-accent flex items-center gap-1.5 text-sm font-semibold transition-colors"
                   >{{ item.label }}
-                  <OIcon v-if="item.locked" name="lock" size="xs" class="text-warning-600" />
+                  <OIcon
+                    v-if="item.locked"
+                    name="lock"
+                    size="xs"
+                    class="text-status-warning-text"
+                  />
                 </span>
                 <span
                   v-if="item.description"

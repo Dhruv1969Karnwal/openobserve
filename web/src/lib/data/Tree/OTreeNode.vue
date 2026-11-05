@@ -177,10 +177,7 @@ function onTickChange(newVal: CheckboxModelValue) {
       />
 
       <!-- Label -->
-      <OTruncatedText
-        class="text-text-body text-sm leading-snug"
-        :class="isDisabled ? 'opacity-50' : ''"
-      >
+      <OTruncatedText class="text-text-body text-sm leading-snug">
         {{ node.label }}
       </OTruncatedText>
     </div>

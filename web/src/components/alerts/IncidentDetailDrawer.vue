@@ -504,7 +504,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 size="sm"
                                 :class="
                                   copiedField === 'incident_id'
-                                    ? 'text-status-positive'
+                                    ? 'text-status-success-text'
                                     : 'hover:text-text-link opacity-60 hover:opacity-100'
                                 "
                                 class="flex-shrink-0 cursor-pointer transition-all"
@@ -529,7 +529,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 size="sm"
                                 :class="
                                   copiedField === 'incident_title'
-                                    ? 'text-status-positive'
+                                    ? 'text-status-success-text'
                                     : 'hover:text-text-link opacity-60 hover:opacity-100'
                                 "
                                 class="flex-shrink-0 cursor-pointer transition-all"
@@ -554,7 +554,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 size="sm"
                                 :class="
                                   copiedField === 'key_type'
-                                    ? 'text-status-positive'
+                                    ? 'text-status-success-text'
                                     : 'hover:text-text-link opacity-60 hover:opacity-100'
                                 "
                                 class="flex-shrink-0 cursor-pointer transition-all"
@@ -1235,7 +1235,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       correlationError
                         ? correlationError.includes('disambiguation fields')
                           ? 'text-warning'
-                          : 'text-status-negative'
+                          : 'text-status-error-text'
                         : 'text-text-muted',
                     ]"
                   />
@@ -1319,7 +1319,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       correlationError
                         ? correlationError.includes('disambiguation fields')
                           ? 'text-warning'
-                          : 'text-status-negative'
+                          : 'text-status-error-text'
                         : 'text-text-muted',
                     ]"
                   />
@@ -1420,7 +1420,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                       correlationError
                         ? correlationError.includes('disambiguation fields')
                           ? 'text-warning'
-                          : 'text-status-negative'
+                          : 'text-status-error-text'
                         : 'text-text-muted',
                     ]"
                   />

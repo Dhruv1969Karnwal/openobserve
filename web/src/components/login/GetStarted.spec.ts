@@ -20,9 +20,14 @@ import { createI18n } from "vue-i18n";
 import { createMemoryHistory, createRouter, type Router } from "vue-router";
 import enLocale from "@/locales/languages/en-US.json";
 import GetStarted from "./GetStarted.vue";
+import config from "@/aws-exports";
 import { makeGetStartedSchema } from "./GetStarted.schema";
 import { FIRST_SOURCE_PREFILL_KEY } from "./firstSourceOptions";
 import { gt } from "@/types/i18n";
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
 
 const submitNewUserInfo = vi.fn();
 vi.mock("@/services/billings", async (importOriginal) => {
@@ -57,6 +62,10 @@ const track = vi.fn();
 vi.mock("@/services/product_analytics", () => ({
   default: { track: (...args: unknown[]) => track(...args) },
 }));
+
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
 
 const ORG = "test-org";
 const EMAIL = "test@example.com";
@@ -149,7 +158,13 @@ describe("GetStarted.vue", () => {
 
   const pushSpy = () => vi.spyOn(router, "push");
 
+  const originalIsCloud = config.isCloud;
+  const originalIsEnterprise = config.isEnterprise;
+
   beforeEach(() => {
+    resetPaidFeaturePolicy();
+    (config as any).isCloud = originalIsCloud;
+    (config as any).isEnterprise = originalIsEnterprise;
     submitNewUserInfo.mockReset();
     submitNewUserInfo.mockResolvedValue({ status: 200 });
     httpCalls.mockClear();
@@ -187,9 +202,36 @@ describe("GetStarted.vue", () => {
   });
 
   describe("content", () => {
-    it("shows the welcome title and the trial subtitle", async () => {
+    it("shows the welcome title on the shipped hide policy", async () => {
       await mountAt();
-      expect(byTest("onboarding-get-started-title").text()).toBe("Welcome to OpenObserve");
+      expect(byTest("onboarding-get-started-title").text()).toBe("Welcome to Retrace.ai");
+    });
+
+    it("does not advertise a trial the shipped single-edition build cannot honour", async () => {
+      setPaidFeaturePolicy("hide");
+      await mountAt();
+      expect(byTest("onboarding-get-started-subtitle").exists()).toBe(false);
+    });
+
+    it("still withholds the trial subtitle under the lock policy on the OSS edition", async () => {
+      setPaidFeaturePolicy("lock");
+      await mountAt();
+      expect(byTest("onboarding-get-started-subtitle").exists()).toBe(false);
+    });
+
+    it("shows the trial subtitle when the edition actually sells the trial", async () => {
+      setPaidFeaturePolicy("lock");
+      (config as any).isCloud = "true";
+      await mountAt();
+      expect(byTest("onboarding-get-started-subtitle").text()).toContain(
+        "Your 14-day trial has started",
+      );
+    });
+
+    it("gates on the edition, not the paid-feature policy", async () => {
+      setPaidFeaturePolicy("hide");
+      (config as any).isEnterprise = "true";
+      await mountAt();
       expect(byTest("onboarding-get-started-subtitle").text()).toContain(
         "Your 14-day trial has started",
       );

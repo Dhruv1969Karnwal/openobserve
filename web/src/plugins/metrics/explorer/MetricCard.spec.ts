@@ -165,11 +165,18 @@ describe("MetricCard (ported to @/lib)", () => {
       const { info, fresh } = status(wrapper);
       expect(info.text()).toBe("sum(rate) · s");
       expect(fresh.text()).toContain("33");
-      expect(hidingClasses(info.element, wrapper.element)).toEqual([]);
+      // The note is the one element allowed to yield, and it yields by truncating,
+      // not by switching off: it is the only on-screen statement of what the panel
+      // plots, since the y-axis title it was assumed to duplicate does not reliably
+      // paint. It yields below 24rem, which is under a two-up card at 1440.
+      // `truncate` clips the note; only `hidden` is a container query below 24rem.
+      expect(hidingClasses(info.element, wrapper.element)).toEqual(["hidden", "truncate"]);
+      expect(info.classes()).toContain("@min-[24rem]/panelbar:inline");
+      expect(info.classes()).toContain("truncate");
       expect(hidingClasses(fresh.element, wrapper.element)).toEqual([]);
     });
 
-    it("lets the metric name give way, never the function · unit or the freshness", () => {
+    it("lets the function · unit give way below a card width, never the name or the freshness", () => {
       wrapper = createWrapper({
         preview: preview({ footerLabel: "sum(rate)", lastTriggeredAt: Date.now() }),
       });
@@ -182,8 +189,10 @@ describe("MetricCard (ported to @/lib)", () => {
             .element,
         ),
       ).toBe(true);
-      expect(cluster.className).toContain("shrink-0");
-      expect(info.classes()).toContain("whitespace-nowrap");
+      expect(cluster.className).toContain("min-w-0");
+      expect(cluster.className).not.toContain("shrink-0");
+      expect(info.classes()).toContain("truncate");
+      expect(info.classes()).toContain("@min-[24rem]/panelbar:inline");
       // The name is the row's one shrinkable element.
       const title = wrapper.find(
         '[data-test="metrics-explorer-card-title-node_cpu_seconds_total"]',
@@ -345,7 +354,9 @@ describe("MetricCard (ported to @/lib)", () => {
       const btn = wrapper.find(
         '[data-test="metrics-explorer-card-refresh-node_cpu_seconds_total"]',
       );
-      expect(btn.element.parentElement?.className).not.toContain("w-0");
+      // token match: `min-w-0` on a sibling is not a collapsed wrapper
+      const parentClasses = (btn.element.parentElement?.className ?? "").split(/\s+/);
+      expect(parentClasses).not.toContain("w-0");
     });
 
     it("has no refresh action on an unsupported card (there is nothing to run)", () => {
@@ -522,7 +533,7 @@ describe("MetricCard (ported to @/lib)", () => {
       ).toBe(true);
       // The dashboards' own copy (`panel.noData`) — the card shows the SAME
       // inline empty state a dashboard panel does.
-      expect(wrapper.text()).toContain("No Data");
+      expect(wrapper.text()).toContain("No data");
     });
 
     it("renders the chart when the preview has series", () => {

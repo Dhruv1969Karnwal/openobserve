@@ -171,15 +171,15 @@ describe("FunctionList", () => {
     router.push("/functions");
   });
 
-  // The list otherwise gives no clue whether a function is JS or VRL, so the
-  // language gets its own Type column rendered as a badge.
-  describe("Type column (JS vs VRL badge)", () => {
+  // VRL is what every function is unless the payload says otherwise, so the list
+  // marks only the exception; the pane states the language of the one row it shows.
+  describe("Language mark (JS vs VRL)", () => {
     const mountList = () =>
       mount(FunctionList, {
         global: { plugins: [i18n, store, router], stubs: globalStubs },
       });
 
-    it("badges each function with its language and keeps the name intact", async () => {
+    it("marks only the JavaScript row and keeps every name intact", async () => {
       const wrapper = mountList();
       await flushPromises();
       // OTable holds its skeleton for MIN_SKELETON_MS (50ms) after loading
@@ -190,15 +190,11 @@ describe("FunctionList", () => {
 
       // fixture: func1 + func2 are VRL (transType 0), js_func is JS (transType 1)
       const js = wrapper.findAll('[data-test="function-list-type-badge-js"]');
-      const vrl = wrapper.findAll('[data-test="function-list-type-badge-vrl"]');
       expect(js).toHaveLength(1);
-      expect(vrl.length).toBeGreaterThanOrEqual(2);
-
       expect(js[0].text()).toBe("JavaScript");
-      expect(vrl[0].text()).toBe("VRL");
 
-      // the badge is its own column — the name cell is untouched
-      expect(wrapper.find('[data-test="function-list-name-cell-js_func"]').text()).toBe("js_func");
+      const nameCells = wrapper.findAll('[data-test^="function-list-name-cell-"]');
+      expect(nameCells.map((cell) => cell.text())).toEqual(["func1", "func2", "js_func"]);
     });
   });
 

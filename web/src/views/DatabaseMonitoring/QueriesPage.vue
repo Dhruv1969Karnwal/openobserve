@@ -302,13 +302,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               :class="row.isTail ? 'ps-4' : ''"
             >
               <OTag type="dbSystem" :value="row.db_system" size="xs" />
-              <span class="opacity-45">·</span>
+              <span class="text-text-secondary">·</span>
               <OTruncatedText
                 :tooltip="raw([row.serviceLabel, row.db_instance].filter(Boolean).join(' · '))"
               >
                 <span class="text-text-secondary font-medium">{{ row.serviceLabel }}</span>
                 <template v-if="row.db_instance">
-                  <span class="px-1 opacity-45">·</span>
+                  <span class="text-text-secondary px-1">·</span>
                   <span>{{ row.db_instance }}</span>
                 </template>
               </OTruncatedText>

@@ -20,6 +20,11 @@ import i18n from "@/locales";
 import Header from "@/components/Header.vue";
 import * as cookies from "@/utils/cookies";
 import { chartColor } from "@/utils/chartTheme";
+import enLocale from "@/locales/languages/en-US.json";
+import {
+  resetPaidFeaturePolicy,
+  setPaidFeaturePolicy,
+} from "@/test/unit/helpers/paidFeaturePolicy";
 
 const breakpoint = vi.hoisted(() => ({ lgUp: true }));
 vi.mock("@/composables/useBreakpoint", () => ({
@@ -44,6 +49,11 @@ vi.mock("@/utils/cookies", () => ({
   setToken: vi.fn(),
   removeToken: vi.fn(),
 }));
+
+// Header gates upsell surfaces on the paid-feature policy; this lets one file exercise both sides.
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) =>
+  (await import("@/test/unit/helpers/paidFeaturePolicy")).withPaidFeaturePolicy(importOriginal),
+);
 
 describe("Header Component", () => {
   let wrapper: any;
@@ -197,8 +207,10 @@ describe("Header Component", () => {
     wrapper = createWrapper();
   });
 
+  afterEach(() => resetPaidFeaturePolicy());
+
   describe("Logo Rendering", () => {
-    it("should display OpenObserve logo by default", async () => {
+    it("should display the product wordmark by default", async () => {
       const logoWrapper = createWrapper({
         mountType: "mount",
         stubsOverrides: {},
@@ -206,8 +218,8 @@ describe("Header Component", () => {
 
       await logoWrapper.vm.$nextTick();
 
-      // Verify the OpenObserve logo is rendered
-      const openobserveLogo = logoWrapper.find('[data-test="header-openobserve-logo"]');
+      // Verify the product wordmark is rendered
+      const openobserveLogo = logoWrapper.find('[data-test="header-retrace-logo"]');
       expect(openobserveLogo.exists()).toBe(true);
 
       logoWrapper.unmount();
@@ -248,7 +260,7 @@ describe("Header Component", () => {
       expect(wrapper.emitted("goToHome")).toBeTruthy();
     });
 
-    it("should use dark theme logo when theme is dark", async () => {
+    it("should render the same token-painted wordmark when the theme is dark", async () => {
       const darkWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -261,18 +273,17 @@ describe("Header Component", () => {
 
       await darkWrapper.vm.$nextTick();
 
-      // Verify the logo exists and check that dark theme is applied
-      const openobserveLogo = darkWrapper.find('[data-test="header-openobserve-logo"]');
-      expect(openobserveLogo.exists()).toBe(true);
-
-      // The logo src should contain 'dark' in the path
-      const logoSrc = openobserveLogo.attributes("src");
-      expect(logoSrc).toContain("dark");
+      // Verify the wordmark is present in the dark theme.
+      const wordmark = darkWrapper.find('[data-test="header-retrace-logo"]');
+      expect(wordmark.exists()).toBe(true);
+      // One token-painted lock-up serves both themes, so there is deliberately no per-theme `src`.
+      expect(wordmark.text()).toBe("Retrace.ai");
+      expect(wordmark.attributes("src")).toBeUndefined();
 
       darkWrapper.unmount();
     });
 
-    it("should not display OpenObserve logo when custom_hide_self_logo is true", async () => {
+    it("should not display the product wordmark when custom_hide_self_logo is true", async () => {
       const customWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -291,8 +302,8 @@ describe("Header Component", () => {
 
       await customWrapper.vm.$nextTick();
 
-      // Check that the OpenObserve logo is NOT in the HTML
-      const openobserveLogo = customWrapper.find('[data-test="header-openobserve-logo"]');
+      // Check that the product wordmark is NOT in the HTML
+      const openobserveLogo = customWrapper.find('[data-test="header-retrace-logo"]');
       expect(openobserveLogo.exists()).toBe(false);
 
       // Verify the custom logo text IS displayed
@@ -302,7 +313,7 @@ describe("Header Component", () => {
       customWrapper.unmount();
     });
 
-    it("should display OpenObserve logo when custom_hide_self_logo is false", async () => {
+    it("should display the product wordmark when custom_hide_self_logo is false", async () => {
       const customWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -321,8 +332,8 @@ describe("Header Component", () => {
 
       await customWrapper.vm.$nextTick();
 
-      // Check that the OpenObserve logo IS in the HTML
-      const openobserveLogo = customWrapper.find('[data-test="header-openobserve-logo"]');
+      // Check that the product wordmark IS in the HTML
+      const openobserveLogo = customWrapper.find('[data-test="header-retrace-logo"]');
       expect(openobserveLogo.exists()).toBe(true);
 
       // Verify the custom logo text is also displayed
@@ -334,7 +345,8 @@ describe("Header Component", () => {
   });
 
   describe("Quota Warning", () => {
-    it("should display quota threshold message when present", async () => {
+    it("keeps the quota upsell out of the header on the policy this product ships", async () => {
+      setPaidFeaturePolicy("hide");
       const quotaWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -349,15 +361,47 @@ describe("Header Component", () => {
 
       await quotaWrapper.vm.$nextTick();
 
-      // Verify the quota message is actually displayed in the DOM
-      const html = quotaWrapper.html();
-      expect(html).toContain("Quota exceeded");
-
-      // Also check that text is visible
-      const text = quotaWrapper.text();
-      expect(text).toContain("Quota exceeded");
+      // The message and its "upgrade to pro" action are one upsell block, so both are gone.
+      expect(quotaWrapper.html()).not.toContain("Quota exceeded");
+      expect(quotaWrapper.text()).not.toContain("Quota exceeded");
+      expect(quotaWrapper.text()).not.toContain(enLocale.menu.upgradeToProPlan);
 
       quotaWrapper.unmount();
+    });
+
+    it("still shows the quota upsell where the policy sells paid features", async () => {
+      setPaidFeaturePolicy("lock");
+      const quotaWrapper = createWrapper({
+        mountType: "mount",
+        storeOverrides: {
+          state: {
+            organizationData: {
+              quotaThresholdMsg: "Quota exceeded",
+            },
+          },
+        },
+        stubsOverrides: {},
+      });
+
+      await quotaWrapper.vm.$nextTick();
+
+      const html = quotaWrapper.html();
+      expect(html).toContain("Quota exceeded");
+      expect(quotaWrapper.text()).toContain(enLocale.menu.upgradeToProPlan);
+
+      quotaWrapper.unmount();
+    });
+  });
+
+  describe("Edition CTA referent", () => {
+    it("names the same vendor in the cloud CTA as in the dialog it opens", () => {
+      const cloudWrapper = createWrapper({ configOverrides: { isCloud: "true" } });
+
+      expect(cloudWrapper.vm.enterpriseButtonText).toBe("OpenObserve Features");
+      expect(cloudWrapper.vm.enterpriseButtonText).not.toContain("Retrace.ai");
+      expect(enLocale.about.enterprise_offer.cloud.features_title).toContain("OpenObserve");
+
+      cloudWrapper.unmount();
     });
   });
 
@@ -467,7 +511,7 @@ describe("Header Component", () => {
       aiWrapper.unmount();
     });
 
-    it("should show the AI button locked (not hidden) if not enterprise", async () => {
+    it("should hide the AI button entirely when the edition does not include it", async () => {
       const aiWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -485,10 +529,10 @@ describe("Header Component", () => {
 
       await aiWrapper.vm.$nextTick();
 
-      // Visible and clickable — upsell, not a hidden or disabled feature.
+      // Hidden outright — PAID_FEATURE_POLICY is "hide", so there is no
+      // locked-but-clickable upsell affordance in the header.
       const aiButton = aiWrapper.find('[data-test="menu-link-ai-item"]');
-      expect(aiButton.exists()).toBe(true);
-      expect(aiButton.attributes("disabled")).toBeUndefined();
+      expect(aiButton.exists()).toBe(false);
 
       aiWrapper.unmount();
     });
@@ -629,7 +673,7 @@ describe("Header Component", () => {
 
       // Verify update:isHovered event was emitted with true
       expect(aiWrapper.emitted("update:isHovered")).toBeTruthy();
-      expect(aiWrapper.emitted("update:isHovered")[0]).toEqual([true]);
+      expect(aiWrapper.emitted("update:isHovered")?.[0]).toEqual([true]);
 
       aiWrapper.unmount();
     });
@@ -660,7 +704,7 @@ describe("Header Component", () => {
 
       // Verify update:isHovered event was emitted with false
       expect(aiWrapper.emitted("update:isHovered")).toBeTruthy();
-      expect(aiWrapper.emitted("update:isHovered")[0]).toEqual([false]);
+      expect(aiWrapper.emitted("update:isHovered")?.[0]).toEqual([false]);
 
       aiWrapper.unmount();
     });
@@ -971,7 +1015,7 @@ describe("Header Component", () => {
 
         const emitted = langWrapper.emitted("changeLanguage");
         expect(emitted).toBeTruthy();
-        expect(emitted[index]).toEqual([lang]);
+        expect(emitted?.[index]).toEqual([lang]);
       });
     });
 
@@ -1032,7 +1076,7 @@ describe("Header Component", () => {
   });
 
   describe("Theme Management", () => {
-    it("should render with light theme logo", async () => {
+    it("should render the wordmark in the light theme", async () => {
       const lightWrapper = createWrapper({
         mountType: "mount",
         stubsOverrides: {},
@@ -1040,17 +1084,16 @@ describe("Header Component", () => {
 
       await lightWrapper.vm.$nextTick();
 
-      // Verify light theme logo is used
-      const logo = lightWrapper.find('[data-test="header-openobserve-logo"]');
+      // The wordmark is theme-independent: same lock-up, the tokens do the rest.
+      const logo = lightWrapper.find('[data-test="header-retrace-logo"]');
       expect(logo.exists()).toBe(true);
-
-      const logoSrc = logo.attributes("src");
-      expect(logoSrc).toContain("light");
+      expect(logo.text()).toBe("Retrace.ai");
+      expect(logo.find("img").exists()).toBe(false);
 
       lightWrapper.unmount();
     });
 
-    it("should render with dark theme logo", async () => {
+    it("should render the wordmark in the dark theme", async () => {
       const darkWrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -1063,12 +1106,11 @@ describe("Header Component", () => {
 
       await darkWrapper.vm.$nextTick();
 
-      // Verify dark theme logo is used
-      const logo = darkWrapper.find('[data-test="header-openobserve-logo"]');
+      // …and the same in dark, without a second asset.
+      const logo = darkWrapper.find('[data-test="header-retrace-logo"]');
       expect(logo.exists()).toBe(true);
-
-      const logoSrc = logo.attributes("src");
-      expect(logoSrc).toContain("dark");
+      expect(logo.text()).toBe("Retrace.ai");
+      expect(logo.find("img").exists()).toBe(false);
 
       darkWrapper.unmount();
     });
@@ -1208,7 +1250,7 @@ describe("Header Component", () => {
       }
     });
 
-    it("should render default OpenObserve logo when both custom logos are null", () => {
+    it("should render the default product wordmark when both custom logos are null", () => {
       const wrapper = createWrapper({
         mountType: "mount",
         storeOverrides: {
@@ -1227,11 +1269,12 @@ describe("Header Component", () => {
       // Verify no custom logo images are rendered
       expect(html).not.toContain("data:image; base64,");
 
-      // Verify default OpenObserve logo is rendered instead
-      expect(html).toContain("openobserve-logo");
-      const imgs = wrapper.findAll('[data-test="header-openobserve-logo"]');
-      expect(imgs.length).toBeGreaterThan(0);
-      expect(imgs[0].attributes("src")).toContain("openobserve");
+      // The brand is text the page draws with its own font, not an <img> (see BrandWordmark.vue).
+      expect(html).toContain("retrace-logo");
+      const mark = wrapper.find('[data-test="header-retrace-logo"]');
+      expect(mark.exists()).toBe(true);
+      expect(mark.text()).toBe("Retrace.ai");
+      expect(mark.find("img").exists()).toBe(false);
     });
 
     it("should display red warning icon when quota is exactly 95%", () => {

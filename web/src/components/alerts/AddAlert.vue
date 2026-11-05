@@ -492,14 +492,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <OIcon
                   :name="activeEvaluationStatus.wouldTrigger ? 'check-circle' : 'cancel'"
                   :class="
-                    activeEvaluationStatus.wouldTrigger ? 'text-status-positive' : 'text-gray'
+                    activeEvaluationStatus.wouldTrigger ? 'text-status-success-text' : 'text-gray'
                   "
                   size="sm"
                 />
                 <span
                   class="text-xs font-semibold"
                   :class="
-                    activeEvaluationStatus.wouldTrigger ? 'text-status-positive' : 'text-gray'
+                    activeEvaluationStatus.wouldTrigger ? 'text-status-success-text' : 'text-gray'
                   "
                 >
                   {{

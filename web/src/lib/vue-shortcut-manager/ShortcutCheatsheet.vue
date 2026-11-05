@@ -206,14 +206,14 @@
             >{{ t("shortcuts.escKey") }}</kbd
           >
           <span>{{ t("shortcuts.footerClose") }}</span>
-          <span class="opacity-40">·</span>
+          <span class="text-text-secondary">·</span>
           <kbd
             class="bg-surface-base border-border-default rounded-default text-2xs border-border-default inline-flex h-5 items-center justify-center border border-b px-1.5 font-mono"
             >?</kbd
           >
           <span>{{ t("shortcuts.footerReopen") }}</span>
         </div>
-        <div class="opacity-60">{{ t("shortcuts.footerMacHint") }}</div>
+        <div>{{ t("shortcuts.footerMacHint") }}</div>
       </div>
     </template>
   </ODialog>

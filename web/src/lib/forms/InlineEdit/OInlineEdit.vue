@@ -298,7 +298,7 @@ defineExpose({ focus: startEdit });
           // only mid-edit (matches the pipeline/panel headers).
           error ? 'ring-input-border-error' : 'ring-transparent',
           disabled
-            ? 'cursor-not-allowed opacity-60'
+            ? 'cursor-not-allowed'
             : error
               ? 'cursor-text'
               : 'hover:bg-surface-subtle hover:ring-border-default cursor-text',
@@ -325,7 +325,7 @@ defineExpose({ focus: startEdit });
           v-if="!disabled"
           name="edit"
           size="sm"
-          class="text-text-secondary shrink-0 opacity-50 transition-opacity group-hover/inline-edit:opacity-100"
+          class="text-text-secondary shrink-0 transition-opacity"
         />
         <!-- Child-mode OTooltip (attaches to this button). A real tooltip rather
              than a native `title`: this hint is the ONLY place a generated name

@@ -95,6 +95,20 @@ async function mountList() {
         FolderList: { template: '<div data-test="stub-folder-list"></div>' },
         SelectFolderDropDown: true,
         ODialog: true,
+        // WHY: the row's export action moved into the row kebab, so both halves
+        // of the menu are stubbed to plain DOM — reka-ui only mounts menu items
+        // while the menu is open, and `find` needs them in the wrapper's tree.
+        ODropdown: {
+          name: "ODropdown",
+          template: '<div class="o-dropdown-stub"><slot name="trigger" /><slot /></div>',
+        },
+        ODropdownItem: {
+          name: "ODropdownItem",
+          emits: ["select"],
+          template:
+            '<button type="button" class="o-dropdown-item-stub" @click="$emit(\'select\')">' +
+            "<slot /></button>",
+        },
         ExportResourceDialog: true,
         IacRegistryLinks: true,
       },
@@ -107,7 +121,9 @@ async function mountList() {
 }
 
 const exportRow = async (wrapper: any) => {
-  await wrapper.find('[data-test="slos-slolist-export-checkout-availability"]').trigger("click");
+  await wrapper
+    .find('[data-test="slos-slolist-export-checkout-availability-menu"]')
+    .trigger("click");
   await flushPromises();
 };
 

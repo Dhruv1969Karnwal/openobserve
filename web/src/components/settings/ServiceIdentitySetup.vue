@@ -46,7 +46,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               <OIcon
                 :name="serviceNameDetected ? 'check-circle' : 'warning'"
                 size="sm"
-                :class="serviceNameDetected ? 'text-status-positive' : 'text-status-warning-text'"
+                :class="
+                  serviceNameDetected ? 'text-status-success-text' : 'text-status-warning-text'
+                "
               />
               <div class="text-compact min-w-0 flex-1 leading-tight">
                 <template v-if="serviceNameDetected">
@@ -791,7 +793,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 class="mt-1 flex items-center gap-1.5 text-xs"
                 :class="'text-text-secondary'"
               >
-                <OIcon name="verified" size="xs" class="text-status-positive" />
+                <OIcon name="verified" size="xs" class="text-status-success-text" />
                 <span
                   >{{
                     t("settings.serviceIdentitySetup.percentOfServices", {

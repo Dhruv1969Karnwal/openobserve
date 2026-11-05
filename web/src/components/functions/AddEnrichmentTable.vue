@@ -109,9 +109,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :class="[
                   job.status === 'processing' ? 'animate-[spin_2s_linear_infinite]' : '',
                   job.status === 'completed'
-                    ? 'text-status-positive'
+                    ? 'text-status-success-text'
                     : job.status === 'failed'
-                      ? 'text-status-negative'
+                      ? 'text-status-error-text'
                       : job.status === 'processing'
                         ? 'text-accent'
                         : 'text-icon-color',

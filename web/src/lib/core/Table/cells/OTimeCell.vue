@@ -13,8 +13,8 @@ import { raw, type I18nText } from "@/types/i18n";
 //   <OTimeCell :value="row.timestamp" unit="ms" :timezone="store.state.timezone" />
 
 import { computed } from "vue";
-import { formatDistanceToNowStrict } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
+import { formatAbsoluteInZone, formatRelativeAge } from "@/utils/date";
 import OTooltip from "@/lib/overlay/Tooltip/OTooltip.vue";
 
 type TimeUnit = "auto" | "iso" | "s" | "ms" | "us" | "ns";
@@ -97,39 +97,22 @@ const zone = computed(
   () => props.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
 );
 
-/** Pretty absolute date used as the relative-mode fallback for old timestamps. */
-const prettyDate = computed(() => {
-  if (epochMs.value === null) return null;
-  try {
-    return formatInTimeZone(new Date(epochMs.value), zone.value, "MMM d, yyyy");
-  } catch {
-    return new Date(epochMs.value).toISOString().slice(0, 10);
-  }
-});
-
 /**
  * Relative within the cutoff ("2 days ago"), absolute date beyond it
  * ("Jun 24, 2024"). Avoids the meaningless "2 years ago".
  */
-const relative = computed(() => {
-  if (epochMs.value === null) return null;
-  const ageMs = Math.abs(Date.now() - epochMs.value);
-  if (ageMs <= props.relativeCutoffDays * 86_400_000) {
-    return formatDistanceToNowStrict(new Date(epochMs.value), {
-      addSuffix: true,
-    });
-  }
-  return prettyDate.value;
-});
+const relative = computed(() =>
+  epochMs.value === null
+    ? null
+    : formatRelativeAge(epochMs.value, {
+        cutoffDays: props.relativeCutoffDays,
+        timezone: zone.value,
+      }),
+);
 
-const absolute = computed(() => {
-  if (epochMs.value === null) return null;
-  try {
-    return formatInTimeZone(new Date(epochMs.value), zone.value, "yyyy-MM-dd HH:mm:ss");
-  } catch {
-    return new Date(epochMs.value).toISOString();
-  }
-});
+const absolute = computed(() =>
+  epochMs.value === null ? null : formatAbsoluteInZone(epochMs.value, zone.value),
+);
 
 const dateOnly = computed(() => {
   if (epochMs.value === null) return null;

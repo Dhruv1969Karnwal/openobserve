@@ -64,7 +64,7 @@ const LARGE_TEXT_MIN = 3;
 const NON_TEXT_MIN = 3;
 
 /** Ratchets. Both only ever go down; see the module docstring. */
-const MAX_PENDING = 93;
+const MAX_PENDING = 65;
 const MAX_EXEMPT = 37;
 /** Manifest entries on a bare alias, which are never judged. Only goes down. */
 const MAX_UNJUDGED = 7;
@@ -157,7 +157,6 @@ const REAL_SURFACES = [
   "--color-surface-chrome",
   "--color-surface-chrome-deeper",
   "--color-surface-overlay",
-  "--color-surface-chip",
 ];
 
 const MINIMUMS: Record<Exclude<Category, "exempt" | "pending">, number> = {

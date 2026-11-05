@@ -23,11 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   validation, and backend contract are unchanged.
 
   `workflowsEnabled` (interactive) and `workflowsLocked` (visible, disabled) are
-  two different reasons the Workflows group might not be pickable: an edition
-  that doesn't unlock workflows at all shows the group LOCKED (so it stays
-  discoverable); an entitled deployment with the backend `/config` flag
-  `workflows_enabled` off just HIDES it, same as before. Only when neither is
-  true does the control fall back to a plain Destinations dropdown.
+  two different reasons the Workflows group might not be pickable: an edition that
+  doesn't unlock workflows at all shows the group LOCKED (so it stays discoverable)
+  only in a "lock" build — under the shipped "hide" policy it is omitted; an
+  entitled deployment with the backend `/config` flag `workflows_enabled` off just
+  HIDES it, same as before. Only when neither is true does the control fall back to
+  a plain Destinations dropdown.
   Only the control row lives here; the field label + inline required-error stay
   in the parent (AlertSettings) so the two alert-type layouts keep their chrome.
 -->
@@ -82,10 +83,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     >
       {{ t("workflow.create") }}
     </OButton>
-    <!-- Locked (not hidden): the family supports workflow routing, but this
-         edition doesn't unlock it — kept as the discovery point since the
-         dropdown's own "Workflows" header has no icon/tooltip slot to attach. -->
-    <template v-else-if="workflowsLocked">
+    <!-- Locked only under the "lock" policy: under "hide" its dialog is refused, so the button would be dead. -->
+    <template v-else-if="workflowsLocked && showsLockedAffordances">
       <OButton
         data-test="create-workflow-btn"
         variant="outline"
@@ -107,6 +106,7 @@ import OSelect from "@/lib/forms/Select/OSelect.vue";
 import OButton from "@/lib/core/Button/OButton.vue";
 import OIcon from "@/lib/core/Icon/OIcon.vue";
 import { useEnterpriseUpgradeDialog } from "@/composables/useEnterpriseUpgradeDialog";
+import { showsLockedAffordances } from "@/utils/enterpriseFeatures";
 
 const { open: openUpgradeDialog } = useEnterpriseUpgradeDialog();
 
@@ -125,7 +125,6 @@ const props = defineProps<{
   workflowsEnabled: boolean;
   /** Family supports workflows but this edition doesn't unlock them — show the group locked instead of hiding it. */
   workflowsLocked?: boolean;
-  workflowsLockMessage?: I18nText;
   error?: boolean;
   placeholder?: I18nText;
 }>();
@@ -218,9 +217,10 @@ const options = computed(() => {
   if (!props.workflowsEnabled && !props.workflowsLocked) return [...dests, ...missingDests];
   const workflowsHeader = { header: true, label: t("alerts.alertSettings.targetsWorkflowsGroup") };
   if (!props.workflowsEnabled) {
-    // Locked: the header stays visible (so the capability is discoverable
-    // while browsing), but there's nothing selectable beneath it — this
-    // edition has no entitlement to produce real options for.
+    // Only a "lock" build reaches this branch: the header stays visible (so the
+    // capability is discoverable while browsing), but there's nothing selectable
+    // beneath it — this edition has no entitlement to produce real options for.
+    // Under the shipped "hide" policy the parent never sets workflowsLocked.
     return [
       { header: true, label: t("alerts.alertSettings.targetsDestinationsGroup") },
       ...dests,

@@ -100,63 +100,74 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               @click="onTabClick(tab.folderId)"
             >
               <div
-                class="folder-item group/row flex min-h-6 w-full flex-nowrap items-center gap-1.5"
+                class="folder-item group/row flex min-h-6 w-full flex-col"
                 :data-test="`dashboard-folder-tab-name-${tab.name}`"
               >
-                <!-- Fixed-width icon slot. Always rendered, so every folder name
-                 starts on the same x-position whether or not it has an icon. -->
-                <FolderIcon
-                  :token="iconFor(tab)"
-                  :favorite="tab.folderId === FAVORITES_FOLDER_ID"
-                  :data-test="`dashboard-folder-icon-${tab.name}`"
-                />
-                <OTruncatedText
-                  class="folder-name flex-1 text-left"
-                  :data-test="`dashboard-folder-name-${tab.name}`"
-                  >{{ tab.name }}</OTruncatedText
-                >
-                <!-- Kept in flow rather than overlaid: an overlay needs a backdrop
-                 matching the row, and OTab only paints a hover background on
-                 INACTIVE tabs, so it would read wrong on the open folder. -->
-                <div
-                  v-if="
-                    tab.folderId.toLowerCase() != 'default' && tab.folderId !== FAVORITES_FOLDER_ID
-                  "
-                  class="hidden shrink-0 items-center group-hover/row:flex has-[[data-state=open]]:flex max-md:flex"
-                  @click="isMobile && $event.stopPropagation()"
-                >
-                  <ODropdown side="bottom" align="start">
-                    <template #trigger>
-                      <OButton
-                        :aria-label="t('common.moreActions')"
-                        size="icon"
-                        variant="ghost"
-                        icon-left="more-vert"
-                        class="h-5 w-5"
-                        data-test="dashboard-more-icon"
-                      />
-                    </template>
-                    <ODropdownItem
-                      data-test="dashboard-edit-folder-icon"
-                      @select="editFolder(tab.folderId)"
-                    >
-                      <template #icon-left>
-                        <OIcon name="edit" size="xs" />
+                <div class="flex w-full min-w-0 flex-nowrap items-center gap-1.5">
+                  <!-- Fixed-width icon slot. Always rendered, so every folder name
+                   starts on the same x-position whether or not it has an icon. -->
+                  <FolderIcon
+                    :token="iconFor(tab)"
+                    :favorite="tab.folderId === FAVORITES_FOLDER_ID"
+                    :data-test="`dashboard-folder-icon-${tab.name}`"
+                  />
+                  <OTruncatedText
+                    class="folder-name flex-1 text-left"
+                    :data-test="`dashboard-folder-name-${tab.name}`"
+                    >{{ tab.name }}</OTruncatedText
+                  >
+                  <!-- Kept in flow rather than overlaid: an overlay needs a backdrop
+                   matching the row, and OTab only paints a hover background on
+                   INACTIVE tabs, so it would read wrong on the open folder. -->
+                  <div
+                    v-if="
+                      tab.folderId.toLowerCase() != 'default' &&
+                      tab.folderId !== FAVORITES_FOLDER_ID
+                    "
+                    class="hidden shrink-0 items-center group-hover/row:flex has-[[data-state=open]]:flex max-md:flex"
+                    @click="isMobile && $event.stopPropagation()"
+                  >
+                    <ODropdown side="bottom" align="start">
+                      <template #trigger>
+                        <OButton
+                          :aria-label="t('common.moreActions')"
+                          size="icon"
+                          variant="ghost"
+                          icon-left="more-vert"
+                          class="h-5 w-5"
+                          data-test="dashboard-more-icon"
+                        />
                       </template>
-                      {{ t("common.edit") }}
-                    </ODropdownItem>
-                    <ODropdownItem
-                      variant="destructive"
-                      data-test="dashboard-delete-folder-icon"
-                      @select="showDeleteFolderDialogFn(tab.folderId)"
-                    >
-                      <template #icon-left>
-                        <OIcon name="delete" size="xs" />
-                      </template>
-                      {{ t("common.delete") }}
-                    </ODropdownItem>
-                  </ODropdown>
+                      <ODropdownItem
+                        data-test="dashboard-edit-folder-icon"
+                        @select="editFolder(tab.folderId)"
+                      >
+                        <template #icon-left>
+                          <OIcon name="edit" size="xs" />
+                        </template>
+                        {{ t("common.edit") }}
+                      </ODropdownItem>
+                      <ODropdownItem
+                        variant="destructive"
+                        data-test="dashboard-delete-folder-icon"
+                        @select="showDeleteFolderDialogFn(tab.folderId)"
+                      >
+                        <template #icon-left>
+                          <OIcon name="delete" size="xs" />
+                        </template>
+                        {{ t("common.delete") }}
+                      </ODropdownItem>
+                    </ODropdown>
+                  </div>
                 </div>
+                <!-- What a folder is FOR, from the folder record itself; only the
+                     dashboards endpoint carries a description at all. -->
+                <OTruncatedText
+                  v-if="tab.description"
+                  class="text-text-secondary text-2xs w-full ps-5.5"
+                  :data-test="`dashboard-folder-desc-${tab.name}`"
+                  >{{ tab.description }}</OTruncatedText
+                >
               </div>
             </OTab>
           </OTabs>

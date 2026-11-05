@@ -17,8 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <!--
   EmptyCheck — clean, object-only "you're all caught up" illustration: a check
   badge over an empty inbox tray, with a soft halo and sparkles. No character.
-  Micro-animation: the badge pops + the check draws, sparkles twinkle. Uses
-  success green; CSS motion gated by `animated` + prefers-reduced-motion.
+  Micro-animation: the badge pops + the check draws, sparkles twinkle. Monochrome
+  ink (matches the other empty states); CSS motion gated by animated + reduced-motion.
 -->
 <template>
   <svg
@@ -30,18 +30,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     :aria-label="t('emptyState.allCaughtUp')"
     :class="['es-root', { 'es-static': !animated }]"
   >
-    <circle cx="120" cy="74" r="56" fill="var(--color-success-500)" opacity="0.07" />
+    <circle cx="120" cy="74" r="56" fill="var(--color-primary-500)" opacity="0.07" />
     <ellipse cx="120" cy="156" rx="58" ry="9" fill="var(--color-primary-900)" opacity="0.1" />
 
-    <!-- success rays + confetti -->
-    <g stroke="var(--color-success-400)" stroke-width="2.5" stroke-linecap="round" opacity="0.45">
+    <!-- quiet rays + dots (monochrome ink) -->
+    <g stroke="var(--color-primary-400)" stroke-width="2.5" stroke-linecap="round" opacity="0.45">
       <line x1="120" y1="22" x2="120" y2="12" />
       <line x1="170" y1="34" x2="178" y2="27" />
       <line x1="70" y1="34" x2="62" y2="27" />
       <line x1="182" y1="74" x2="192" y2="74" />
       <line x1="58" y1="74" x2="48" y2="74" />
     </g>
-    <g fill="var(--color-success-500)" opacity="0.7">
+    <g fill="var(--color-primary-400)" opacity="0.7">
       <circle cx="48" cy="100" r="2.2" />
       <circle cx="192" cy="104" r="2.2" />
       <circle cx="62" cy="40" r="1.8" />
@@ -65,20 +65,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     <!-- check badge (pops) -->
     <g class="es-badge">
-      <circle cx="120" cy="70" r="34" fill="var(--color-success-100)" />
+      <circle cx="120" cy="70" r="34" fill="var(--color-primary-100)" />
       <circle
         cx="120"
         cy="70"
         r="34"
         fill="none"
-        stroke="var(--color-success-500)"
+        stroke="var(--color-primary-400)"
         stroke-width="3"
       />
       <path
         class="es-check"
         d="M104 71 L116 83 L138 58"
         fill="none"
-        stroke="var(--color-success-700)"
+        stroke="var(--color-primary-700)"
         stroke-width="6"
         stroke-linecap="round"
         stroke-linejoin="round"
@@ -91,7 +91,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <g class="es-spark es-spark-a">
         <path
           d="M0 -7 L1.6 -1.6 L7 0 L1.6 1.6 L0 7 L-1.6 1.6 L-7 0 L-1.6 -1.6 Z"
-          fill="var(--color-success-500)"
+          fill="var(--color-primary-400)"
         />
       </g>
     </g>

@@ -55,7 +55,8 @@ export const ROW_RAIL_TONE_CLASS: Record<RowRailTone, string> = {
   blue: "[&>td:first-child]:border-s-4 [&>td:first-child]:border-s-badge-blue-soft-text",
   teal: "[&>td:first-child]:border-s-4 [&>td:first-child]:border-s-badge-teal-soft-text",
   purple: "[&>td:first-child]:border-s-4 [&>td:first-child]:border-s-badge-purple-soft-text",
-  neutral: "[&>td:first-child]:border-s-4 [&>td:first-child]:border-s-border-default",
+  // A rail is a state mark, so even the receding one is a rail token, not a separator.
+  neutral: "[&>td:first-child]:border-s-4 [&>td:first-child]:border-s-row-rail-muted",
 };
 
 /** Tone → utility classes for a de-emphasised row. */
@@ -182,6 +183,12 @@ export interface OTableColumnMeta {
   headerTooltip?: I18nText;
   /** Additional class applied to the <td> */
   cellClass?: string;
+  /**
+   * Identifier role: the cell's text renders in the mono face (`--font-mono`),
+   * at the cell's own size. For hostnames, emails, stream/metric names, tokens —
+   * values an operator compares character by character.
+   */
+  mono?: boolean;
   /**
    * Mark this as the primary "name" column. The record-name column renders at
    * weight 500 — enough to separate it from metadata columns (which stay 400 /
@@ -342,6 +349,10 @@ export interface OTableProps<TData = any> {
    *  (renders with `cursor: not-allowed` and ignores toggles). E.g. block bulk
    *  selection of the root user in IAM. */
   isRowSelectable?: (row: TData) => boolean;
+  /** Why `isRowSelectable` returned false for this row. Shown as a tooltip and
+   *  wired as the checkbox's `aria-describedby`, because a checkbox that
+   *  silently refuses one row reads as a broken control. */
+  rowSelectionReason?: (row: TData) => I18nText | undefined;
   /** Field used as unique row identifier, or a resolver for rows that have no
    *  naturally unique field. Pass a resolver when the obvious candidate can
    *  repeat across rows (e.g. log hits sharing a `_timestamp`), otherwise every
@@ -455,8 +466,12 @@ export interface OTableProps<TData = any> {
   persistColumns?: boolean;
 
   // ── Layout ──
-  /** When false, table shrinks to fit its content instead of filling the container height (default: true) */
-  fillHeight?: boolean;
+  /**
+   * When false, table shrinks to fit its content instead of filling the container
+   * height (default: true). "auto" fills only when the rows actually need the room:
+   * a short list draws a short frame rather than a viewport-tall empty box.
+   */
+  fillHeight?: boolean | "auto";
 
   // ── Display ──
   loading?: boolean;

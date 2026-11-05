@@ -149,7 +149,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     >
                   </span>
                   <span v-if="row.aggregateStatus === 'completed'">
-                    <OIcon name="check-circle" size="sm" class="text-status-positive">
+                    <OIcon name="check-circle" size="sm" class="text-status-success-text">
                       <OTooltip>
                         <template #content>
                           <div style="max-width: 18.75rem">

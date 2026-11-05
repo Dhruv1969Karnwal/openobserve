@@ -23,12 +23,12 @@ const useOSRoutes = () => {
   const parentRoutes: any = [];
 
   // LLM Insights + Sessions are the only AI Observability sections OSS
-  // actually serves from its own backend; every other section's route is
-  // still registered (not just hidden in the rail) so the locked-but-visible
-  // nav items in AIObservabilityShell (Index.vue) resolve to something —
-  // `withFeatureGate`, applied inside `useAIObservabilityShellRoute`, redirects
-  // to the shared `enterpriseFeatureLocked` page since a true OSS build never
-  // satisfies `isEnterprise`/`isCloud`. This is the SAME route table the
+  // actually serves from its own backend; every other section's route is still
+  // registered so a deep link resolves to something — `withFeatureGate`, applied
+  // inside `useAIObservabilityShellRoute`, then bounces it to the org home under
+  // the shipped "hide" policy (only a "lock" build lands on the shared
+  // `enterpriseFeatureLocked` page), since a true OSS build never satisfies
+  // `isEnterprise`/`isCloud`. This is the SAME route table the
   // enterprise/cloud router registers (see enterprise/composables/router.ts) —
   // one definition, not two hand-duplicated copies.
   const homeChildRoutes: any[] = [

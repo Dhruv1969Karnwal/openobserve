@@ -21,7 +21,12 @@ export interface DescriptionListProps {
 }
 
 export interface DescriptionItemProps {
-  label: I18nText;
+  /**
+   * Printed label. Optional because the component's own template offers a
+   * `label` slot for labels that are not text (a chip, a link); supply one or
+   * the other, never neither.
+   */
+  label?: I18nText;
   /**
    * Value shown when the default slot is empty. Defaults to an em dash — an
    * absent value must read as absent, never as a blank row.

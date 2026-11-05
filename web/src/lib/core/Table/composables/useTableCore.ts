@@ -16,6 +16,7 @@ import { computed, ref, watch, type Ref } from "vue";
 import { raw } from "@/types/i18n";
 import useBreakpoint from "@/composables/useBreakpoint";
 import { TABLE_INDEX_COL_SIZE, type OTableColumnDef } from "../OTable.types";
+import { headerLabelMinWidth } from "../utils/headerMinWidth";
 
 // Register the custom "avg" fn (provided via table options below) so
 // OTableColumnDef.aggregate values type-check against AggregationFnOption.
@@ -270,11 +271,17 @@ export function useTableCore<TData>(
       // DETERMINISTICALLY from its icon count (not DOM-measured at runtime) so
       // the loading skeleton and the loaded table render it at the exact same
       // width — no flash when data arrives.
+      // A header that reads "Compressio" names nothing, so a declared width that
+      // is narrower than the column's own label is treated as a mistake and
+      // raised to fit it. The table then scrolls rather than crushing the label.
+      const headerFloor = isActionCol
+        ? 0
+        : headerLabelMinWidth(col.header, { sortable: !!col.sortable });
       const size = isActionCol
         ? isMobile.value
           ? actionColumnWidth((col.meta as any)?.actionCount)
           : Math.max(col.size ?? 0, actionColumnWidth((col.meta as any)?.actionCount))
-        : (col.size ?? 150);
+        : Math.max(col.size ?? 150, headerFloor);
       const columnDef: ColumnDef<TData> = {
         id: col.id,
         header: isActionCol && isMobile.value ? "" : (col.header as any),
@@ -292,9 +299,18 @@ export function useTableCore<TData>(
         // layout guard, since the Excel-style width strategy means a drag only
         // ever changes the dragged column. Columns that need a larger minimum
         // (e.g. the name column) set their own `minSize`. Rigid columns locked.
+        // A squeezed label is the one thing a reader cannot recover, so the floor
+        // is at least the width of the column's own header. Capped at `size` so a
+        // label can never widen a column the caller sized narrower on purpose.
         minSize: rigid
           ? size
-          : (col.minSize ?? (col.size !== undefined && col.size < 48 ? col.size : 48)),
+          : Math.min(
+              size,
+              Math.max(
+                col.minSize ?? (col.size !== undefined && col.size < 48 ? col.size : 48),
+                isActionCol ? 0 : headerLabelMinWidth(col.header, { sortable: !!col.sortable }),
+              ),
+            ),
         maxSize: rigid ? size : (col.maxSize ?? 800),
         enableSorting: (props.sorting === "client" && col.sortable) ?? false,
         sortUndefined: col.sortUndefined,

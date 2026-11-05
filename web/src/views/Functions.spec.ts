@@ -4,6 +4,7 @@ import { mount } from "@vue/test-utils";
 import { createStore } from "vuex";
 import { createRouter, createWebHistory } from "vue-router";
 import { createI18n } from "vue-i18n";
+import config from "@/aws-exports";
 import Functions from "./Functions.vue";
 
 // Mock heavy child components that are not under test
@@ -35,6 +36,23 @@ vi.mock("@/aws-exports", () => ({
     isCloud: "false",
   },
 }));
+
+// The shipped PAID_FEATURE_POLICY is fixed at module load (see
+// helpers/paidFeaturePolicy LIMITATION), so a "lock" build is simulated at the
+// consumer boundary — same pattern as SearchBar.paidAffordances.spec.ts.
+const policy = vi.hoisted(() => ({ lockSim: false }));
+
+vi.mock("@/utils/enterpriseFeatures", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/enterpriseFeatures")>();
+  return {
+    ...actual,
+    checkFeatureAccess: (key: unknown, ctx: unknown) => {
+      const access = actual.checkFeatureAccess(key as never, ctx as never);
+      if (!policy.lockSim || access.allowed || key !== "pipelineBackfill") return access;
+      return { ...access, visible: true };
+    },
+  };
+});
 
 vi.mock("@/lib/core/Button/OButton.vue", () => ({
   default: {
@@ -257,6 +275,93 @@ describe("Functions.vue", () => {
       wrapper = await createWrapper({}, "functionList");
       const addBtn = wrapper.find('[data-test="pipeline-list-add-pipeline-btn"]');
       expect(addBtn.exists()).toBe(false);
+    });
+  });
+
+  describe("Backfill entry gate", () => {
+    const originalIsEnterprise = (config as any).isEnterprise;
+    const originalIsCloud = (config as any).isCloud;
+    const originalInnerWidth = window.innerWidth;
+
+    const setViewport = (width: number) => {
+      Object.defineProperty(window, "innerWidth", { value: width, writable: true });
+    };
+
+    afterEach(() => {
+      (config as any).isEnterprise = originalIsEnterprise;
+      (config as any).isCloud = originalIsCloud;
+      policy.lockSim = false;
+      setViewport(originalInnerWidth);
+    });
+
+    /** The shipped build: the entry the paid page is reached through does not render. */
+    it("omits the toolbar entry on the shipped OSS build", async () => {
+      setViewport(1920);
+      wrapper = await createWrapper({}, "pipelines");
+      expect(wrapper.find('[data-test="pipeline-list-backfill-btn"]').exists()).toBe(false);
+    });
+
+    it("omits the overflow entry on the shipped OSS build", async () => {
+      setViewport(1024);
+      wrapper = await createWrapper({}, "pipelines");
+      expect(wrapper.find('[data-test="pipeline-list-menu-backfill-btn"]').exists()).toBe(false);
+    });
+
+    /** Entitled: both halves of the same action (wide group + collapsed menu) come back. */
+    it("renders the toolbar entry on an entitled build", async () => {
+      setViewport(1920);
+      (config as any).isEnterprise = "true";
+      wrapper = await createWrapper({}, "pipelines");
+      expect(wrapper.find('[data-test="pipeline-list-backfill-btn"]').exists()).toBe(true);
+    });
+
+    it("renders the overflow entry on an entitled build", async () => {
+      setViewport(1024);
+      (config as any).isEnterprise = "true";
+      wrapper = await createWrapper({}, "pipelines");
+      expect(wrapper.find('[data-test="pipeline-list-menu-backfill-btn"]').exists()).toBe(true);
+    });
+
+    /** The key is `cloudOffers: false` — Cloud sells neither the entry nor the page. */
+    it("omits the entry on a pure-cloud build", async () => {
+      setViewport(1920);
+      (config as any).isCloud = "true";
+      wrapper = await createWrapper({}, "pipelines");
+      expect(wrapper.find('[data-test="pipeline-list-backfill-btn"]').exists()).toBe(false);
+    });
+
+    /**
+     * The `lock` contract, and the point where the registry and the raw
+     * `config.isEnterprise` check this entry used to read diverge: a
+     * visible-but-locked entry whose click the route gate turns into the
+     * locked page, instead of an affordance that silently never renders.
+     */
+    it("shows the entry as a locked affordance on an un-entitled lock build", async () => {
+      setViewport(1920);
+      policy.lockSim = true;
+      wrapper = await createWrapper({}, "pipelines");
+      expect(wrapper.find('[data-test="pipeline-list-backfill-btn"]').exists()).toBe(true);
+    });
+
+    /** Only the literal "true" unlocks, exactly as the registry predicate compares it. */
+    it.each(["", "TRUE", "1", "yes"])("treats isEnterprise=%p as OSS", async (value) => {
+      setViewport(1920);
+      (config as any).isEnterprise = value;
+      wrapper = await createWrapper({}, "pipelines");
+      expect(wrapper.find('[data-test="pipeline-list-backfill-btn"]').exists()).toBe(false);
+    });
+
+    it("pushes the registry-gated route from the entry", async () => {
+      setViewport(1920);
+      (config as any).isEnterprise = "true";
+      wrapper = await createWrapper({}, "pipelines");
+      const pushSpy = vi.spyOn(router, "push");
+      await wrapper.find('[data-test="pipeline-list-backfill-btn"]').trigger("click");
+      expect(pushSpy).toHaveBeenCalledWith({
+        name: "pipelineBackfill",
+        query: { org_identifier: "test-org-id" },
+      });
+      pushSpy.mockRestore();
     });
   });
 

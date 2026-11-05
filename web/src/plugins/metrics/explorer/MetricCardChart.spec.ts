@@ -202,9 +202,9 @@ describe("MetricCardChart colours multi-series charts per series", () => {
     expect(color).toEqual({ mode: "fixed", fixedColor: ["#60a5fa"] });
   });
 
-  it("switches to a per-series palette once there is more than one", () => {
+  it("seats series by position once there is more than one", () => {
     const color = panelProp(mountChart({ results: matrix(3) }), "panelSchema").config.color;
-    expect(color.mode).toBe("palette-classic-by-series");
+    expect(color.mode).toBe("palette-classic");
   });
 
   it("counts series ACROSS queries — one per percentile, one series each", () => {
@@ -217,17 +217,22 @@ describe("MetricCardChart colours multi-series charts per series", () => {
       results,
       queries: [50, 90, 99].map((p) => ({ expr: `q${p}`, legendTemplate: `p${p}` })),
     });
-    expect(panelProp(wrapper, "panelSchema").config.color.mode).toBe("palette-classic-by-series");
+    expect(panelProp(wrapper, "panelSchema").config.color.mode).toBe("palette-classic");
   });
 
-  it("turns the legend on with the palette-classic colour mode when asked", () => {
+  it("names the series with a legend as soon as the card draws more than one", () => {
     const config = panelProp(
       mountChart({ results: matrix(3), legend: true }),
       "panelSchema",
     ).config;
     expect(config.show_legends).toBe(true);
     expect(config.color.mode).toBe("palette-classic");
+    // Multi-series without an explicit legend request still gets one: a line the
+    // operator cannot attribute to a label value is not a readable number.
     expect(panelProp(mountChart({ results: matrix(3) }), "panelSchema").config.show_legends).toBe(
+      true,
+    );
+    expect(panelProp(mountChart({ results: matrix(1) }), "panelSchema").config.show_legends).toBe(
       false,
     );
   });
@@ -239,7 +244,7 @@ describe("MetricCardChart colours multi-series charts per series", () => {
     await wrapper.setProps({ results: matrix(4) });
     await nextTick();
 
-    expect(panelProp(wrapper, "panelSchema").config.color.mode).toBe("palette-classic-by-series");
+    expect(panelProp(wrapper, "panelSchema").config.color.mode).toBe("palette-classic");
   });
 });
 

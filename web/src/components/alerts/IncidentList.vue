@@ -672,7 +672,6 @@ export default defineComponent({
       const c = severityCounts.value;
       const hasData = c.total > 0;
       const v = (n: number): string | number => (hasData ? n : "—");
-      const share = hasData ? c.total : undefined;
       return [
         {
           key: "P1",
@@ -680,7 +679,6 @@ export default defineComponent({
           value: v(c.p1),
           icon: "error",
           tone: "error",
-          max: share,
           dataTest: "incident-severity-p1",
         },
         {
@@ -689,7 +687,6 @@ export default defineComponent({
           value: v(c.p2),
           icon: "warning",
           tone: "orange",
-          max: share,
           dataTest: "incident-severity-p2",
         },
         {
@@ -698,7 +695,6 @@ export default defineComponent({
           value: v(c.p3),
           icon: "flag",
           tone: "warning",
-          max: share,
           dataTest: "incident-severity-p3",
         },
         {
@@ -707,7 +703,6 @@ export default defineComponent({
           value: v(c.p4),
           icon: "info",
           tone: "info",
-          max: share,
           dataTest: "incident-severity-p4",
         },
         {
@@ -736,16 +731,16 @@ export default defineComponent({
       const s = String(row?.severity || "").toUpperCase();
       const color =
         row?.status === "resolved"
-          ? "var(--color-success-500)"
+          ? "var(--color-row-rail-positive)"
           : s === "P1"
-            ? "var(--color-error-500)"
+            ? "var(--color-row-rail-negative)"
             : s === "P2"
               ? "var(--color-orange-500)"
               : s === "P3"
                 ? "var(--color-amber-500)"
                 : s === "P4"
                   ? "var(--color-blue-500)"
-                  : "var(--color-grey-400)";
+                  : "var(--color-row-rail-muted)";
       return { boxShadow: `var(--shadow-rail-geom) ${color}` };
     };
 
