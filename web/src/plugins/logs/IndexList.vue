@@ -102,7 +102,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 stream.label
               }}</OTruncatedText>
               <span class="text-text-secondary shrink-0 text-xs tabular-nums">{{
-                stream.events == null ? "—" : formatLargeNumber(stream.events)
+                stream.events == null ? "—" : addCommasToNumber(stream.events)
               }}</span>
             </button>
           </li>
@@ -284,11 +284,11 @@ import {
   b64EncodeUnicode,
   getImageURL,
   convertTimeFromMicroToMilli,
-  formatLargeNumber,
   useLocalInterestingFields,
   generateTraceContext,
   addSpacesToOperators,
 } from "../../utils/zincutils";
+import { addCommasToNumber } from "@/utils/formatters";
 import { getConsumableRelativeTime } from "@/utils/date";
 import { cloneDeep } from "lodash-es";
 import useSearchWebSocket from "@/composables/useSearchWebSocket";
@@ -1932,7 +1932,7 @@ export default defineComponent({
             (searchObj.data.stream.selectedStream.length + 1)
           : searchObj.data.stream.selectedStreamFields.length,
       ),
-      formatLargeNumber,
+      addCommasToNumber,
       sortedStreamFields,
       placeHolderText,
       cancelTraceId,

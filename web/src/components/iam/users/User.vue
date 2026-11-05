@@ -87,7 +87,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 :selected-key="roleFilter"
                 @select="onStatSelect"
               />
-              <!-- Rank is a ring and kind is a corner, so both are named in words as well. -->
+              <!-- Rank is an outline and kind is a corner, so both are named in words as well. -->
               <p
                 class="text-text-body text-2xs mt-1 leading-snug"
                 data-test="user-list-role-legend"
@@ -604,6 +604,18 @@ export default defineComponent({
 
     // Built-in role names get the muted (yellow) outline badge; anything else
     // is treated as a custom role and gets the destructive (red) outline badge.
+    //
+    // This is the ONE answer to "did OpenObserve define this role name, or did
+    // the organization invent it?" - the corner of the chip is drawn from it too
+    // (see `orgCarriedRole` below). It used to be drawn from a second, slightly
+    // different set, and the two disagreed on `member`, so the same role was
+    // built-in to one rule and organization-created to another.
+    //
+    // `member` belongs here although no `UserRole::Member` exists any more: the
+    // users-table migration read it as an alias for `admin`, so the product
+    // defined the name. It is a legacy spelling of a shipped role, never a role
+    // an organization created, and drawing it as one told users their own
+    // instance had invented a privilege name that came from OpenObserve.
     const BUILTIN_ROLES = new Set([
       "admin",
       "viewer",
@@ -644,18 +656,20 @@ export default defineComponent({
       serviceaccount: 1,
     };
 
-    // ── Role chips: rank in the ring, kind in the corner, never in a hue ──────
+    // ── Role chips: rank in the outline, kind in the corner, never in a hue ────
     // `PRIVILEGE_RANK >= ADMIN_RANK_FLOOR` is the line this page's delete/edit gates and the server already draw.
     const ADMIN_RANK_FLOOR = 4;
-    // `member` is absent on purpose: the users-table migration only aliases the pre-RBAC name.
-    const SHIPPED_ROLES = new Set(["root", "admin", "editor", "viewer", "user", "serviceaccount"]);
     const roleKey = (r: unknown) => String(r ?? "").toLowerCase();
     const rolePillVariant = (r: unknown) =>
       (PRIVILEGE_RANK[roleKey(r)] ?? 0) >= ADMIN_RANK_FLOOR
         ? ("default-outline" as const)
         : ("default-soft" as const);
-    /** A name the organization carries (custom, or pre-RBAC) rather than one OpenObserve ships. */
-    const orgCarriedRole = (r: unknown) => !SHIPPED_ROLES.has(roleKey(r));
+    /**
+     * A name the organization carries rather than one OpenObserve defines. Drawn
+     * from `isBuiltinRole`, the same predicate the badge type and the tile label
+     * already use, so one question cannot get two answers on one screen.
+     */
+    const orgCarriedRole = (r: unknown) => !isBuiltinRole(roleKey(r));
     // A zero radius beats a pill at a glance; a small one would read as a rounding artefact.
     const rolePillShape = (r: unknown) =>
       orgCarriedRole(r) ? ("square" as const) : ("pill" as const);

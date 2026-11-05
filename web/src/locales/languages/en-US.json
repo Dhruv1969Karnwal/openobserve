@@ -3121,7 +3121,7 @@
     "externalRowLocked": "This user signs in through an external identity source and is managed there.",
     "selfRowLocked": "You cannot delete the account you are signed in with.",
     "manageUsersAdminOnly": "Only root or an org admin can remove users.",
-    "roleChipLegend": "A ringed chip is a role that can administer this organization (Root, Admin); a squared-off chip is a custom role this organization created.",
+    "roleChipLegend": "An outlined chip is a role that can administer this organization; a filled chip is not. A square-cornered chip is a role this organization created; a round-ended chip is one OpenObserve defines.",
     "description": "Description",
     "revoke_invite": "Revoke Invite",
     "revokeInvitationTitle": "Revoke Invitation",

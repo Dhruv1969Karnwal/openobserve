@@ -3097,6 +3097,24 @@ describe("Index List stream rail", async () => {
     expect(w.find('[data-test="logs-search-stream-quick-pick-node_syslog"]').text()).toContain("—");
   });
 
+  it("prints a stream's event count the same way the table beside it does", async () => {
+    // This rail and the stream table on the same screen both print
+    // `stats.doc_num` for the same stream. The rail used to abbreviate
+    // (`1.6M`, `331.9K`) while the table spelled the same quantity out
+    // (`1,550,240`, `331,900`), so one screen showed two numbers for one fact and
+    // raters read it as two different quantities. One quantity, one format.
+    const w = await mountRail();
+    expect(w.find('[data-test="logs-search-stream-quick-pick-container_stdout"]').text()).toContain(
+      "1,550,240",
+    );
+    expect(w.find('[data-test="logs-search-stream-quick-pick-app_payments"]').text()).toContain(
+      "331,900",
+    );
+    // The abbreviated forms are what made the two surfaces disagree.
+    expect(w.text()).not.toContain("1.6M");
+    expect(w.text()).not.toContain("331.9K");
+  });
+
   it("keeps a stream row a real button so the picker is keyboard reachable", async () => {
     const w = await mountRail();
     const row = w.find('[data-test="logs-search-stream-quick-pick-app_payments"]');

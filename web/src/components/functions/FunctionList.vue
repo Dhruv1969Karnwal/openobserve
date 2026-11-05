@@ -78,7 +78,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               selection="multiple"
               v-model:selected-ids="selectedFunctionIds"
               fill-height="auto"
-              :row-class="focusedRowClass"
+              :active-row-index="focusedRowIndex"
               @row-click="onRowClick"
               :show-global-filter="false"
               :default-columns="false"
@@ -143,7 +143,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   <button
                     type="button"
                     class="text-text-heading focus-visible:ring-focus-ring-accent min-w-0 cursor-pointer truncate rounded-none text-start font-medium outline-none focus-visible:ring-2"
-                    :aria-current="selectionShown && row?.name === focusedName ? 'true' : undefined"
                     :data-test="`function-list-name-cell-${row?.name ?? value}`"
                     @click="focusFunction(row)"
                   >
@@ -1042,8 +1041,24 @@ export default defineComponent({
     // the list alone until a row is chosen, and a marked row with nothing to read
     // is a promise the screen has not kept.
     const selectionShown = computed(() => !isMobile.value || phoneDetailOpen.value);
-    const focusedRowClass = (row: any) =>
-      selectionShown.value && row?.name === focusedName.value ? "bg-table-row-selected-bg" : "";
+    // Which row the table must mark as current. OTable owns the treatment - the
+    // fill, the inset ring that survives greyscale and colour-blind reading, the
+    // `data-active-row` hook and the row's own `aria-current` - and it is driven
+    // by the row's position, so this list passes the position rather than
+    // painting its own idea of a selection. A colour-only class here was the
+    // whole affordance the raters could not see: 1.4:1 against white, and the
+    // same grey family as hover.
+    //
+    // `Row.index` is the row's position in the data handed to the table, which is
+    // `visibleRows` - not its position on the page - so the index is taken from
+    // the same list, in the same order.
+    const focusedRowIndex = computed(() => {
+      if (!selectionShown.value) return null;
+      const name = focusedRow.value?.name;
+      if (!name) return null;
+      const index = visibleRows.value.findIndex((row: any) => row?.name === name);
+      return index === -1 ? null : index;
+    });
     watch(
       () => route.query[FOCUSED_QUERY],
       (value) => {
@@ -1320,7 +1335,7 @@ export default defineComponent({
       focusedRow,
       focusedView,
       focusFunction,
-      focusedRowClass,
+      focusedRowIndex,
       selectionShown,
       paneVisible,
       loadError,

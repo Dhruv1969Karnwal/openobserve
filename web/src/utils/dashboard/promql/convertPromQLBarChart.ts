@@ -24,7 +24,7 @@ import {
 import { getSeriesColor } from "../colorPalette";
 import { getUnitValue, formatUnitValue } from "../convertDataIntoUnitValue";
 import { createSeriesOverrideLookup } from "../seriesOverrides";
-import { calculateWidthText } from "../chartDimensionUtils";
+import { calculateWidthText, calculateValueAxisExtent } from "../chartDimensionUtils";
 
 /**
  * Converter for bar chart variants (h-bar, stacked, h-stacked)
@@ -211,15 +211,20 @@ export class BarConverter implements PromQLChartConverter {
       });
     }
 
-    // Configure axes based on orientation
+    // Configure axes based on orientation. A value axis prints a unit next to
+    // every tick, so it is sized once on the largest tick it paints: sized per
+    // tick it changes unit mid-axis and the printed numbers stop rising with the
+    // bars. A bar axis always runs from zero, which the extent already assumes.
+    // 5 is ECharts' own value-axis splitNumber; buildValueAxis does not override.
+    const valueAxisExtent = calculateValueAxisExtent(chartMin, chartMax, config);
     const axisConfig = isHorizontal
       ? {
-          xAxis: buildValueAxis(panelSchema, store),
+          xAxis: buildValueAxis(panelSchema, store, valueAxisExtent),
           yAxis: buildCategoryYAxis(categories, panelSchema, store),
         }
       : {
           xAxis: buildCategoryXAxis(categories, panelSchema, store),
-          yAxis: buildValueAxis(panelSchema, store),
+          yAxis: buildValueAxis(panelSchema, store, valueAxisExtent),
         };
 
     if (isHorizontal) {

@@ -140,9 +140,8 @@ describe("FunctionList on a phone", () => {
     const wrapper = await mountList();
     expect(wrapper.findAll("tbody tr").length).toBe(2);
     expect(wrapper.find('[data-test="function-detail-panel"]').exists()).toBe(false);
-    expect(
-      wrapper.find('[data-test^="function-list-name-cell-"][aria-current="true"]').exists(),
-    ).toBe(false);
+    // No row is marked current while the detail it would point at is off screen.
+    expect(wrapper.find('tr[aria-current="true"]').exists()).toBe(false);
   });
 
   it("pushes the chosen function over the list, with a way back", async () => {
@@ -155,16 +154,12 @@ describe("FunctionList on a phone", () => {
     expect(panel.exists()).toBe(true);
     expect(panel.find('[data-test="function-detail-name"]').text()).toBe("add_geo");
     expect(panel.find('[data-test="function-detail-back"]').exists()).toBe(true);
-    expect(
-      wrapper.find('[data-test="function-list-name-cell-add_geo"]').attributes("aria-current"),
-    ).toBe("true");
+    expect(wrapper.find('tr[aria-current="true"]').exists()).toBe(true);
 
     await panel.find('[data-test="function-detail-back"]').trigger("click");
     await nextTick();
     expect(wrapper.find('[data-test="function-detail-panel"]').exists()).toBe(false);
-    expect(
-      wrapper.find('[data-test^="function-list-name-cell-"][aria-current="true"]').exists(),
-    ).toBe(false);
+    expect(wrapper.find('tr[aria-current="true"]').exists()).toBe(false);
     expect(wrapper.find('[data-test="function-list-name-cell-add_geo"]').exists()).toBe(true);
   });
 

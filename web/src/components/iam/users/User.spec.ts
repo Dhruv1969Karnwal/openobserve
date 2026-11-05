@@ -803,13 +803,26 @@ describe("User Component", () => {
       }
     });
 
-    it("separates Editor from Member without asking the reader to read", () => {
-      expect(wrapper.vm.rolePillVariant("editor")).toBe(wrapper.vm.rolePillVariant("member"));
-      expect(wrapper.vm.rolePillShape("editor")).toBe("pill");
-      expect(wrapper.vm.rolePillShape("member")).toBe("square");
+    it("gives every role OpenObserve defines a round end, and only invented names a corner", () => {
+      // `member` is a legacy spelling the product itself defined, not a role the
+      // organization wrote. It used to be drawn square, which told a reader their
+      // own instance had invented a privilege name - and flatly contradicted both
+      // the legend and the badge rule 40 lines away in the same file.
+      for (const role of ALL) {
+        expect(wrapper.vm.rolePillShape(role)).toBe("pill");
+      }
+      expect(wrapper.vm.rolePillShape("Billing reader")).toBe("square");
     });
 
-    it("marks a custom role by its corner, so the ring keeps meaning one thing", () => {
+    it("never lets the corner contradict the built-in rule the badge already follows", () => {
+      // One question - did OpenObserve define this name? - may not get two answers
+      // on one screen. This is the invariant whose absence produced the defect.
+      for (const role of [...ALL, "Billing reader", "Member", "project-accountant"]) {
+        expect(wrapper.vm.rolePillShape(role) === "square").toBe(!wrapper.vm.isBuiltinRole(role));
+      }
+    });
+
+    it("marks a custom role by its corner, so the outline keeps meaning one thing", () => {
       expect(wrapper.vm.rolePillShape("Billing reader")).toBe("square");
       expect(wrapper.vm.rolePillVariant("Billing reader")).toBe("default-soft");
     });
@@ -820,11 +833,24 @@ describe("User Component", () => {
       }
     });
 
-    it("states the rank in words beside the tiles", () => {
+    it("states both encodings in words that match what is drawn", () => {
       const legend = wrapper.find('[data-test="user-list-role-legend"]');
       expect(legend.exists()).toBe(true);
-      expect(legend.text()).toContain("administer");
-      expect(legend.text()).toContain("squared-off");
+      const text = legend.text();
+      // The words have to name the cues a reader can actually see. "Ringed" named
+      // neither: the rank cue is an outline versus a fill, and a filled chip reads
+      // as ringed to some viewers, which is how a rater concluded Viewer could
+      // administer the organization.
+      expect(text).toContain("outlined");
+      expect(text).toContain("filled");
+      expect(text).toContain("administer");
+      expect(text).toContain("square-cornered");
+      expect(text).toContain("round-ended");
+      // Every built-in role really is round-ended, and every invented one is not.
+      for (const role of ALL) {
+        expect(wrapper.vm.rolePillShape(role)).toBe("pill");
+      }
+      expect(wrapper.vm.rolePillShape("Billing reader")).toBe("square");
     });
 
     it("prints every facet tile in ink", () => {

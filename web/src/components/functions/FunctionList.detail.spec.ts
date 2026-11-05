@@ -95,6 +95,17 @@ describe("FunctionList master–detail", () => {
     await nextTick();
   };
 
+  // The row the table marks as current. Currency belongs to the ROW - its
+  // `aria-current`, its `data-active-row` hook and the inset ring that keeps the
+  // mark legible without colour - because that is what the row is to a reader and
+  // to a stylesheet. A cell inside the row carrying it instead describes the wrong
+  // thing, which is how this screen came to mark a row only by a grey fill.
+  const currentRow = (wrapper: any) => wrapper.find('tr[aria-current="true"]');
+  const currentRowName = (wrapper: any) =>
+    ["redact_pii", "add_geo"].find((name) =>
+      currentRow(wrapper).find(`[data-test="function-list-name-cell-${name}"]`).exists(),
+    ) ?? null;
+
   beforeEach(async () => {
     vi.clearAllMocks();
     resetListViewState();
@@ -132,12 +143,24 @@ describe("FunctionList master–detail", () => {
     expect(panel.exists()).toBe(true);
     expect(panel.text()).toContain("redact_pii");
     expect(wrapper.find('[data-test="function-detail-name"]').text()).toBe("redact_pii");
-    expect(
-      wrapper.find('[data-test="function-list-name-cell-redact_pii"]').attributes("aria-current"),
-    ).toBe("true");
-    expect(
-      wrapper.find('[data-test="function-list-name-cell-add_geo"]').attributes("aria-current"),
-    ).toBeUndefined();
+    expect(currentRowName(wrapper)).toBe("redact_pii");
+    expect(wrapper.findAll('tr[aria-current="true"]')).toHaveLength(1);
+  });
+
+  it("marks the current row with an edge as well as a fill, so the cue survives colour", async () => {
+    // A grey fill alone measured 1.4:1 against white and sat in the same family as
+    // hover, which is why raters could not tell a selected row from a pointed-at
+    // one. The row's inset ring is the part that reads without colour.
+    const wrapper = mountList();
+    await settle();
+
+    const row = currentRow(wrapper);
+    expect(row.exists()).toBe(true);
+    expect(row.attributes("data-active-row")).toBe("true");
+    expect(row.classes()).toContain("ring-2");
+    expect(row.classes()).toContain("ring-inset");
+    // And only one row may claim it, or the mark means nothing.
+    expect(wrapper.findAll('tr[data-active-row="true"]')).toHaveLength(1);
   });
 
   it("shows the focused function's body, params and streams", async () => {
@@ -159,12 +182,8 @@ describe("FunctionList master–detail", () => {
     await nextTick();
 
     expect(wrapper.find('[data-test="function-detail-name"]').text()).toBe("add_geo");
-    expect(
-      wrapper.find('[data-test="function-list-name-cell-add_geo"]').attributes("aria-current"),
-    ).toBe("true");
-    expect(
-      wrapper.find('[data-test="function-list-name-cell-redact_pii"]').attributes("aria-current"),
-    ).toBeUndefined();
+    expect(currentRowName(wrapper)).toBe("add_geo");
+    expect(wrapper.findAll('tr[aria-current="true"]')).toHaveLength(1);
     expect(router.currentRoute.value.query.function).toBe("add_geo");
   });
 
