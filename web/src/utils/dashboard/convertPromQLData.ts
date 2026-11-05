@@ -719,12 +719,19 @@ export const convertPromQLData = async (
         hideOverlap: true,
         color: chartTextColor(),
         formatter: function (name: any) {
+          // One unit for the whole axis, sized on the widest bound it can reach.
+          // Sized per tick instead, one axis prints `1.43MB/s` above `878.91KB/s`
+          // above `0.00B/s` and the printed column stops rising with the data.
+          const lo = panelSchema.config?.y_axis_min ?? min;
+          const hi = panelSchema.config?.y_axis_max ?? max;
+          const axisExtent = Math.max(Math.abs(Number(lo) || 0), Math.abs(Number(hi) || 0));
           return formatUnitValue(
             getUnitValue(
               name,
               panelSchema.config?.unit,
               panelSchema.config?.unit_custom,
               panelSchema.config?.decimals,
+              axisExtent,
             ),
           );
         },
