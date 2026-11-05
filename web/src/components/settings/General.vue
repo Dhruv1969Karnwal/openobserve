@@ -1052,8 +1052,11 @@ export default defineComponent({
       { deep: true, immediate: true },
     );
 
+    // This page saves manually, so both states must speak the manual-save language. The
+    // idle copy used to read "Everything on this page is saved.", which sounds like an
+    // autosave promise sitting on the same baseline as a manual Save button.
     const dirtyNote = computed(() =>
-      isDirty.value ? t("settings.unsavedChangesNote") : t("settings.allChangesSavedNote"),
+      isDirty.value ? t("settings.pendingChangesNote") : t("settings.noPendingChangesNote"),
     );
 
     const accentState = (color: string, fallback: string) =>

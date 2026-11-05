@@ -1262,8 +1262,15 @@ describe("General", () => {
       expect(save(w).attributes("disabled")).toBeDefined();
       expect(save(w).attributes("disabled-reason")).toBe("Nothing to save yet.");
       expect(w.find('[data-test="general-settings-dirty-note"]').text()).toContain(
-        "Everything on this page is saved.",
+        "No unsaved changes.",
       );
+    });
+
+    it("never describes the idle form as an autosave promise next to the Save button", () => {
+      const w = createWrapper();
+      const note = w.find('[data-test="general-settings-dirty-note"]').text();
+      expect(save(w).exists()).toBe(true);
+      expect(note).not.toMatch(/is saved|everything.*saved/i);
     });
 
     it("opens Save the moment a field differs from what is saved", async () => {
@@ -1274,8 +1281,16 @@ describe("General", () => {
       expect(w.vm.isDirty).toBe(true);
       expect(save(w).attributes("disabled")).toBeUndefined();
       expect(w.find('[data-test="general-settings-dirty-note"]').text()).toContain(
-        "Unsaved changes on this page.",
+        "Unsaved changes — select Save to apply.",
       );
+    });
+
+    it("names the manual save action once a change is pending", async () => {
+      const w = createWrapper();
+      const form = w.findComponent({ name: "OForm" });
+      form.vm.form.setFieldValue("scrape_interval", 45);
+      await nextTick();
+      expect(w.find('[data-test="general-settings-dirty-note"]').text()).toMatch(/Save/);
     });
 
     it("counts a previewed accent color as an unsaved change", async () => {
