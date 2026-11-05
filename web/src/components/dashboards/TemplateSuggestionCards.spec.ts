@@ -174,6 +174,28 @@ describe("TemplateSuggestionCards", () => {
     expect(galleryState.loadDashboards).not.toHaveBeenCalled();
   });
 
+  it("renders a legible glyph for the Host Metrics card, not one that collapses at 12px", async () => {
+    // Two reviewers read this card's icon as "a rectangle with a stray dash inside"
+    // and "a broken placeholder, not a chart". Cause: badge icons render at
+    // OIcon size="xs" = 12px, and the previous glyph (monitor-heart-outline) is a
+    // monitor containing a small HEART — interior detail that collapses at 12px
+    // into an unreadable mark. Guard three things:
+    //   1. the icon resolves (an unregistered name renders no svg at all),
+    //   2. it is not the nested-detail glyph that collapsed,
+    //   3. the 12px budget stays visible to whoever changes it next.
+    wrapper = mountCards();
+    await flushPromises();
+
+    const card = wrapper.find('[data-test="template-card-hostmetrics"]');
+    expect(card.exists()).toBe(true);
+    expect(card.find("svg").exists()).toBe(true);
+
+    const icon = card.findComponent({ name: "OIcon" }) as any;
+    expect(icon.exists()).toBe(true);
+    expect(icon.props("name")).not.toBe("monitor-heart");
+    expect(icon.props("size")).toBe("xs");
+  });
+
   it("loads the gallery lazily on Browse all templates, then opens the drawer", async () => {
     wrapper = mountCards();
     await wrapper.find('[data-test="template-browse-all"]').trigger("click");
